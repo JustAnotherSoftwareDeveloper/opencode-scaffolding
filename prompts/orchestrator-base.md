@@ -39,17 +39,22 @@ Use the current sized worker families as the default pool.
 
 | Need | Route To |
 | --- | --- |
-| Tiny bounded checks or simple synthesis | `generic-xs`, `analysis-xs` |
-| Read-only local discovery and inventory | `generic-xs`, `generic-sm`, `generic-md` |
-| Reasoning, tradeoffs, risk, architecture, dependency validation | `analysis-xs`, `analysis-sm`, `analysis-md`, `analysis-lg`, `analysis-xl` |
-| Embedded quality checks and final judgment | `analysis-sm`, `analysis-md`, `analysis-lg` |
-| Code or config edits | `coding-xs`, `coding-sm`, `coding-md`, `coding-lg`, `coding-xl` |
-| Skill, prompt, command, and documentation prose | `doc-writer-xs`, `doc-writer-sm`, `doc-writer-md`, `doc-writer-lg`, `doc-writer-xl` |
-| General synthesis or coordination support | `generic-xs`, `generic-sm`, `generic-md`, `generic-lg`, `generic-xl` |
-| Current external docs or source-critical research | `websearch-xs`, `websearch-sm`, `websearch-md`, `websearch-lg`, `websearch-xl` |
+| Tiny supplied-context checks, extraction, naming, short summaries | `generic-xs`, `analysis-xs`, `doc-writer-xs`, `websearch-xs` |
+| Bounded local synthesis, simple comparisons, snippet/evidence processing | `generic-sm`, `analysis-sm`, `doc-writer-sm`, `websearch-sm` |
+| Read-only local discovery and inventory | `explore`, `generic-sm`, `generic-md` |
+| Tool-heavy discovery, shell use, or multi-file investigation | `explore` for read-only search; otherwise `generic-md`, `generic-lg` |
+| Reasoning, tradeoffs, risk, architecture, dependency validation | `analysis-sm` for bounded evidence; `analysis-md`, `analysis-lg`, `analysis-xl` for high-judgment work |
+| Embedded quality checks and final judgment | `analysis-md`, `analysis-lg`, `analysis-xl` |
+| Tiny code suggestions or patch sketches, no autonomous edits | `coding-xs`, `coding-sm` |
+| Code or config edits | `coding-md`, `coding-lg`, `coding-xl` |
+| Skill, prompt, command, and documentation prose | `doc-writer-sm`, `doc-writer-md`, `doc-writer-lg`, `doc-writer-xl` |
+| General synthesis or coordination support | `generic-sm`, `generic-md`, `generic-lg`, `generic-xl` |
+| Current external docs or source-critical research | `websearch-md`, `websearch-lg`, `websearch-xl` |
 | Images, screenshots, diagrams, and PDFs | `multimodal-looker` |
 
-Select the smallest capable tier. A step is too large when it bundles independent files, unrelated skills, unrelated context, or mixed complexity levels that could be delegated separately.
+Select the smallest capable tier, but do not route by cost alone. Local XS agents are 3B-class supplied-context workers and should not receive tool-heavy, judgment-heavy, or open-ended tasks. Local SM agents are 7B/8B-class bounded workers; they can handle short synthesis and narrow analysis, but `coding-sm` should be used for suggestions or tiny patch sketches rather than autonomous repository edits. Use MD+ for live/source-gathering research, final review, broad debugging, multi-file edits, and any task where a weak local answer would be expensive.
+
+A step is too large when it bundles independent files, unrelated skills, unrelated context, or mixed complexity levels that could be delegated separately.
 
 ## Runbook Contract
 

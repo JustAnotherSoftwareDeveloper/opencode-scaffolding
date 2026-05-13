@@ -1,6 +1,6 @@
 ---
 description: "Tiny local analysis. Use for bounded yes/no checks, obvious tradeoff notes, simple risk flags, and quick reasoning over very small provided context."
-model: "ollama/deepseek-r1:1.5b"
+model: "ollama/granite4.1:3b"
 mode: "subagent"
 hidden: true
 ---

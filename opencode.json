@@ -12,59 +12,55 @@
       },
       "models": {
         "qwen3.5:0.8b": {
-          "name": "Qwen 3.5 0.8B",
-          "tools": true
+          "name": "Qwen 3.5 0.8B"
         },
         "qwen3:1.7b": {
           "name": "Qwen3 1.7B"
         },
         "qwen3.5:2b": {
-          "name": "Qwen 3.5 2B",
-          "tools": true
+          "name": "Qwen 3.5 2B"
         },
         "granite4.1:3b": {
-          "name": "Granite 4.1 3B",
-          "tools": true
+          "name": "Granite 4.1 3B"
         },
         "phi4-mini": {
-          "name": "Phi-4 Mini",
-          "tools": true
+          "name": "Phi-4 Mini"
         },
         "qwen2.5-coder:1.5b": {
-          "name": "Qwen2.5 Coder 1.5B",
-          "tools": true
+          "name": "Qwen2.5 Coder 1.5B"
         },
         "qwen2.5-coder:3b": {
-          "name": "Qwen2.5 Coder 3B",
-          "tools": true
+          "name": "Qwen2.5 Coder 3B"
         },
         "qwen3-vl:2b-thinking": {
-          "name": "Qwen3 VL 2B Thinking",
-          "tools": true
+          "name": "Qwen3 VL 2B Thinking"
         },
         "qwen3-vl:8b-thinking": {
-          "name": "Qwen3 VL 8B Thinking",
-          "tools": true
+          "name": "Qwen3 VL 8B Thinking"
         },
         "qwen3:8b": {
-          "name": "Qwen3 8B",
-          "tools": true
+          "name": "Qwen3 8B"
         },
         "deepseek-r1:8b": {
-          "name": "DeepSeek R1 8B",
-          "tools": true
+          "name": "DeepSeek R1 8B"
         },
         "command-r7b": {
-          "name": "Command R7B",
-          "tools": true
+          "name": "Command R7B"
         },
         "llama3-groq-tool-use:8b": {
-          "name": "Llama3 Groq Tool Use 8B",
-          "tools": true
+          "name": "Llama3 Groq Tool Use 8B"
         },
         "glm-4.7-flash": {
-          "name": "GLM 4.7 Flash",
-          "tools": true
+          "name": "GLM 4.7 Flash"
+        },
+        "qwen25-coder-7b-16k": {
+          "name": "Qwen2.5-Coder 7B 16K"
+        },
+        "qwen3-8b-12k": {
+          "name": "Qwen3 8B 12K"
+        },
+        "granite41-8b-12k": {
+          "name": "Granite 4.1 8B 12K"
         }
       }
     }

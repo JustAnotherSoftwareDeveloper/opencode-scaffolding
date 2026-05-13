@@ -1,6 +1,6 @@
 ---
 description: "Tiny isolated coding work. Use only for one function, one small file, simple syntax fixes, trivial helpers, or very explicit low-risk edits."
-model: "ollama/qwen2.5-coder:1.5b"
+model: "ollama/qwen2.5-coder:3b"
 mode: "subagent"
 hidden: true
 ---

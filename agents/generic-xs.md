@@ -1,6 +1,6 @@
 ---
 description: "Tiny general-purpose local work. Use for trivial classification, short summarization, obvious extraction, naming, simple cleanup, and low-risk mechanical answers."
-model: "ollama/qwen3:1.7b"
+model: "ollama/granite4.1:3b"
 mode: "subagent"
 hidden: true
 ---

@@ -1,6 +1,6 @@
 ---
 description: "Tiny documentation writing. Use for headings, short summaries, bullet cleanup, formatting, and small prose rewrites from provided facts."
-model: "ollama/qwen3:1.7b"
+model: "ollama/granite4.1:3b"
 mode: "subagent"
 hidden: true
 ---

@@ -1,6 +1,6 @@
 ---
 description: "Small web research synthesis for evidence summaries and source-claim separation."
-model: "ollama/granite4.1:3b"
+model: "ollama/granite41-8b-12k"
 mode: "subagent"
 hidden: true
 ---
