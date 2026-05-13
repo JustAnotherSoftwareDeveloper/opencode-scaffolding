@@ -76,6 +76,7 @@ state_file: .state/<plan-slug>/<step-id>.md
 ## Verification
 
 - <command, parse check, read check, or review criterion>
+- For JSON/YAML edits, prefer `uv run --project scripts/python validate-json <file>`, `uv run --project scripts/python validate-json <file> --schema <schema-file>`, or `uv run --project scripts/python validate-yaml <file>`.
 
 ## Result Consumption
 
@@ -116,6 +117,7 @@ acceptance_criteria:
   - proposal pattern rejects raw-request planning paths.
   - steps.items.properties.skill is a sibling of worker, minimum_capable_tier, context_package, objective, and recovery.
 verification:
+  - uv run --project scripts/python validate-yaml skills/plan/schema.yaml
   - python YAML parse for schema and template.
   - structural check of schema['properties']['steps']['items']['properties'].
 ```

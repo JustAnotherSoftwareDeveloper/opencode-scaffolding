@@ -38,7 +38,7 @@ For non-trivial harness changes:
 4. Initialize or read `.state/<plan_slug>/` before plan execution.
 5. Delegate independent discovery, drafting, implementation, validation, and critique to sized workers.
 6. Make the smallest correct edits and preserve unrelated user changes.
-7. Validate JSON, frontmatter, skill names, command structure, agent availability, artifact paths, and state consistency when possible.
+7. Validate JSON, YAML, frontmatter, skill names, command structure, agent availability, artifact paths, and state consistency when possible. Use `uv run --project scripts/python validate-json <file>`, `uv run --project scripts/python validate-json <file> --schema <schema-file>`, and `uv run --project scripts/python validate-yaml <file>` when available.
 8. Load `review-work` with an appropriately sized `analysis-*` worker for embedded quality checks.
 9. Load `retro` after meaningful changes.
 10. Use `lesson-writer` when reusable session guidance should be captured in `.lessons/`.

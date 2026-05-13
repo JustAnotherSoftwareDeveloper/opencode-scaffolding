@@ -200,6 +200,7 @@ Example command execution body:
 - Preserve existing user changes and unrelated files.
 - Keep edits minimal and reversible.
 - Use embedded quality checks before claiming success.
+- Validate JSON/YAML artifacts with the Python validators when available: `uv run --project scripts/python validate-json <file>`, `uv run --project scripts/python validate-json <file> --schema <schema-file>`, and `uv run --project scripts/python validate-yaml <file>`.
 - Use retro after meaningful harness changes.
 - Capture durable lessons when reusable guidance emerges.
 - Manage active artifacts in `.proposals/`, `.plans/`, `.state/`, and `.lessons/`.

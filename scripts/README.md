@@ -35,11 +35,13 @@ Python with uv:
 
 ```bash
 uv run --directory scripts/python python --version
-uv run --directory scripts/python --no-sync python --version
+uv sync --project scripts/python
 uv run --directory scripts/python src/example.py
+uv run --project scripts/python validate-json opencode.json
+uv run --project scripts/python validate-yaml skills/plan/schema.yaml
 ```
 
-Use `--no-sync` for validation-only commands that do not need project dependencies. Normal `uv run` may create `.venv/` and `uv.lock`; those are ignored in this initial zero-dependency workspace until dependencies are introduced deliberately.
+Run `uv sync --project scripts/python` after dependency or script-target changes. The Python workspace now has deliberate validation dependencies, so `scripts/python/uv.lock` should be kept with the workspace for reproducible validator execution.
 
 ## Script Contract
 
@@ -54,4 +56,4 @@ Scripts intended for skills should:
 
 ## Dependency Policy
 
-The initial workspace is intentionally zero-dependency. Do not install dependencies or commit lockfiles until a helper actually needs them and the dependency choice has been reviewed. When Python dependencies are added, revisit whether `scripts/python/uv.lock` should be committed.
+Only add dependencies when a helper needs them and the dependency choice has been reviewed. The Python validators intentionally use `PyYAML`, `jsonschema`, and a dev `pyright` dependency; keep `scripts/python/uv.lock` updated when these dependencies change.

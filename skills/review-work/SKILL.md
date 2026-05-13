@@ -39,6 +39,8 @@ Review whether prompts are specific, bounded, non-contradictory, and useful for 
 ## Missing Verification
 List checks that should still be run or could not be run.
 
+For changed JSON/YAML artifacts, treat missing validator coverage as a finding when the Python validators are available. Expected commands are `uv run --project scripts/python validate-json <file>`, `uv run --project scripts/python validate-json <file> --schema <schema-file>` when a local schema exists, and `uv run --project scripts/python validate-yaml <file>`.
+
 ## Recommendation
 State whether to accept, fix before accepting, or redesign.
 

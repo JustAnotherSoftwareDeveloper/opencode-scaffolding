@@ -59,6 +59,12 @@ Use `templates/delegation-packet.md` as the canonical packet template. A packet 
 - `result_consumption`: how the orchestrator reads the worker result.
 - `recovery_escalation`: retry, redelegation, escalation, or stop conditions.
 
+If delegated work creates or edits JSON/YAML, include the appropriate validator in `verification` when available:
+
+- `uv run --project scripts/python validate-json <file>`
+- `uv run --project scripts/python validate-json <file> --schema <schema-file>`
+- `uv run --project scripts/python validate-yaml <file>`
+
 ## Result Consumption
 
 OpenCode does not provide a documented structured child-session result protocol. Use explicit conventions:

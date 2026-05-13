@@ -1,9 +1,28 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "scripts-python"
 version = "0.1.0"
 description = "Python automation scripts for OpenCode skills"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "PyYAML>=6.0",
+    "jsonschema>=4.0",
+]
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.407",
+]
 
 [tool.uv]
-package = false
+package = true
+
+[tool.setuptools]
+packages = ["lib", "src"]
+
+[project.scripts]
+"validate-json" = "src.validate_json:main"
+"validate-yaml" = "src.validate_yaml:main"

@@ -17,6 +17,8 @@ Plan artifacts live at:
 
 The artifact is a pure YAML file (no markdown body or separate frontmatter) whose structure is defined by `skills/plan/schema.yaml` — the **source of truth** for plan validity. A separate example/template is at `skills/plan/templates/plan.yaml`.
 
+Validate plan YAML syntax with `uv run --project scripts/python validate-yaml <plan-file>`. When local schema validation is available, include schema conformance checks against `skills/plan/schema.yaml`; at minimum, validate the schema file itself with `uv run --project scripts/python validate-yaml skills/plan/schema.yaml`.
+
 New YAML plans use `schema_version: 3`.
 
 Planning requires an accepted proposal artifact at `.proposals/<unix-timestamp>-<slug>.md`. The `proposal` field in the plan artifact must point to a valid accepted proposal path. Direct-user-request planning is not supported.
@@ -212,6 +214,6 @@ Plans must include a quality check performed by an appropriately sized `analysis
 - Do not delegate vague work; rewrite vague steps until they are executable.
 - Do not create separate review artifacts.
 - Do not write new artifacts outside `.proposals/`, `.plans/`, `.state/`, or `.lessons/` unless explicitly authorized.
-- Validate every plan artifact against `skills/plan/schema.yaml` — the schema is the source of truth for required keys, types, enums, patterns, and constraints.
+- Validate every plan artifact against `skills/plan/schema.yaml` — the schema is the source of truth for required keys, types, enums, patterns, and constraints. Include `uv run --project scripts/python validate-yaml <plan-file>` in plan verification when the validator is available.
 - Include validation gates for YAML structure, schema conformance, worker availability, step dependency correctness, and artifact paths when relevant.
 - Include rollback and recovery even for small changes.

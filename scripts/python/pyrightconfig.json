@@ -1,0 +1,6 @@
+{
+  "include": ["lib", "src"],
+  "exclude": [".venv", "__pycache__", "*.egg-info"],
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "standard"
+}
