@@ -1,0 +1,9 @@
+[project]
+name = "scripts-python"
+version = "0.1.0"
+description = "Python automation scripts for OpenCode skills"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv]
+package = false
