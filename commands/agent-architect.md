@@ -15,16 +15,21 @@ If `$ARGUMENTS` names a readable `.proposals/*.md` file:
 - If it is accepted, offer or proceed to create a plan in `.plans/` when authorized.
 - If it is draft or needs clarification, continue the proposal workflow.
 
-If `$ARGUMENTS` names a readable `.plans/*.yaml` file:
+If `$ARGUMENTS` names a readable `.plans/*.json` file:
 
 - Read the plan first and treat it as the runbook.
-- Confirm or initialize `.state/<plan_slug>/`.
+- Confirm or initialize `.state/<plan_slug>/` with `uv run --project scripts/python init-plan-state <plan.json>`.
 - Execute only when the plan is approved or the user explicitly authorizes execution.
+
+If `$ARGUMENTS` names a readable legacy `.plans/*.yaml` file:
+
+- Treat it as a pre-conversion runbook and keep any edits YAML-valid.
+- Prefer JSON plans for new work.
 
 If `$ARGUMENTS` requests resume behavior:
 
 - Locate `.state/<plan_slug>/metadata.json`.
-- Read `.state/<plan_slug>/MAIN.md`.
+- Read `.state/<plan_slug>/MAIN.json`.
 - Read the active step file.
 - Resume from recorded state.
 

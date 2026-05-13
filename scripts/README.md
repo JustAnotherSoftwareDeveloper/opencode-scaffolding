@@ -38,7 +38,8 @@ uv run --directory scripts/python python --version
 uv sync --project scripts/python
 uv run --directory scripts/python src/example.py
 uv run --project scripts/python validate-json opencode.json
-uv run --project scripts/python validate-yaml skills/plan/schema.yaml
+uv run --project scripts/python validate-json skills/plan/templates/plan.json --schema skills/plan/schema.json
+uv run --project scripts/python validate-yaml skills/plan/schema.yaml  # legacy YAML artifacts only
 ```
 
 Run `uv sync --project scripts/python` after dependency or script-target changes. The Python workspace now has deliberate validation dependencies, so `scripts/python/uv.lock` should be kept with the workspace for reproducible validator execution.

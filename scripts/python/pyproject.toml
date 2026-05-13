@@ -26,3 +26,4 @@ packages = ["lib", "src"]
 [project.scripts]
 "validate-json" = "src.validate_json:main"
 "validate-yaml" = "src.validate_yaml:main"
+"init-plan-state" = "src.init_plan_state:main"

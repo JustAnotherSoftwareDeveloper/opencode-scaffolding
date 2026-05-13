@@ -12,20 +12,26 @@ Use this skill after a proposal is accepted. Planning requires an accepted propo
 Plan artifacts live at:
 
 ```text
-.plans/<unix-timestamp>-slug.yaml
+.plans/<unix-timestamp>-slug.json
 ```
 
-The artifact is a pure YAML file (no markdown body or separate frontmatter) whose structure is defined by `skills/plan/schema.yaml` — the **source of truth** for plan validity. A separate example/template is at `skills/plan/templates/plan.yaml`.
+The artifact is a pure JSON file whose structure is defined by `skills/plan/schema.json` — the **source of truth** for plan validity. A complete example/template is at `skills/plan/templates/plan.json`.
 
-Validate plan YAML syntax with `uv run --project scripts/python validate-yaml <plan-file>`. When local schema validation is available, include schema conformance checks against `skills/plan/schema.yaml`; at minimum, validate the schema file itself with `uv run --project scripts/python validate-yaml skills/plan/schema.yaml`.
+Validate plan JSON syntax and schema conformance with:
 
-New YAML plans use `schema_version: 3`.
+```text
+uv run --project scripts/python validate-json <plan-file> --schema skills/plan/schema.json
+```
+
+New JSON plans use `schema_version: 3`.
+
+> **Historical note:** Prior plans used `.yaml` format with `skills/plan/schema.yaml` and `skills/plan/templates/plan.yaml`. Those files remain in the repository for archival reference but **new plans must use the JSON format**. The YAML validator (`validate-yaml`) is still available for reviewing legacy plans.
 
 Planning requires an accepted proposal artifact at `.proposals/<unix-timestamp>-<slug>.md`. The `proposal` field in the plan artifact must point to a valid accepted proposal path. Direct-user-request planning is not supported.
 
-## Required YAML Plan Keys
+## Required JSON Plan Keys
 
-Every plan artifact must include the following top-level keys, as defined by `skills/plan/schema.yaml`:
+Every plan artifact must include the following top-level keys, as defined by `skills/plan/schema.json`:
 
 | Key | Type | Description |
 | --- | --- | --- |
@@ -54,7 +60,7 @@ Every plan artifact must include the following top-level keys, as defined by `sk
 | `rollback_recovery` | string | Steps to undo or recover from execution |
 | `final_report_contract` | string | What the final report must include |
 
-These keys are required by `skills/plan/schema.yaml`. `templates/plan.yaml` demonstrates all keys with realistic values. Additional keys are not permitted (`additionalProperties: false` in the schema).
+These keys are required by `skills/plan/schema.json`. `templates/plan.json` demonstrates all keys with realistic values. Additional keys are not permitted (`additionalProperties: false` in the schema).
 
 ## Proposal Intake Validation
 
@@ -87,7 +93,7 @@ This analysis should be documented in the optional `planning_analysis` field of 
 
 ## Orchestrator-Aware Step Contract
 
-Every step in the `steps` array is a YAML object with the following required keys (defined in `skills/plan/schema.yaml`):
+Every step in the `steps` array is a JSON object with the following required keys (defined in `skills/plan/schema.json`):
 
 | Key | Type | Description |
 | --- | --- | --- |
@@ -100,44 +106,42 @@ Every step in the `steps` array is a YAML object with the following required key
 | `context_package` | object | User requirement slice, relevant sections, files in/out scope, expected return format |
 | `objective` | string | Bounded objective for this step |
 | `expected_output` | string | What this step should produce |
-| `state_updates` | array of strings | State files this step updates |
+| `state_updates` | array of strings | State files this step updates (use `.json` paths) |
 | `acceptance_criteria` | array of strings | Success criteria |
 | `verification` | string | How to verify this step |
 | `recovery` | string | What to do if this step fails |
 
 Recommended step shape:
 
-```yaml
-- id: "01-step-slug"
-  depends_on: []
-  parallel_group: A
-  worker:
-    family: generic    # one of: generic, analysis, coding, doc-writer, websearch, multimodal-looker
-    size: sm           # one of: xs, sm, md, lg, xl
-  skill: null          # null or lowercase-hyphenated skill name (e.g., lesson-writer)
-  minimum_capable_tier: sm
-  context_package:
-    user_requirement_slice: "Slice of user requirements relevant to this step"
-    relevant_proposal_sections:
-      - "Goal"
-    relevant_state_files: []
-    files_in_scope:
-      - "path/to/target/files"
-    files_out_scope:
-      - "node_modules/"
-    expected_return_format: "Findings as structured text"
-  objective: "Bounded objective for this step"
-  expected_output: "What this step should produce"
-  state_updates:
-    - ".state/<plan_slug>/01-step-slug.md"
-  acceptance_criteria:
-    - "Criterion one"
-    - "Criterion two"
-  verification: "How to verify this step"
-  recovery: "What to do if this step fails"
+```json
+{
+  "id": "01-step-slug",
+  "depends_on": [],
+  "parallel_group": "A",
+  "worker": {
+    "family": "generic",
+    "size": "sm"
+  },
+  "skill": null,
+  "minimum_capable_tier": "sm",
+  "context_package": {
+    "user_requirement_slice": "Slice of user requirements relevant to this step",
+    "relevant_proposal_sections": ["Goal"],
+    "relevant_state_files": [],
+    "files_in_scope": ["path/to/target/files"],
+    "files_out_scope": ["node_modules/"],
+    "expected_return_format": "Findings as structured text"
+  },
+  "objective": "Bounded objective for this step",
+  "expected_output": "What this step should produce",
+  "state_updates": ["../.state/<plan_slug>/01-step-slug.json"],
+  "acceptance_criteria": ["Criterion one", "Criterion two"],
+  "verification": "How to verify this step",
+  "recovery": "What to do if this step fails"
+}
 ```
 
-See `skills/plan/templates/plan.yaml` for a complete multi-step example. See `skills/plan/schema.yaml` for exact type, enum, and pattern constraints on every field.
+See `skills/plan/templates/plan.json` for a complete multi-step example. See `skills/plan/schema.json` for exact type, enum, and pattern constraints on every field.
 
 ## Worker Routing And Sizing
 
@@ -189,20 +193,50 @@ The `parallel_groups` key maps group identifiers to step ID arrays, making safe 
 
 ## State Initialization
 
-Each approved or executing plan must define:
+Each approved or executing plan must have a `.state/<plan_slug>/` directory with the following files:
 
 ```text
 .state/<plan_slug>/
-  metadata.json
-  MAIN.md
-  01-step-slug.md
-  02-step-slug.md
+  metadata.json       # Orchestrator-owned plan metadata (schema: skills/plan/schemas/state-metadata.schema.json)
+  MAIN.json           # Orchestrator-owned human-readable dashboard (schema: skills/plan/schemas/state-main.schema.json)
+  01-step-slug.json   # Step-owned state file (schema: skills/plan/schemas/state-step.schema.json)
+  02-step-slug.json   # Step-owned state file
   ...
 ```
 
-`metadata.json` tracks plan path (pointing to `.plans/<plan_slug>.yaml`), proposal path, status, active step, steps, dependency graph, parallel groups, blockers, and latest verification. `MAIN.md` is the human-readable dashboard. Each step file records objective, inputs, context package, delegation, work log, outputs, verification, blockers, and next action.
+### Automatic Initialization (Preferred)
 
-The orchestrator owns `metadata.json` and `MAIN.md`. Workers may write only explicitly assigned step files. After worker updates, the orchestrator reconciles state.
+After creating a valid plan JSON artifact at `.plans/<plan_slug>.json`, run the state initializer script:
+
+```text
+uv run --project scripts/python init-plan-state <plan.json>
+```
+
+The script:
+1. Validates the plan JSON against `skills/plan/schema.json`.
+2. Creates the `.state/<plan_slug>/` directory and fails safely if that directory already contains files.
+3. Seeds `metadata.json`, `MAIN.json`, and step `.json` files from the plan definition.
+4. Validates each generated file against the corresponding state JSON schema.
+
+Example:
+
+```text
+uv run --project scripts/python init-plan-state .plans/1778710681-example-plan.json
+```
+
+### Manual Initialization (Fallback)
+
+If the initialization script is unavailable, manually create the files:
+
+- **`metadata.json`** — follows `skills/plan/schemas/state-metadata.schema.json`. Tracks plan path (pointing to `.plans/<plan_slug>.json`), proposal path, status, active step, step statuses, dependency graph, parallel groups, blockers, and latest verification. Validate with: `uv run --project scripts/python validate-json <file> --schema skills/plan/schemas/state-metadata.schema.json`
+
+- **`MAIN.json`** — follows `skills/plan/schemas/state-main.schema.json`. Human-readable dashboard with plan_id, title, objective, status, active step, step_statuses, blockers, latest verification, and worker_assignments. Validate with: `uv run --project scripts/python validate-json <file> --schema skills/plan/schemas/state-main.schema.json`
+
+- **Step files** (`<step-id>.json`) — follow `skills/plan/schemas/state-step.schema.json`. Each records step_id, status, objective, inputs, context_summary, work_log, outputs, verification, blockers, next_action, worker, timestamps, and findings. Validate with: `uv run --project scripts/python validate-json <file> --schema skills/plan/schemas/state-step.schema.json`
+
+### Ownership
+
+The orchestrator owns `metadata.json` and `MAIN.json`. Workers may write only explicitly assigned step `.json` files. After worker updates, the orchestrator reconciles `metadata.json` and `MAIN.json` to reflect the new step status.
 
 ## Embedded Quality Check
 
@@ -214,6 +248,7 @@ Plans must include a quality check performed by an appropriately sized `analysis
 - Do not delegate vague work; rewrite vague steps until they are executable.
 - Do not create separate review artifacts.
 - Do not write new artifacts outside `.proposals/`, `.plans/`, `.state/`, or `.lessons/` unless explicitly authorized.
-- Validate every plan artifact against `skills/plan/schema.yaml` — the schema is the source of truth for required keys, types, enums, patterns, and constraints. Include `uv run --project scripts/python validate-yaml <plan-file>` in plan verification when the validator is available.
-- Include validation gates for YAML structure, schema conformance, worker availability, step dependency correctness, and artifact paths when relevant.
+- Validate every plan artifact against `skills/plan/schema.json` — the schema is the source of truth for required keys, types, enums, patterns, and constraints. Use `uv run --project scripts/python validate-json <plan-file> --schema skills/plan/schema.json` for schema conformance.
+- Validate state files (`metadata.json`, `MAIN.json`, step `.json` files) against the corresponding schemas in `skills/plan/schemas/`. The initialization script (`init-plan-state`) runs these checks automatically.
+- Include validation gates for JSON structure, schema conformance, worker availability, step dependency correctness, and artifact paths when relevant.
 - Include rollback and recovery even for small changes.

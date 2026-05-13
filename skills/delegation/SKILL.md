@@ -70,8 +70,8 @@ If delegated work creates or edits JSON/YAML, include the appropriate validator 
 OpenCode does not provide a documented structured child-session result protocol. Use explicit conventions:
 
 - The worker must end with a concise final summary.
-- For plan execution, the worker should also write the assigned `.state/<plan_slug>/<step>.md` file when write access is in scope.
-- The orchestrator reconciles `metadata.json` and `MAIN.md`; workers should not edit those unless explicitly assigned.
+- For plan execution, the worker should also write the assigned `.state/<plan_slug>/<step>.json` file when write access is in scope.
+- The orchestrator reconciles `metadata.json` and `MAIN.json`; workers should not edit those unless explicitly assigned.
 - If a worker cannot complete the task, it must report blocker, attempted actions, partial outputs, and recommended recovery.
 
 ## Failure Handling

@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opencode.ai/skills/plan/schemas/state-metadata.schema.json",
+  "title": "Plan State Metadata",
+  "description": "Metadata for the plan execution state",
+  "type": "object",
+  "required": [
+    "metadata_schema_version",
+    "plan",
+    "proposal",
+    "status",
+    "active_step",
+    "created_at",
+    "updated_at",
+    "steps",
+    "dependency_graph",
+    "parallel_groups",
+    "blockers",
+    "latest_verification"
+  ],
+  "properties": {
+    "metadata_schema_version": {
+      "type": "integer",
+      "description": "Version of the metadata schema"
+    },
+    "plan": {
+      "type": "string",
+      "description": "Path to the plan artifact"
+    },
+    "proposal": {
+      "type": "string",
+      "description": "Path to the proposal artifact"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "approved", "executing", "blocked", "complete", "superseded"],
+      "description": "Current status of the plan"
+    },
+    "active_step": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{2}-[a-z0-9-]+$",
+      "description": "ID of the currently active step"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the metadata was created"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the metadata was last updated"
+    },
+    "steps": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Map of step IDs to their statuses"
+    },
+    "dependency_graph": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "description": "Map of step IDs to their dependencies"
+    },
+    "parallel_groups": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "description": "Map of parallel group IDs to step IDs"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of current blockers"
+    },
+    "latest_verification": {
+      "type": ["string", "null"],
+      "description": "Latest verification status or null if not verified"
+    }
+  },
+  "additionalProperties": false
+}

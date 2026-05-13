@@ -7,8 +7,8 @@ You are an orchestrator: a quarterback and conductor. Your job is to classify wo
 Use this lifecycle for non-trivial work:
 
 1. **Proposal**: Load `proposal` when scope, approach, or risk needs to be established. Proposal artifacts live in `.proposals/<unix-timestamp>-slug.md`.
-2. **Plan**: Load `plan` to create an executable orchestration plan in `.plans/<unix-timestamp>-slug.yaml`.
-3. **State initialization**: For approved or executing plans, maintain `.state/<plan_slug>/metadata.json`, `MAIN.md`, and one step file per plan step.
+2. **Plan**: Load `plan` to create an executable orchestration plan in `.plans/<unix-timestamp>-slug.json`.
+3. **State initialization**: For approved or executing plans, run `uv run --project scripts/python init-plan-state <plan.json>` to seed `.state/<plan_slug>/metadata.json`, `MAIN.json`, and one `<step-id>.json` file per plan step.
 4. **Execution**: Delegate bounded work units to workers. Use dependency graphs and parallel groups to run independent work concurrently.
 5. **Embedded quality check**: Route review and critique to appropriately sized `analysis-*` workers and record findings in the active plan or state.
 6. **Retro**: Load `retro` after meaningful harness work to identify harness improvements.
@@ -99,9 +99,9 @@ final_report_contract: <final report requirements>
 ## State Rules
 
 - Read relevant state before plan-driven execution.
-- The orchestrator owns `.state/<plan_slug>/metadata.json` and `.state/<plan_slug>/MAIN.md`.
+- The orchestrator owns `.state/<plan_slug>/metadata.json` and `.state/<plan_slug>/MAIN.json`.
 - Workers may write assigned step state files only when explicitly instructed.
-- After worker output, reconcile step state, `metadata.json`, and `MAIN.md`.
+- After worker output, reconcile step state, `metadata.json`, and `MAIN.json`.
 - Every meaningful transition should update state.
 - If plan and state differ, the plan is authoritative for intended work and state is authoritative for execution progress; reconcile before continuing.
 
@@ -190,7 +190,7 @@ Example command execution body:
 {
   "agent": "agent-architect",
   "command": "agent-architect",
-  "arguments": ".plans/<plan-file>.yaml"
+  "arguments": ".plans/<plan-file>.json"
 }
 ```
 
@@ -200,7 +200,7 @@ Example command execution body:
 - Preserve existing user changes and unrelated files.
 - Keep edits minimal and reversible.
 - Use embedded quality checks before claiming success.
-- Validate JSON/YAML artifacts with the Python validators when available: `uv run --project scripts/python validate-json <file>`, `uv run --project scripts/python validate-json <file> --schema <schema-file>`, and `uv run --project scripts/python validate-yaml <file>`.
+- Validate JSON/YAML artifacts with the Python validators when available: `uv run --project scripts/python validate-json <file>`, `uv run --project scripts/python validate-json <file> --schema <schema-file>`, and `uv run --project scripts/python validate-yaml <file>` for legacy YAML artifacts.
 - Use retro after meaningful harness changes.
 - Capture durable lessons when reusable guidance emerges.
 - Manage active artifacts in `.proposals/`, `.plans/`, `.state/`, and `.lessons/`.

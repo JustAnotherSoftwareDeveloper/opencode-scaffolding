@@ -28,7 +28,15 @@ List findings first. For each finding include severity, file path, line referenc
 State whether execution matched the runbook and note any deviations.
 
 ## Config And Schema Validity
-Review JSON validity, markdown frontmatter shape, command definitions, skill naming rules, and agent mode/hidden usage.
+Review JSON validity, JSON Schema conformance, markdown frontmatter shape, command definitions, skill naming rules, and agent mode/hidden usage.
+
+For JSON plan artifacts, validate against the plan schema:
+- `uv run --project scripts/python validate-json .plans/<plan-slug>.json --schema skills/plan/schema.json`
+
+For JSON state artifacts, validate against the state schemas:
+- `uv run --project scripts/python validate-json .state/<plan-slug>/metadata.json --schema skills/plan/schemas/state-metadata.schema.json`
+- `uv run --project scripts/python validate-json .state/<plan-slug>/MAIN.json --schema skills/plan/schemas/state-main.schema.json`
+- `uv run --project scripts/python validate-json .state/<plan-slug>/<step-id>.json --schema skills/plan/schemas/state-step.schema.json`
 
 ## Permission Safety
 Review task permissions, skill permissions, write permissions, and accidental over-broad access.
@@ -39,7 +47,17 @@ Review whether prompts are specific, bounded, non-contradictory, and useful for 
 ## Missing Verification
 List checks that should still be run or could not be run.
 
-For changed JSON/YAML artifacts, treat missing validator coverage as a finding when the Python validators are available. Expected commands are `uv run --project scripts/python validate-json <file>`, `uv run --project scripts/python validate-json <file> --schema <schema-file>` when a local schema exists, and `uv run --project scripts/python validate-yaml <file>`.
+For changed JSON/YAML artifacts, treat missing validator coverage as a finding when the Python validators are available. Expected commands are:
+- `uv run --project scripts/python validate-json <file>`
+- `uv run --project scripts/python validate-json <file> --schema <schema-file>` when a local schema exists
+- `uv run --project scripts/python validate-yaml <file>` (for legacy YAML artifacts only)
+
+For plan state artifacts, expect validation against the schemas in `skills/plan/schemas/`:
+- `state-metadata.schema.json` for `metadata.json`
+- `state-main.schema.json` for `MAIN.json`
+- `state-step.schema.json` for each step file
+
+If the `init-plan-state` script was not run after creating a new plan JSON, flag that as a missing validation step.
 
 ## Recommendation
 State whether to accept, fix before accepting, or redesign.

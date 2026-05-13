@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opencode.ai/skills/plan/schemas/state-main.schema.json",
+  "title": "Plan State Main",
+  "description": "Main dashboard for the plan execution state",
+  "type": "object",
+  "required": [
+    "plan_id",
+    "title",
+    "objective",
+    "status",
+    "active_step",
+    "step_statuses",
+    "blockers",
+    "latest_verification"
+  ],
+  "properties": {
+    "plan_id": {
+      "type": "string",
+      "description": "Unique identifier for the plan"
+    },
+    "title": {
+      "type": "string",
+      "description": "Title of the plan"
+    },
+    "objective": {
+      "type": "string",
+      "description": "Objective of the plan"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "approved", "executing", "blocked", "complete", "superseded"],
+      "description": "Current status of the plan"
+    },
+    "active_step": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{2}-[a-z0-9-]+$",
+      "description": "ID of the currently active step"
+    },
+    "step_statuses": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Map of step IDs to their statuses"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of current blockers"
+    },
+    "latest_verification": {
+      "type": ["string", "null"],
+      "description": "Latest verification status or null if not verified"
+    },
+    "worker_assignments": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Map of step IDs to worker families"
+    }
+  },
+  "additionalProperties": false
+}

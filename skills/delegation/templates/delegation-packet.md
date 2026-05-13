@@ -15,7 +15,7 @@ worker_size: <xs|sm|md|lg|xl|null>       # null only for workers without size su
 skill: <skill-name-or-null>
 plan_id: <plan-id>
 step_id: <step-id>
-state_file: .state/<plan-slug>/<step-id>.md
+state_file: .state/<plan-slug>/<step-id>.json
 ```
 
 ## Objective
@@ -34,7 +34,7 @@ state_file: .state/<plan-slug>/<step-id>.md
 
 ### Relevant State Files
 
-- `.state/<plan-slug>/<prior-step>.md`
+- `.state/<plan-slug>/<prior-step>.json`
 
 ### Files In Scope
 
@@ -65,8 +65,8 @@ state_file: .state/<plan-slug>/<step-id>.md
 
 ## State Updates
 
-- Write findings or work log to `.state/<plan-slug>/<step-id>.md` when file writes are in scope.
-- Do not edit `.state/<plan-slug>/metadata.json` or `.state/<plan-slug>/MAIN.md` unless explicitly assigned.
+- Write findings or work log to `.state/<plan-slug>/<step-id>.json` when file writes are in scope.
+- Do not edit `.state/<plan-slug>/metadata.json` or `.state/<plan-slug>/MAIN.json` unless explicitly assigned.
 
 ## Acceptance Criteria
 
@@ -76,7 +76,12 @@ state_file: .state/<plan-slug>/<step-id>.md
 ## Verification
 
 - <command, parse check, read check, or review criterion>
-- For JSON/YAML edits, prefer `uv run --project scripts/python validate-json <file>`, `uv run --project scripts/python validate-json <file> --schema <schema-file>`, or `uv run --project scripts/python validate-yaml <file>`.
+- For JSON edits, prefer `uv run --project scripts/python validate-json <file>` or `uv run --project scripts/python validate-json <file> --schema <schema-file>`.
+- For YAML edits (legacy artifacts only), use `uv run --project scripts/python validate-yaml <file>`.
+- For state files, validate against the appropriate schema:
+  - `uv run --project scripts/python validate-json .state/<plan-slug>/metadata.json --schema skills/plan/schemas/state-metadata.schema.json`
+  - `uv run --project scripts/python validate-json .state/<plan-slug>/MAIN.json --schema skills/plan/schemas/state-main.schema.json`
+  - `uv run --project scripts/python validate-json .state/<plan-slug>/<step-id>.json --schema skills/plan/schemas/state-step.schema.json`
 
 ## Result Consumption
 
@@ -100,24 +105,26 @@ target_agent: coding-md
 worker_family: coding
 worker_size: md
 skill: null
-plan_id: 1778702103-proposal-planning-skill-upgrade
-step_id: 05-upgrade-plan-skill-schema-template
-state_file: .state/1778702103-proposal-planning-skill-upgrade/05-upgrade-plan-skill-schema-template.md
-objective: Repair skills/plan/schema.yaml so planning requires accepted proposals and step skill accepts null or lowercase hyphenated strings.
+plan_id: 1778710681-json-plan-state-artifacts
+step_id: 04-implement-plan-schema-template
+state_file: .state/1778710681-json-plan-state-artifacts/04-implement-plan-schema-template.json
+objective: Implement JSON plan schema and template files for the JSON-based plan artifact contract.
 files_in_scope:
-  - skills/plan/schema.yaml
-  - skills/plan/templates/plan.yaml
+  - skills/plan/schema.json
+  - skills/plan/templates/plan.json
 files_out_scope:
   - opencode.json
   - agents/
   - node_modules/
 expected_return_format: Summary of schema/template edits, validation commands, and residual risks.
 acceptance_criteria:
-  - skills/plan/schema.yaml parses as YAML.
-  - proposal pattern rejects raw-request planning paths.
-  - steps.items.properties.skill is a sibling of worker, minimum_capable_tier, context_package, objective, and recovery.
+  - skills/plan/schema.json is valid JSON Schema (draft 2020-12).
+  - skills/plan/templates/plan.json validates against skills/plan/schema.json.
+  - YAML schema/template files are retained as historical references but not referenced as live.
 verification:
-  - uv run --project scripts/python validate-yaml skills/plan/schema.yaml
-  - python YAML parse for schema and template.
-  - structural check of schema['properties']['steps']['items']['properties'].
+  - uv run --project scripts/python validate-json skills/plan/schema.json
+  - uv run --project scripts/python validate-json skills/plan/templates/plan.json --schema skills/plan/schema.json
+  - python JSON parse check for schema and template.
 ```
+
+> Historical note: Prior delegation packets referenced `.yaml` schemas and `.md` state files. New packets should use the JSON conventions above.
