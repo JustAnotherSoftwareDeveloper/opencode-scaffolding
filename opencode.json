@@ -1,0 +1,120 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md"],
+  "model": "openrouter/deepseek/deepseek-v4-pro",
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama",
+      "options": {
+        "baseURL": "http://localhost:11434/v1",
+        "apiKey": "ollama"
+      },
+      "models": {
+        "qwen3.5:0.8b": {
+          "name": "Qwen 3.5 0.8B",
+          "tools": true
+        },
+        "qwen3.5:2b": {
+          "name": "Qwen 3.5 2B",
+          "tools": true
+        },
+        "granite4.1:3b": {
+          "name": "Granite 4.1 3B",
+          "tools": true
+        },
+        "phi4-mini": {
+          "name": "Phi-4 Mini",
+          "tools": true
+        },
+        "qwen2.5-coder:1.5b": {
+          "name": "Qwen2.5 Coder 1.5B",
+          "tools": true
+        },
+        "qwen2.5-coder:3b": {
+          "name": "Qwen2.5 Coder 3B",
+          "tools": true
+        },
+        "qwen3-vl:2b-thinking": {
+          "name": "Qwen3 VL 2B Thinking",
+          "tools": true
+        },
+        "qwen3-vl:8b-thinking": {
+          "name": "Qwen3 VL 8B Thinking",
+          "tools": true
+        },
+        "qwen3:8b": {
+          "name": "Qwen3 8B",
+          "tools": true
+        },
+        "deepseek-r1:8b": {
+          "name": "DeepSeek R1 8B",
+          "tools": true
+        },
+        "command-r7b": {
+          "name": "Command R7B",
+          "tools": true
+        },
+        "llama3-groq-tool-use:8b": {
+          "name": "Llama3 Groq Tool Use 8B",
+          "tools": true
+        },
+        "glm-4.7-flash": {
+          "name": "GLM 4.7 Flash",
+          "tools": true
+        }
+      }
+    }
+  },
+  "agent": {
+    "orchestrator-base": {
+      "description": "Hidden base orchestrator pattern for aggressive delegation, proposal-plan-execution workflows, runbook-driven execution, review, and retro loops.",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "openrouter/deepseek/deepseek-v4-pro",
+      "prompt": "{file:./prompts/orchestrator-base.md}",
+      "permission": {
+        "task": {
+          "*": "deny",
+          "analysis-*": "allow",
+          "coding-*": "allow",
+          "generic-*": "allow",
+          "doc-writer-*": "allow",
+          "websearch-*": "allow",
+          "explore": "allow",
+          "librarian": "allow",
+          "oracle": "allow",
+          "multimodal-looker": "allow"
+        },
+        "skill": {
+          "*": "allow"
+        }
+      }
+    },
+    "agent-architect": {
+      "description": "Primary orchestrator for creating and improving OpenCode agents, skills, commands, migrations, and the orchestration harness.",
+      "mode": "primary",
+      "model": "openrouter/deepseek/deepseek-v4-pro",
+      "prompt": "{file:./prompts/orchestrator-base.md}\n\n{file:./prompts/agent-architect.md}",
+      "permission": {
+        "task": {
+          "*": "deny",
+          "analysis-*": "allow",
+          "coding-*": "allow",
+          "generic-*": "allow",
+          "doc-writer-*": "allow",
+          "websearch-*": "allow",
+          "explore": "allow",
+          "librarian": "allow",
+          "oracle": "allow",
+          "multimodal-looker": "allow",
+          "orchestrator-base": "allow"
+        },
+        "skill": {
+          "*": "allow"
+        }
+      }
+    }
+  },
+  "plugin": []
+}
