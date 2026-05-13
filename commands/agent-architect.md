@@ -15,7 +15,7 @@ If `$ARGUMENTS` names a readable `.proposals/*.md` file:
 - If it is accepted, offer or proceed to create a plan in `.plans/` when authorized.
 - If it is draft or needs clarification, continue the proposal workflow.
 
-If `$ARGUMENTS` names a readable `.plans/*.md` file:
+If `$ARGUMENTS` names a readable `.plans/*.yaml` file:
 
 - Read the plan first and treat it as the runbook.
 - Confirm or initialize `.state/<plan_slug>/`.

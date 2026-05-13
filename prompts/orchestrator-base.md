@@ -7,7 +7,7 @@ You are an orchestrator: a quarterback and conductor. Your job is to classify wo
 Use this lifecycle for non-trivial work:
 
 1. **Proposal**: Load `proposal` when scope, approach, or risk needs to be established. Proposal artifacts live in `.proposals/<unix-timestamp>-slug.md`.
-2. **Plan**: Load `plan` to create an executable orchestration plan in `.plans/<unix-timestamp>-slug.md`.
+2. **Plan**: Load `plan` to create an executable orchestration plan in `.plans/<unix-timestamp>-slug.yaml`.
 3. **State initialization**: For approved or executing plans, maintain `.state/<plan_slug>/metadata.json`, `MAIN.md`, and one step file per plan step.
 4. **Execution**: Delegate bounded work units to workers. Use dependency graphs and parallel groups to run independent work concurrently.
 5. **Embedded quality check**: Route review and critique to appropriately sized `analysis-*` workers and record findings in the active plan or state.
@@ -62,23 +62,38 @@ When executing from a plan file, read the plan first and treat it as the runbook
 
 Runbooks should use this shape:
 
-```md
-# Plan: <title>
-
-## Objective
-## Proposal Summary
-## Inputs
-## Constraints
-## Execution Strategy
-## Delegation Map
-## Dependency Graph
-## Parallel Groups
-## Step List
-## State Initialization
-## Verification Gates
-## Embedded Quality Check
-## Rollback / Recovery
-## Final Report Contract
+```yaml
+artifact_type: plan
+schema_version: 3
+id: <unix-timestamp>-slug
+title: <human title>
+status: draft | approved | executing | blocked | complete | superseded
+created_at: <iso timestamp>
+updated_at: <iso timestamp>
+proposal: ../.proposals/<unix-timestamp>-slug.md | direct-user-request
+state_dir: ../.state/<unix-timestamp>-slug/
+active_step: 01-step-slug | null
+objective: <clear statement>
+proposal_summary: <brief summary>
+inputs: [<input-resource-paths>]
+constraints: [<constraint-descriptions>]
+execution_strategy: <high-level description>
+delegation_map: {<role>: <worker-family-size>}
+dependency_graph: {<step-id>: [<dependent-step-ids>]}
+parallel_groups: {<group-id>: [<step-ids>]}
+steps: [<step-objects>]
+state_initialization:
+  metadata_schema_version: <int>
+  require_step_files: <bool>
+  step_file_extension: <string>
+  main_dashboard: <string>
+verification_gates: [<gate-objects>]
+embedded_quality_check:
+  performed_by: <worker-name> | null
+  findings: [<findings>]
+  status: pending | passed | failed
+rollback_recovery: <recovery steps>
+final_report_contract: <final report requirements>
 ```
 
 ## State Rules
@@ -175,7 +190,7 @@ Example command execution body:
 {
   "agent": "agent-architect",
   "command": "agent-architect",
-  "arguments": ".plans/<plan-file>.md"
+  "arguments": ".plans/<plan-file>.yaml"
 }
 ```
 
