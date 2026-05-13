@@ -5,7 +5,7 @@ description: Convert an accepted proposal into a concrete orchestration runbook 
 
 # Plan Skill
 
-Use this skill after a proposal is accepted, or when the user directly authorizes planning from a sufficiently clear objective. The output is an executable orchestration plan artifact in structured YAML format.
+Use this skill after a proposal is accepted. Planning requires an accepted proposal artifact (.proposals/<timestamp>-<slug>.md with status: accepted). Direct planning from raw user requests is not supported.
 
 ## Plan Artifact Contract
 
@@ -19,7 +19,7 @@ The artifact is a pure YAML file (no markdown body or separate frontmatter) whos
 
 New YAML plans use `schema_version: 3`.
 
-Proposal paths remain `.proposals/*.md` (markdown files). The proposal field may also be `direct-user-request` when no proposal exists.
+Planning requires an accepted proposal artifact at `.proposals/<unix-timestamp>-<slug>.md`. The `proposal` field in the plan artifact must point to a valid accepted proposal path. Direct-user-request planning is not supported.
 
 ## Required YAML Plan Keys
 
@@ -34,7 +34,7 @@ Every plan artifact must include the following top-level keys, as defined by `sk
 | `status` | enum | `draft` / `approved` / `executing` / `blocked` / `complete` / `superseded` |
 | `created_at` | ISO 8601 datetime | Creation timestamp |
 | `updated_at` | ISO 8601 datetime | Last-updated timestamp |
-| `proposal` | path or `"direct-user-request"` | Path to the accepted proposal or `direct-user-request` |
+| `proposal` | path | Path to the accepted proposal artifact. Planning hard-blocked without one. |
 | `state_dir` | path | Relative path to `.state/<plan_slug>/` |
 | `active_step` | step ID or `null` | Current executing step |
 | `objective` | string | Clear statement of what this plan accomplishes |
@@ -54,6 +54,35 @@ Every plan artifact must include the following top-level keys, as defined by `sk
 
 These keys are required by `skills/plan/schema.yaml`. `templates/plan.yaml` demonstrates all keys with realistic values. Additional keys are not permitted (`additionalProperties: false` in the schema).
 
+## Proposal Intake Validation
+
+The plan skill must validate that the proposal artifact exists and has an `accepted` status before creating an executable plan. This hard-blocker ensures that planning always starts from a valid, agreed-upon decision artifact.
+
+The plan skill should:
+1. Verify the proposal path exists and is a valid `.proposals/<timestamp>-<slug>.md` file
+2. Check that the proposal has `status: accepted` in its frontmatter
+3. Extract key information from the proposal:
+   - Objective (from proposal's goal section)
+   - Constraints (from proposal's constraints section)
+   - Decisions (from proposal's accepted decisions section)
+   - Risks (from proposal's risks section)
+   - Acceptance criteria (from proposal's acceptance criteria section)
+
+## Planning Analysis Phase
+
+The planning skill must perform an analysis-first workflow that decomposes the accepted proposal into executable steps:
+
+1. **Problem breakdown** - Identify the core problem or objective from the proposal
+2. **Workstream identification** - Break the problem into distinct workstreams or sub-tasks
+3. **Skill mapping** - Map each workstream to appropriate skills based on the proposal's suggested delegation
+4. **Worker family/size mapping** - Assign appropriate worker families and sizes to each workstream
+5. **Dependency analysis** - Determine step dependencies based on workstream relationships
+6. **Parallelization analysis** - Identify which steps can run concurrently
+7. **File/state/artifact impact analysis** - Determine what files, state, and artifacts will be affected
+8. **Delegation packet inventory** - List any delegation packets needed for complex steps
+
+This analysis should be documented in the optional `planning_analysis` field of the plan artifact, which helps trace how the plan was derived from the proposal.
+
 ## Orchestrator-Aware Step Contract
 
 Every step in the `steps` array is a YAML object with the following required keys (defined in `skills/plan/schema.yaml`):
@@ -64,7 +93,7 @@ Every step in the `steps` array is a YAML object with the following required key
 | `depends_on` | array of strings | Step IDs this step depends on |
 | `parallel_group` | string | Group identifier for concurrency control |
 | `worker` | object | `{family, size}` — worker family and tier |
-| `skill` | string or null | Skill to load or `null` |
+| `skill` | string or null | Skill to load (lowercase-hyphenated name) or `null`. Runtime validates skill existence. |
 | `minimum_capable_tier` | string | Minimum worker tier (xs/sm/md/lg/xl) |
 | `context_package` | object | User requirement slice, relevant sections, files in/out scope, expected return format |
 | `objective` | string | Bounded objective for this step |
@@ -83,7 +112,7 @@ Recommended step shape:
   worker:
     family: generic    # one of: generic, analysis, coding, doc-writer, websearch, multimodal-looker
     size: sm           # one of: xs, sm, md, lg, xl
-  skill: null          # or: proposal, plan, lesson-writer, review-work, retro
+  skill: null          # null or lowercase-hyphenated skill name (e.g., lesson-writer)
   minimum_capable_tier: sm
   context_package:
     user_requirement_slice: "Slice of user requirements relevant to this step"
@@ -123,6 +152,32 @@ Use current sized worker families only:
 | Visual, screenshot, diagram, or PDF analysis | `multimodal-looker` | use only for visual/PDF/image work |
 
 Choose the smallest capable tier for each independent step. The goal is not to force every task to `xs` or `sm`; the goal is to split independent work so each piece can use the cheapest reliable worker. A step is too large if it bundles independent files, unrelated skills, unrelated context, or mixed complexity levels that could be delegated separately.
+
+## Context Examples By Worker Size
+
+| Size | Good fit | Context package shape | Avoid |
+| --- | --- | --- | --- |
+| `xs` | Supplied-context checks, extraction, naming, tiny summaries | Exact input, exact expected output, no open-ended discovery | Broad search, ambiguous judgment, file edits |
+| `sm` | Bounded synthesis, simple comparisons, narrow discovery | Short file list, concrete acceptance criteria, small state update | Multi-file refactors, architecture decisions |
+| `md` | Multi-file investigation, moderate implementation, schema/template edits | Proposal slice, relevant state files, file scope, validation commands | Vague objectives or unbounded repository changes |
+| `lg` | Architecture-sensitive analysis, complex implementation, embedded review | Detailed rationale, risks, alternatives, explicit pass/fail criteria | Mechanical edits that can be sliced smaller |
+| `xl` | Highest-risk judgment, conflicting evidence, expensive failure cases | Complete decision context, known conflicts, expected judgment standard | Routine drafting, small fixes, or work better split across smaller workers |
+
+## Delegation Packets
+
+Use delegation packets when a step has enough context that inline `context_package` fields are insufficient. The canonical packet template is:
+
+```text
+skills/delegation/templates/delegation-packet.md
+```
+
+The plan template reference is:
+
+```text
+skills/plan/templates/delegation-packet.md
+```
+
+Delegation packets are OpenCode-specific. They should name the target worker, optional skill, objective, files in and out of scope, expected return format, assigned state updates, result-consumption convention, verification, and recovery/escalation. Load the `delegation` skill when constructing or consuming non-trivial worker packets.
 
 ## Dependency Graph And Parallelization
 

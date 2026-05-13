@@ -69,8 +69,10 @@ properties:
     description: ISO timestamp for when the plan was last updated
   proposal:
     type: string
-    pattern: "^(direct-user-request$|\\.\\.\\/\\.proposals\\/[0-9]+-[a-z0-9-]+\\.md$)"
-    description: Path to the related proposal or 'direct-user-request'
+    pattern: "^\\.\\.\\/\\.proposals\\/[0-9]+-[a-z0-9-]+\\.md$"
+    description: >
+      Path to the accepted proposal artifact.
+      Planning requires an accepted proposal. Direct-user-request planning is not supported.
   state_dir:
     type: string
     pattern: "^\\.\\.\\/\\.state\\/[0-9]+-[a-z0-9-]+\\/$"
@@ -85,6 +87,24 @@ properties:
   proposal_summary:
     type: string
     description: Brief summary of the accepted proposal this plan implements
+
+  handoff_traceability:
+    type: object
+    description: >
+      Maps proposal acceptance criteria to plan verification gates and step acceptance criteria.
+      This field is optional and experimental. The structure may evolve.
+    additionalProperties: true
+    properties: {}
+  planning_analysis:
+    type: object
+    description: >
+      Analysis record showing how steps were derived from the accepted proposal:
+      problem breakdown, workstreams, skill/worker mapping, dependency/parallel analysis,
+      state/artifact impact, delegation packet inventory.
+      This field is optional and experimental. The structure may evolve.
+    additionalProperties: true
+    properties: {}
+
   inputs:
     type: array
     items:
@@ -161,16 +181,6 @@ properties:
                 - lg
                 - xl
               description: Worker size
-        skill:
-          type: ["string", "null"]
-          enum:
-            - null
-            - proposal
-            - plan
-            - lesson-writer
-            - review-work
-            - retro
-          description: Skill to load for this step or null
         minimum_capable_tier:
           type: string
           enum:
@@ -180,6 +190,13 @@ properties:
             - lg
             - xl
           description: Minimum worker tier required for this step
+        skill:
+          type: ["string", "null"]
+          pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+          description: >
+            Optional skill name to load for this step.
+            Must be null (no skill) or a lowercase hyphenated skill name (e.g., "proposal", "lesson-writer").
+            Runtime must verify the named skill exists before loading.
         context_package:
           type: object
           required:

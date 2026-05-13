@@ -1,166 +1,105 @@
 ---
-# Schema version 3: first fully-structured YAML plan format.
-# Bumped from 2 (markdown with frontmatter) to 3 (pure YAML with schema).
+# Template/Example for OpenCode YAML Plan Format (Schema Version 3)
+# This is a generic example showing the structure and placeholder values.
+# Replace all placeholder values with actual content when creating a new plan.
 artifact_type: plan
 schema_version: 3
-id: "1778693582-plan-structured-format"
-title: "Implement Structured YAML Plan Format and Schema"
-status: executing
-created_at: "2026-05-13T00:00:00Z"
-updated_at: "2026-05-13T00:00:00Z"
-proposal: "../.proposals/1747064363-plan-structured-format.md"
-state_dir: "../.state/1778693582-plan-structured-format/"
-active_step: "01-confirm-reference-inventory"
+id: "<unix-timestamp>-<plan-slug>"
+title: "<Descriptive title for the plan>"
+status: draft  # One of: draft, approved, executing, blocked, complete, superseded
+created_at: "<ISO 8601 timestamp (e.g., 2026-05-13T10:30:00Z)>"
+updated_at: "<ISO 8601 timestamp (e.g., 2026-05-13T10:30:00Z)>"
+proposal: "../.proposals/<timestamp>-<proposal-slug>.md"  # planning requires an accepted proposal
+state_dir: "../.state/<plan-slug>/"
+active_step: null  # or step ID like "01-example-step"
 
 objective: |
-  Implement the accepted proposal to replace future plan artifacts from markdown (`.plans/<timestamp>-slug.md`) to structured YAML (`.plans/<timestamp>-slug.yaml`) backed by a standalone JSON Schema file at `skills/plan/schema.yaml` and a separate template/example at `skills/plan/templates/plan.yaml`.
+  <Clear statement of what this plan intends to accomplish>
 
 proposal_summary: |
-  Accepted proposal: `.proposals/1747064363-plan-structured-format.md`.
-  
-  Key accepted decisions:
-  - Use YAML for future plan artifacts.
-  - Use JSON Schema draft 2020-12 embedded in YAML for plan validation.
-  - Store schema as standalone file: `skills/plan/schema.yaml`.
-  - Store example/template separately: `skills/plan/templates/plan.yaml`.
-  - New YAML plan format uses `schema_version: 3`; this markdown runbook remains schema version 2.
-  - Future YAML plans keep proposal links pointing to proposal markdown files (`.proposals/*.md`).
-  - Leave historical `.state/` workspaces unchanged.
-  - Update actionable `.plans/*.md` references in prompts, commands, templates, and the plan skill.
+  <Brief summary of the accepted proposal this plan implements>
 
 inputs:
-  - "../.proposals/1747064363-plan-structured-format.md"
-  - "skills/plan/SKILL.md"
-  - "prompts/orchestrator-base.md"
-  - "prompts/agent-architect.md"
-  - "commands/agent-architect.md"
-  - "skills/proposal/templates/proposal-template.md"
-  - "Existing validation/discovery from proposal and plan quality checks."
+  - "<List of input resources or file paths>"
+  - "../.proposals/<timestamp>-<proposal-slug>.md"
 
 constraints:
-  - Do not modify historical `.state/` workspaces.
-  - Do not modify `opencode.json`, existing worker agents, provider config, model IDs, or fallback ordering.
-  - Do not modify `skills/review-work/SKILL.md`, `skills/retro/SKILL.md`, or `skills/lesson-writer/SKILL.md` unless validation discovers a direct actionable conflict.
-  - Preserve proposal, lesson, and state formats.
-  - Keep schema and template as separate files.
-  - Do not implement behavior beyond the accepted proposal.
-  - Use current sized worker families only.
+  - "<List of constraints affecting the plan execution>"
+  - "<Each constraint as a separate string>"
 
 execution_strategy: |
-  Proceed in dependency-aware phases:
-  1. Confirm the final actionable reference inventory.
-  2. Create the standalone schema.
-  3. Create the separate plan template/example against the schema.
-  4. Review schema/template before downstream prompt and skill rewrites.
-  5. Update the plan skill to define the new YAML plan contract.
-  6. Update prompts, command routing, and proposal template references.
-  7. Validate formatting, schema/template consistency, and remaining `.plans/*.md` references.
-  8. Run embedded quality review before reporting success.
-  9. Apply fixes only if review finds blockers; otherwise skip the conditional fix step.
-  10. Prepare final report and decide whether retro/lesson capture is warranted.
+  <High-level description of the execution approach>
 
 delegation_map:
-  reference_inventory: "generic-sm"
-  schema_implementation: "coding-md"
-  template_authoring: "doc-writer-sm"
-  schema_template_review: "analysis-md"
-  plan_skill_rewrite: "doc-writer-md"
-  prompt_command_template_updates: "coding-md"
-  validation_sweep: "generic-sm"
-  embedded_final_review: "analysis-lg"
-  fixes_if_needed: "coding-md"
+  <role-name>: "<worker-family>-<size>"  # e.g., "analysis-lg"
+  example_role: "generic-sm"
 
 steps:
-  - id: "01-confirm-reference-inventory"
+  - id: "01-example-step"
     depends_on: []
     parallel_group: "A"
     worker:
-      family: generic
-      size: sm
+      family: generic  # One of: generic, analysis, coding, doc-writer, websearch, multimodal-looker
+      size: sm         # One of: xs, sm, md, lg, xl
+    skill: null        # null or lowercase-hyphenated skill name (e.g., lesson-writer)
+    minimum_capable_tier: sm
+    context_package:
+      user_requirement_slice: "<Slice of user requirements relevant to this step>"
+      relevant_proposal_sections:
+        - "<Relevant sections from the proposal>"
+      relevant_state_files: []
+      files_in_scope:
+        - "<Files this step may read or edit>"
+      files_out_scope:
+        - "<Files this step must not touch>"
+      expected_return_format: "<Expected format of the output>"
+    objective: "<Bounded objective for this step>"
+    expected_output: "<What this step should produce>"
+    state_updates:
+      - "../.state/<plan-slug>/01-example-step.md"
+    acceptance_criteria:
+      - "<Criterion one>"
+      - "<Criterion two>"
+    verification: "<How to verify this step>"
+    recovery: "<What to do if this step fails>"
+
+  - id: "02-another-step"
+    depends_on:
+      - "01-example-step"
+    parallel_group: "B"
+    worker:
+      family: analysis
+      size: md
     skill: null
     minimum_capable_tier: sm
     context_package:
-      user_requirement_slice: "Implement accepted structured YAML plan proposal; historical `.state/` remains unchanged."
+      user_requirement_slice: "<Slice of user requirements relevant to this step>"
       relevant_proposal_sections:
-        - "Proposal Current State"
-        - "In Scope"
-        - "Artifact and State Impact"
-        - "Acceptance Criteria"
-      relevant_state_files: []
-      files_in_scope:
-        - "skills/"
-        - "prompts/"
-        - "commands/"
-        - ".proposals/1747064363-plan-structured-format.md"
-      files_out_scope:
-        - "node_modules/"
-        - ".opencode/"
-        - "opencode.json"
-        - "agents/"
-        - ".state/"
-      expected_return_format: "exact actionable file list with `.plans/*.md`, plan heading, or plan artifact contract references."
-    objective: "Confirm the final set of actionable files requiring edits before implementation."
-    expected_output: "Inventory of actionable references and explicit confirmation that `.state/` matches are archival and not to be edited."
-    state_updates:
-      - ".state/1778693582-plan-structured-format/01-confirm-reference-inventory.md"
-    acceptance_criteria:
-      - "Lists every actionable `.plans/*.md` reference."
-      - "Identifies markdown runbook/section references that must become YAML key references."
-      - "Confirms no unexpected files require edits."
-    verification: "Cross-check against grep/read outputs."
-    recovery: "If new files are discovered, update this plan before editing."
-
-  - id: "02-create-standalone-schema"
-    depends_on:
-      - "01-confirm-reference-inventory"
-    parallel_group: "B"
-    worker:
-      family: coding
-      size: md
-    skill: null
-    minimum_capable_tier: md
-    context_package:
-      user_requirement_slice: "Schema must be its own standalone file."
-      relevant_proposal_sections:
-        - "Recommended Approach / Schema Location"
-        - "Plan File Shape"
-        - "Acceptance Criteria"
+        - "<Relevant sections from the proposal>"
       relevant_state_files:
-        - ".state/1778693582-plan-structured-format/01-confirm-reference-inventory.md"
+        - "../.state/<plan-slug>/01-example-step.md"
       files_in_scope:
-        - "skills/plan/schema.yaml"
+        - "<Files this step may read or edit>"
       files_out_scope:
-        - "skills/plan/templates/plan.yaml"
-        - "prompts/"
-        - "commands/"
-        - ".proposals/"
-        - ".state/"
-        - "opencode.json"
-        - "agents/"
-      expected_return_format: "schema file created, schema design notes, validation limitations."
-    objective: "Create `skills/plan/schema.yaml` as standalone JSON Schema draft 2020-12 embedded in YAML."
-    expected_output: "`skills/plan/schema.yaml`."
+        - "<Files this step must not touch>"
+      expected_return_format: "<Expected format of the output>"
+    objective: "<Bounded objective for this step>"
+    expected_output: "<What this step should produce>"
     state_updates:
-      - ".state/1778693582-plan-structured-format/02-create-standalone-schema.md"
+      - "../.state/<plan-slug>/02-another-step.md"
     acceptance_criteria:
-      - "Schema is standalone and is not embedded in the template or `SKILL.md`."
-      - "Schema requires `artifact_type: plan` and `schema_version: 3` for new YAML plans."
-      - "Schema supports `proposal` values that are proposal markdown paths (`.proposals/*.md`) or `direct-user-request`."
-      - "Schema covers metadata, objective, proposal summary, inputs, constraints, execution strategy, delegation map, dependency graph, parallel groups, steps, state initialization, verification gates, embedded quality check, rollback/recovery, and final report contract."
-      - "Schema includes conservative enums/patterns for status, worker family/size, skill nullable field, and step ids."
-      - "Schema allows new state metadata to reference `.plans/*.yaml` for future YAML plans while leaving historical `.state` untouched."
-    verification: |
-      - YAML parses where tooling is available.
-      - Schema fields match accepted proposal by inspection.
-    recovery: "If schema becomes too complex, simplify while preserving required top-level coverage and document deferred deep validations."
+      - "<Criterion one>"
+      - "<Criterion two>"
+    verification: "<How to verify this step>"
+    recovery: "<What to do if this step fails>"
 
 dependency_graph:
-  01-confirm-reference-inventory: []
-  02-create-standalone-schema: ["01-confirm-reference-inventory"]
+  01-example-step: []
+  02-another-step: ["01-example-step"]
 
 parallel_groups:
-  A: ["01-confirm-reference-inventory"]
-  B: ["02-create-standalone-schema"]
+  A: ["01-example-step"]
+  B: ["02-another-step"]
 
 state_initialization:
   metadata_schema_version: 2
@@ -169,51 +108,41 @@ state_initialization:
   main_dashboard: "MAIN.md"
 
 verification_gates:
-  - gate: "Post-inventory gate"
+  - gate: "<Descriptive gate name>"
     criteria:
-      - "No unexpected actionable files discovered; otherwise update plan before edits."
-  - gate: "Schema gate"
+      - "<Criterion one>"
+      - "<Criterion two>"
+  - gate: "<Another gate name>"
     criteria:
-      - "`schema.yaml` exists, is standalone, can be parsed as YAML when tooling is available, and enforces `schema_version: 3` plus `.md` proposal paths/direct requests."
-  - gate: "Template gate"
-    criteria:
-      - "`templates/plan.yaml` exists, is separate from schema, uses `schema_version: 3`, and uses a `.md` proposal path or `direct-user-request`."
-  - gate: "Intermediate review gate"
-    criteria:
-      - "`analysis-md` review-work output for schema/template recommends proceeding or documents resolved fixes."
-  - gate: "Skill/prompt gate"
-    criteria:
-      - "Plan skill and orchestrator prompts describe YAML plan keys rather than markdown plan headings."
-  - gate: "Reference gate"
-    criteria:
-      - "No actionable `.plans/*.md` references remain outside archival `.state` records and proposal/history documentation."
-  - gate: "Final review gate"
-    criteria:
-      - "`analysis-lg` review-work output recommends accept or only non-blocking follow-up."
-  - gate: "State gate"
-    criteria:
-      - "Active state workspace accurately records each step status and final verification."
+      - "<Criterion one>"
+      - "<Criterion two>"
 
 embedded_quality_check:
-  performed_by: null
-  findings: null
-  status: pending
+  performed_by: null  # Worker who performed the quality check
+  findings: null      # Array of findings or null
+  status: pending     # One of: pending, passed, failed
 
 rollback_recovery: |
-  - All edits are text-file changes and should be reversible via git diff if needed.
-  - If schema validation fails, revise only `skills/plan/schema.yaml` before downstream rewrites.
-  - If template validation fails, revise `skills/plan/templates/plan.yaml`; change schema only when the schema is clearly deficient.
-  - If prompt updates create ambiguity, restore prior wording for the affected paragraph and add a smaller YAML-key-oriented replacement.
-  - If unexpected `.plans/*.md` references appear in generated/runtime directories, do not edit them; document as ignored.
-  - If historical `.state` files are accidentally modified, restore them immediately because user chose to leave them unchanged.
+  <Steps to undo or recover from execution>
 
 final_report_contract: |
-  The final execution report must include:
-  - What changed.
-  - Files modified and files intentionally left untouched.
-  - Validation performed and results.
-  - Intermediate schema/template review result.
-  - Final embedded review result.
-  - State workspace status.
-  - Any skipped checks or remaining risks.
-  - Whether retro or lesson capture was performed or intentionally skipped.
+  <What the final report must include>
+
+# --- Optional planning-analysis and handoff-traceability fields ---
+# These fields document how the plan was derived from the proposal.
+# They are optional (not schema-required). See SKILL.md for guidance.
+planning_analysis:
+  proposal_fidelity: "<How this plan preserves the accepted proposal contract>"
+  problem_breakdown: "<Breakdown of the problem into distinct workstreams>"
+  workstreams:
+    - "<workstream-1>"
+    - "<workstream-2>"
+  skill_mapping: "<Map of workstreams to skills>"
+  dependency_analysis: "<How step dependencies were derived>"
+  parallelization_analysis: "<How parallel groups were determined>"
+  state_and_artifact_impact: "<Files, state, and artifacts affected>"
+  delegation_packet_inventory: "<List of packets needed>"
+
+handoff_traceability:
+  "<proposal acceptance criterion 1>": "<corresponding plan gate or step>"
+  "<proposal acceptance criterion 2>": "<corresponding plan gate or step>"
