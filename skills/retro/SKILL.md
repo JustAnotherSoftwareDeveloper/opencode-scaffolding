@@ -5,40 +5,45 @@ description: Improve the orchestration harness after execution by identifying ch
 
 # Retro Skill
 
-Use this skill after review, especially after harness changes, migrations, failed delegations, or ambiguous workflows. The goal is to improve the system that produced the work.
+Use this skill after meaningful harness work to identify what should be preserved, what should change, and which harness improvements should be made before future runs.
+
+Retro complements `lesson-writer`: retro identifies harness improvements, while `lesson-writer` captures reusable session guidance in durable `.lessons/` artifacts.
 
 ## Inputs
 
-- User request.
-- Proposal, runbook, and delegation map.
+- User request and accepted proposal or plan.
+- State workspace summary.
 - Worker outputs.
-- Review findings.
-- Validation failures or friction encountered during execution.
+- Validation results.
+- Review findings from embedded quality checks.
+- Any recovery steps taken.
 
 ## Output Format
 
 Return exactly these sections:
 
 ## What Worked
-List routing decisions, prompts, skills, commands, or validation steps that should be kept.
+List routing patterns, prompts, skills, commands, validation steps, or state practices that should be kept.
 
-## Friction
-List specific issues that slowed work, caused ambiguity, or created risk.
+## What Should Change
+List concrete harness improvements needed before similar future work.
 
-## Harness Improvements
-Recommend changes to orchestrator prompts, Agent Architect behavior, worker routing, or runbook conventions.
+## Harness Guidance
+Describe updates to agents, skills, commands, runbooks, state practices, or routing rules.
 
-## Skill Improvements
-Recommend additions, removals, or rewrites to skills.
+## Validation Improvements
+List checks that should be added, removed, clarified, or run earlier.
 
-## Command Improvements
-Recommend slash command changes or new command templates.
+## Lesson Feed
+State whether the retro output should feed `lesson-writer` and summarize the durable lesson to capture.
 
-## Action Items
-List concrete follow-up items with priority: high, medium, or low.
+## Follow-Up Actions
+List bounded follow-up tasks, each with an owner or suggested worker family when appropriate.
 
 ## Rules
 
-- Optimize for future reliability, not post-hoc justification.
-- Prefer a few high-leverage fixes over many speculative improvements.
-- Separate immediate fixes from ideas that need their own proposal and plan.
+- Focus on improving the orchestration harness, not re-summarizing every completed task.
+- Keep recommendations concrete and actionable.
+- Do not modify files while writing the retro.
+- Do not propose model, provider, or generated-runtime changes unless explicitly requested.
+- If a durable session lesson is warranted, recommend invoking `lesson-writer` for a `.lessons/` artifact.

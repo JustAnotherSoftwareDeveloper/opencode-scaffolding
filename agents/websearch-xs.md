@@ -1,6 +1,6 @@
 ---
 description: "Tiny web-result processing for extraction and snippet-only summarization."
-model: "ollama/qwen3.5:0.8b"
+model: "ollama/qwen3:1.7b"
 mode: "subagent"
 hidden: true
 ---

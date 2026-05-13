@@ -7,6 +7,8 @@ description: Review completed harness work for correctness, config validity, pro
 
 Use this skill after execution and before the orchestrator reports success. The review should identify defects, regressions, missing validation, and harness-quality problems.
 
+This skill is intended to be loaded by appropriately sized `analysis-*` workers as an embedded quality check in the workflow.
+
 ## Inputs
 
 - User request.
@@ -45,4 +47,5 @@ State whether to accept, fix before accepting, or redesign.
 - Findings are the primary output. Do not bury them after a summary.
 - Do not modify files while reviewing.
 - Be concrete and cite exact files.
-- Distinguish correctness issues from style preferences.
+- Distinguish correctness problems from style preferences.
+- Treat review as part of the active workflow, not a separate artifact lane.
