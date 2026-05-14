@@ -89,40 +89,17 @@ Execution and review must use **configured harness subagents** from `agents/*.md
 
 ## Delegation Template
 
-Use this template for `task` worker delegation. For full packet construction with all fields, load the `delegation` skill and use `skills/delegation/templates/delegation-packet.md`.
+For `task` worker delegation, load the `delegation` skill and select the handoff template matching the chosen worker size. The compatibility index is `skills/delegation/templates/delegation-packet.md`; size-specific templates are:
 
-```md
-You are working as a delegated worker for an orchestrator.
+| Worker size | Template |
+|-------------|----------|
+| `xs` | `skills/delegation/templates/delegation-packet-xs.md` |
+| `sm` | `skills/delegation/templates/delegation-packet-sm.md` |
+| `md` | `skills/delegation/templates/delegation-packet-md.md` |
+| `lg` | `skills/delegation/templates/delegation-packet-lg.md` |
+| `xl` | `skills/delegation/templates/delegation-packet-xl.md` |
 
-Load skill: <skill-name or "none">
-
-Objective:
-<one bounded objective>
-
-Context:
-<relevant harness state, files, constraints, and prior outputs>
-
-Inputs:
-<runbook sections, state files, user requirements, worker findings>
-
-Files in scope:
-<paths this worker may read or edit>
-
-Files out of scope:
-<paths this worker must not touch>
-
-Do:
-<specific actions>
-
-Do not:
-<prohibited changes>
-
-Return:
-- Findings or changes
-- Files touched, if any
-- Verification performed
-- Risks or unresolved questions
-```
+Do not inline a full packet body in orchestrator prompts. Keep packets bounded to the selected tier; if required context does not fit, decompose the work or choose a larger worker/template.
 
 ## Context Package Guidance
 

@@ -12,7 +12,7 @@ Use this skill when a runbook step should be handed to a worker subagent through
 1. **Classify** an atomic work unit by its type (analysis, coding, doc-writing, synthesis, web research, visual) and its size/risk/ambiguity/cost-of-failure attributes.
 2. **Identify** a relevant skill to load, or `null`.
 3. **Select** the smallest capable worker family and size using the work-type matrix and the sizing rubric.
-4. **Construct** a lean worker handoff prompt using `templates/delegation-packet.md`.
+4. **Construct** a lean worker handoff prompt using the size-matched template from the tiered packet templates (`templates/delegation-packet-{size}.md`).
 5. **Consume** the worker result and reconcile it into runbook state.
 6. **Retry, redelegate, or escalate** only when the packet's recovery policy permits it.
 
@@ -31,7 +31,8 @@ For each atomic unit:
 1. Classify the work type and pick the family from the map below.
 2. Identify the skill to load, or `null`.
 3. Pick the smallest capable size from the size table. Consider task size, risk, ambiguity, and cost of failure together; do not default to `md`.
-4. Build the worker handoff prompt with `templates/delegation-packet.md`.
+4. Select the delegation-packet template matching the chosen size (`templates/delegation-packet-{size}.md`).
+5. Build the worker handoff prompt from the selected template.
 
 ---
 
@@ -136,7 +137,17 @@ Choose the smallest size that matches the task's scope, risk, ambiguity, and cos
 
 ## Handoff Prompt Construction
 
-Use `templates/delegation-packet.md` as a lean prompt template for the Task tool. Routing metadata (`target_agent`, family, size) is for the orchestrator's Task call, not for the worker prompt. The handoff prompt should include:
+Select the delegation-packet template matching the chosen worker size from the size chosen in Routing Workflow step 4. Each worker size has a dedicated template in `skills/delegation/templates/`. The compatibility index at `templates/delegation-packet.md` is the canonical size-to-template reference.
+
+| Worker size | Template |
+|-------------|----------|
+| `xs` | `skills/delegation/templates/delegation-packet-xs.md` |
+| `sm` | `skills/delegation/templates/delegation-packet-sm.md` |
+| `md` | `skills/delegation/templates/delegation-packet-md.md` |
+| `lg` | `skills/delegation/templates/delegation-packet-lg.md` |
+| `xl` | `skills/delegation/templates/delegation-packet-xl.md` |
+
+The handoff prompt constructed from the selected template must include:
 
 - orchestrator name;
 - skill to load, or `none`;
@@ -147,6 +158,8 @@ Use `templates/delegation-packet.md` as a lean prompt template for the Task tool
 - state file the worker may update, if any;
 - verification expectations;
 - required return format.
+
+**context fit rule**: If the required context cannot fit within the selected tier's template without overstuffing (e.g., cramming excessive detail, omitting necessary files or instructions), do not overstuff the packet. Instead, decompose the atomic unit into smaller sub-units and delegate each to an appropriately sized worker, or select a larger worker/template size. An overstuffed packet degrades worker focus, increases token waste, and raises the risk of partial or low-quality results.
 
 If delegated work creates or edits JSON/YAML, include the appropriate validator in `verification` when available:
 

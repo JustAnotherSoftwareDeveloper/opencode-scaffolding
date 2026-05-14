@@ -1,49 +1,11 @@
-# Delegated Worker Handoff
+# Compatibility Index
 
-You are working as a delegated worker for <orchestrator-name>.
+This index is a short reference mapping worker size to the corresponding templated delegation packet. Orchestrators should select the template whose filename matches their chosen worker size.
 
-Load skill: <skill-name or none>
+- **xs**: `skills/delegation/templates/delegation-packet-xs.md`
+- **sm**: `skills/delegation/templates/delegation-packet-sm.md`
+- **md**: `skills/delegation/templates/delegation-packet-md.md`
+- **lg**: `skills/delegation/templates/delegation-packet-lg.md`
+- **xl**: `skills/delegation/templates/delegation-packet-xl.md`
 
-## Objective
-
-<One bounded objective.>
-
-## Context
-
-<Relevant proposal, plan, state, prior findings, constraints, and assumptions.>
-
-## Inputs
-
-<User requirement slice, files, plan sections, state files, or other inputs to use.>
-
-## Files in scope
-
-- <path-or-glob the worker may read or edit>
-
-## Files out of scope
-
-- <path-or-glob the worker must not touch>
-
-## Do
-
-- <specific action>
-
-## Do not
-
-- <specific prohibition>
-
-## State updates
-
-- <state file the worker may update, or "none">
-- Do not edit orchestrator-owned state files unless explicitly listed here.
-
-## Verification
-
-- <command, parse check, read check, or review criterion>
-
-## Return
-
-- Findings or changes
-- Files touched, if any
-- Verification performed
-- Blockers, risks, or unresolved questions
+The detailed template bodies reside in the tier‑specific files above and must not be duplicated here.
