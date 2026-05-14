@@ -5,7 +5,7 @@ description: Build OpenCode Task tool delegation packets, select worker family/s
 
 # Delegation Skill
 
-Use this skill when an orchestration plan step should be handed to a worker subagent through OpenCode's Task tool pattern. This skill is the **canonical source of truth** for the configured worker matrix, dynamic worker routing, and handoff packet construction. It does not replace the Task tool or create a new agent framework.
+Use this skill when a runbook step should be handed to a worker subagent through OpenCode's Task tool pattern. This skill is the **canonical source of truth** for the configured worker matrix, dynamic worker routing, and handoff packet construction. It does not replace the Task tool or create a new agent framework.
 
 ## Responsibilities
 
@@ -13,7 +13,7 @@ Use this skill when an orchestration plan step should be handed to a worker suba
 2. **Identify** a relevant skill to load, or `null`.
 3. **Select** the smallest capable worker family and size using the work-type matrix and the sizing rubric.
 4. **Construct** a lean worker handoff prompt using `templates/delegation-packet.md`.
-5. **Consume** the worker result and reconcile it into plan state.
+5. **Consume** the worker result and reconcile it into runbook state.
 6. **Retry, redelegate, or escalate** only when the packet's recovery policy permits it.
 
 ## Non-Goals
@@ -179,4 +179,4 @@ OpenCode does not provide a documented structured child-session result protocol.
 - Do not delegate destructive git operations or provider/model/config edits unless a plan explicitly authorizes them.
 - Do not hide unresolved assumptions; include them in the packet or stop for clarification.
 - Do not route work to workers that are not configured in `agents/*.md`. Only the 26 workers in this matrix (5 families × 5 sizes + `multimodal-looker`) are available.
-- Do not hardcode worker sizes in orchestrator prompts or plan steps. Worker selection must be evaluated dynamically for each atomic unit.
+- Do not hardcode worker sizes in orchestrator prompts or runbook steps. Worker selection must be evaluated dynamically for each atomic unit.

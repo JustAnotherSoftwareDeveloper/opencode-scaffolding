@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opencode.ai/skills/plan/schemas/state-step.schema.json",
-  "title": "Plan State Step",
-  "description": "State for a single step in the plan execution",
+  "$id": "https://opencode.ai/skills/runbook/schemas/state-step.schema.json",
+  "title": "Runbook State Step",
+  "description": "State for a single step in the runbook execution",
   "type": "object",
   "required": [
     "step_id",

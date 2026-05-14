@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opencode.ai/skills/plan/schemas/state-main.schema.json",
-  "title": "Plan State Main",
-  "description": "Main dashboard for the plan execution state",
+  "$id": "https://opencode.ai/skills/runbook/schemas/state-main.schema.json",
+  "title": "Runbook State Main",
+  "description": "Main dashboard for the runbook execution state",
   "type": "object",
   "required": [
-    "plan_id",
+    "runbook_id",
     "title",
     "objective",
     "status",
@@ -15,22 +15,22 @@
     "latest_verification"
   ],
   "properties": {
-    "plan_id": {
+    "runbook_id": {
       "type": "string",
-      "description": "Unique identifier for the plan"
+      "description": "Unique identifier for the runbook"
     },
     "title": {
       "type": "string",
-      "description": "Title of the plan"
+      "description": "Title of the runbook"
     },
     "objective": {
       "type": "string",
-      "description": "Objective of the plan"
+      "description": "Objective of the runbook"
     },
     "status": {
       "type": "string",
       "enum": ["draft", "approved", "executing", "blocked", "complete", "superseded"],
-      "description": "Current status of the plan"
+      "description": "Current status of the runbook"
     },
     "active_step": {
       "type": ["string", "null"],

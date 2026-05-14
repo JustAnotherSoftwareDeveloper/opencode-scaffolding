@@ -1,0 +1,36 @@
+{
+  "artifact_type": "runbook",
+  "schema_version": 1,
+  "id": "1778772412-runbook-example",
+  "title": "Runbook Title",
+  "status": "draft",
+  "created_at": "2023-01-01T00:00:00Z",
+  "updated_at": "2023-01-01T00:00:00Z",
+  "proposal": "../../.proposals/1778770202-plan-runbook-lifecycle.md",
+  "plan": "../../.plans/1778772412-runbook-example.md",
+  "state_dir": "../../.state/1778772412-runbook-example/",
+  "active_step": null,
+  "objective": "Clear statement of what this runbook intends to accomplish",
+  "plan_summary": "Brief summary of the approved markdown plan this runbook executes",
+  "inputs": [],
+  "constraints": [],
+  "execution_strategy": "High-level description of the execution approach",
+  "delegation_map": {},
+  "steps": [],
+  "dependency_graph": {},
+  "parallel_groups": {},
+  "state_initialization": {
+    "metadata_schema_version": 1,
+    "require_step_files": false,
+    "step_file_extension": ".json",
+    "main_dashboard": "MAIN.json"
+  },
+  "verification_gates": [],
+  "embedded_quality_check": {
+    "performed_by": null,
+    "findings": null,
+    "status": "pending"
+  },
+  "rollback_recovery": "Steps to undo or recover from execution",
+  "final_report_contract": "What the final report must include"
+}

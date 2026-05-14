@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opencode.ai/skills/plan/schema.json",
-  "title": "OpenCode Plan Schema",
-  "description": "JSON Schema for structured JSON plan artifacts",
+  "$id": "https://opencode.ai/skills/runbook/schema.json",
+  "title": "OpenCode Runbook Schema",
+  "description": "JSON Schema for structured JSON runbook artifacts",
   "type": "object",
   "required": [
     "artifact_type",
@@ -13,10 +13,11 @@
     "created_at",
     "updated_at",
     "proposal",
+    "plan",
     "state_dir",
     "active_step",
     "objective",
-    "proposal_summary",
+    "plan_summary",
     "inputs",
     "constraints",
     "execution_strategy",
@@ -33,22 +34,22 @@
   "properties": {
     "artifact_type": {
       "type": "string",
-      "const": "plan",
-      "description": "Discriminator for plan artifacts"
+      "const": "runbook",
+      "description": "Discriminator for runbook artifacts"
     },
     "schema_version": {
       "type": "integer",
-      "const": 3,
-      "description": "Version for migration tracking (3 for JSON format)"
+      "const": 1,
+      "description": "Version for migration tracking (1 for JSON format)"
     },
     "id": {
       "type": "string",
       "pattern": "^[0-9]+-[a-z0-9-]+$",
-      "description": "Unique identifier for the plan (timestamp-slug format)"
+      "description": "Unique identifier for the runbook (timestamp-slug format)"
     },
     "title": {
       "type": "string",
-      "description": "Human-readable title for the plan"
+      "description": "Human-readable title for the runbook"
     },
     "status": {
       "type": "string",
@@ -60,44 +61,49 @@
         "complete",
         "superseded"
       ],
-      "description": "Current status of the plan"
+      "description": "Current status of the runbook"
     },
     "created_at": {
       "type": "string",
       "format": "date-time",
-      "description": "ISO timestamp for when the plan was created"
+      "description": "ISO timestamp for when the runbook was created"
     },
     "updated_at": {
       "type": "string",
       "format": "date-time",
-      "description": "ISO timestamp for when the plan was last updated"
+      "description": "ISO timestamp for when the runbook was last updated"
     },
     "proposal": {
       "type": "string",
-      "pattern": "^\\.\\.\\/\\.proposals\\/[0-9]+-[a-z0-9-]+\\.md$",
-      "description": "Path to the accepted proposal artifact. Planning requires an accepted proposal. Direct-user-request planning is not supported."
+      "pattern": "^\\.\\.\\/\\.\\.\\/\\.proposals\\/[0-9]+-[a-z0-9-]+\\.md$",
+      "description": "Path from .runbooks/<id>/runbook.json to the accepted proposal artifact."
+    },
+    "plan": {
+      "type": "string",
+      "pattern": "^\\.\\.\\/\\.\\.\\/\\.plans\\/[0-9]+-[a-z0-9-]+\\.md$",
+      "description": "Path from .runbooks/<id>/runbook.json to the source markdown engineering plan artifact."
     },
     "state_dir": {
       "type": "string",
-      "pattern": "^\\.\\.\\/\\.state\\/[0-9]+-[a-z0-9-]+\\/$",
-      "description": "Path to the state directory for this plan"
+      "pattern": "^\\.\\.\\/\\.\\.\\/\\.state\\/[0-9]+-[a-z0-9-]+\\/$",
+      "description": "Path from .runbooks/<id>/runbook.json to the state directory for this runbook"
     },
     "active_step": {
       "type": ["string", "null"],
-      "pattern": "^(0[0-9]-[a-z0-9-]+$|null$)",
+      "pattern": "^[0-9]{2}-[a-z0-9-]+$",
       "description": "Current execution step ID or null"
     },
     "objective": {
       "type": "string",
-      "description": "Clear statement of what this plan intends to accomplish"
+      "description": "Clear statement of what this runbook intends to accomplish"
     },
-    "proposal_summary": {
+    "plan_summary": {
       "type": "string",
-      "description": "Brief summary of the accepted proposal this plan implements"
+      "description": "Brief summary of the approved markdown plan this runbook executes"
     },
     "handoff_traceability": {
       "type": "object",
-      "description": "Maps proposal acceptance criteria to plan verification gates and step acceptance criteria. This field is optional and experimental. The structure may evolve.",
+      "description": "Maps proposal acceptance criteria to runbook verification gates and step acceptance criteria. This field is optional and experimental. The structure may evolve.",
       "additionalProperties": true,
       "properties": {}
     },
@@ -119,7 +125,7 @@
       "items": {
         "type": "string"
       },
-      "description": "List of constraints affecting the plan execution"
+      "description": "List of constraints affecting the runbook execution"
     },
     "execution_strategy": {
       "type": "string",
@@ -155,14 +161,14 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^0[0-9]-[a-z0-9-]+$",
+            "pattern": "^[0-9]{2}-[a-z0-9-]+$",
             "description": "Unique step identifier (01-step-slug format)"
           },
           "depends_on": {
             "type": "array",
             "items": {
               "type": "string",
-              "pattern": "^0[0-9]-[a-z0-9-]+$"
+              "pattern": "^[0-9]{2}-[a-z0-9-]+$"
             },
             "description": "List of step IDs this step depends on"
           },
@@ -310,7 +316,7 @@
         "type": "array",
         "items": {
           "type": "string",
-          "pattern": "^0[0-9]-[a-z0-9-]+$"
+          "pattern": "^[0-9]{2}-[a-z0-9-]+$"
         }
       },
       "description": "Step dependencies mapping step IDs to their dependencies"
@@ -321,7 +327,7 @@
         "type": "array",
         "items": {
           "type": "string",
-          "pattern": "^0[0-9]-[a-z0-9-]+$"
+          "pattern": "^[0-9]{2}-[a-z0-9-]+$"
         }
       },
       "description": "Parallel groups mapping group identifiers to step IDs"
@@ -353,7 +359,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Defines the expected .state/<plan_slug>/ structure for this plan"
+      "description": "Defines the expected .state/<runbook_slug>/ structure for this runbook"
     },
     "verification_gates": {
       "type": "array",

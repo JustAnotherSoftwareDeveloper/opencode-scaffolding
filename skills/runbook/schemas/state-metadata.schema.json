@@ -1,11 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opencode.ai/skills/plan/schemas/state-metadata.schema.json",
-  "title": "Plan State Metadata",
-  "description": "Metadata for the plan execution state",
+  "$id": "https://opencode.ai/skills/runbook/schemas/state-metadata.schema.json",
+  "title": "Runbook State Metadata",
+  "description": "Metadata for the runbook execution state",
   "type": "object",
   "required": [
     "metadata_schema_version",
+    "runbook",
     "plan",
     "proposal",
     "status",
@@ -23,9 +24,13 @@
       "type": "integer",
       "description": "Version of the metadata schema"
     },
+    "runbook": {
+      "type": "string",
+      "description": "Path to the runbook artifact"
+    },
     "plan": {
       "type": "string",
-      "description": "Path to the plan artifact"
+      "description": "Path to the source markdown plan artifact"
     },
     "proposal": {
       "type": "string",
@@ -34,7 +39,7 @@
     "status": {
       "type": "string",
       "enum": ["draft", "approved", "executing", "blocked", "complete", "superseded"],
-      "description": "Current status of the plan"
+      "description": "Current status of the runbook"
     },
     "active_step": {
       "type": ["string", "null"],

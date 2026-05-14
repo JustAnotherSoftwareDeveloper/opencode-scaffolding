@@ -17,7 +17,7 @@ This directory (`~/.config/opencode`) is the **global OpenCode configuration** f
 - **Validate JSON/YAML edits with the Python validators when available**:
   - JSON syntax: `uv run --project scripts/python validate-json <file>`
   - JSON schema: `uv run --project scripts/python validate-json <file> --schema <schema-file>`
-  - JSON schemas for plan/state artifacts live in `skills/plan/schema.json` and `skills/plan/schemas/`
+  - JSON schemas for runbook/state artifacts live in `skills/runbook/schema.json` and `skills/runbook/schemas/`
   - YAML syntax: `uv run --project scripts/python validate-yaml <file>`
 - **Never edit `node_modules/`**, `.opencode/node_modules/`, or auto-generated lock files, except updating `scripts/python/uv.lock` through `uv sync --project scripts/python` when Python script dependencies intentionally change.
 - **Never commit or hardcode secrets** (API keys, tokens). Use `{env:VARIABLE}` or `{file:~/.path/to/secret}` substitution instead.

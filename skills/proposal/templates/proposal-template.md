@@ -8,7 +8,8 @@ created_at: <iso timestamp>
 updated_at: <iso timestamp>
 owner: orchestrator
 source_request: <short user request>
-related_plan: null | ../.plans/<unix-timestamp>-slug.json
+related_plan: null | ../.plans/<unix-timestamp>-slug.md
+related_runbook: null | ../.runbooks/<unix-timestamp>-slug/runbook.json
 ---
 # Proposal: <title>
 

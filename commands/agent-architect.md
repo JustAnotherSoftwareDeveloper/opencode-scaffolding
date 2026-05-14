@@ -1,5 +1,5 @@
 ---
-description: Run Agent Architect against a goal, proposal, plan, resume request, or lesson request
+description: Run Agent Architect against a goal, proposal, plan, runbook, resume request, or lesson request
 agent: agent-architect
 ---
 
@@ -15,21 +15,22 @@ If `$ARGUMENTS` names a readable `.proposals/*.md` file:
 - If it is accepted, offer or proceed to create a plan in `.plans/` when authorized.
 - If it is draft or needs clarification, continue the proposal workflow.
 
-If `$ARGUMENTS` names a readable `.plans/*.json` file:
+If `$ARGUMENTS` names a readable `.plans/*.md` file:
 
-- Read the plan first and treat it as the runbook.
-- Confirm or initialize `.state/<plan_slug>/` with `uv run --project scripts/python init-plan-state <plan.json>`.
-- Execute only when the plan is approved or the user explicitly authorizes execution.
+- Read the plan as a human engineering specification.
+- If it is approved, offer or proceed to generate a runbook workspace in `.runbooks/<runbook_id>/` when authorized.
+- Do not execute directly from the plan; execution requires `.runbooks/<runbook_id>/runbook.json`.
 
-If `$ARGUMENTS` names a readable legacy `.plans/*.yaml` file:
+If `$ARGUMENTS` names a readable `.runbooks/<runbook_id>/*.json` file:
 
-- Treat it as a pre-conversion runbook and keep any edits YAML-valid.
-- Prefer JSON plans for new work.
+- Read the runbook first and treat it as the authoritative execution contract.
+- Confirm or initialize `.state/<runbook_id>/` with `uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/runbook.json`.
+- Execute only when the runbook is approved or the user explicitly authorizes execution.
 
 If `$ARGUMENTS` requests resume behavior:
 
-- Locate `.state/<plan_slug>/metadata.json`.
-- Read `.state/<plan_slug>/MAIN.json`.
+- Locate `.state/<runbook_id>/metadata.json`.
+- Read `.state/<runbook_id>/MAIN.json`.
 - Read the active step file.
 - Resume from recorded state.
 
@@ -41,7 +42,7 @@ If `$ARGUMENTS` requests lesson capture, or meaningful work completes with reusa
 If `$ARGUMENTS` is a goal rather than a file path:
 
 - Start with `proposal` unless the task is trivial.
-- Use `plan` before non-trivial execution.
+- Use `plan` before non-trivial execution, then `runbook` before editing.
 - Delegate independent work to sized workers in parallel where safe.
 - Use embedded quality checks with appropriately sized `analysis-*` workers before reporting success.
 - Use `retro` after meaningful harness changes.
