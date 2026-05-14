@@ -80,9 +80,6 @@
           "generic-*": "allow",
           "doc-writer-*": "allow",
           "websearch-*": "allow",
-          "explore": "allow",
-          "librarian": "allow",
-          "oracle": "allow",
           "multimodal-looker": "allow"
         },
         "skill": {
@@ -103,9 +100,6 @@
           "generic-*": "allow",
           "doc-writer-*": "allow",
           "websearch-*": "allow",
-          "explore": "allow",
-          "librarian": "allow",
-          "oracle": "allow",
           "multimodal-looker": "allow",
           "orchestrator-base": "allow"
         },
