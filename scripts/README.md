@@ -38,7 +38,8 @@ uv run --directory scripts/python python --version
 uv sync --project scripts/python
 uv run --directory scripts/python src/example.py
 uv run --project scripts/python validate-json opencode.json
-uv run --project scripts/python validate-json skills/runbook/templates/runbook.json --schema skills/runbook/schema.json
+uv run --project scripts/python validate-runbook .runbooks/<id>/main.toon
+uv run --project scripts/python validate-json skills/runbook/templates/runbook.json --schema skills/runbook/schema.json  # legacy v1 JSON runbooks
 uv run --project scripts/python validate-yaml skills/plan/schema.yaml  # legacy YAML artifacts only
 ```
 

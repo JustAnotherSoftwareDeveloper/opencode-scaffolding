@@ -1,48 +1,42 @@
-# Python Scripts
+# Python Scripts for OpenCode
 
-Python helpers use uv in non-package project mode.
+This directory contains Python automation scripts for OpenCode skills.
 
-## Layout
+## Testing
 
-- `src/`: executable Python entry points.
-- `lib/`: shared modules imported by scripts in `src/`.
-
-## Examples
+To run the test suite:
 
 ```bash
-uv sync --project scripts/python
-uv run --directory scripts/python src/example.py
+# Install development dependencies
+uv sync --dev
+
+# Run all tests
+uv run --project scripts/python pytest scripts/python/tests/
+
+# Run specific test file
+uv run --project scripts/python pytest scripts/python/tests/test_runbook_validation.py
+
+# Run with verbose output
+uv run --project scripts/python pytest scripts/python/tests/test_runbook_validation.py -v
 ```
 
-The example script runs `src/example.py`, which imports `lib/example.py` by adding the workspace root to `sys.path` at runtime.
+## Available Commands
 
-## Validators
+- `validate-runbook` - Validate runbooks in v1 JSON or v2 TOON format
+- `init-runbook-state` - Initialize runbook state files
+- `validate-json` - Validate JSON files
+- `validate-yaml` - Validate YAML files
 
-The workspace provides uv script targets for JSON and YAML validation:
+## Runbook Format Support
 
-```bash
-uv sync --project scripts/python
-uv run --project scripts/python validate-json opencode.json
-uv run --project scripts/python validate-json path/to/data.json --schema path/to/schema.json
-uv run --project scripts/python validate-json skills/runbook/templates/runbook.json --schema skills/runbook/schema.json
-uv run --project scripts/python validate-yaml skills/plan/schema.yaml  # legacy YAML artifacts only
-uv run --project scripts/python pyright
-```
+This project supports both:
+- v1 JSON format: `.runbooks/<id>/runbook.json`
+- v2 TOON format: `.runbooks/<id>/main.toon` with referenced step files in `steps/<step-id>.toon`
 
-Use `validate-json` for JSON syntax checks and add `--schema` when a local JSON Schema is available. Use `validate-yaml` for YAML syntax checks. These commands are intended for skills, agents, and harness workflows that create or edit JSON/YAML artifacts.
+## Testing Coverage
 
-## Runbook State Initializer
-
-The `init-runbook-state` command initializes a runbook's state directory from `.runbooks/<id>/runbook.json`:
-
-```bash
-uv sync --project scripts/python
-uv run --project scripts/python init-runbook-state .runbooks/<id>/runbook.json
-```
-
-This command:
-- Validates the runbook file against `skills/runbook/schema.json`
-- Creates the state directory if it doesn't exist
-- Checks that the state directory is empty or absent
-- Creates metadata.json, MAIN.json, and step files
-- Validates all generated files against schemas in `skills/runbook/schemas/`
+The test suite covers:
+- Valid v2 TOON runbook parsing and validation
+- Negative invariant cases (cycles, missing files, ID mismatches, etc.)
+- Legacy v1 JSON compatibility
+- State initialization compatibility

@@ -9,10 +9,10 @@ Initialize state and execute a runbook. If no runbook slug is provided, use the 
 ## Workflow
 
 ### If `$ARGUMENTS` names a runbook slug or path
-1. Locate `.runbooks/<slug>/runbook.json` (or the full path if given).
+1. Locate `.runbooks/<slug>/main.toon` first. If absent, fall back to legacy `.runbooks/<slug>/runbook.json` (or use the full path if given).
 2. Verify the runbook has `status: approved`, or ask the user for authorization.
 3. Read the runbook as the authoritative execution contract.
-4. Initialize state: `uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/runbook.json`.
+4. Initialize state with the selected source: `uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/main.toon` for v2, or `.runbooks/<runbook_id>/runbook.json` for legacy v1.
 5. Execute each step according to the runbook dependency graph and parallel groups:
    - Decompose steps into atomic units.
    - Load the `delegation` skill to select worker family/size per unit.
@@ -24,7 +24,7 @@ Initialize state and execute a runbook. If no runbook slug is provided, use the 
 ### If `$ARGUMENTS` is empty
 1. List `.runbooks/` directory entries sorted by name.
 2. Pick the most recent `.runbooks/<ts>-slug/`.
-3. Read `.runbooks/<ts>-slug/runbook.json`.
+3. Read `.runbooks/<ts>-slug/main.toon` if present; otherwise read legacy `.runbooks/<ts>-slug/runbook.json`.
 4. Check for existing state in `.state/<ts>-slug/`:
    - If state exists and execution was in progress: resume from the active step.
    - If state exists and execution was complete: report and ask if re-execution is desired.
@@ -37,6 +37,7 @@ Initialize state and execute a runbook. If no runbook slug is provided, use the 
 ## Constraints
 
 - Read the runbook first and treat it as the authoritative contract.
+- Prefer v2 `main.toon`; use `runbook.json` only as legacy compatibility.
 - Preserve existing user changes and unrelated files.
 - Use only configured harness subagents for execution and review.
 - Use embedded quality checks before claiming step success.

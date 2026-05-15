@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
 from lib.json_validation import JsonValidationError, validate_json_path
 from lib.runbook_state import HARNESS_ROOT, seed_runbook_state
+from lib.runbook_toon import load_runbook, RunbookLoadError
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Initialize a runbook's state directory from a runbook JSON file.")
-    parser.add_argument("runbook_file", help="Path to the JSON runbook file to validate and seed state from.")
+    parser = argparse.ArgumentParser(description="Initialize a runbook's state directory from a runbook file (v1 JSON or v2 TOON format).")
+    parser.add_argument("runbook_file", help="Path to the runbook file to validate and seed state from (runbook.json for v1, main.toon for v2).")
     return parser
 
 
@@ -20,20 +20,24 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        # Validate the runbook file against the runbook schema
         runbook_path = Path(args.runbook_file).resolve()
-        runbook_schema_path = HARNESS_ROOT / "skills/runbook/schema.json"
-        validate_json_path(runbook_path, runbook_schema_path)
-        
-        # Load the runbook to get state_dir
-        with runbook_path.open("r", encoding="utf-8") as f:
-            runbook_data = json.load(f)
 
+        # Preserve the legacy v1 JSON Schema gate before using the normalized
+        # loader. V2 TOON runbooks are validated by parser-backed invariants in
+        # lib.runbook_toon; no v2 JSON Schema exists by design.
+        if runbook_path.name == "runbook.json":
+            runbook_schema_path = HARNESS_ROOT / "skills/runbook/schema.json"
+            validate_json_path(runbook_path, runbook_schema_path)
+
+        # Use the normalized loader that handles both v1 and v2 formats.
+        result = load_runbook(runbook_path)
+        runbook_data = result.data
+        
         # Validate that the runbook file is in the correct location:
-        # .runbooks/<runbook_id>/runbook.json
-        if runbook_path.name != "runbook.json" or runbook_path.parent.parent.name != ".runbooks":
+        # .runbooks/<runbook_id>/runbook.json or .runbooks/<runbook_id>/main.toon
+        if runbook_path.parent.parent.name != ".runbooks":
             print(
-                f"Error: Runbook file {runbook_path} must be located at .runbooks/<runbook_id>/runbook.json so relative state_dir paths resolve safely.",
+                f"Error: Runbook file {runbook_path} must be located at .runbooks/<runbook_id>/runbook.json or .runbooks/<runbook_id>/main.toon so relative state_dir paths resolve safely.",
                 file=sys.stderr,
             )
             return 1
@@ -83,6 +87,9 @@ def main() -> int:
         return 0
         
     except JsonValidationError as exc:
+        print(f"init-runbook-state: {exc}", file=sys.stderr)
+        return 1
+    except RunbookLoadError as exc:
         print(f"init-runbook-state: {exc}", file=sys.stderr)
         return 1
     except Exception as exc:

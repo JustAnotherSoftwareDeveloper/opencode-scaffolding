@@ -1,0 +1,47 @@
+# OpenCode Runbook v2 TOON Template
+# This is the default v2 runbook format. Use instead of runbook.json for new runbooks.
+#
+# Instructions:
+# 1. Replace placeholder values with actual runbook data.
+# 2. List each step in the steps array with id and file references.
+# 3. Create a corresponding step file under steps/<step-id>.toon for each entry.
+# 4. Validate with: validate-runbook .runbooks/<id>/main.toon
+
+artifact_type: runbook
+format_version: 2
+id: <unix-timestamp>-<slug>
+title: Runbook Title
+status: draft
+created_at: <created-iso-timestamp>
+updated_at: <created-iso-timestamp>
+proposal: ../../.proposals/<proposal-id>.md
+plan: ../../.plans/<plan-id>.md
+state_dir: ../../.state/<runbook-id>/
+active_step: null
+objective: Clear statement of what this runbook intends to accomplish
+plan_summary: Brief summary of the approved markdown plan this runbook executes
+inputs[0]:
+constraints[0]:
+execution_strategy: High-level description of the execution approach
+delegation_map:
+  role-1: worker-family-size
+steps[N]{id,file}:
+  <step-id>,steps/<step-id>.toon
+  <step-id>,steps/<step-id>.toon
+dependency_graph:
+  <step-id>[0]:
+  <step-id>[<count>]: <dep-1>,<dep-2>
+parallel_groups:
+  <group-name>[<count>]: <step-id>,<step-id>
+state_initialization:
+  metadata_schema_version: 1
+  require_step_files: true
+  step_file_extension: .json
+  main_dashboard: MAIN.json
+verification_gates[0]:
+embedded_quality_check:
+  performed_by: null
+  findings: null
+  status: pending
+rollback_recovery: Steps to undo or recover from execution
+final_report_contract: What the final report must include
