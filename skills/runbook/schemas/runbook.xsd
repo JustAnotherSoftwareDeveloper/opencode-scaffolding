@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
+  <xs:simpleType name="idType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9]+-[a-z0-9-]+|[a-z0-9-]+" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="statusType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="draft" />
+      <xs:enumeration value="approved" />
+      <xs:enumeration value="executing" />
+      <xs:enumeration value="blocked" />
+      <xs:enumeration value="complete" />
+      <xs:enumeration value="superseded" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="stringListType">
+    <xs:sequence>
+      <xs:element name="item" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="workerType">
+    <xs:attribute name="family" type="xs:string" use="required" />
+    <xs:attribute name="size" type="xs:string" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="contextPackageType">
+    <xs:sequence>
+      <xs:element name="user_requirement_slice" type="xs:string" />
+      <xs:element name="relevant_proposal_sections" type="stringListType" />
+      <xs:element name="relevant_state_files" type="stringListType" />
+      <xs:element name="files_in_scope" type="stringListType" />
+      <xs:element name="files_out_scope" type="stringListType" />
+      <xs:element name="expected_return_format" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="step">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="depends_on" type="stringListType" />
+        <xs:element name="parallel_group" type="xs:string" />
+        <xs:element name="worker" type="workerType" />
+        <xs:element name="skill" type="xs:string" minOccurs="0" />
+        <xs:element name="minimum_capable_tier" type="xs:string" />
+        <xs:element name="context_package" type="contextPackageType" />
+        <xs:element name="objective" type="xs:string" />
+        <xs:element name="expected_output" type="xs:string" />
+        <xs:element name="state_updates" type="stringListType" />
+        <xs:element name="acceptance_criteria" type="stringListType" />
+        <xs:element name="verification" type="xs:string" />
+        <xs:element name="recovery" type="xs:string" />
+      </xs:sequence>
+      <xs:attribute name="id" type="idType" use="required" />
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="runbook">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="title" type="xs:string" />
+        <xs:element name="status" type="statusType" />
+        <xs:element name="created_at" type="xs:string" />
+        <xs:element name="updated_at" type="xs:string" />
+        <xs:element name="proposal" type="xs:string" />
+        <xs:element name="plan" type="xs:string" />
+        <xs:element name="state_dir" type="xs:string" />
+        <xs:element name="active_step" type="xs:string" minOccurs="0" />
+        <xs:element name="objective" type="xs:string" />
+        <xs:element name="plan_summary" type="xs:string" />
+        <xs:element name="inputs" type="stringListType" />
+        <xs:element name="constraints" type="stringListType" />
+        <xs:element name="execution_strategy" type="xs:string" />
+        <xs:element name="delegation_map">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="entry" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="role" type="xs:string" use="required" />
+                  <xs:attribute name="worker" type="xs:string" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="steps">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="step_ref" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="id" type="idType" use="required" />
+                  <xs:attribute name="file" type="xs:string" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="dependency_graph">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="step" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="depends_on" minOccurs="0" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:attribute name="id" type="idType" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="id" type="idType" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="parallel_groups">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="group" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="step" minOccurs="0" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:attribute name="id" type="idType" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="id" type="xs:string" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="state_initialization">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="metadata_schema_version" type="xs:integer" />
+              <xs:element name="require_step_files" type="xs:boolean" />
+              <xs:element name="step_file_extension" type="xs:string" />
+              <xs:element name="main_dashboard" type="xs:string" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="verification_gates" type="stringListType" />
+        <xs:element name="embedded_quality_check">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="performed_by" type="xs:string" minOccurs="0" />
+              <xs:element name="findings" type="xs:string" minOccurs="0" />
+              <xs:element name="status" type="xs:string" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="rollback_recovery" type="xs:string" />
+        <xs:element name="final_report_contract" type="xs:string" />
+      </xs:sequence>
+      <xs:attribute name="artifact_type" type="xs:string" fixed="runbook" use="required" />
+      <xs:attribute name="format_version" type="xs:integer" fixed="2" use="required" />
+      <xs:attribute name="id" type="idType" use="required" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

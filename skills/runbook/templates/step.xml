@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<step id="01-step-id">
+  <depends_on>
+    <item>dependency-step-id</item>
+  </depends_on>
+  <parallel_group>default</parallel_group>
+  <worker family="coding" size="md" />
+  <skill />
+  <minimum_capable_tier>md</minimum_capable_tier>
+  <context_package>
+    <user_requirement_slice>Description of what this step needs to accomplish</user_requirement_slice>
+    <relevant_proposal_sections>
+      <item>Relevant proposal section</item>
+    </relevant_proposal_sections>
+    <relevant_state_files>
+      <item>Relevant state file</item>
+    </relevant_state_files>
+    <files_in_scope>
+      <item>File in scope</item>
+    </files_in_scope>
+    <files_out_scope>
+      <item>File out of scope</item>
+    </files_out_scope>
+    <expected_return_format>Expected format of the output</expected_return_format>
+  </context_package>
+  <objective>Bounded objective for this step</objective>
+  <expected_output>What this step should produce</expected_output>
+  <state_updates>
+    <item>state-file-to-update.json</item>
+  </state_updates>
+  <acceptance_criteria>
+    <item>Criterion for determining step success</item>
+  </acceptance_criteria>
+  <verification>How to verify this step</verification>
+  <recovery>What to do if this step fails</recovery>
+</step>

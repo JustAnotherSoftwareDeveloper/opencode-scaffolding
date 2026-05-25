@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
-"""CLI command to validate runbooks in v1 JSON or v2 TOON format.
+"""CLI command to validate runbooks in v1 JSON or v2 XML format.
 
 Usage:
     validate-runbook <runbook_path> [--strict]
     
 Examples:
-    # Validate a v2 TOON runbook
-    validate-runbook .runbooks/my-runbook/main.toon
+    # Validate a v2 XML runbook
+    validate-runbook .runbooks/my-runbook/main.xml
     
     # Validate a legacy v1 JSON runbook  
     validate-runbook .runbooks/my-runbook/runbook.json
     
     # Validate with strict mode (unreferenced steps are errors)
-    validate-runbook .runbooks/my-runbook/main.toon --strict
+    validate-runbook .runbooks/my-runbook/main.xml --strict
     
     # Output as JSON
-    validate-runbook .runbooks/my-runbook/main.toon --json
+    validate-runbook .runbooks/my-runbook/main.xml --json
 """
 
 from __future__ import annotations
@@ -25,16 +25,16 @@ import json
 import sys
 from pathlib import Path
 
-from lib.runbook_toon import validate_runbook, RunbookLoadError
+from lib.runbook_xml import validate_runbook, RunbookLoadError
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Validate a runbook in v1 JSON or v2 TOON format."
+        description="Validate a runbook in v1 JSON or v2 XML format."
     )
     parser.add_argument(
         "runbook_path",
-        help="Path to runbook.json (v1) or main.toon (v2)"
+        help="Path to runbook.json (v1) or main.xml (v2)"
     )
     parser.add_argument(
         "--strict",

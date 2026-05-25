@@ -30,8 +30,8 @@ State whether execution matched the runbook and note any deviations.
 ## Config And Schema Validity
 Review JSON validity, JSON Schema conformance, markdown frontmatter shape, command definitions, skill naming rules, and agent mode/hidden usage.
 
-For v2 TOON runbook workspaces, validate with parser-backed invariant checks:
-- `uv run --project scripts/python validate-runbook .runbooks/<runbook-id>/main.toon`
+For v2 XML runbook workspaces, validate with XSD and parser-backed invariant checks:
+- `uv run --project scripts/python validate-runbook .runbooks/<runbook-id>/main.xml`
 
 For legacy v1 JSON runbook artifacts, validate against the runbook schema:
 - `uv run --project scripts/python validate-json .runbooks/<runbook-id>/runbook.json --schema skills/runbook/schema.json`
@@ -62,7 +62,7 @@ For runbook state artifacts, expect validation against the schemas in `skills/ru
 
 If the `init-runbook-state` script was not run after creating a new runbook JSON, flag that as a missing validation step.
 
-If execution starts from a v2 TOON runbook, expect `init-runbook-state` to receive `.runbooks/<runbook-id>/main.toon`. If execution starts from legacy v1 JSON, expect `.runbooks/<runbook-id>/runbook.json`.
+If execution starts from a v2 XML runbook, expect `init-runbook-state` to receive `.runbooks/<runbook-id>/main.xml`. If execution starts from legacy v1 JSON, expect `.runbooks/<runbook-id>/runbook.json`.
 
 ## Recommendation
 State whether to accept, fix before accepting, or redesign.

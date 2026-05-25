@@ -38,7 +38,7 @@ uv run --directory scripts/python python --version
 uv sync --project scripts/python
 uv run --directory scripts/python src/example.py
 uv run --project scripts/python validate-json opencode.json
-uv run --project scripts/python validate-runbook .runbooks/<id>/main.toon
+uv run --project scripts/python validate-runbook .runbooks/<id>/main.xml
 uv run --project scripts/python validate-json skills/runbook/templates/runbook.json --schema skills/runbook/schema.json  # legacy v1 JSON runbooks
 uv run --project scripts/python validate-yaml skills/plan/schema.yaml  # legacy YAML artifacts only
 ```
@@ -58,4 +58,4 @@ Scripts intended for skills should:
 
 ## Dependency Policy
 
-Only add dependencies when a helper needs them and the dependency choice has been reviewed. The Python validators intentionally use `PyYAML`, `jsonschema`, and a dev `pyright` dependency; keep `scripts/python/uv.lock` updated when these dependencies change.
+Only add dependencies when a helper needs them and the dependency choice has been reviewed. The Python validators intentionally use `PyYAML`, `jsonschema`, `lxml`, and a dev `pyright` dependency; keep `scripts/python/uv.lock` updated when these dependencies change.

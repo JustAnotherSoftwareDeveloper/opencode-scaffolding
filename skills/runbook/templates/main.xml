@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<runbook artifact_type="runbook" format_version="2" id="unix-timestamp-slug">
+  <title>Runbook Title</title>
+  <status>draft</status>
+  <created_at>created-iso-timestamp</created_at>
+  <updated_at>created-iso-timestamp</updated_at>
+  <proposal>../../.proposals/proposal-id.md</proposal>
+  <plan>../../.plans/plan-id.md</plan>
+  <state_dir>../../.state/runbook-id/</state_dir>
+  <active_step />
+  <objective>Clear statement of what this runbook intends to accomplish</objective>
+  <plan_summary>Brief summary of the approved markdown plan this runbook executes</plan_summary>
+  <inputs>
+    <item>input-resource</item>
+  </inputs>
+  <constraints>
+    <item>constraint</item>
+  </constraints>
+  <execution_strategy>High-level description of the execution approach</execution_strategy>
+  <delegation_map>
+    <entry role="role-1" worker="worker-family-size" />
+  </delegation_map>
+  <steps>
+    <step_ref id="01-step-id" file="steps/01-step-id.xml" />
+  </steps>
+  <dependency_graph>
+    <step id="01-step-id" />
+  </dependency_graph>
+  <parallel_groups>
+    <group id="default">
+      <step id="01-step-id" />
+    </group>
+  </parallel_groups>
+  <state_initialization>
+    <metadata_schema_version>1</metadata_schema_version>
+    <require_step_files>true</require_step_files>
+    <step_file_extension>.json</step_file_extension>
+    <main_dashboard>MAIN.json</main_dashboard>
+  </state_initialization>
+  <verification_gates>
+    <gate>verification-gate</gate>
+  </verification_gates>
+  <embedded_quality_check>
+    <performed_by />
+    <findings />
+    <status>pending</status>
+  </embedded_quality_check>
+  <rollback_recovery>Steps to undo or recover from execution</rollback_recovery>
+  <final_report_contract>What the final report must include</final_report_contract>
+</runbook>

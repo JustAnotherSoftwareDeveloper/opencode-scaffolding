@@ -1,13 +1,13 @@
 """Reusable Python helper modules for OpenCode automation scripts."""
 
-from lib.runbook_toon import (
+from lib.runbook_xml import (
     load_runbook,
     validate_runbook,
     RunbookLoadResult,
     LoadedStep,
     RunbookLoadError,
     InvariantViolation,
-    ToonValidationError,
+    XmlValidationError,
 )
 
 __all__ = [
@@ -17,5 +17,5 @@ __all__ = [
     "LoadedStep",
     "RunbookLoadError",
     "InvariantViolation",
-    "ToonValidationError",
+    "XmlValidationError",
 ]

@@ -22,7 +22,7 @@ uv run --project scripts/python pytest scripts/python/tests/test_runbook_validat
 
 ## Available Commands
 
-- `validate-runbook` - Validate runbooks in v1 JSON or v2 TOON format
+- `validate-runbook` - Validate runbooks in v1 JSON or v2 XML format
 - `init-runbook-state` - Initialize runbook state files
 - `validate-json` - Validate JSON files
 - `validate-yaml` - Validate YAML files
@@ -31,12 +31,12 @@ uv run --project scripts/python pytest scripts/python/tests/test_runbook_validat
 
 This project supports both:
 - v1 JSON format: `.runbooks/<id>/runbook.json`
-- v2 TOON format: `.runbooks/<id>/main.toon` with referenced step files in `steps/<step-id>.toon`
+- v2 XML format: `.runbooks/<id>/main.xml` with referenced step files in `steps/<step-id>.xml`
 
 ## Testing Coverage
 
 The test suite covers:
-- Valid v2 TOON runbook parsing and validation
+- Valid v2 XML runbook parsing and validation
 - Negative invariant cases (cycles, missing files, ID mismatches, etc.)
 - Legacy v1 JSON compatibility
 - State initialization compatibility

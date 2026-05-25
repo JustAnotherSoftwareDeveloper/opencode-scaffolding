@@ -8,8 +8,8 @@ Use this lifecycle for non-trivial work:
 
 1. **Proposal** — Load `proposal` skill when scope, approach, or risk needs to be established. Artifacts: `.proposals/<unix-timestamp>-slug.md`.
 2. **Plan** — Load `plan` skill to create a human-readable engineering specification in `.plans/<unix-timestamp>-slug.md`.
-3. **Runbook** — Load `runbook` skill to generate an executable runbook workspace from an approved plan. Current v2 artifacts: `.runbooks/<unix-timestamp>-slug/main.toon` plus `steps/<step-id>.toon`. Legacy v1 workspaces may contain `.runbooks/<id>/runbook.json`.
-4. **State initialization** — For approved or executing runbooks, run `uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/main.toon` for v2, or the selected legacy `.runbooks/<runbook_id>/runbook.json`, to seed `.state/<runbook_id>/metadata.json`, `MAIN.json`, and one `<step-id>.json` per step when required.
+3. **Runbook** — Load `runbook` skill to generate an executable runbook workspace from an approved plan. Current v2 artifacts: `.runbooks/<unix-timestamp>-slug/main.xml` plus `steps/<step-id>.xml`. Legacy v1 workspaces may contain `.runbooks/<id>/runbook.json`.
+4. **State initialization** — For approved or executing runbooks, run `uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/main.xml` for v2, or the selected legacy `.runbooks/<runbook_id>/runbook.json`, to seed `.state/<runbook_id>/metadata.json`, `MAIN.json`, and one `<step-id>.json` per step when required.
 5. **Execution** — Decompose work into atomic units, annotate each with a relevant skill, then load `delegation` for worker family/size selection and handoff packet construction. Use dependency graphs and parallel groups from the runbook.
 6. **Embedded quality check** — Route review and critique to appropriately sized `analysis-*` workers using the `review-work` skill. Record findings in runbook state.
 7. **Retro** — Load `retro` after meaningful harness execution to identify harness improvements.
@@ -25,7 +25,7 @@ These skills are available to every orchestrator-style agent during the planning
 |-------|-------------|
 | `proposal` | Establish scope, alternatives, risks, and acceptance criteria before planning. Artifact: `.proposals/<slug>.md`. |
 | `plan` | Convert an accepted proposal into a human-readable engineering specification. Artifact: `.plans/<slug>.md`. |
-| `runbook` | Convert an approved plan into an executable runbook workspace. Current artifact: `.runbooks/<slug>/main.toon` plus `steps/*.toon`; legacy artifact: `.runbooks/<slug>/runbook.json`. |
+| `runbook` | Convert an approved plan into an executable runbook workspace. Current artifact: `.runbooks/<slug>/main.xml` plus `steps/*.xml`; legacy artifact: `.runbooks/<slug>/runbook.json`. |
 | `review-work` | Embedded critique of proposal or plan artifacts before accepting. |
 | `delegation` | Runbook-level routing guidance if the runbook needs to specify delegation patterns for steps. |
 
@@ -113,14 +113,14 @@ For runbook-driven work, each delegation should include:
 
 ## Runbook Contract
 
-When executing, read the runbook first and treat it as the authoritative execution contract. If an approved plan exists but no runbook exists, load the `runbook` skill to generate `.runbooks/<id>/main.toon` plus step `.toon` files before editing. If only a legacy `.runbooks/<id>/runbook.json` exists, it remains a supported v1 contract.
+When executing, read the runbook first and treat it as the authoritative execution contract. If an approved plan exists but no runbook exists, load the `runbook` skill to generate `.runbooks/<id>/main.xml` plus step `.xml` files before editing. If only a legacy `.runbooks/<id>/runbook.json` exists, it remains a supported v1 contract.
 
-Runbooks live in `.runbooks/<runbook_id>/`. Current v2 workspaces use `main.toon` plus `steps/*.toon`; legacy v1 workspaces use `runbook.json`.
+Runbooks live in `.runbooks/<runbook_id>/`. Current v2 workspaces use `main.xml` plus `steps/*.xml`; legacy v1 workspaces use `runbook.json`.
 
-V2 `main.toon` owns runbook-level metadata, graph, parallel groups, state initialization, verification gates, and step file refs. Each `steps/<step-id>.toon` owns one full executable step. Validate v2 workspaces with:
+V2 `main.xml` owns runbook-level metadata, graph, parallel groups, state initialization, verification gates, and step file refs. Each `steps/<step-id>.xml` owns one full executable step. Validate v2 workspaces with:
 
 ```text
-uv run --project scripts/python validate-runbook .runbooks/<runbook_id>/main.toon
+uv run --project scripts/python validate-runbook .runbooks/<runbook_id>/main.xml
 ```
 
 Legacy v1 `runbook.json` has this normalized shape:
@@ -206,7 +206,7 @@ Example command execution body:
 {
   "agent": "agent-architect",
   "command": "agent-architect",
-  "arguments": ".runbooks/<runbook-id>/main.toon"
+  "arguments": ".runbooks/<runbook-id>/main.xml"
 }
 ```
 
@@ -216,7 +216,7 @@ Example command execution body:
 - Preserve existing user changes and unrelated files.
 - Keep edits minimal and reversible.
 - Use embedded quality checks (via `review-work` and `analysis-*` workers) before claiming success.
-- Validate v2 runbooks with `uv run --project scripts/python validate-runbook .runbooks/<runbook-id>/main.toon`. Validate JSON/YAML artifacts with the Python validators when available: `uv run --project scripts/python validate-json <file>`, `uv run --project scripts/python validate-json <file> --schema <schema-file>`, and `uv run --project scripts/python validate-yaml <file>` for legacy YAML artifacts.
+- Validate v2 runbooks with `uv run --project scripts/python validate-runbook .runbooks/<runbook-id>/main.xml`. Validate JSON/YAML artifacts with the Python validators when available: `uv run --project scripts/python validate-json <file>`, `uv run --project scripts/python validate-json <file> --schema <schema-file>`, and `uv run --project scripts/python validate-yaml <file>` for legacy YAML artifacts.
 - Use `retro` after meaningful harness changes.
 - Capture durable lessons when reusable guidance emerges.
 - Manage active artifacts in `.proposals/`, `.plans/`, `.runbooks/`, `.state/`, and `.lessons/`.

@@ -9,7 +9,7 @@ updated_at: <iso timestamp>
 owner: orchestrator
 source_request: <short user request>
 related_plan: null | ../.plans/<unix-timestamp>-slug.md
-related_runbook: null | ../.runbooks/<unix-timestamp>-slug/runbook.json
+related_runbook: null | ../.runbooks/<unix-timestamp>-slug/main.xml
 ---
 # Proposal: <title>
 
