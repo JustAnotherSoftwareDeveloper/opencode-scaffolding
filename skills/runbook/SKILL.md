@@ -84,7 +84,7 @@ uv run --project scripts/python validate-json .state/<runbook_id>/<step-id>.json
 
 ## Embedded Quality Check
 
-Every non-trivial runbook should include or trigger an embedded quality check using `review-work` and an appropriately sized `analysis-*` worker. The review should check plan fidelity, step granularity, dependency correctness, worker routing, file scope safety, runbook validation, state initialization, and recovery coverage.
+Every non-trivial runbook should include or trigger an embedded quality check using `review-work` and an appropriately sized `worker-*` worker with review-mode instructions. The review should check plan fidelity, step granularity, dependency correctness, worker routing, file scope safety, runbook validation, state initialization, and recovery coverage.
 
 ## Rules
 

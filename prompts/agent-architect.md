@@ -50,11 +50,11 @@ In addition to the base execution skills, load these during harness work:
 
 The base delegates worker selection to the `delegation` skill. These are harness-specific override guidelines:
 
-- **Agent authoring**: delegate prose drafting to `doc-writer-*`; delegate config validation to `coding-*`.
-- **Skill authoring**: delegate skill prose and workflow design to `doc-writer-*`.
-- **Command authoring**: delegate command prompt drafting to `doc-writer-*`.
-- **Config edits** (`opencode.json`): delegate to `coding-*` for JSON editing and validation.
-- **Proposal/plan review**: delegate to `analysis-*`.
+- **Agent authoring**: delegate prose drafting to `worker-*` with documentation-mode instructions; delegate config validation to `worker-*` with coding-mode instructions.
+- **Skill authoring**: delegate skill prose and workflow design to `worker-*` with documentation-mode instructions.
+- **Command authoring**: delegate command prompt drafting to `worker-*` with documentation-mode instructions.
+- **Config edits** (`opencode.json`): delegate to `worker-*` with coding-mode instructions for JSON editing and validation.
+- **Proposal/plan review**: delegate to `worker-*` with review-mode instructions.
 - **Visual/PDF/image analysis**: delegate to `multimodal-looker`.
 
 Always start at the smallest capable tier. Escalate via the `delegation` skill's rules.
@@ -77,6 +77,15 @@ Always start at the smallest capable tier. Escalate via the `delegation` skill's
 - Every skill needs a specific `description` that helps agents decide when to load it.
 - Skills encode reusable workflow, not personality.
 - Skills may include code blocks, templates, reference tables, and embedded scripts.
+
+## Skill Framework Rules
+
+- Load `skill-hygiene` when creating or reviewing skills.
+- Choose one class before drafting a framework-authored skill: `atomic`, `orchestrated`, `documentation`, or `planning`.
+- Use top-level local `class` frontmatter for framework-authored skills; treat it as harness-owned metadata, not native OpenCode routing.
+- Keep `SKILL.md` concise and place long references, schemas, examples, or scripts in supporting files.
+- Validate new or changed framework skills with `uv run --project scripts/python validate-skill-framework ...`.
+- Do not migrate or annotate existing skills unless a future accepted proposal and approved plan authorize it.
 
 ## Command Authoring Rules
 

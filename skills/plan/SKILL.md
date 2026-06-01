@@ -70,7 +70,7 @@ The plan body must contain each of these sections. Sections that are not yet fil
 **Implementation Strategy** — The "how" broken into coarse phases. Each phase lists the files it will touch and the skills it will need. Example:
 
 ```
-Phase 1: Rewrite SKILL.md — touches skills/plan/SKILL.md, needs doc-writer worker.
+Phase 1: Rewrite SKILL.md — touches skills/plan/SKILL.md, needs worker-sm or worker-md with documentation-mode instructions.
 Phase 2: Delete old schemas — touches skills/plan/schema.json, skills/plan/schemas/*.json.
 Phase 3: Update templates — touches skills/plan/templates/delegation-packet.md.
 ```
@@ -92,7 +92,7 @@ Phase 3: Update templates — touches skills/plan/templates/delegation-packet.md
 **Runbook Generation** — Notes for the runbook skill: preferred worker sizes, parallel groups, dependency ordering, skill loading instructions. This section is consumed by the runbook skill, not by workers directly. Example:
 
 ```
-- Phase 1 (doc-writer, size sm): rewrite SKILL.md
+- Phase 1 (worker, size sm, documentation mode): rewrite SKILL.md
 - Phase 2 (bash, size xs): delete schema.json and state schemas
 - Phases 1 and 2 are serial (Phase 2 depends on Phase 1)
 - Load lesson-writer after all phases complete

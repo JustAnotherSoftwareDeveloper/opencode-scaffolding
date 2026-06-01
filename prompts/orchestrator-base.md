@@ -11,7 +11,7 @@ Use this lifecycle for non-trivial work:
 3. **Runbook** — Load `runbook` skill to generate an executable runbook workspace from an approved plan. Current v2 artifacts: `.runbooks/<unix-timestamp>-slug/main.xml` plus `steps/<step-id>.xml`. Legacy v1 workspaces may contain `.runbooks/<id>/runbook.json`.
 4. **State initialization** — For approved or executing runbooks, run `uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/main.xml` for v2, or the selected legacy `.runbooks/<runbook_id>/runbook.json`, to seed `.state/<runbook_id>/metadata.json`, `MAIN.json`, and one `<step-id>.json` per step when required.
 5. **Execution** — Decompose work into atomic units, annotate each with a relevant skill, then load `delegation` for worker family/size selection and handoff packet construction. Use dependency graphs and parallel groups from the runbook.
-6. **Embedded quality check** — Route review and critique to appropriately sized `analysis-*` workers using the `review-work` skill. Record findings in runbook state.
+6. **Embedded quality check** — Route review and critique to appropriately sized `worker-*` workers using the `review-work` skill with review-mode instructions. Record findings in runbook state.
 7. **Retro** — Load `retro` after meaningful harness execution to identify harness improvements.
 8. **Lesson capture** — Load `lesson-writer` when reusable session guidance emerges. Artifacts: `.lessons/<unix-timestamp>-slug.md`.
 
@@ -190,11 +190,11 @@ Example delegated API message body:
 
 ```json
 {
-  "agent": "analysis-md",
+  "agent": "worker-md",
   "parts": [
     {
       "type": "text",
-      "text": "Load skill: proposal\n\nObjective: evaluate the proposed harness change.\n\nReturn: risks, alternatives, and recommendation."
+      "text": "Task mode: review/analysis.\nLoad skill: proposal\n\nObjective: evaluate the proposed harness change.\n\nReturn: risks, alternatives, and recommendation."
     }
   ]
 }
@@ -215,7 +215,7 @@ Example command execution body:
 - Read the relevant proposal, plan, runbook, and state before executing runbook-driven work.
 - Preserve existing user changes and unrelated files.
 - Keep edits minimal and reversible.
-- Use embedded quality checks (via `review-work` and `analysis-*` workers) before claiming success.
+- Use embedded quality checks (via `review-work` and `worker-*` workers with review-mode instructions) before claiming success.
 - Validate v2 runbooks with `uv run --project scripts/python validate-runbook .runbooks/<runbook-id>/main.xml`. Validate JSON/YAML artifacts with the Python validators when available: `uv run --project scripts/python validate-json <file>`, `uv run --project scripts/python validate-json <file> --schema <schema-file>`, and `uv run --project scripts/python validate-yaml <file>` for legacy YAML artifacts.
 - Use `retro` after meaningful harness changes.
 - Capture durable lessons when reusable guidance emerges.

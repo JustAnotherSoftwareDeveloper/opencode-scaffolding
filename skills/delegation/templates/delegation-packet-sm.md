@@ -13,7 +13,10 @@ Load skill: <skill-name or none>
 - <paths the worker must not touch>
 ## Do
 - <specific actions and expected output>
+- Follow task-mode guardrails for analysis/review, coding/config, documentation, synthesis, and web research.
 ## Do not
 - <scope or behavior prohibitions>
+- Do not bypass task-mode guardrails.
+- Do not perform work outside your designated task mode.
 ## Return
 - Files touched, verification, blockers or risks.

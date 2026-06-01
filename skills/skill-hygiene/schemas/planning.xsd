@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:annotation><xs:documentation>Planning skills create or review lifecycle artifacts such as proposals, plans, runbooks, reviews, decisions, and recovery paths.</xs:documentation></xs:annotation>
+  <xs:element name="skill_class_manifest">
+    <xs:annotation><xs:documentation>Canonical XML manifest shape for a planning skill class review.</xs:documentation></xs:annotation>
+    <xs:complexType><xs:sequence>
+      <xs:element name="class_name" type="planningClass" />
+      <xs:element name="purpose" type="nonEmptyString" />
+      <xs:element name="use_when" type="nonEmptyString" />
+      <xs:element name="do_not_use_when" type="nonEmptyString" />
+      <xs:element name="required_frontmatter" type="frontmatterType" />
+      <xs:element name="hygiene_checks" type="listType" />
+      <xs:element name="validation" type="listType" />
+      <xs:element name="artifact_contracts" type="listType" />
+      <xs:element name="decision_gates" type="listType" />
+      <xs:element name="handoff_requirements" type="nonEmptyString" />
+      <xs:element name="acceptance_criteria_mapping" type="nonEmptyString" />
+      <xs:element name="rollback_recovery" type="nonEmptyString" />
+    </xs:sequence></xs:complexType>
+  </xs:element>
+  <xs:simpleType name="planningClass"><xs:restriction base="xs:string"><xs:enumeration value="planning" /></xs:restriction></xs:simpleType>
+  <xs:simpleType name="nonEmptyString"><xs:restriction base="xs:string"><xs:minLength value="1" /></xs:restriction></xs:simpleType>
+  <xs:complexType name="frontmatterType"><xs:sequence><xs:element name="field" minOccurs="3" maxOccurs="unbounded"><xs:complexType><xs:simpleContent><xs:extension base="nonEmptyString"><xs:attribute name="name" use="required" type="nonEmptyString" /></xs:extension></xs:simpleContent></xs:complexType></xs:element></xs:sequence></xs:complexType>
+  <xs:complexType name="listType"><xs:sequence><xs:element name="item" type="nonEmptyString" maxOccurs="unbounded" /></xs:sequence></xs:complexType>
+</xs:schema>

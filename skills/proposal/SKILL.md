@@ -25,7 +25,7 @@ Proposal artifacts live at:
 2. **Run discovery protocol**: Conduct local discovery and/or external research as needed.
 3. **Run clarification protocol**: Ask only critical questions to resolve blocking unknowns.
 4. **Create or update artifact**: Write the proposal to `.proposals/<unix-timestamp>-slug.md`.
-5. **Run embedded critique**: Delegate critique to an appropriately sized `analysis-*` worker and record findings directly in the proposal.
+5. **Run embedded critique**: Delegate critique to an appropriately sized `worker-*` worker with review-mode instructions and record findings directly in the proposal.
 6. **Revise**: Incorporate user feedback and critique into the same proposal artifact.
 7. **Decision**: Mark the proposal `accepted`, `needs-clarification`, `rejected`, or `superseded`.
 8. **Return summary**: Report artifact path, status, key tradeoffs, and the next user decision.
@@ -34,10 +34,10 @@ Proposal artifacts live at:
 
 | Work | Worker Family | Purpose |
 | --- | --- | --- |
-| Local discovery | `generic-*` | Inventory files, conventions, and constraints |
-| External research | `websearch-*` | Gather current source-backed information |
-| Proposal drafting and revision | `doc-writer-*` | Write clear proposal prose |
-| Embedded critique | `analysis-*` | Identify gaps, risks, and acceptance problems |
+| Local discovery | `worker-*` with generic-mode instructions | Inventory files, conventions, and constraints |
+| External research | `worker-*` with web-research-mode instructions | Gather current source-backed information |
+| Proposal drafting and revision | `worker-*` with documentation-mode instructions | Write clear proposal prose |
+| Embedded critique | `worker-*` with review-mode instructions | Identify gaps, risks, and acceptance problems |
 
 Choose the smallest capable worker size for each bounded task. Escalate only when scope, ambiguity, or risk requires it.
 
@@ -88,7 +88,7 @@ Perform discovery based on depth tier:
 - **External research**: Gather source-backed information from documentation, standards, or comparable examples.
 - **Prior-art/current-state**: Identify relevant previous proposals, plans, or state artifacts.
 
-Record discovery results as facts, not assumptions. Use `explore` or `generic-*` workers for discovery tasks.
+Record discovery results as facts, not assumptions. Use `worker-*` with generic-mode instructions for discovery tasks.
 
 ## Clarification/Interview Protocol
 
@@ -100,7 +100,7 @@ When critical unknowns exist:
 - Record assumptions explicitly in the proposal.
 - Do not ask questions that can be resolved by discovery.
 
-Use `analysis-sm` or `doc-writer-sm` workers for clarification tasks.
+Use `worker-*` with review-mode instructions or `worker-*` with documentation-mode instructions for clarification tasks.
 
 ## Proposal-to-Plan Handoff
 
@@ -132,10 +132,10 @@ Out of scope:
 - ...
 
 ### Suggested Delegation / Skills
-- discovery: explore or generic-sm/md
-- analysis: analysis-md/lg
-- implementation: coding-md/lg
-- docs/templates: doc-writer-sm/md
+- discovery: worker-* with generic-mode instructions
+- analysis: worker-* with review-mode instructions
+- implementation: worker-* with coding-mode instructions
+- docs/templates: worker-* with documentation-mode instructions
 
 ### OpenCode Docs Required for Handoff / Delegation Design
 - Agents: <https://opencode.ai/docs/agents/>

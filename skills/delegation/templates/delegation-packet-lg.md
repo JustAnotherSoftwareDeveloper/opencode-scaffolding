@@ -24,9 +24,12 @@ Load skill: <skill-name or none>
 ## Do
 - <specific action>
 - Include edge-case handling where applicable.
+- Follow task-mode guardrails for analysis/review, coding/config, documentation, synthesis, and web research.
 
 ## Do not
 - <specific prohibition>
+- Do not bypass task-mode guardrails.
+- Do not perform work outside your designated task mode.
 - Do not skip verification steps.
 
 ## State updates

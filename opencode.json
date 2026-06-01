@@ -75,11 +75,7 @@
       "permission": {
         "task": {
           "*": "deny",
-          "analysis-*": "allow",
-          "coding-*": "allow",
-          "generic-*": "allow",
-          "doc-writer-*": "allow",
-          "websearch-*": "allow",
+          "worker-*": "allow",
           "multimodal-looker": "allow"
         },
         "skill": {
@@ -95,11 +91,7 @@
       "permission": {
         "task": {
           "*": "deny",
-          "analysis-*": "allow",
-          "coding-*": "allow",
-          "generic-*": "allow",
-          "doc-writer-*": "allow",
-          "websearch-*": "allow",
+          "worker-*": "allow",
           "multimodal-looker": "allow",
           "orchestrator-base": "allow"
         },

@@ -12,7 +12,7 @@ Load skill `proposal`, then create a proposal artifact for:
 2. Classify intent and depth for the request above.
 3. Run discovery (local file inventory, prior art, conventions).
 4. Create `.proposals/<unix-timestamp>-slug.md` from the proposal template.
-5. Run embedded quality check via `analysis-*` worker.
+5. Run embedded quality check via `worker-*` with review-mode instructions.
 6. Report the artifact path, status, key tradeoffs, and next user decision.
 
 ## Constraints

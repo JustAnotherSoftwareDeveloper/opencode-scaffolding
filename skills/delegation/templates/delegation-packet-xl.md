@@ -29,10 +29,13 @@ Load skill: <skill-name or none>
 
 - <specific action>
 - Report partial progress if blocked.
+- Follow task-mode guardrails for analysis/review, coding/config, documentation, synthesis, and web research.
 
 ## Do not
 
 - <specific prohibition>
+- Do not bypass task-mode guardrails.
+- Do not perform work outside your designated task mode.
 - Do not work around blockers silently.
 
 ## State updates

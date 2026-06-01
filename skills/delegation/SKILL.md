@@ -40,66 +40,27 @@ For each atomic unit:
 
 | Work type | Route to |
 |-----------|----------|
-| Analysis, reasoning, tradeoffs, risk, architecture, critique | `analysis-*` |
-| Code editing, implementation, refactor, debugging, config writing | `coding-*` |
-| Documentation, prompts, skills, commands, guides, structured prose | `doc-writer-*` |
-| Synthesis, coordination, classification, extraction, general-purpose tasks | `generic-*` |
-| Web research, current facts, source synthesis, evidence comparison | `websearch-*` |
+| Analysis, reasoning, tradeoffs, risk, architecture, critique | `worker-*` |
+| Code editing, implementation, refactor, debugging, config writing | `worker-*` |
+| Documentation, prompts, skills, commands, guides, structured prose | `worker-*` |
+| Synthesis, coordination, classification, extraction, general-purpose tasks | `worker-*` |
+| Web research, current facts, source synthesis, evidence comparison | `worker-*` |
 | Image/screenshot/diagram/PDF analysis | `multimodal-looker` |
 
 ## Worker Matrix (Canonical Source of Truth)
 
-All 26 configured workers. The matrix reflects the exact `agents/*.md` definitions. The **default model** is the model listed in the agent frontmatter; fallback models are defined in the agent files but omitted here for brevity.
+One text worker family: `worker-*` with sizes xs, sm, md, lg, xl.
+The matrix reflects the exact `agents/*.md` definitions. The **default model** is the model listed in the agent frontmatter; fallback models are defined in the agent files but omitted here for brevity.
 
-### analysis-* family — Reasoning, tradeoffs, risk, architecture, critique
-
-| Worker | Default model | When to use |
-|--------|---------------|-------------|
-| `analysis-xs` | `ollama/granite4.1:3b` | Bounded yes/no checks, obvious tradeoff notes, simple risk flags, quick reasoning over very small provided context. |
-| `analysis-sm` | `ollama/qwen3-8b-12k` | Comparing options, identifying risks, sanity-checking shell commands, reviewing small design choices, reasoning over provided evidence. |
-| `analysis-md` | `openrouter/deepseek/deepseek-v4-flash` | Nontrivial reasoning, multi-factor comparisons, root-cause analysis from supplied evidence, decisions where local analysis may be too weak. |
-| `analysis-lg` | `openrouter/mistralai/mistral-small-2603` | Nuanced product, design, planning, and technical tradeoff analysis where judgment matters but the task is not the most expensive tier. |
-| `analysis-xl` | `openrouter/deepseek/deepseek-v4-pro` | Hard reasoning, architecture decisions, conflicting evidence, failed prior attempts, high-stakes recommendations, final judgment passes. |
-
-### coding-* family — Code, config, schema, template editing
+### worker-* family — Text workers for all work types
 
 | Worker | Default model | When to use |
 |--------|---------------|-------------|
-| `coding-xs` | `ollama/qwen2.5-coder:3b` | One function, one small file, simple syntax fixes, trivial helpers, very explicit low-risk edits. |
-| `coding-sm` | `ollama/qwen3-8b-12k` | Narrow repo edits, simple refactors, direct bug fixes with clear context, test fixes, code explanation. |
-| `coding-md` | `openrouter/qwen/qwen3-coder-30b-a3b-instruct` | Moderate implementation, several related file edits, bug fixes requiring investigation, repo-aware coding where local models are insufficient. |
-| `coding-lg` | `openrouter/qwen/qwen3-coder` | Complex repo-aware implementation, significant refactors, difficult bugs, multi-step changes, tasks requiring strong code reasoning. |
-| `coding-xl` | `openrouter/moonshotai/kimi-k2.5` | Hard repo work, large refactors, long-horizon debugging, architecture-sensitive code, tasks where failure is expensive. |
-
-### doc-writer-* family — Documentation, prompts, skills, command prose
-
-| Worker | Default model | When to use |
-|--------|---------------|-------------|
-| `doc-writer-xs` | `ollama/granite4.1:3b` | Headings, short summaries, bullet cleanup, formatting, small prose rewrites from provided facts. |
-| `doc-writer-sm` | `ollama/granite41-8b-12k` | README sections, short docs, changelog notes, small guides, structured prose from known facts. |
-| `doc-writer-md` | `openrouter/deepseek/deepseek-v4-flash` | Longer guides, structured documentation, synthesis from multiple worker outputs, clear technical prose. |
-| `doc-writer-lg` | `openrouter/mistralai/mistral-small-2603` | Polished guides, longer technical documents, product-style explanations, substantial rewrite/synthesis work. |
-| `doc-writer-xl` | `openrouter/minimax/minimax-m2.5` | Polished, coherent, structured prose. Preserves technical truth. Flags missing facts rather than fabricating. |
-
-### generic-* family — Synthesis, coordination, extraction, classification
-
-| Worker | Default model | When to use |
-|--------|---------------|-------------|
-| `generic-xs` | `ollama/granite4.1:3b` | Trivial classification, short summarization, obvious extraction, naming, simple cleanup, low-risk mechanical answers. |
-| `generic-sm` | `ollama/granite41-8b-12k` | Short explanations, small comparisons, bounded synthesis from provided context, simple task decomposition. |
-| `generic-md` | `openrouter/deepseek/deepseek-v4-flash` | Moderate synthesis, nontrivial explanation, multi-part tasks, cases where local workers may be too weak. |
-| `generic-lg` | `openrouter/qwen/qwen3.6-35b-a3b` | Difficult synthesis, complex task coordination support, cross-domain reasoning, higher-quality answers where cost is acceptable. |
-| `generic-xl` | `openrouter/deepseek/deepseek-v4-pro` | High-judgment, high-ambiguity, or high-cost-of-error work. |
-
-### websearch-* family — Web research, current facts, source synthesis
-
-| Worker | Default model | When to use |
-|--------|---------------|-------------|
-| `websearch-xs` | `ollama/granite4.1:3b` | Extraction and snippet-only summarization from web results. Does not make final recommendations. |
-| `websearch-sm` | `ollama/granite41-8b-12k` | Evidence summaries and source-claim separation from web research. |
-| `websearch-md` | `openrouter/deepseek/deepseek-v4-flash` | Normal research tasks, current factual lookups, comparison across sources, evidence summaries requiring judgment. |
-| `websearch-lg` | `openrouter/qwen/qwen3.6-35b-a3b` | Source-critical synthesis using primary and corroborated sources. |
-| `websearch-xl` | `openrouter/moonshotai/kimi-k2.5` | Complex, high-value, high-ambiguity research where source quality, currentness, and judgment are critical. |
+| `worker-xs` | `ollama/granite4.1:3b` | Bounded yes/no checks, obvious tradeoff notes, simple risk flags, quick reasoning over very small provided context. |
+| `worker-sm` | `ollama/qwen3-8b-12k` | Comparing options, identifying risks, sanity-checking shell commands, reviewing small design choices, reasoning over provided evidence. |
+| `worker-md` | `openrouter/deepseek/deepseek-v4-flash` | Nontrivial reasoning, multi-factor comparisons, root-cause analysis from supplied evidence, decisions where local analysis may be too weak. |
+| `worker-lg` | `openrouter/mistralai/mistral-small-2603` | Nuanced product, design, planning, and technical tradeoff analysis where judgment matters but the task is not the most expensive tier. |
+| `worker-xl` | `openrouter/deepseek/deepseek-v4-pro` | Hard reasoning, architecture decisions, conflicting evidence, failed prior attempts, high-stakes recommendations, final judgment passes. |
 
 ### multimodal-* family — Visual analysis
 
@@ -109,7 +70,7 @@ All 26 configured workers. The matrix reflects the exact `agents/*.md` definitio
 
 ## Size Selection
 
-Choose the smallest size that matches the task's scope, risk, ambiguity, and cost of failure. Size is not just file count: a one-file architecture decision can require `analysis-lg`, while a broad mechanical inventory can be split across smaller `generic-sm` tasks.
+Choose the smallest size that matches the task's scope, risk, ambiguity, and cost of failure. Size is not just file count: a one-file architecture decision can require `worker-lg`, while a broad mechanical inventory can be split across smaller `worker-sm` tasks.
 
 | Size | Use when | Avoid when |
 |------|----------|------------|
@@ -121,19 +82,18 @@ Choose the smallest size that matches the task's scope, risk, ambiguity, and cos
 
 ## Escalation and De-Escalation
 
-### When to Escalate (choose a larger size or a more capable family)
+### When to Escalate (choose a larger size)
 
-1. **Worker reports partial success**: the task exceeded the worker's capability. Redelegate to the next size up in the same family.
-2. **Failed prior attempts**: if a first attempt failed, redelegate to `*-lg` or `*-xl` in the same family. Do not retry the same size.
-3. **High ambiguity discovered mid-task**: if the worker uncovers ambiguity the packet did not anticipate, escalate to `analysis-lg` or `analysis-xl` for the ambiguity-resolution part, then resume the original work.
-4. **Cross-family escalation**: if the task was misclassified (e.g., a "generic" task turned out to need deep code reasoning), redelegate to the correct family at the same or one-larger size.
-5. **Cost-of-failure escalation**: if review reveals the failure cost was underestimated, escalate to `*-xl` for the redo.
+1. **Worker reports partial success**: the task exceeded the worker's capability. Redelegate to the next size up in the `worker-*` family.
+2. **Failed prior attempts**: if a first attempt failed, redelegate to `worker-lg` or `worker-xl` in the `worker-*` family. Do not retry the same size.
+3. **High ambiguity discovered mid-task**: if the worker uncovers ambiguity the packet did not anticipate, escalate to `worker-lg` or `worker-xl` for the ambiguity-resolution part, then resume the original work.
+4. **Cost-of-failure escalation**: if review reveals the failure cost was underestimated, escalate to `worker-xl` for the redo.
 
-### When to De-Escalate (choose a smaller size or a local worker)
+### When to De-Escalate (choose a smaller size)
 
-1. **Oversized packet**: if the packet asked for a `*-xl` analysis but the atomic unit is trivially bounded (one short file, low risk), downgrade to `*-sm` or `*-xs`.
-2. **Local worker sufficient**: if the task can be handled by an Ollama worker (`*-xs` or `*-sm`) without quality loss, prefer it over a cloud worker (`*-md` or larger). This saves cost and keeps work offline.
-3. **Subtask decomposition**: after an `*-xl` worker produces a plan, delegate subsequent execution subtasks to appropriately smaller workers.
+1. **Oversized packet**: if the packet asked for a `worker-xl` analysis but the atomic unit is trivially bounded (one short file, low risk), downgrade to `worker-sm` or `worker-xs`.
+2. **Local worker sufficient**: if the task can be handled by an Ollama worker (`worker-xs` or `worker-sm`) without quality loss, prefer it over a cloud worker (`worker-md` or larger). This saves cost and keeps work offline.
+3. **Subtask decomposition**: after a `worker-xl` worker produces a plan, delegate subsequent execution subtasks to appropriately smaller workers.
 
 ## Handoff Prompt Construction
 
@@ -191,5 +151,5 @@ OpenCode does not provide a documented structured child-session result protocol.
 - Do not ask a worker to modify files outside `files_in_scope`.
 - Do not delegate destructive git operations or provider/model/config edits unless a plan explicitly authorizes them.
 - Do not hide unresolved assumptions; include them in the packet or stop for clarification.
-- Do not route work to workers that are not configured in `agents/*.md`. Only the 26 workers in this matrix (5 families × 5 sizes + `multimodal-looker`) are available.
+- Do not route work to workers that are not configured in `agents/*.md`. Only the `worker-*` family with sizes xs, sm, md, lg, xl and `multimodal-looker` are available.
 - Do not hardcode worker sizes in orchestrator prompts or runbook steps. Worker selection must be evaluated dynamically for each atomic unit.

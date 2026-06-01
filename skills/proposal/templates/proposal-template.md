@@ -85,10 +85,10 @@ Out of scope:
 - ...
 
 ### Suggested Delegation / Skills
-- discovery: explore or generic-sm/md
-- analysis: analysis-md/lg
-- implementation: coding-md/lg
-- docs/templates: doc-writer-sm/md
+- discovery: worker-* with generic-mode instructions
+- analysis: worker-* with review-mode instructions
+- implementation: worker-* with coding-mode instructions
+- docs/templates: worker-* with documentation-mode instructions
 
 ### OpenCode Docs Required for Handoff / Delegation Design
 - Agents: <https://opencode.ai/docs/agents/>

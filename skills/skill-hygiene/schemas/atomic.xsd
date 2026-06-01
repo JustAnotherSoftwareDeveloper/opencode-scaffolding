@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:annotation><xs:documentation>Atomic skills are small, single-objective procedures with bounded inputs, bounded outputs, and independent validation.</xs:documentation></xs:annotation>
+  <xs:element name="skill_class_manifest">
+    <xs:annotation><xs:documentation>Canonical XML manifest shape for an atomic skill class review.</xs:documentation></xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="class_name" type="atomicClass" />
+        <xs:element name="purpose" type="nonEmptyString" />
+        <xs:element name="use_when" type="nonEmptyString" />
+        <xs:element name="do_not_use_when" type="nonEmptyString" />
+        <xs:element name="required_frontmatter" type="frontmatterType" />
+        <xs:element name="hygiene_checks" type="listType" />
+        <xs:element name="validation" type="listType" />
+        <xs:element name="single_objective" type="nonEmptyString" />
+        <xs:element name="bounded_inputs" type="listType" />
+        <xs:element name="bounded_outputs" type="listType" />
+        <xs:element name="independent_validation" type="nonEmptyString" />
+        <xs:element name="max_scope_guidance" type="nonEmptyString" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:simpleType name="atomicClass"><xs:restriction base="xs:string"><xs:enumeration value="atomic" /></xs:restriction></xs:simpleType>
+  <xs:simpleType name="nonEmptyString"><xs:restriction base="xs:string"><xs:minLength value="1" /></xs:restriction></xs:simpleType>
+  <xs:complexType name="frontmatterType"><xs:sequence><xs:element name="field" minOccurs="3" maxOccurs="unbounded"><xs:complexType><xs:simpleContent><xs:extension base="nonEmptyString"><xs:attribute name="name" use="required" type="nonEmptyString" /></xs:extension></xs:simpleContent></xs:complexType></xs:element></xs:sequence></xs:complexType>
+  <xs:complexType name="listType"><xs:sequence><xs:element name="item" type="nonEmptyString" maxOccurs="unbounded" /></xs:sequence></xs:complexType>
+</xs:schema>
