@@ -5,6 +5,7 @@ mode: "subagent"
 hidden: true
 temperature: 0.3
 top_p: 0.9
+steps: 15
 max_tokens: 16384
 ---
 

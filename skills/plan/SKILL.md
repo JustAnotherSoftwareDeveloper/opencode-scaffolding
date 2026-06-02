@@ -5,7 +5,7 @@ description: Create directory-based markdown engineering plans from accepted pro
 
 # Plan Skill
 
-Use this skill after a proposal is accepted. Planning requires an accepted proposal artifact (`.proposals/<timestamp>-<slug>.md` with `status: accepted`). Direct planning from raw user requests is not supported.
+Use this skill after a proposal is accepted. Planning requires an accepted proposal artifact: prefer a proposal workspace at `.proposals/<timestamp>-<slug>/INDEX.md` with accepted status in `metadata.md`; historical single-file `.proposals/<timestamp>-<slug>.md` artifacts remain readable but must not be migrated. Direct planning from raw user requests is not supported.
 
 **This skill does not implement changes.** It produces a markdown plan artifact. Non-trivial execution proceeds by loading the **runbook** skill after the plan is approved.
 
@@ -32,7 +32,7 @@ title: "<Human-readable title>"
 status: draft  # draft | approved | superseded
 created_at: "<ISO 8601 timestamp>"
 updated_at: "<ISO 8601 timestamp>"
-proposal: ".proposals/<timestamp>-<proposal-slug>.md"
+proposal: ".proposals/<timestamp>-<proposal-slug>/INDEX.md"
 ---
 ```
 
@@ -63,7 +63,7 @@ The `INDEX.md` file must contain each of these sections. Sections that are not y
 
 **Non-Goals** — Bullet list of things the plan explicitly leaves out. Example: "- No changes to the runbook skill. - No changes to existing proposal markdown files."
 
-**Source Proposal** — Link: `.proposals/<timestamp>-<slug>.md`. Summarize the accepted decisions that drive this plan.
+**Source Proposal** — Link to `.proposals/<timestamp>-<slug>/INDEX.md` for proposal workspaces, or to a historical `.proposals/<timestamp>-<slug>.md` artifact when planning from an existing legacy proposal. Summarize the accepted decisions that drive this plan.
 
 **Accepted Decisions** — Planning-level decisions: which phases run in parallel, which worker families to use, which skills to load per phase, any ordering constraints. Record these so the runbook does not have to rediscover them.
 
@@ -126,8 +126,8 @@ Phase 3: Update lifecycle references — touches prompts or commands found by in
 
 Before creating a plan, the skill must:
 
-1. Verify the proposal path exists and is a valid `.proposals/<timestamp>-<slug>.md` file.
-2. Check that the proposal has `status: accepted` in its frontmatter.
+1. Verify the proposal path exists and is either a valid `.proposals/<timestamp>-<slug>/INDEX.md` workspace entry point or a historical `.proposals/<timestamp>-<slug>.md` file.
+2. Check that the proposal has `status: accepted` in workspace `metadata.md` or historical file frontmatter.
 3. Extract key information from the proposal:
    - Goal → plan **Goal**
    - Non-Goals → plan **Non-Goals**

@@ -4,6 +4,7 @@ model: "openrouter/qwen/qwen3-235b-a22b-2507"
 mode: "subagent"
 hidden: true
 temperature: 0.3
+steps: 10
 max_tokens: 8192
 ---
 

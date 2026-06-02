@@ -3,6 +3,7 @@ description: "Small worker for bounded delegated text tasks. Use for short expla
 model: "openrouter/mistralai/mistral-nemo"
 mode: "subagent"
 hidden: true
+steps: 5
 max_tokens: 8192
 ---
 

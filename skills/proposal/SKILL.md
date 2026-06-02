@@ -22,12 +22,17 @@ Light and standard proposals may skip one or more phases and rely on minimal loc
 Proposal artifacts live at:
 
 ```text
-.proposals/<unix-timestamp>-slug.md
+.proposals/<unix-timestamp>-slug/INDEX.md
 ```
 
 - `<unix-timestamp>` is seconds since epoch at artifact creation time.
 - `slug` is lowercase, hyphen-separated, and human-readable.
-- Preserve the original timestamp and slug when updating an existing proposal unless superseding it is explicitly intended.
+- The current proposal file stem becomes the proposal directory name.
+- `INDEX.md` is a table of contents only: no YAML frontmatter, status, source request, decision body, summaries, or duplicated section prose.
+- `metadata.md` owns proposal frontmatter and status metadata.
+- Each canonical proposal section lives in its own markdown file inside the proposal directory.
+- Existing historical `.proposals/*.md` proposal files remain valid read-only artifacts; do not migrate, rewrite, move, or split them unless a future accepted proposal explicitly authorizes migration.
+- Preserve the original timestamp and slug when updating an existing directory proposal unless superseding it is explicitly intended.
 
 ## Lifecycle
 
@@ -35,7 +40,7 @@ Proposal artifacts live at:
 2. **Explore** (deep): Decompose discovery into bounded worker-lane roles; launch lanes per the depth-tier lane matrix; record evidence in the ledger.
 3. **Analyze** (deep): Delegate bounded analysis lanes; synthesize findings into decision-ready tradeoffs, risks, and impact.
 4. **Specify**: Resolve blocking ambiguity with clarification markers; draft acceptance criteria as independently testable statements.
-5. **Create or update artifact**: Write the proposal to `.proposals/<unix-timestamp>-slug.md`.
+5. **Create or update artifact**: Write the proposal workspace to `.proposals/<unix-timestamp>-slug/INDEX.md` plus `metadata.md` and canonical section files.
 6. **Run embedded critique**: Delegate critique to an appropriately sized `worker-*` worker with review-mode instructions and record findings directly in the proposal.
 7. **Revise**: Incorporate user feedback and critique into the same proposal artifact.
 8. **Decision**: Mark the proposal `accepted`, `needs-clarification`, `rejected`, or `superseded`.
@@ -56,13 +61,15 @@ Choose the smallest capable worker size for each bounded task. Escalate only whe
 
 ## Proposal Artifact Format
 
-Use the shared proposal artifact skeleton at:
+Use the shared proposal workspace skeleton at:
 
 ```text
-templates/proposal-template.md
+templates/proposal-workspace/
 ```
 
-Copy the template into `.proposals/<unix-timestamp>-slug.md`, fill all placeholders, and preserve the section order unless the proposal explicitly requires a justified deviation.
+Create `.proposals/<unix-timestamp>-slug/`, copy the files from `templates/proposal-workspace/`, fill all placeholders, and preserve the canonical file map unless the proposal explicitly requires a justified deviation. Keep `INDEX.md` as a table of contents only. Put metadata/frontmatter in `metadata.md` and detailed content in section files.
+
+`templates/proposal-template.md` is retained only as a legacy reference for historical single-file proposals. Do not use it for new proposals unless recovering or reading an existing `.proposals/*.md` artifact.
 
 ## Section Guidance
 

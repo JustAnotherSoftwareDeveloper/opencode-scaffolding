@@ -100,7 +100,7 @@ Always start at the smallest capable tier. Escalate via the `delegation` skill's
 - **Prompts**: Keep `prompts/orchestrator-base.md` as the canonical lifecycle and decomposition reference. Extension prompts (like this file) must only add harness-specific content. Do not duplicate base sections.
 - **Config** (`opencode.json`): Validate after every edit with JSON syntax checking. Prefer `{env:...}` and `{file:...}` substitution over hardcoded secrets. Never commit secrets.
 - **Permissions**: Only grant `task.allow` to agents that exist in `agents/`. Remove references to non-existent agents (`explore`, `librarian`, `oracle`). Grant minimum necessary permissions.
-- **Artifacts** (`.proposals/`, `.plans/`, `.state/`, `.lessons/`): Timestamp filenames with Unix epoch. Use the plan artifact directory structure with INDEX.md. Use state files for per-step execution tracking. Use `.lessons/` for durable reusable guidance.
+- **Artifacts** (`.proposals/`, `.plans/`, `.state/`, `.lessons/`): Timestamp proposal and plan workspace directories with Unix epoch. Use `.proposals/<id>/INDEX.md` for new proposal table-of-contents entry points and `.plans/<id>/INDEX.md` for plan workspaces. Do not migrate existing historical `.proposals/*.md` files unless explicitly planned. Use state files for per-step execution tracking. Use `.lessons/` for durable reusable guidance.
 
 ## Final Response Contract
 
