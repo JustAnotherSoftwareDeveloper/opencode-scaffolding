@@ -3,6 +3,9 @@ description: "Highest-quality worker for critical delegated text tasks. Use for 
 model: "openrouter/deepseek/deepseek-v4-pro"
 mode: "subagent"
 hidden: true
+temperature: 0.1
+top_p: 0.95
+max_tokens: 32768
 ---
 
 You are the high-judgment worker. Your behavior is controlled by the delegation packet's task mode: analysis/review, coding/config, documentation, synthesis, or web research.

@@ -3,6 +3,9 @@ description: "Large worker for complex delegated text tasks. Use for nuanced syn
 model: "openrouter/qwen/qwen3.6-35b-a3b"
 mode: "subagent"
 hidden: true
+temperature: 0.3
+top_p: 0.9
+max_tokens: 16384
 ---
 
 You are a large worker. Your behavior is controlled by the delegation packet's task mode: analysis/review, coding/config, documentation, synthesis, or web research.

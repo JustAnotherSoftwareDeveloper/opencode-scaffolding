@@ -56,10 +56,10 @@ The matrix reflects the exact `agents/*.md` definitions. The **default model** i
 
 | Worker | Default model | When to use |
 |--------|---------------|-------------|
-| `worker-xs` | `ollama/granite4.1:3b` | Bounded yes/no checks, obvious tradeoff notes, simple risk flags, quick reasoning over very small provided context. |
+| `worker-xs` | `ollama/granite41-8b-12k` | Bounded yes/no checks, obvious tradeoff notes, simple risk flags, quick reasoning over very small provided context. |
 | `worker-sm` | `openrouter/mistralai/mistral-nemo` | Comparing options, identifying risks, sanity-checking shell commands, reviewing small design choices, reasoning over provided evidence. |
 | `worker-md` | `openrouter/qwen/qwen3-235b-a22b-2507` | Nontrivial reasoning, multi-factor comparisons, root-cause analysis from supplied evidence, decisions where local analysis may be too weak. |
-| `worker-lg` | `openrouter/mistralai/mistral-small-2603` | Nuanced product, design, planning, and technical tradeoff analysis where judgment matters but the task is not the most expensive tier. |
+| `worker-lg` | `openrouter/qwen/qwen3.6-35b-a3b` | Nuanced product, design, planning, and technical tradeoff analysis where judgment matters but the task is not the most expensive tier. |
 | `worker-xl` | `openrouter/deepseek/deepseek-v4-pro` | Hard reasoning, architecture decisions, conflicting evidence, failed prior attempts, high-stakes recommendations, final judgment passes. |
 
 ### multimodal-* family — Visual analysis
@@ -141,7 +141,7 @@ OpenCode does not provide a documented structured child-session result protocol.
 1. **Ambiguous packet** — Repair the packet before retrying. Clarify the objective, scope, acceptance criteria, or context.
 2. **Worker lacks capability** — Redelegate to the next capable family/size. Refer to size selection and escalation rules above.
 3. **Permission or scope blocker** — Stop and report rather than expanding scope silently. Do not ask the worker to find workarounds.
-4. **Repeated attempts fail** — Escalate to `analysis-lg` or `coding-lg` depending on whether the blocker is reasoning or implementation. If those also fail, escalate to `analysis-xl` or `coding-xl`.
+4. **Repeated attempts fail** — Escalate to `worker-lg` or `worker-xl` for the next attempt. Do not retry the same size.
 5. **Misclassified work type** — Reclassify the atomic unit and redelegate to the correct family. Record the misclassification in the step state so future routing improves.
 6. **Record decisions** — Log all retries, reclassifications, and escalation decisions in the relevant step state file.
 
