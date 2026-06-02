@@ -54,11 +54,26 @@ none | light | standard | deep
 
 ## Delegation Model
 
+### Analyst Lane Selection Rationale
+<!-- For deep proposals: justify which exploration/analysis lanes are required, recommended, or optional based on the depth-tier lane matrix. -->
+
+### Delegated Analysis Summary
+<!-- For deep proposals: summarize tradeoffs, risks, contradictions, framework-fit assessment, and decision impact from analysis lanes. -->
+
 ## Risks and Unknowns
 
 ## Discovery Results
 
+### Discovery Evidence Ledger
+<!-- For deep proposals: record source-backed findings with lane, worker, source, claim/fact, inference, assumption, confidence, relevance, fit caveat, and decision impact. -->
+
+| Lane | Worker | Source | Claim / Fact | Inference | Assumption | Confidence | Relevance | Fit Caveat | Decision Impact |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <!-- e.g., Local explorer --> | <!-- e.g., worker-sm --> | <!-- e.g., skills/proposal/SKILL.md --> | <!-- Observed fact --> | <!-- Inferred meaning --> | <!-- Stated assumption --> | <!-- High/Medium/Low --> | <!-- Why this matters --> | <!-- Limitations or staleness --> | <!-- How this influences the approach --> |
+
 ## Clarification Questions
+
+<!-- Use [NEEDS CLARIFICATION: ...] markers for unresolved blocking ambiguity. Tag as blocking (must resolve) or minor (can proceed with default). -->
 
 ## Planning Handoff
 
@@ -105,8 +120,24 @@ Out of scope:
 - parallel groups
 - delegation packet inventory
 
-## Embedded Quality Check
+## Update-vs-New Decision
+<!-- When revising a related proposal, record the decision to revise, supersede, or create a new artifact, with a brief justification. -->
+
+## Specification Quality Checklist
+<!-- Before embedded review, verify: -->
+- [ ] What/why is clearly separated from how
+- [ ] Acceptance criteria are independently testable
+- [ ] Blocking ambiguity is marked with [NEEDS CLARIFICATION: ...]
+- [ ] Minor ambiguity has recommended defaults
+- [ ] Given/When/Then scenarios are used for behavioral criteria
+- [ ] Evidence ledger (if present) has confidence and fit caveats
+- [ ] No implementation plans, task breakdowns, or runbook state
 
 ## Acceptance Criteria
+
+<!-- Provide independently verifiable checks. Use scenarios for behavior: -->
+<!-- Given <context>, When <action>, Then <outcome> -->
+
+## Embedded Quality Check
 
 ## Decision
