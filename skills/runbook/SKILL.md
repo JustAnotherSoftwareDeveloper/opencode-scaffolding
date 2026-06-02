@@ -1,6 +1,6 @@
 ---
 name: runbook
-description: Generate executable runbook directory workspaces from approved markdown plans. Use for .runbooks/<id>/main.xml (v2 default) or .runbooks/<id>/runbook.json (v1 legacy) creation, validation, state initialization, and runbook-driven execution handoff.
+description: Generate executable runbook directory workspaces from approved markdown plans. Use for .runbooks/<id>/main.xml (v3 target) creation, validation, state initialization, and runbook-driven execution handoff.
 ---
 
 # Runbook Skill
@@ -9,21 +9,27 @@ Use this skill after a markdown plan has been approved and before execution begi
 
 This skill does **not** implement requested changes directly. It converts an approved human engineering plan into an executable runbook workspace, validates that workspace, and prepares it for runbook-keyed state initialization.
 
-## Artifact Contract (v2 Default)
+## Artifact Contract (v3 Target)
 
-Runbook workspaces follow the **v2 XML format** by default:
+Runbook workspaces follow the **v3 XML/XSD-first format** as the target contract:
 
 ```text
-.runbooks/<unix-timestamp>-slug/
+.runbooks/<runbook_id>/
   main.xml
+  state.xml
   steps/
-    01-<step-slug>.xml
-    02-<step-slug>.xml
+    <step-id>.xml
+  evidence/
+    index.xml
+  snippets/
+    index.xml
+  reference/
+    index.xml
 ```
 
-The primary manifest is `main.xml`. Each step is defined in its own XML file under `steps/`, referenced by `step_ref` entries in `main.xml`.
+The primary manifest is `main.xml`. Each step is defined in its own XML file under `steps/`. The runbook-local `state.xml` replaces retired `.state/<id>/` JSON state for the new target workflow. Manifests `evidence/index.xml`, `snippets/index.xml`, and `reference/index.xml` are created by default.
 
-Legacy v1 JSON workspaces may contain `.runbooks/<id>/runbook.json`; use those only for explicit legacy compatibility.
+Legacy v1 JSON workspaces with `.runbooks/<id>/runbook.json` are deprecated and not created for new target workflows.
 
 ## Plan Intake Validation
 
@@ -37,50 +43,40 @@ Before creating a runbook, verify:
 
 If the plan is too vague to execute safely, stop and repair the plan with the `plan` skill before generating a runbook.
 
-## Runbook Generation Workflow (v2 XML Default)
+## Runbook Generation Workflow (v3 Target)
 
 1. Extract proposal and plan context.
 2. Split plan phases into bounded executable steps.
 3. Build dependency graph and parallel groups.
 4. Load `delegation` for dynamic worker family/size guidance.
-5. Create `.runbooks/<id>/main.xml` and `steps/<step-id>.xml` files using `skills/runbook/templates/main.xml` and `skills/runbook/templates/step.xml`.
+5. Create `.runbooks/<id>/main.xml`, `state.xml`, and `steps/<step-id>.xml` files using XSDs under `skills/runbook/schemas/` as the only schema/template contract.
 6. Validate with `uv run --project scripts/python validate-runbook .runbooks/<id>/main.xml`.
 7. Initialize state only when execution is authorized: `uv run --project scripts/python init-runbook-state .runbooks/<id>/main.xml`.
 
 ## XML Shape Requirements
 
-- `main.xml` root: `<runbook artifact_type="runbook" format_version="2" id="<runbook-id>">`.
+- `main.xml` root: `<runbook artifact_type="runbook" format_version="3" id="<runbook-id>">`.
 - Step references: `<step_ref id="01-step" file="steps/01-step.xml" />`.
 - Step files root: `<step id="01-step">`.
 - Paths are relative to `.runbooks/<id>/`.
 - Step references must start with `steps/`, end with `.xml`, avoid `..`, and stay within the runbook directory.
-- The runbook directory name, manifest `id`, and `state_dir` runbook ID must match.
+- The runbook directory name, manifest `id`, and `state.xml` runbook ID must match.
+- Required manifests: `evidence/index.xml`, `snippets/index.xml`, `reference/index.xml`.
 
 ## Validation
 
-v2 XML runbooks use XSD structure validation plus parser-backed invariants in `scripts/python/lib/runbook_xml.py`.
+v3 XML runbooks use XSD structure validation under `skills/runbook/schemas/` as the only schema contract, plus parser-backed invariants in `scripts/python/lib/runbook_xml.py` and `scripts/python/lib/runbook_state.py`.
 
-Validate v2 XML:
+Validation must be script-backed (Python/bash), not LLM judgment.
+
+Validate v3 XML:
 
 ```text
 uv run --project scripts/python validate-runbook .runbooks/<runbook_id>/main.xml
 uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/main.xml
 ```
 
-Validate legacy v1 JSON:
-
-```text
-uv run --project scripts/python validate-json .runbooks/<runbook_id>/runbook.json --schema skills/runbook/schema.json
-uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/runbook.json
-```
-
-Shared state validation:
-
-```text
-uv run --project scripts/python validate-json .state/<runbook_id>/metadata.json --schema skills/runbook/schemas/state-metadata.schema.json
-uv run --project scripts/python validate-json .state/<runbook_id>/MAIN.json --schema skills/runbook/schemas/state-main.schema.json
-uv run --project scripts/python validate-json .state/<runbook_id>/<step-id>.json --schema skills/runbook/schemas/state-step.schema.json
-```
+Legacy validation is not supported for new target workflows.
 
 ## Embedded Quality Check
 
@@ -91,8 +87,8 @@ Every non-trivial runbook should include or trigger an embedded quality check us
 - Do not execute implementation changes while generating the runbook.
 - Do not create `.plans/*.json` executable artifacts.
 - Do not use `init-plan-state`; use `init-runbook-state` only.
-- Do not store runbooks as single files directly under `.runbooks/`; use `.runbooks/<id>/main.xml` (v2) or `.runbooks/<id>/runbook.json` (v1 legacy).
-- Do not create new v2 runbooks with TOON; TOON support was hard-cut over to XML.
+- Do not store runbooks as single files directly under `.runbooks/`; use `.runbooks/<id>/main.xml` (v3 target).
+- Do not create new v3 runbooks with TOON or JSON; use XML/XSD-first format.
 - Do not modify worker agent names, model IDs, provider settings, or fallback ordering.
-- Do not write outside `.runbooks/`, `.state/`, or explicitly authorized harness files.
+- Do not write outside `.runbooks/`, or explicitly authorized harness files.
 - Do not hide unresolved assumptions; either encode them in the runbook or return to the plan/proposal stage.

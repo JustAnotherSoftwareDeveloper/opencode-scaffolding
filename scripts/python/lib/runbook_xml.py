@@ -1,7 +1,9 @@
-"""XML runbook loader with v2 workspace support and legacy v1 JSON compatibility.
+"""Runbook loader/validator with v3 XML target support and legacy compatibility.
 
-Canonical v2 workspaces use `.runbooks/<id>/main.xml` plus `steps/*.xml`.
-Legacy v1 workspaces continue to use `.runbooks/<id>/runbook.json`.
+Target v3 workspaces use `.runbooks/<id>/main.xml`, runbook-local
+`state.xml`, `steps/<step-id>.xml`, and manifest indexes. Legacy v1 JSON and
+transitional v2 XML are detected explicitly so imports and existing artifacts do
+not fail merely because v3 became the target contract.
 """
 
 from __future__ import annotations
@@ -48,7 +50,13 @@ class RunbookLoadResult:
     warnings: list[str] = field(default_factory=list)
 
 
-def _text(parent: etree._Element, name: str, default: str | None = "") -> str | None:
+HARNESS_ROOT = Path(__file__).resolve().parents[3]
+SCHEMA_DIR = HARNESS_ROOT / "skills" / "runbook" / "schemas"
+
+
+def _text(parent: etree._Element | None, name: str, default: str | None = "") -> str | None:
+    if parent is None:
+        return default
     child = parent.find(name)
     if child is None:
         return default
@@ -56,7 +64,9 @@ def _text(parent: etree._Element, name: str, default: str | None = "") -> str | 
     return value.strip() if value else default
 
 
-def _items(parent: etree._Element, name: str) -> list[str]:
+def _items(parent: etree._Element | None, name: str) -> list[str]:
+    if parent is None:
+        return []
     container = parent.find(name)
     if container is None:
         return []
@@ -64,27 +74,22 @@ def _items(parent: etree._Element, name: str) -> list[str]:
 
 
 def _secure_parser() -> etree.XMLParser:
-    return etree.XMLParser(
-        resolve_entities=False,
-        no_network=True,
-        load_dtd=False,
-        huge_tree=False,
-        remove_blank_text=True,
-    )
+    return etree.XMLParser(resolve_entities=False, no_network=True, load_dtd=False, huge_tree=False, remove_blank_text=True)
 
 
-def _schema_path() -> Path:
-    return Path(__file__).resolve().parents[3] / "skills" / "runbook" / "schemas" / "runbook.xsd"
+def _schema_path(name: str = "runbook.xsd") -> Path:
+    return SCHEMA_DIR / name
 
 
-def _load_schema() -> etree.XMLSchema:
+def _load_schema(name: str = "runbook.xsd") -> etree.XMLSchema:
+    path = _schema_path(name)
     try:
-        return etree.XMLSchema(etree.parse(str(_schema_path()), parser=_secure_parser()))
+        return etree.XMLSchema(etree.parse(str(path), parser=_secure_parser()))
     except (OSError, etree.XMLSyntaxError, etree.XMLSchemaParseError) as exc:
-        raise XmlValidationError(f"Failed to load runbook XSD: {exc}", path=_schema_path())
+        raise XmlValidationError(f"Failed to load {name}: {exc}", path=path)
 
 
-def _parse_xml(path: Path, expected_root: str) -> etree._Element:
+def _parse_xml(path: Path, expected_root: str, schema_name: str | None = None) -> tuple[etree._ElementTree, etree._Element]:
     try:
         tree = etree.parse(str(path), parser=_secure_parser())
     except OSError:
@@ -96,22 +101,32 @@ def _parse_xml(path: Path, expected_root: str) -> etree._Element:
     if root.tag != expected_root:
         raise XmlValidationError(f"Expected XML root <{expected_root}>, got <{root.tag}>", path=path)
 
-    schema = _load_schema()
-    if not schema.validate(tree):
-        errors = [str(error) for error in schema.error_log]
-        raise XmlValidationError("XML failed XSD validation", path=path, details={"errors": errors})
-    return root
+    if schema_name:
+        schema = _load_schema(schema_name)
+        if not schema.validate(tree):
+            errors = [str(error) for error in schema.error_log]
+            raise XmlValidationError("XML failed XSD validation", path=path, details={"errors": errors})
+    return tree, root
+
+
+def _validate_xml(path: Path, expected_root: str, schema_name: str) -> None:
+    _parse_xml(path, expected_root, schema_name)
 
 
 def detect_runbook_format(runbook_path: Path) -> int:
     if runbook_path.name == "runbook.json":
         return 1
     if runbook_path.name == "main.xml":
-        return 2
+        _, root = _parse_xml(runbook_path, "runbook", None)
+        raw = root.get("format_version")
+        try:
+            return int(raw) if raw is not None else 2
+        except ValueError:
+            raise RunbookLoadError(f"Invalid format_version on main.xml: {raw!r}", path=runbook_path)
     if runbook_path.name == "main.toon":
         raise RunbookLoadError("TOON runbooks are no longer supported; use main.xml", path=runbook_path)
     raise RunbookLoadError(
-        f"Cannot detect runbook format from filename: {runbook_path.name}. Expected 'runbook.json' (v1) or 'main.xml' (v2).",
+        f"Cannot detect runbook format from filename: {runbook_path.name}. Expected 'runbook.json' or 'main.xml'.",
         path=runbook_path,
     )
 
@@ -148,6 +163,12 @@ def validate_runbook_id_matches(runbook_data: dict[str, Any], expected_id: str, 
 
 
 def validate_state_dir(runbook_data: dict[str, Any], runbook_id: str, runbook_path: Path) -> None:
+    if runbook_data.get("format_version") == 3:
+        expected = "state.xml"
+        actual = runbook_data.get("state")
+        if actual != expected:
+            raise InvariantViolation("Invalid v3 state reference", path=runbook_path, details={"expected": expected, "actual": actual})
+        return
     expected = f"../../.state/{runbook_id}/"
     actual = runbook_data.get("state_dir")
     if actual != expected:
@@ -174,8 +195,8 @@ class StrictStepPathValidator:
         return step_path
 
 
-def _parse_step_xml(step_path: Path) -> dict[str, Any]:
-    root = _parse_xml(step_path, "step")
+def _parse_step_xml(step_path: Path, validate_xsd: bool = True) -> dict[str, Any]:
+    _, root = _parse_xml(step_path, "step", "runbook.xsd" if validate_xsd else None)
     worker = root.find("worker")
     context = root.find("context_package")
     if worker is None or context is None:
@@ -204,23 +225,17 @@ def _parse_step_xml(step_path: Path) -> dict[str, Any]:
     }
 
 
-def _parse_runbook_xml(runbook_path: Path) -> dict[str, Any]:
-    root = _parse_xml(runbook_path, "runbook")
+def _parse_runbook_xml(runbook_path: Path, format_version: int) -> dict[str, Any]:
+    _, root = _parse_xml(runbook_path, "runbook", "runbook.xsd" if format_version == 3 else None)
     delegation_map = {entry.get("role"): entry.get("worker") for entry in root.findall("delegation_map/entry")}
     steps_index = [{"id": item.get("id"), "file": item.get("file")} for item in root.findall("steps/step_ref")]
-    dep_graph = {
-        item.get("id"): [dep.get("id") for dep in item.findall("depends_on") if dep.get("id")]
-        for item in root.findall("dependency_graph/step")
-    }
-    parallel_groups = {
-        group.get("id"): [step.get("id") for step in group.findall("step") if step.get("id")]
-        for group in root.findall("parallel_groups/group")
-    }
-    state = root.find("state_initialization")
+    dep_graph = {item.get("id"): [dep.get("id") for dep in item.findall("depends_on") if dep.get("id")] for item in root.findall("dependency_graph/step")}
+    parallel_groups = {group.get("id"): [step.get("id") for step in group.findall("step") if step.get("id")] for group in root.findall("parallel_groups/group")}
     eqc = root.find("embedded_quality_check")
-    return {
+    state_init = root.find("state_initialization")
+    data: dict[str, Any] = {
         "artifact_type": root.get("artifact_type"),
-        "format_version": int(root.get("format_version", "2")),
+        "format_version": format_version,
         "id": root.get("id"),
         "title": _text(root, "title"),
         "status": _text(root, "status"),
@@ -228,7 +243,6 @@ def _parse_runbook_xml(runbook_path: Path) -> dict[str, Any]:
         "updated_at": _text(root, "updated_at"),
         "proposal": _text(root, "proposal"),
         "plan": _text(root, "plan"),
-        "state_dir": _text(root, "state_dir"),
         "active_step": _text(root, "active_step", None) or None,
         "objective": _text(root, "objective"),
         "plan_summary": _text(root, "plan_summary"),
@@ -239,24 +253,40 @@ def _parse_runbook_xml(runbook_path: Path) -> dict[str, Any]:
         "steps": steps_index,
         "dependency_graph": dep_graph,
         "parallel_groups": parallel_groups,
-        "state_initialization": {
-            "metadata_schema_version": int(_text(state, "metadata_schema_version", "1")) if state is not None else 1,
-            "require_step_files": (_text(state, "require_step_files", "true") == "true") if state is not None else True,
-            "step_file_extension": _text(state, "step_file_extension", ".json") if state is not None else ".json",
-            "main_dashboard": _text(state, "main_dashboard", "MAIN.json") if state is not None else "MAIN.json",
-        },
         "verification_gates": _items(root, "verification_gates"),
         "embedded_quality_check": {
-            "performed_by": _text(eqc, "performed_by", None) if eqc is not None else None,
-            "findings": _text(eqc, "findings", None) if eqc is not None else None,
-            "status": _text(eqc, "status", "pending") if eqc is not None else "pending",
+            "performed_by": _text(eqc, "performed_by", None),
+            "findings": _text(eqc, "findings", None),
+            "status": _text(eqc, "status", "pending"),
         },
         "rollback_recovery": _text(root, "rollback_recovery"),
         "final_report_contract": _text(root, "final_report_contract"),
     }
+    if format_version == 3:
+        data.update(
+            {
+                "state": _text(root, "state"),
+                "evidence_manifest": _text(root, "evidence_manifest", "evidence/index.xml"),
+                "snippets_manifest": _text(root, "snippets_manifest", "snippets/index.xml"),
+                "reference_manifest": _text(root, "reference_manifest", "reference/index.xml"),
+            }
+        )
+    else:
+        data.update(
+            {
+                "state_dir": _text(root, "state_dir"),
+                "state_initialization": {
+                    "metadata_schema_version": int(_text(state_init, "metadata_schema_version", "1")),
+                    "require_step_files": _text(state_init, "require_step_files", "true") == "true",
+                    "step_file_extension": _text(state_init, "step_file_extension", ".json"),
+                    "main_dashboard": _text(state_init, "main_dashboard", "MAIN.json"),
+                },
+            }
+        )
+    return data
 
 
-def load_step_files(runbook_dir: Path, steps_index: list[dict[str, Any]]) -> list[LoadedStep]:
+def load_step_files(runbook_dir: Path, steps_index: list[dict[str, Any]], validate_xsd: bool = True) -> list[LoadedStep]:
     validator = StrictStepPathValidator()
     loaded: list[LoadedStep] = []
     seen: set[str] = set()
@@ -271,7 +301,7 @@ def load_step_files(runbook_dir: Path, steps_index: list[dict[str, Any]]) -> lis
         step_path = validator.validate(runbook_dir, file_ref, f"step '{step_id}' at index {idx}")
         if not step_path.exists():
             raise InvariantViolation(f"Step file not found for '{step_id}': {file_ref}", path=runbook_dir)
-        data = _parse_step_xml(step_path)
+        data = _parse_step_xml(step_path, validate_xsd=validate_xsd)
         if data.get("id") != step_id:
             raise InvariantViolation(f"Step ID mismatch: index has '{step_id}' but file has '{data.get('id')}'", path=step_path)
         if step_path.stem != step_id:
@@ -333,19 +363,33 @@ def validate_parallel_groups(runbook_data: dict[str, Any], valid_step_ids: set[s
 
 
 def validate_required_fields(runbook_data: dict[str, Any], runbook_path: Path, format_version: int) -> None:
-    required = [
-        "id", "title", "objective", "plan_summary", "inputs", "constraints", "execution_strategy",
-        "delegation_map", "steps", "dependency_graph", "parallel_groups", "state_initialization",
-        "verification_gates", "embedded_quality_check", "rollback_recovery", "final_report_contract",
-        "status", "created_at", "updated_at", "proposal", "plan", "active_step",
+    common = [
+        "id",
+        "title",
+        "objective",
+        "plan_summary",
+        "inputs",
+        "constraints",
+        "execution_strategy",
+        "delegation_map",
+        "steps",
+        "dependency_graph",
+        "parallel_groups",
+        "verification_gates",
+        "embedded_quality_check",
+        "rollback_recovery",
+        "final_report_contract",
+        "status",
+        "created_at",
+        "updated_at",
+        "proposal",
+        "plan",
+        "active_step",
     ]
+    required = common + (["state", "evidence_manifest", "snippets_manifest", "reference_manifest"] if format_version == 3 else ["state_dir", "state_initialization"])
     for field in required:
         if field not in runbook_data:
             raise InvariantViolation(f"Runbook missing required field: '{field}'", path=runbook_path)
-    if format_version == 1 and not runbook_data.get("schema_version"):
-        raise InvariantViolation("v1 runbook must specify 'schema_version' field", path=runbook_path)
-    if format_version == 2 and runbook_data.get("format_version") != 2:
-        raise InvariantViolation("v2 runbook must specify format_version 2", path=runbook_path)
 
 
 def validate_active_step(runbook_data: dict[str, Any], valid_step_ids: set[str], runbook_path: Path) -> None:
@@ -354,12 +398,42 @@ def validate_active_step(runbook_data: dict[str, Any], valid_step_ids: set[str],
         raise InvariantViolation(f"active_step references unknown step: '{active}'", path=runbook_path)
 
 
+def _safe_workspace_ref(runbook_dir: Path, ref_path: str, expected_suffix: str, context: str) -> Path:
+    if not ref_path or ref_path.startswith("/") or ".." in ref_path.split("/") or not ref_path.endswith(expected_suffix):
+        raise InvariantViolation(f"Invalid {context} path: {ref_path}", path=runbook_dir)
+    resolved = (runbook_dir / ref_path).resolve()
+    try:
+        resolved.relative_to(runbook_dir.resolve())
+    except ValueError:
+        raise InvariantViolation(f"{context} path escapes runbook directory: {ref_path}", path=runbook_dir)
+    return resolved
+
+
+def validate_v3_workspace_xml(runbook_dir: Path, runbook_data: dict[str, Any], require_workspace_xml: bool = True) -> None:
+    state_path = _safe_workspace_ref(runbook_dir, runbook_data["state"], ".xml", "state")
+    if state_path.exists():
+        _validate_xml(state_path, "state", "state.xsd")
+    elif require_workspace_xml:
+        raise InvariantViolation(f"Required v3 state file not found: {state_path.relative_to(runbook_dir)}", path=runbook_dir)
+    manifests = [
+        ("evidence_manifest", "evidence-manifest", "evidence-manifest.xsd"),
+        ("snippets_manifest", "snippets-manifest", "snippets-manifest.xsd"),
+        ("reference_manifest", "reference-manifest", "reference-manifest.xsd"),
+    ]
+    for field, root, schema in manifests:
+        path = _safe_workspace_ref(runbook_dir, runbook_data[field], "index.xml", field)
+        if path.exists():
+            _validate_xml(path, root, schema)
+        elif require_workspace_xml:
+            raise InvariantViolation(f"Required v3 manifest not found: {path.relative_to(runbook_dir)}", path=runbook_dir)
+
+
 def merge_step_data(main_data: dict[str, Any], loaded_steps: list[LoadedStep]) -> list[dict[str, Any]]:
     by_id = {step.id: step.data for step in loaded_steps}
     return [by_id[ref["id"]] for ref in main_data.get("steps", []) if ref.get("id") in by_id]
 
 
-def load_runbook(runbook_path: str | Path, allow_unreferenced_steps: bool = False) -> RunbookLoadResult:
+def load_runbook(runbook_path: str | Path, allow_unreferenced_steps: bool = False, require_workspace_xml: bool = True) -> RunbookLoadResult:
     path = Path(runbook_path).resolve()
     format_version = detect_runbook_format(path)
     runbook_id, runbook_dir = validate_path_shape(path)
@@ -368,18 +442,22 @@ def load_runbook(runbook_path: str | Path, allow_unreferenced_steps: bool = Fals
         data = load_json_runbook(path)
         steps: list[LoadedStep] = []
     else:
-        main_data = _parse_runbook_xml(path)
+        if format_version not in {2, 3}:
+            raise RunbookLoadError(f"Unsupported XML runbook format_version: {format_version}", path=path)
+        main_data = _parse_runbook_xml(path, format_version)
         validate_runbook_id_matches(main_data, runbook_id, path)
         validate_state_dir(main_data, runbook_id, path)
-        steps = load_step_files(runbook_dir, main_data.get("steps", []))
+        steps = load_step_files(runbook_dir, main_data.get("steps", []), validate_xsd=True)
         warnings = check_unreferenced_step_files(runbook_dir, steps, allow_unreferenced_steps)
         data = dict(main_data)
         data["steps"] = merge_step_data(main_data, steps)
+        if format_version == 3:
+            validate_v3_workspace_xml(runbook_dir, data, require_workspace_xml=require_workspace_xml)
 
     validate_runbook_id_matches(data, runbook_id, path)
     validate_state_dir(data, runbook_id, path)
     validate_required_fields(data, path, format_version)
-    valid_step_ids = {step.id for step in steps} if format_version == 2 else {s.get("id") for s in data.get("steps", []) if s.get("id")}
+    valid_step_ids = {step.id for step in steps} if format_version in {2, 3} else {s.get("id") for s in data.get("steps", []) if s.get("id")}
     validate_dependency_graph(data, valid_step_ids, path)
     validate_parallel_groups(data, valid_step_ids, path)
     validate_active_step(data, valid_step_ids, path)

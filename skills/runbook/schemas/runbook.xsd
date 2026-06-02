@@ -6,6 +6,13 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Note: XSD patterns are implicitly anchored; ^ and $ are literal characters -->
+  <xs:simpleType name="stepIdType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9]{2}-[a-z0-9-]+" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="statusType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="draft" />
@@ -39,6 +46,7 @@
     </xs:sequence>
   </xs:complexType>
 
+  <!-- Step element (used in steps/<step-id>.xml) -->
   <xs:element name="step">
     <xs:complexType>
       <xs:sequence>
@@ -55,10 +63,11 @@
         <xs:element name="verification" type="xs:string" />
         <xs:element name="recovery" type="xs:string" />
       </xs:sequence>
-      <xs:attribute name="id" type="idType" use="required" />
+      <xs:attribute name="id" type="stepIdType" use="required" />
     </xs:complexType>
   </xs:element>
 
+  <!-- Runbook root element (main.xml) for format_version 3 -->
   <xs:element name="runbook">
     <xs:complexType>
       <xs:sequence>
@@ -68,13 +77,19 @@
         <xs:element name="updated_at" type="xs:string" />
         <xs:element name="proposal" type="xs:string" />
         <xs:element name="plan" type="xs:string" />
-        <xs:element name="state_dir" type="xs:string" />
-        <xs:element name="active_step" type="xs:string" minOccurs="0" />
+
+        <!-- v3: required reference to runbook-local state.xml -->
+        <xs:element name="state" type="xs:string" />
+
+        <xs:element name="active_step" type="stepIdType" minOccurs="0" />
         <xs:element name="objective" type="xs:string" />
         <xs:element name="plan_summary" type="xs:string" />
+
         <xs:element name="inputs" type="stringListType" />
         <xs:element name="constraints" type="stringListType" />
         <xs:element name="execution_strategy" type="xs:string" />
+
+        <!-- Delegation map: role -> worker family+size -->
         <xs:element name="delegation_map">
           <xs:complexType>
             <xs:sequence>
@@ -87,18 +102,22 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+
+        <!-- Step references: each step file under steps/ -->
         <xs:element name="steps">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="step_ref" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
-                  <xs:attribute name="id" type="idType" use="required" />
+                  <xs:attribute name="id" type="stepIdType" use="required" />
                   <xs:attribute name="file" type="xs:string" use="required" />
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+
+        <!-- Dependency graph: step -> depends_on step ids -->
         <xs:element name="dependency_graph">
           <xs:complexType>
             <xs:sequence>
@@ -107,16 +126,18 @@
                   <xs:sequence>
                     <xs:element name="depends_on" minOccurs="0" maxOccurs="unbounded">
                       <xs:complexType>
-                        <xs:attribute name="id" type="idType" use="required" />
+                        <xs:attribute name="id" type="stepIdType" use="required" />
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
-                  <xs:attribute name="id" type="idType" use="required" />
+                  <xs:attribute name="id" type="stepIdType" use="required" />
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+
+        <!-- Parallel groups: group -> step ids -->
         <xs:element name="parallel_groups">
           <xs:complexType>
             <xs:sequence>
@@ -125,7 +146,7 @@
                   <xs:sequence>
                     <xs:element name="step" minOccurs="0" maxOccurs="unbounded">
                       <xs:complexType>
-                        <xs:attribute name="id" type="idType" use="required" />
+                        <xs:attribute name="id" type="stepIdType" use="required" />
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
@@ -135,17 +156,16 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="state_initialization">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="metadata_schema_version" type="xs:integer" />
-              <xs:element name="require_step_files" type="xs:boolean" />
-              <xs:element name="step_file_extension" type="xs:string" />
-              <xs:element name="main_dashboard" type="xs:string" />
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
+
+        <!-- Manifest references: evidence, snippets, reference -->
+        <xs:element name="evidence_manifest" type="xs:string" minOccurs="0" />
+        <xs:element name="snippets_manifest" type="xs:string" minOccurs="0" />
+        <xs:element name="reference_manifest" type="xs:string" minOccurs="0" />
+
+        <!-- Verification gates -->
         <xs:element name="verification_gates" type="stringListType" />
+
+        <!-- Embedded quality check -->
         <xs:element name="embedded_quality_check">
           <xs:complexType>
             <xs:sequence>
@@ -155,11 +175,15 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+
+        <!-- Rollback and recovery -->
         <xs:element name="rollback_recovery" type="xs:string" />
+
+        <!-- Final report contract -->
         <xs:element name="final_report_contract" type="xs:string" />
       </xs:sequence>
       <xs:attribute name="artifact_type" type="xs:string" fixed="runbook" use="required" />
-      <xs:attribute name="format_version" type="xs:integer" fixed="2" use="required" />
+      <xs:attribute name="format_version" type="xs:integer" use="required" />
       <xs:attribute name="id" type="idType" use="required" />
     </xs:complexType>
   </xs:element>

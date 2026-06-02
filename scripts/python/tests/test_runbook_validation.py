@@ -1,4 +1,4 @@
-"""Regression tests for v1 JSON and v2 XML runbook validation."""
+"""Regression tests for legacy and v3 XML runbook validation."""
 
 from __future__ import annotations
 
@@ -149,6 +149,42 @@ def _write_v2_runbook(
     return main_file
 
 
+def _write_v3_runbook(
+    tmp_path: Path,
+    runbook_id: str = "test-v3-runbook",
+    steps: list[dict[str, Any]] | None = None,
+    *,
+    step_refs: list[dict[str, str]] | None = None,
+) -> Path:
+    steps = steps or [_step("01-example"), _step("02-another", ["01-example"])]
+    runbook_dir = tmp_path / ".runbooks" / runbook_id
+    steps_dir = runbook_dir / "steps"
+    steps_dir.mkdir(parents=True)
+    refs = step_refs or [{"id": step["id"], "file": f"steps/{step['id']}.xml"} for step in steps]
+    dep_steps = "".join(
+        f'''<step id="{step['id']}">{''.join(f'<depends_on id="{dep}" />' for dep in step['depends_on'])}</step>'''
+        for step in steps
+    )
+    ref_xml = "".join(f'<step_ref id="{ref["id"]}" file="{ref["file"]}" />' for ref in refs)
+    group_steps = "".join(f'<step id="{step["id"]}" />' for step in steps)
+    main_file = runbook_dir / "main.xml"
+    main_file.write_text(f'''<?xml version="1.0" encoding="UTF-8"?>
+<runbook artifact_type="runbook" format_version="3" id="{runbook_id}">
+  <title>Test Runbook</title><status>approved</status><created_at>2026-05-15T00:00:00Z</created_at><updated_at>2026-05-15T00:00:00Z</updated_at>
+  <proposal>../../.proposals/test.md</proposal><plan>../../.plans/test.md</plan><state>state.xml</state><active_step>{steps[0]['id'] if steps else ''}</active_step>
+  <objective>Test runbook validation</objective><plan_summary>Testing v3 runbook validation</plan_summary>
+  <inputs/><constraints/><execution_strategy>Test strategy</execution_strategy><delegation_map/>
+  <steps>{ref_xml}</steps><dependency_graph>{dep_steps}</dependency_graph><parallel_groups><group id="group-1">{group_steps}</group></parallel_groups>
+  <evidence_manifest>evidence/index.xml</evidence_manifest><snippets_manifest>snippets/index.xml</snippets_manifest><reference_manifest>reference/index.xml</reference_manifest>
+  <verification_gates/><embedded_quality_check><performed_by/><findings/><status>pending</status></embedded_quality_check>
+  <rollback_recovery>Test recovery</rollback_recovery><final_report_contract>Test contract</final_report_contract>
+</runbook>
+''', encoding="utf-8")
+    for step in steps:
+        (steps_dir / f"{step['id']}.xml").write_text(_step_xml(step), encoding="utf-8")
+    return main_file
+
+
 def test_legacy_v1_compatibility(tmp_path: Path) -> None:
     runbook_file = _write_v1_runbook(tmp_path)
     is_valid, messages = validate_runbook(runbook_file)
@@ -174,6 +210,55 @@ def test_valid_v2_xml_runbook_loads_and_seeds_state(tmp_path: Path) -> None:
     assert (state_dir / "MAIN.json").exists()
     assert (state_dir / "01-example.json").exists()
     assert (state_dir / "02-another.json").exists()
+
+
+def test_valid_v3_xml_runbook_loads_and_seeds_local_state(tmp_path: Path) -> None:
+    main_file = _write_v3_runbook(tmp_path)
+    result = load_runbook(main_file, require_workspace_xml=False)
+    assert result.runbook_id == "test-v3-runbook"
+    assert result.format_version == 3
+    assert [step.id for step in result.steps] == ["01-example", "02-another"]
+    seed_runbook_state(result.data, main_file)
+    assert (main_file.parent / "state.xml").exists()
+    assert (main_file.parent / "evidence" / "index.xml").exists()
+    assert (main_file.parent / "snippets" / "index.xml").exists()
+    assert (main_file.parent / "reference" / "index.xml").exists()
+    assert not (tmp_path / ".state" / "test-v3-runbook").exists()
+    is_valid_after_state, messages_after_state = validate_runbook(main_file)
+    assert is_valid_after_state, messages_after_state
+
+
+def test_v3_rejects_wrong_state_reference(tmp_path: Path) -> None:
+    main_file = _write_v3_runbook(tmp_path, "test-bad-state")
+    text = main_file.read_text(encoding="utf-8").replace("<state>state.xml</state>", "<state>../../.state/test-bad-state/</state>")
+    main_file.write_text(text, encoding="utf-8")
+    is_valid, messages = validate_runbook(main_file)
+    assert not is_valid
+    assert any("state" in msg.lower() for msg in messages), messages
+
+
+def test_v3_missing_state_file_fails_validation(tmp_path: Path) -> None:
+    main_file = _write_v3_runbook(tmp_path, "test-missing-state")
+    is_valid, messages = validate_runbook(main_file)
+    assert not is_valid
+    assert any("state file not found" in msg.lower() for msg in messages), messages
+
+
+def test_v3_manifest_validation_fails_for_wrong_root(tmp_path: Path) -> None:
+    main_file = _write_v3_runbook(tmp_path, "test-bad-manifest")
+    seed_runbook_state(load_runbook(main_file, require_workspace_xml=False).data, main_file)
+    (main_file.parent / "snippets" / "index.xml").write_text("<snipped-manifest />", encoding="utf-8")
+    is_valid, messages = validate_runbook(main_file)
+    assert not is_valid
+    assert any("snippets" in msg.lower() or "root" in msg.lower() or "validation" in msg.lower() for msg in messages), messages
+
+
+def test_v3_unreferenced_step_file_fails(tmp_path: Path) -> None:
+    main_file = _write_v3_runbook(tmp_path, "test-v3-unreferenced", [_step("01-example")])
+    (main_file.parent / "steps" / "02-extra.xml").write_text(_step_xml(_step("02-extra")), encoding="utf-8")
+    is_valid, messages = validate_runbook(main_file)
+    assert not is_valid
+    assert any("unreferenced" in msg.lower() for msg in messages), messages
 
 
 def test_v2_dependency_cycle_fails(tmp_path: Path) -> None:

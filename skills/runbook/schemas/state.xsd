@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Simple types -->
+  <xs:simpleType name="stepIdType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9]{2}-[a-z0-9-]+"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="statusType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="draft"/>
+      <xs:enumeration value="approved"/>
+      <xs:enumeration value="executing"/>
+      <xs:enumeration value="blocked"/>
+      <xs:enumeration value="complete"/>
+      <xs:enumeration value="superseded"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="stepStatusType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="pending"/>
+      <xs:enumeration value="in_progress"/>
+      <xs:enumeration value="completed"/>
+      <xs:enumeration value="blocked"/>
+      <xs:enumeration value="failed"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Complex types -->
+  <xs:complexType name="stepStateType">
+    <xs:sequence>
+      <xs:element name="status" type="stepStatusType"/>
+      <xs:element name="objective" type="xs:string"/>
+      <xs:element name="inputs" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="context_summary" type="xs:string" minOccurs="0"/>
+      <xs:element name="work_log" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="outputs" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="verification" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="status" type="xs:string"/>
+            <xs:element name="commands" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="details" type="xs:string" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="blockers" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="next_action" type="xs:string" minOccurs="0"/>
+      <xs:element name="worker" type="xs:string" minOccurs="0"/>
+      <xs:element name="started_at" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="completed_at" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="findings" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="design_summary" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="strictness_analysis" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" type="stepIdType" use="required"/>
+  </xs:complexType>
+
+  <!-- Root element -->
+  <xs:element name="state">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="metadata_schema_version" type="xs:integer"/>
+        <xs:element name="runbook" type="xs:string"/>
+        <xs:element name="plan" type="xs:string"/>
+        <xs:element name="proposal" type="xs:string"/>
+        <xs:element name="status" type="statusType"/>
+        <xs:element name="active_step" type="stepIdType" minOccurs="0"/>
+        <xs:element name="created_at" type="xs:dateTime"/>
+        <xs:element name="updated_at" type="xs:dateTime"/>
+        <xs:element name="steps" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="step" type="stepStateType" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="dependency_graph" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="step" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="depends_on" type="stepIdType" minOccurs="0" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                  <xs:attribute name="id" type="stepIdType" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="parallel_groups" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="group" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="step" type="stepIdType" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                  <xs:attribute name="id" type="xs:string" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="blockers" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="latest_verification" type="xs:string" minOccurs="0"/>
+        <xs:element name="worker_assignments" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="assignment" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="step" type="stepIdType" use="required"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

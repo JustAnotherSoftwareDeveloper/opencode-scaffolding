@@ -8,8 +8,8 @@ Use this lifecycle for non-trivial work:
 
 1. **Proposal** — Load `proposal` skill when scope, approach, or risk needs to be established. Artifacts: `.proposals/<unix-timestamp>-slug.md`.
 2. **Plan** — Load `plan` skill to create a human-readable engineering specification in `.plans/<unix-timestamp>-slug/INDEX.md`.
-3. **Runbook** — Load `runbook` skill to generate an executable runbook workspace from an approved plan. Current v2 artifacts: `.runbooks/<unix-timestamp>-slug/main.xml` plus `steps/<step-id>.xml`. Legacy v1 workspaces may contain `.runbooks/<id>/runbook.json`.
-4. **State initialization** — For approved or executing runbooks, run `uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/main.xml` for v2, or the selected legacy `.runbooks/<runbook_id>/runbook.json`, to seed `.state/<runbook_id>/metadata.json`, `MAIN.json`, and one `<step-id>.json` per step when required.
+3. **Runbook** — Load `runbook` skill to generate an executable v3 XML/XSD-first runbook workspace from an approved plan. Target artifacts: `.runbooks/<unix-timestamp>-slug/main.xml`, `state.xml`, `steps/<step-id>.xml`, `evidence/index.xml`, `snippets/index.xml`, and `reference/index.xml`. Legacy v1 workspaces may contain `.runbooks/<id>/runbook.json`.
+4. **State initialization** — For approved or executing v3 runbooks, run `uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/main.xml` to create/update runbook-local `state.xml` and default manifest indexes. Transitional v2 and legacy v1 artifacts may still seed `.state/<runbook_id>/` only for backward compatibility.
 5. **Execution** — Decompose work into atomic units, annotate each with a relevant skill, then load `delegation` for worker family/size selection and handoff packet construction. Use dependency graphs and parallel groups from the runbook.
 6. **Embedded quality check** — Route review and critique to appropriately sized `worker-*` workers using the `review-work` skill with review-mode instructions. Record findings in runbook state.
 7. **Retro** — Load `retro` after meaningful harness execution to identify harness improvements.
@@ -25,7 +25,7 @@ These skills are available to every orchestrator-style agent during the planning
 |-------|-------------|
 | `proposal` | Establish scope, alternatives, risks, and acceptance criteria before planning. Artifact: `.proposals/<slug>.md`. |
 | `plan` | Convert an accepted proposal into a human-readable engineering specification. Artifact: `.plans/<slug>/INDEX.md`. |
-| `runbook` | Convert an approved plan into an executable runbook workspace. Current artifact: `.runbooks/<slug>/main.xml` plus `steps/*.xml`; legacy artifact: `.runbooks/<slug>/runbook.json`. |
+| `runbook` | Convert an approved plan into an executable v3 XML/XSD-first runbook workspace: `.runbooks/<slug>/main.xml`, `state.xml`, `steps/*.xml`, and manifest indexes. legacy artifact: `.runbooks/<slug>/runbook.json`. |
 | `review-work` | Embedded critique of proposal or plan artifacts before accepting. |
 | `delegation` | Runbook-level routing guidance if the runbook needs to specify delegation patterns for steps. |
 
@@ -115,9 +115,9 @@ For runbook-driven work, each delegation should include:
 
 When executing, read the runbook first and treat it as the authoritative execution contract. If an approved plan exists but no runbook exists, load the `runbook` skill to generate `.runbooks/<id>/main.xml` plus step `.xml` files before editing. If only a legacy `.runbooks/<id>/runbook.json` exists, it remains a supported v1 contract.
 
-Runbooks live in `.runbooks/<runbook_id>/`. Current v2 workspaces use `main.xml` plus `steps/*.xml`; legacy v1 workspaces use `runbook.json`.
+Runbooks live in `.runbooks/<runbook_id>/`. Target v3 workspaces use `main.xml`, `state.xml`, `steps/*.xml`, `evidence/index.xml`, `snippets/index.xml`, and `reference/index.xml`; legacy v1 workspaces use `runbook.json`.
 
-V2 `main.xml` owns runbook-level metadata, graph, parallel groups, state initialization, verification gates, and step file refs. Each `steps/<step-id>.xml` owns one full executable step. Validate v2 workspaces with:
+V3 `main.xml` owns runbook-level metadata, graph, parallel groups, state reference, manifest references, verification gates, and step file refs. Each `steps/<step-id>.xml` owns one full executable step. Validate v3 workspaces with script-backed checks:
 
 ```text
 uv run --project scripts/python validate-runbook .runbooks/<runbook_id>/main.xml
@@ -135,7 +135,7 @@ created_at: <iso timestamp>
 updated_at: <iso timestamp>
 proposal: ../../.proposals/<unix-timestamp>-slug.md
 plan: ../../.plans/<unix-timestamp>-slug/INDEX.md
-state_dir: ../../.state/<runbook_id>/
+state_dir: ../../.state/<runbook_id>/  # legacy v1/v2 only
 active_step: 01-step-slug | null
 objective: <clear statement>
 plan_summary: <brief summary>
@@ -164,9 +164,9 @@ final_report_contract: <final report requirements>
 
 - Read relevant state before runbook-driven execution.
 - The runbook is authoritative for intended execution; state is authoritative for execution progress.
-- The orchestrator owns `.state/<runbook_id>/metadata.json` and `.state/<runbook_id>/MAIN.json`.
+- For v3 runbooks, the orchestrator owns runbook-local `state.xml`. Transitional v2 and legacy v1 may still use `.state/<runbook_id>/metadata.json` and `.state/<runbook_id>/MAIN.json` only as backward compatibility.
 - Workers may write assigned step state files only when explicitly instructed.
-- After worker output, reconcile step state, `metadata.json`, and `MAIN.json`.
+- After worker output, reconcile `state.xml` for v3, or `metadata.json` and `MAIN.json` for backward-compatible v2/v1 artifacts.
 - Every meaningful transition should update state.
 - If runbook and state differ, reconcile before continuing and record the decision in state.
 
@@ -216,9 +216,9 @@ Example command execution body:
 - Preserve existing user changes and unrelated files.
 - Keep edits minimal and reversible.
 - Use embedded quality checks (via `review-work` and `worker-*` workers with review-mode instructions) before claiming success.
-- Validate v2 runbooks with `uv run --project scripts/python validate-runbook .runbooks/<runbook-id>/main.xml`. Validate JSON/YAML artifacts with the Python validators when available: `uv run --project scripts/python validate-json <file>`, `uv run --project scripts/python validate-json <file> --schema <schema-file>`, and `uv run --project scripts/python validate-yaml <file>` for legacy YAML artifacts.
+- Validate v3 runbooks with `uv run --project scripts/python validate-runbook .runbooks/<runbook-id>/main.xml`. Validate JSON/YAML artifacts with the Python validators when available: `uv run --project scripts/python validate-json <file>`, `uv run --project scripts/python validate-json <file> --schema <schema-file>`, and `uv run --project scripts/python validate-yaml <file>` for legacy artifacts.
 - Use `retro` after meaningful harness changes.
 - Capture durable lessons when reusable guidance emerges.
-- Manage active artifacts in `.proposals/`, `.plans/`, `.runbooks/`, `.state/`, and `.lessons/`.
+- Manage active artifacts in `.proposals/`, `.plans/`, `.runbooks/`, v3 `state.xml` or legacy `.state/`, and `.lessons/`.
 - Use only configured harness subagents (`agents/*.md`) for execution and review; do not route work to unspecified/native OpenCode agents unless explicitly authorized.
 - Report what changed, what was verified, what state was updated, and what remains risky.
