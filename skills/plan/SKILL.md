@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Create human-readable markdown engineering plans from accepted proposals. Use when a proposal has been accepted and an execution blueprint is needed.
+description: Create directory-based markdown engineering plans from accepted proposals. Use when a proposal has been accepted and an execution blueprint is needed. Plans are directory workspace artifacts centered on INDEX.md.
 ---
 
 # Plan Skill
@@ -11,13 +11,15 @@ Use this skill after a proposal is accepted. Planning requires an accepted propo
 
 ## Plan Artifact Contract
 
-Plan artifacts live at:
+Plan artifacts are now directory workspace artifacts:
 
 ```text
-.plans/<unix-timestamp>-<slug>.md
+.plans/<unix-timestamp>-<slug>/INDEX.md
 ```
 
-Each plan is a **human-readable markdown file** — not a JSON executable. It serves as the complete engineering specification that a runbook skill uses to drive execution.
+Each plan is a **human-readable markdown workspace** — not a JSON executable. It serves as the complete engineering specification that a runbook skill uses to drive execution. Legacy single-file `.plans/*.md` support is not required for this workflow.
+
+The `INDEX.md` file is mandatory. Supporting markdown files are optional and may be added based on complexity when they make the plan easier to review or execute.
 
 ### Frontmatter
 
@@ -36,7 +38,7 @@ proposal: ".proposals/<timestamp>-<proposal-slug>.md"
 
 ### Required Sections
 
-The plan body must contain each of these sections. Sections that are not yet filled should state "TBD" rather than being omitted.
+The `INDEX.md` file must contain each of these sections. Sections that are not yet filled should state "TBD" rather than being omitted.
 
 | Section | Purpose |
 | --- | --- |
@@ -44,14 +46,16 @@ The plan body must contain each of these sections. Sections that are not yet fil
 | **Non-Goals** | What this plan explicitly does NOT address |
 | **Source Proposal** | Link to the accepted proposal and summary of its key decisions |
 | **Accepted Decisions** | Record of decisions made during planning itself (worker routing, sequencing, skill selection) |
-| **Current State** | Inventory of relevant existing files, artifacts, and configuration |
+| **Workspace Contents** | Structure of the plan directory, including all files and subdirectories |
+| **Current State Summary** | Summary of relevant existing artifacts, configuration, and context |
 | **Design** | Architectural or structural changes the plan will produce |
 | **Implementation Strategy** | Phases, ordering, and high-level execution approach |
+| **Skill/File Routing Summary** | Mapping of files to skills and workers, including routing logic |
 | **Artifact Impact** | Files and directories that will be created, modified, or deleted |
 | **Validation** | How correctness will be verified (tests, linting, schema validation, manual review) |
 | **Rollback / Recovery** | Steps to undo or recover if execution fails partway through |
 | **Acceptance Criteria** | Concrete, verifiable conditions that define plan completion |
-| **Runbook Generation** | Guidance for the runbook skill: worker sizing, skill dependencies, parallelization opportunities, and step boundaries |
+| **Runbook Generation Handoff** | Guidance for the runbook skill: worker sizing, skill dependencies, parallelization opportunities, and step boundaries |
 
 #### Section Detail
 
@@ -63,39 +67,59 @@ The plan body must contain each of these sections. Sections that are not yet fil
 
 **Accepted Decisions** — Planning-level decisions: which phases run in parallel, which worker families to use, which skills to load per phase, any ordering constraints. Record these so the runbook does not have to rediscover them.
 
-**Current State** — File tree, relevant config snippets, existing schema keys, dependency versions. Enough that a worker can orient without browsing the entire repository.
+**Workspace Contents** — File tree structure of the plan directory, including all files and subdirectories. Example:
+
+```
+.plans/1780404291-directory-plan-skill-upgrade/
+├── INDEX.md
+├── context.md
+├── skill-map.md
+├── validation.md
+└── runbook-handoff.md
+```
+
+**Current State Summary** — Summary of relevant existing artifacts, configuration, and context. Focus on high-level context rather than exhaustive inventory.
 
 **Design** — The "what" of the change. For a schema change: the new shapes, removed fields, migration notes. For a skill rewrite: the new prompt structure, contract, and lifecycle. Include diagrams or pseudo-code where helpful.
 
-**Implementation Strategy** — The "how" broken into coarse phases. Each phase lists the files it will touch and the skills it will need. Example:
+**Implementation Strategy** — The "how" broken into coarse phases. Each phase lists the files it will touch, the skill guidance it will need, and the validation it must pass. Example:
 
 ```
-Phase 1: Rewrite SKILL.md — touches skills/plan/SKILL.md, needs worker-sm or worker-md with documentation-mode instructions.
-Phase 2: Delete old schemas — touches skills/plan/schema.json, skills/plan/schemas/*.json.
-Phase 3: Update templates — touches skills/plan/templates/delegation-packet.md.
+Phase 1: Rewrite plan skill contract — touches `skills/plan/SKILL.md`; use `skill-hygiene` only if frontmatter or local skill framework metadata changes; otherwise use documentation-mode instructions.
+Phase 2: Add plan workspace templates — touches `skills/plan/templates/plan-workspace/*.md`; use documentation-mode instructions and keep templates non-executable.
+Phase 3: Update lifecycle references — touches prompts or commands found by inventory; use focused harness documentation-editing instructions.
 ```
+
+**Skill/File Routing Summary** — Mapping of files or workstreams to skills and how to use them. Do not hardcode a fixed worker tier as policy; defer worker sizing to the `delegation` skill during runbook execution. Example:
+
+| File / Workstream | Skill | How to use it | Do not use it for |
+| --- | --- | --- | --- |
+| `skills/plan/SKILL.md` | `skill-hygiene` when frontmatter or skill framework metadata changes | Check name/description/class hygiene and keep the skill concise. | Do not redesign unrelated skills. |
+| Plan workspace templates | none, or `skill-hygiene` for framework-sensitive template conventions | Create markdown examples that teach the plan contract. | Do not create executable runbook templates. |
+| Runbook handoff | `delegation` during execution | Select the smallest capable configured worker for each atomic runbook unit. | Do not hardcode static worker tiers in the plan. |
+| Embedded review | `review-work` | Review changed artifacts for prompt quality, scope, permission safety, and missing verification. | Do not turn review into new implementation scope. |
 
 **Artifact Impact** — Table of files with create/modify/delete action:
 
 | File | Action |
 | --- | --- |
 | `skills/plan/SKILL.md` | modify |
-| `skills/plan/schema.json` | delete |
-| `skills/plan/schemas/*.json` | delete |
+| `skills/plan/templates/plan-workspace/INDEX.md` | create |
+| `skills/plan/templates/plan-workspace/skill-map.md` | create if needed |
 
-**Validation** — Concrete commands or procedures. Example: "Run `ls skills/plan/schema.json` — must report 'No such file'. Grep new `SKILL.md` for 'init-plan-state' — must find zero matches."
+**Validation** — Concrete commands or procedures. Example: "Search changed files for `.plans/*.md` — active current/future plan instructions must not use the legacy single-file shape. Grep new `SKILL.md` for `init-plan-state` — must find zero matches."
 
-**Rollback / Recovery** — For each file deletion or modification, describe how to undo it. Example: "Restore deleted schemas from git: `git checkout HEAD -- skills/plan/schema.json`."
+**Rollback / Recovery** — For each file deletion or modification, describe how to undo it. Example: "Restore the previous plan skill contract from git: `git checkout HEAD -- skills/plan/SKILL.md`."
 
 **Acceptance Criteria** — Bullet list of pass/fail conditions, each objectively verifiable.
 
-**Runbook Generation** — Notes for the runbook skill: preferred worker sizes, parallel groups, dependency ordering, skill loading instructions. This section is consumed by the runbook skill, not by workers directly. Example:
+**Runbook Generation Handoff** — Notes for the runbook skill: work types, dependency ordering, parallelization opportunities, skill loading instructions, and context packages. This section is consumed by the runbook skill, not by workers directly. Example:
 
 ```
-- Phase 1 (worker, size sm, documentation mode): rewrite SKILL.md
-- Phase 2 (bash, size xs): delete schema.json and state schemas
-- Phases 1 and 2 are serial (Phase 2 depends on Phase 1)
-- Load lesson-writer after all phases complete
+- Phase 1: rewrite `skills/plan/SKILL.md`; work type documentation; load `skill-hygiene` only if metadata changes.
+- Phase 2: create plan workspace templates; work type documentation; no executable artifacts.
+- Phase 3: update path references; work type documentation/config-safe editing; inventory determines file scope.
+- Load `delegation` during runbook execution to choose worker sizes for each atomic unit.
 ```
 
 ## Proposal Intake
@@ -112,13 +136,27 @@ Before creating a plan, the skill must:
    - Risks → inform **Rollback / Recovery**
    - Acceptance criteria → feed into **Acceptance Criteria**
 
+## Authoring Standard
+
+Plans must follow senior-dev-to-intern authoring standard:
+
+- Write so a competent intern can execute the plan with minimal supervision.
+- Include concrete examples for every required section.
+- Specify exact file paths, command syntax, and expected outputs.
+- Avoid vague terms like "various", "some", or "several" — use specific counts or lists.
+- For worker sizing in runbook handoff, use dynamic sizing via the delegation skill rather than hardcoding static sizes.
+
 ## Rules
 
 - Do not implement changes while using this skill.
 - Do not create `.plans/*.json` executable artifacts.
-- Do not reference `schema_version`, `init-plan-state`, `skills/plan/schema.json`, or plan state schemas — these were removed from the plan skill in the plan-runbook-lifecycle change (May 2026).
+- Do not reference `schema_version`, `init-plan-state`, or plan state schemas — these were removed from the plan skill in the plan-runbook-lifecycle change (May 2026).
 - Do not delegate vague work; rewrite vague sections until a worker could execute them.
 - Do not create separate review artifacts.
 - Do not write new artifacts outside `.proposals/`, `.plans/`, or `.lessons/` unless explicitly authorized.
 - For non-trivial execution routing, load the **runbook** skill after the plan is approved.
 - Include validation gates, rollback and recovery even for small changes.
+- Use **skill-hygiene** for skill metadata and frontmatter changes.
+- Use **review-work** for reviewing completed work.
+- Use **delegation** for dynamic worker sizing and task routing during runbook execution.
+- Use **runbook** skill only after plan approval and validation.

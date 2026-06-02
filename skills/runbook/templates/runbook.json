@@ -7,7 +7,7 @@
   "created_at": "2023-01-01T00:00:00Z",
   "updated_at": "2023-01-01T00:00:00Z",
   "proposal": "../../.proposals/1778770202-plan-runbook-lifecycle.md",
-  "plan": "../../.plans/1778772412-runbook-example.md",
+  "plan": "../../.plans/1778772412-runbook-example/INDEX.md",
   "state_dir": "../../.state/1778772412-runbook-example/",
   "active_step": null,
   "objective": "Clear statement of what this runbook intends to accomplish",

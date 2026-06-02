@@ -80,8 +80,8 @@
     },
     "plan": {
       "type": "string",
-      "pattern": "^\\.\\.\\/\\.\\.\\/\\.plans\\/[0-9]+-[a-z0-9-]+\\.md$",
-      "description": "Path from .runbooks/<id>/runbook.json to the source markdown engineering plan artifact."
+      "pattern": "^\\.\\.\\/\\.\\.\\/\\.plans\\/[0-9]+-[a-z0-9-]+\\/INDEX\\.md$",
+      "description": "Path from .runbooks/<id>/runbook.json to the source markdown engineering plan INDEX.md artifact."
     },
     "state_dir": {
       "type": "string",

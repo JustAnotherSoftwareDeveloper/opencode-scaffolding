@@ -5,7 +5,7 @@
   <created_at>created-iso-timestamp</created_at>
   <updated_at>created-iso-timestamp</updated_at>
   <proposal>../../.proposals/proposal-id.md</proposal>
-  <plan>../../.plans/plan-id.md</plan>
+  <plan>../../.plans/plan-id/INDEX.md</plan>
   <state_dir>../../.state/runbook-id/</state_dir>
   <active_step />
   <objective>Clear statement of what this runbook intends to accomplish</objective>

@@ -12,7 +12,7 @@ Generate a plan from a proposal slug. If no slug is provided, use the most recen
 1. Locate `.proposals/<slug>.md` (or the full path if given).
 2. Verify the proposal has `status: accepted` in its frontmatter.
 3. Load the `plan` skill.
-4. Create `.plans/<unix-timestamp>-slug.md` from the proposal.
+4. Create `.plans/<unix-timestamp>-slug/INDEX.md` from the proposal.
 5. Run embedded quality check via `worker-*` with review-mode instructions.
 6. Report the artifact path, status, and next step (runbook).
 

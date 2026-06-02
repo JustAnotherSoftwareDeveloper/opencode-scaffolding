@@ -29,7 +29,7 @@ Legacy v1 JSON workspaces may contain `.runbooks/<id>/runbook.json`; use those o
 
 Before creating a runbook, verify:
 
-1. The plan path exists and matches `.plans/<timestamp>-slug.md`.
+1. The plan path exists and matches `.plans/<timestamp>-slug/INDEX.md`.
 2. The plan is a markdown engineering specification produced by the `plan` skill.
 3. The plan frontmatter has `status: approved` or the user explicitly authorizes runbook generation.
 4. The plan links to an accepted proposal.

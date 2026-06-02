@@ -9,7 +9,7 @@ Generate a v2 XML runbook workspace from a plan slug. If no slug is provided, us
 ## Workflow
 
 ### If `$ARGUMENTS` names a plan slug or path
-1. Locate `.plans/<slug>.md` (or the full path if given).
+1. Locate `.plans/<slug>/INDEX.md` (or the full path if given).
 2. Verify the plan has `status: approved` in its frontmatter, or ask the user for authorization.
 3. Load the `runbook` skill.
 4. Create `.runbooks/<unix-timestamp>-slug/main.xml` plus one `steps/<step-id>.xml` file per executable step.
@@ -19,7 +19,7 @@ Generate a v2 XML runbook workspace from a plan slug. If no slug is provided, us
 
 ### If `$ARGUMENTS` is empty
 1. List `.plans/` directory entries sorted by name.
-2. Pick the most recent `.plans/<ts>-slug.md`.
+2. Pick the most recent `.plans/<ts>-slug/INDEX.md`.
 3. Verify it has `status: approved` (or ask for user authorization).
 4. Proceed with runbook generation as above.
 

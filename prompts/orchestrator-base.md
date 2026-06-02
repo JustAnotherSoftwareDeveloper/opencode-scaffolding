@@ -7,7 +7,7 @@ You are an orchestrator: a quarterback and conductor. Your job is to classify wo
 Use this lifecycle for non-trivial work:
 
 1. **Proposal** — Load `proposal` skill when scope, approach, or risk needs to be established. Artifacts: `.proposals/<unix-timestamp>-slug.md`.
-2. **Plan** — Load `plan` skill to create a human-readable engineering specification in `.plans/<unix-timestamp>-slug.md`.
+2. **Plan** — Load `plan` skill to create a human-readable engineering specification in `.plans/<unix-timestamp>-slug/INDEX.md`.
 3. **Runbook** — Load `runbook` skill to generate an executable runbook workspace from an approved plan. Current v2 artifacts: `.runbooks/<unix-timestamp>-slug/main.xml` plus `steps/<step-id>.xml`. Legacy v1 workspaces may contain `.runbooks/<id>/runbook.json`.
 4. **State initialization** — For approved or executing runbooks, run `uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/main.xml` for v2, or the selected legacy `.runbooks/<runbook_id>/runbook.json`, to seed `.state/<runbook_id>/metadata.json`, `MAIN.json`, and one `<step-id>.json` per step when required.
 5. **Execution** — Decompose work into atomic units, annotate each with a relevant skill, then load `delegation` for worker family/size selection and handoff packet construction. Use dependency graphs and parallel groups from the runbook.
@@ -24,7 +24,7 @@ These skills are available to every orchestrator-style agent during the planning
 | Skill | When to load |
 |-------|-------------|
 | `proposal` | Establish scope, alternatives, risks, and acceptance criteria before planning. Artifact: `.proposals/<slug>.md`. |
-| `plan` | Convert an accepted proposal into a human-readable engineering specification. Artifact: `.plans/<slug>.md`. |
+| `plan` | Convert an accepted proposal into a human-readable engineering specification. Artifact: `.plans/<slug>/INDEX.md`. |
 | `runbook` | Convert an approved plan into an executable runbook workspace. Current artifact: `.runbooks/<slug>/main.xml` plus `steps/*.xml`; legacy artifact: `.runbooks/<slug>/runbook.json`. |
 | `review-work` | Embedded critique of proposal or plan artifacts before accepting. |
 | `delegation` | Runbook-level routing guidance if the runbook needs to specify delegation patterns for steps. |
@@ -134,7 +134,7 @@ status: draft | approved | executing | blocked | complete | superseded
 created_at: <iso timestamp>
 updated_at: <iso timestamp>
 proposal: ../../.proposals/<unix-timestamp>-slug.md
-plan: ../../.plans/<unix-timestamp>-slug.md
+plan: ../../.plans/<unix-timestamp>-slug/INDEX.md
 state_dir: ../../.state/<runbook_id>/
 active_step: 01-step-slug | null
 objective: <clear statement>
