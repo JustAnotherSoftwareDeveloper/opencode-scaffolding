@@ -1,6 +1,6 @@
 ---
 description: "Medium worker for nontrivial delegated text tasks. Use for moderate synthesis, bounded implementation, normal reviews, and multi-part work."
-model: "openrouter/deepseek/deepseek-v4-flash"
+model: "openrouter/qwen/qwen3-235b-a22b-2507"
 mode: "subagent"
 hidden: true
 ---

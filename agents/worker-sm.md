@@ -1,6 +1,6 @@
 ---
 description: "Small worker for bounded delegated text tasks. Use for short explanations, simple comparisons, small edits, scoped reviews, and compact synthesis."
-model: "openrouter/poolside/laguna-xs.2:free"
+model: "openrouter/mistralai/mistral-nemo"
 mode: "subagent"
 hidden: true
 ---

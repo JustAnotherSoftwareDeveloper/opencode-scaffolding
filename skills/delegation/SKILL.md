@@ -57,8 +57,8 @@ The matrix reflects the exact `agents/*.md` definitions. The **default model** i
 | Worker | Default model | When to use |
 |--------|---------------|-------------|
 | `worker-xs` | `ollama/granite4.1:3b` | Bounded yes/no checks, obvious tradeoff notes, simple risk flags, quick reasoning over very small provided context. |
-| `worker-sm` | `ollama/qwen3-8b-12k` | Comparing options, identifying risks, sanity-checking shell commands, reviewing small design choices, reasoning over provided evidence. |
-| `worker-md` | `openrouter/deepseek/deepseek-v4-flash` | Nontrivial reasoning, multi-factor comparisons, root-cause analysis from supplied evidence, decisions where local analysis may be too weak. |
+| `worker-sm` | `openrouter/mistralai/mistral-nemo` | Comparing options, identifying risks, sanity-checking shell commands, reviewing small design choices, reasoning over provided evidence. |
+| `worker-md` | `openrouter/qwen/qwen3-235b-a22b-2507` | Nontrivial reasoning, multi-factor comparisons, root-cause analysis from supplied evidence, decisions where local analysis may be too weak. |
 | `worker-lg` | `openrouter/mistralai/mistral-small-2603` | Nuanced product, design, planning, and technical tradeoff analysis where judgment matters but the task is not the most expensive tier. |
 | `worker-xl` | `openrouter/deepseek/deepseek-v4-pro` | Hard reasoning, architecture decisions, conflicting evidence, failed prior attempts, high-stakes recommendations, final judgment passes. |
 
