@@ -18,10 +18,10 @@ After plan approval, load the `runbook` skill to convert this plan workspace int
 - <Step boundary, objective, and files in scope.>
 - <Step boundary, objective, and files in scope.>
 
-## Dependency And Parallelization Notes
+## Dependency And Serial Sequencing Notes
 
 - <Dependency that must run first.>
-- <Steps that may run in parallel because file scopes do not overlap.>
+- Execute all phases serially; each phase's result must be reconciled before starting the next.
 
 ## Delegation Notes
 

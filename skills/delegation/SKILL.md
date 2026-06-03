@@ -56,9 +56,9 @@ The matrix reflects the exact `agents/*.md` definitions. The **default model** i
 
 | Worker | Default model | When to use |
 |--------|---------------|-------------|
-| `worker-xs` | `ollama/granite41-8b-12k` | Bounded yes/no checks, obvious tradeoff notes, simple risk flags, quick reasoning over very small provided context. |
-| `worker-sm` | `openrouter/mistralai/mistral-nemo` | Comparing options, identifying risks, sanity-checking shell commands, reviewing small design choices, reasoning over provided evidence. |
-| `worker-md` | `openrouter/qwen/qwen3-235b-a22b-2507` | Nontrivial reasoning, multi-factor comparisons, root-cause analysis from supplied evidence, decisions where local analysis may be too weak. |
+| `worker-xs` | `ollama/worker-xs-local` | Bounded yes/no checks, obvious tradeoff notes, simple risk flags, quick reasoning over very small provided context. |
+| `worker-sm` | `ollama/worker-sm-local` | Comparing options, identifying risks, sanity-checking shell commands, reviewing small design choices, reasoning over provided evidence. |
+| `worker-md` | `ollama/worker-md-local` | Nontrivial reasoning, multi-factor comparisons, root-cause analysis from supplied evidence, and moderate bounded decisions. |
 | `worker-lg` | `openrouter/qwen/qwen3.6-35b-a3b` | Nuanced product, design, planning, and technical tradeoff analysis where judgment matters but the task is not the most expensive tier. |
 | `worker-xl` | `openrouter/deepseek/deepseek-v4-pro` | Hard reasoning, architecture decisions, conflicting evidence, failed prior attempts, high-stakes recommendations, final judgment passes. |
 
@@ -76,7 +76,7 @@ Choose the smallest size that matches the task's scope, risk, ambiguity, and cos
 |------|----------|------------|
 | `xs` | Exact, supplied-context work: extraction, naming, formatting, tiny summaries, simple checks, one explicit low-risk helper/fix. | Discovery, open-ended reasoning, multi-file edits, final judgment, source-critical research. |
 | `sm` | Bounded local work: short synthesis, simple comparisons, small docs, narrow clear-context edits, small design/risk checks. | Architecture decisions, ambiguous debugging, multi-file refactors, high-risk review. |
-| `md` | Nontrivial but bounded work: moderate synthesis, normal research, several related edits, root-cause analysis, tasks where local workers may be weak. | High-stakes architecture/final judgment, large refactors, long-horizon debugging. |
+| `md` | Nontrivial but bounded work: moderate synthesis, normal research, several related edits, root-cause analysis, and local-first analysis before cloud escalation. | High-stakes architecture/final judgment, large refactors, long-horizon debugging. |
 | `lg` | Complex or nuanced work: planning/tradeoff analysis, source-critical synthesis, significant refactors, polished guides, difficult bugs. | Routine mechanical work that can be split smaller. |
 | `xl` | Highest-risk work: architecture decisions, conflicting evidence, failed prior attempts, high-stakes recommendations, hard repo work. | Routine drafting or small fixes. |
 
@@ -92,7 +92,7 @@ Choose the smallest size that matches the task's scope, risk, ambiguity, and cos
 ### When to De-Escalate (choose a smaller size)
 
 1. **Oversized packet**: if the packet asked for a `worker-xl` analysis but the atomic unit is trivially bounded (one short file, low risk), downgrade to `worker-sm` or `worker-xs`.
-2. **Local worker sufficient**: if the task can be handled by an Ollama worker (`worker-xs` or `worker-sm`) without quality loss, prefer it over a cloud worker (`worker-md` or larger). This saves cost and keeps work offline.
+2. **Local worker sufficient**: if the task can be handled by a local Ollama worker (`worker-xs`, `worker-sm`, or `worker-md`) without quality loss, prefer it over a cloud worker (`worker-lg` or larger). This saves cost and keeps work offline.
 3. **Subtask decomposition**: after a `worker-xl` worker produces a plan, delegate subsequent execution subtasks to appropriately smaller workers.
 
 ## Handoff Prompt Construction

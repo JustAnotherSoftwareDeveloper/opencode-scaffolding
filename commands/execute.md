@@ -13,7 +13,7 @@ Initialize state and execute a runbook. If no runbook slug is provided, use the 
 2. Verify the runbook has `status: approved`, or ask the user for authorization.
 3. Read the runbook as the authoritative execution contract.
 4. Initialize state with the selected source: `uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/main.xml` for v3/v2 XML, or `.runbooks/<runbook_id>/runbook.json` only for legacy v1. For v3, this creates or updates runbook-local `state.xml` and default manifest indexes.
-5. Execute each step according to the runbook dependency graph and parallel groups:
+5. Execute each step according to the runbook dependency graph, dispatching worker delegations serially—one delegated worker at most in flight—then reconcile state after each delegation completes.
    - Decompose steps into atomic units.
    - Load the `delegation` skill to select worker family/size per unit.
    - Route work via `task` to configured harness subagents.

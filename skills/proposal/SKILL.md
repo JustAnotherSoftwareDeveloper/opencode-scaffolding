@@ -98,7 +98,7 @@ Use the following depth tiers to determine the appropriate level of effort:
 | `none` | Trivial/direct execution; no proposal needed | None | None | Direct execution without proposal |
 | `light` | Narrow, low-risk change with a short proposal | Minimal local check (file existence, constraints) | None | No formal handoff required |
 | `standard` | Normal non-trivial harness/product/code change | Local discovery of files, constraints, and conventions | Optional, for syntax/config conventions or comparable examples | Handoff section required |
-| `deep` | Ambiguous, architecture-sensitive, high-risk, or cross-cutting change | Parallel local analysis/research to stabilize understanding | External research as needed for standards or breaking changes | Full handoff with traceability into plan gates |
+| `deep` | Ambiguous, architecture-sensitive, high-risk, or cross-cutting change | Serial local analysis/research to stabilize understanding | External research as needed for standards or breaking changes | Full handoff with traceability into plan gates |
 
 Use `none` for trivial tasks (e.g., typo fixes, surface changes). Use `light` for narrow changes in one file. Use `standard` for normal non-trivial work. Use `deep` for architecture-sensitive or harness-wide changes.
 
@@ -249,7 +249,7 @@ Out of scope:
 ### Required Planning Analysis
 - problem breakdown
 - dependency graph
-- parallel groups
+- serial sequencing analysis
 - delegation packet inventory
 ```
 

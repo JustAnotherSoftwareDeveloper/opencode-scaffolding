@@ -49,5 +49,5 @@ Out of scope:
 
 - problem breakdown
 - dependency graph
-- parallel groups
+- serial sequencing analysis
 - delegation packet inventory

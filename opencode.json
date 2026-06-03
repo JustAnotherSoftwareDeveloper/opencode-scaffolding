@@ -61,6 +61,15 @@
         },
         "granite41-8b-12k": {
           "name": "Granite 4.1 8B 12K"
+        },
+        "worker-xs-local": {
+          "name": "Worker XS Local"
+        },
+        "worker-sm-local": {
+          "name": "Worker SM Local"
+        },
+        "worker-md-local": {
+          "name": "Worker MD Local"
         }
       }
     }

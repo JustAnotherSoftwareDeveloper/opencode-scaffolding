@@ -47,11 +47,15 @@ If the plan is too vague to execute safely, stop and repair the plan with the `p
 
 1. Extract proposal and plan context.
 2. Split plan phases into bounded executable steps.
-3. Build dependency graph and parallel groups.
+3. Build dependency graph and serial sequencing order (one step at a time; no parallel dispatch).
 4. Load `delegation` for dynamic worker family/size guidance.
 5. Create `.runbooks/<id>/main.xml`, `state.xml`, and `steps/<step-id>.xml` files using XSDs under `skills/runbook/schemas/` as the only schema/template contract.
 6. Validate with `uv run --project scripts/python validate-runbook .runbooks/<id>/main.xml`.
 7. Initialize state only when execution is authorized: `uv run --project scripts/python init-runbook-state .runbooks/<id>/main.xml`.
+
+## Execution Model
+
+Runbooks use **strict serial execution**. Steps are ordered by the dependency graph and dispatched one at a time. The `dependency_graph` element encodes precedence constraints; it is **not** a parallel dispatch mechanism. There are no executable parallel groups.
 
 ## XML Shape Requirements
 

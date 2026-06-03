@@ -55,7 +55,7 @@ The `INDEX.md` file must contain each of these sections. Sections that are not y
 | **Validation** | How correctness will be verified (tests, linting, schema validation, manual review) |
 | **Rollback / Recovery** | Steps to undo or recover if execution fails partway through |
 | **Acceptance Criteria** | Concrete, verifiable conditions that define plan completion |
-| **Runbook Generation Handoff** | Guidance for the runbook skill: worker sizing, skill dependencies, parallelization opportunities, and step boundaries |
+| **Runbook Generation Handoff** | Guidance for the runbook skill: worker sizing, skill dependencies, serial sequencing requirements, and step boundaries |
 
 #### Section Detail
 
@@ -65,7 +65,7 @@ The `INDEX.md` file must contain each of these sections. Sections that are not y
 
 **Source Proposal** — Link to `.proposals/<timestamp>-<slug>/INDEX.md` for proposal workspaces, or to a historical `.proposals/<timestamp>-<slug>.md` artifact when planning from an existing legacy proposal. Summarize the accepted decisions that drive this plan.
 
-**Accepted Decisions** — Planning-level decisions: which phases run in parallel, which worker families to use, which skills to load per phase, any ordering constraints. Record these so the runbook does not have to rediscover them.
+**Accepted Decisions** — Planning-level decisions: which phase ordering is required, which worker families to use, which skills to load per phase, and any serial sequencing constraints. Record these so the runbook does not have to rediscover them.
 
 **Workspace Contents** — File tree structure of the plan directory, including all files and subdirectories. Example:
 
@@ -113,7 +113,7 @@ Phase 3: Update lifecycle references — touches prompts or commands found by in
 
 **Acceptance Criteria** — Bullet list of pass/fail conditions, each objectively verifiable.
 
-**Runbook Generation Handoff** — Notes for the runbook skill: work types, dependency ordering, parallelization opportunities, skill loading instructions, and context packages. This section is consumed by the runbook skill, not by workers directly. Example:
+**Runbook Generation Handoff** — Notes for the runbook skill: work types, dependency ordering, serial sequencing requirements, skill loading instructions, and context packages. This section is consumed by the runbook skill, not by workers directly. Example:
 
 ```
 - Phase 1: rewrite `skills/plan/SKILL.md`; work type documentation; load `skill-hygiene` only if metadata changes.

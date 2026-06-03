@@ -10,7 +10,7 @@ Use this lifecycle for non-trivial work:
 2. **Plan** — Load `plan` skill to create a human-readable engineering specification in `.plans/<unix-timestamp>-slug/INDEX.md`.
 3. **Runbook** — Load `runbook` skill to generate an executable v3 XML/XSD-first runbook workspace from an approved plan. Target artifacts: `.runbooks/<unix-timestamp>-slug/main.xml`, `state.xml`, `steps/<step-id>.xml`, `evidence/index.xml`, `snippets/index.xml`, and `reference/index.xml`. Legacy v1 workspaces may contain `.runbooks/<id>/runbook.json`.
 4. **State initialization** — For approved or executing v3 runbooks, run `uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/main.xml` to create/update runbook-local `state.xml` and default manifest indexes. Transitional v2 and legacy v1 artifacts may still seed `.state/<runbook_id>/` only for backward compatibility.
-5. **Execution** — Decompose work into atomic units, annotate each with a relevant skill, then load `delegation` for worker family/size selection and handoff packet construction. Use dependency graphs and parallel groups from the runbook.
+5. **Execution** — Decompose work into atomic units, annotate each with a relevant skill, then load `delegation` for worker family/size selection and handoff packet construction. Execute steps serially: the orchestrator has at most one delegated worker in flight; consume and reconcile each worker result before dispatching the next.
 6. **Embedded quality check** — Route review and critique to appropriately sized `worker-*` workers using the `review-work` skill with review-mode instructions. Record findings in runbook state.
 7. **Retro** — Load `retro` after meaningful harness execution to identify harness improvements.
 8. **Lesson capture** — Load `lesson-writer` when reusable session guidance emerges. Artifacts: `.lessons/<unix-timestamp>-slug.md`.
@@ -64,7 +64,7 @@ For each atomic unit:
 
 ### Aggressive Delegation
 
-Default to delegation when work can be parallelized, requires a different capability, benefits from independent judgment, or needs an embedded quality check.
+Default to delegation when work requires a different capability, benefits from independent judgment, or needs an embedded quality check. Execute delegations serially—one delegated worker at most in flight—reconcile each result before dispatching the next.
 
 ### Routing Source of Truth
 
@@ -117,7 +117,7 @@ When executing, read the runbook first and treat it as the authoritative executi
 
 Runbooks live in `.runbooks/<runbook_id>/`. Target v3 workspaces use `main.xml`, `state.xml`, `steps/*.xml`, `evidence/index.xml`, `snippets/index.xml`, and `reference/index.xml`; legacy v1 workspaces use `runbook.json`.
 
-V3 `main.xml` owns runbook-level metadata, graph, parallel groups, state reference, manifest references, verification gates, and step file refs. Each `steps/<step-id>.xml` owns one full executable step. Validate v3 workspaces with script-backed checks:
+V3 `main.xml` owns runbook-level metadata, dependency graph for ordering, state reference, manifest references, verification gates, and step file refs. Each `steps/<step-id>.xml` owns one full executable step. Validate v3 workspaces with script-backed checks:
 
 ```text
 uv run --project scripts/python validate-runbook .runbooks/<runbook_id>/main.xml
@@ -144,7 +144,7 @@ constraints: [<constraint-descriptions>]
 execution_strategy: <high-level description>
 delegation_map: {<role>: <worker-family-size>}
 dependency_graph: {<step-id>: [<dependent-step-ids>]}
-parallel_groups: {<group-id>: [<step-ids>]}
+serial_execution: one delegated worker in flight; consume and reconcile before the next delegation
 steps: [<step-objects>]
 state_initialization:
   metadata_schema_version: <int>

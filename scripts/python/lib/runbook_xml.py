@@ -204,7 +204,6 @@ def _parse_step_xml(step_path: Path, validate_xsd: bool = True) -> dict[str, Any
     return {
         "id": root.get("id"),
         "depends_on": _items(root, "depends_on"),
-        "parallel_group": _text(root, "parallel_group"),
         "worker": {"family": worker.get("family"), "size": worker.get("size")},
         "skill": _text(root, "skill", None) or None,
         "minimum_capable_tier": _text(root, "minimum_capable_tier"),
@@ -230,7 +229,6 @@ def _parse_runbook_xml(runbook_path: Path, format_version: int) -> dict[str, Any
     delegation_map = {entry.get("role"): entry.get("worker") for entry in root.findall("delegation_map/entry")}
     steps_index = [{"id": item.get("id"), "file": item.get("file")} for item in root.findall("steps/step_ref")]
     dep_graph = {item.get("id"): [dep.get("id") for dep in item.findall("depends_on") if dep.get("id")] for item in root.findall("dependency_graph/step")}
-    parallel_groups = {group.get("id"): [step.get("id") for step in group.findall("step") if step.get("id")] for group in root.findall("parallel_groups/group")}
     eqc = root.find("embedded_quality_check")
     state_init = root.find("state_initialization")
     data: dict[str, Any] = {
@@ -252,7 +250,6 @@ def _parse_runbook_xml(runbook_path: Path, format_version: int) -> dict[str, Any
         "delegation_map": delegation_map,
         "steps": steps_index,
         "dependency_graph": dep_graph,
-        "parallel_groups": parallel_groups,
         "verification_gates": _items(root, "verification_gates"),
         "embedded_quality_check": {
             "performed_by": _text(eqc, "performed_by", None),
@@ -355,13 +352,6 @@ def validate_dependency_graph(runbook_data: dict[str, Any], valid_step_ids: set[
             visit(step_id, visited, set())
 
 
-def validate_parallel_groups(runbook_data: dict[str, Any], valid_step_ids: set[str], runbook_path: Path) -> None:
-    for group, steps in runbook_data.get("parallel_groups", {}).items():
-        for step_id in steps:
-            if step_id not in valid_step_ids:
-                raise InvariantViolation(f"Parallel group '{group}' references unknown step: '{step_id}'", path=runbook_path)
-
-
 def validate_required_fields(runbook_data: dict[str, Any], runbook_path: Path, format_version: int) -> None:
     common = [
         "id",
@@ -374,7 +364,6 @@ def validate_required_fields(runbook_data: dict[str, Any], runbook_path: Path, f
         "delegation_map",
         "steps",
         "dependency_graph",
-        "parallel_groups",
         "verification_gates",
         "embedded_quality_check",
         "rollback_recovery",
@@ -459,7 +448,6 @@ def load_runbook(runbook_path: str | Path, allow_unreferenced_steps: bool = Fals
     validate_required_fields(data, path, format_version)
     valid_step_ids = {step.id for step in steps} if format_version in {2, 3} else {s.get("id") for s in data.get("steps", []) if s.get("id")}
     validate_dependency_graph(data, valid_step_ids, path)
-    validate_parallel_groups(data, valid_step_ids, path)
     validate_active_step(data, valid_step_ids, path)
     return RunbookLoadResult(runbook_id=runbook_id, format_version=format_version, source_path=path, data=data, steps=steps, warnings=warnings)
 

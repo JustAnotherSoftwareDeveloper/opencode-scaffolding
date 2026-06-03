@@ -51,7 +51,6 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element name="depends_on" type="stringListType" />
-        <xs:element name="parallel_group" type="xs:string" />
         <xs:element name="worker" type="workerType" />
         <xs:element name="skill" type="xs:string" minOccurs="0" />
         <xs:element name="minimum_capable_tier" type="xs:string" />
@@ -131,26 +130,6 @@
                     </xs:element>
                   </xs:sequence>
                   <xs:attribute name="id" type="stepIdType" use="required" />
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-
-        <!-- Parallel groups: group -> step ids -->
-        <xs:element name="parallel_groups">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="group" minOccurs="0" maxOccurs="unbounded">
-                <xs:complexType>
-                  <xs:sequence>
-                    <xs:element name="step" minOccurs="0" maxOccurs="unbounded">
-                      <xs:complexType>
-                        <xs:attribute name="id" type="stepIdType" use="required" />
-                      </xs:complexType>
-                    </xs:element>
-                  </xs:sequence>
-                  <xs:attribute name="id" type="xs:string" use="required" />
                 </xs:complexType>
               </xs:element>
             </xs:sequence>

@@ -71,7 +71,6 @@ def seed_runbook_local_state(runbook_data: Any, runbook_path: Path) -> Path:
 
     step_xml = []
     dep_xml = []
-    group_xml = []
     assignment_xml = []
     for step in steps:
         step_id = step.get("id")
@@ -97,11 +96,6 @@ def seed_runbook_local_state(runbook_data: Any, runbook_path: Path) -> Path:
     </step>''')
         assignment_xml.append(f'''    <assignment step="{escape(step_id)}">{escape(worker)}</assignment>''')
 
-    for group, group_steps in runbook_data.get("parallel_groups", {}).items():
-        items = "".join(f"\n        <step>{escape(str(step_id))}</step>" for step_id in group_steps)
-        group_xml.append(f'''    <group id="{escape(str(group))}">{items}
-    </group>''')
-
     state_xml = f'''<?xml version="1.0" encoding="UTF-8"?>
 <state>
   <metadata_schema_version>1</metadata_schema_version>
@@ -117,9 +111,6 @@ def seed_runbook_local_state(runbook_data: Any, runbook_path: Path) -> Path:
   <dependency_graph>
 {chr(10).join(dep_xml)}
   </dependency_graph>
-  <parallel_groups>
-{chr(10).join(group_xml)}
-  </parallel_groups>
   <worker_assignments>
 {chr(10).join(assignment_xml)}
   </worker_assignments>
@@ -182,7 +173,6 @@ def seed_runbook_state(runbook_data: Any, runbook_path: Path, state_dir: Path | 
         "updated_at": timestamp,
         "steps": step_statuses,
         "dependency_graph": runbook_data.get("dependency_graph", {}),
-        "parallel_groups": runbook_data.get("parallel_groups", {}),
         "blockers": [],
         "latest_verification": None,
     }

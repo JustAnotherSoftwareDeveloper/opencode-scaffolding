@@ -15,7 +15,6 @@ def _step(step_id: str, depends_on: list[str] | None = None) -> dict[str, Any]:
     return {
         "id": step_id,
         "depends_on": depends_on or [],
-        "parallel_group": "group-1",
         "worker": {"family": "coding", "size": "md"},
         "skill": None,
         "minimum_capable_tier": "md",
@@ -58,7 +57,6 @@ def _runbook_data(runbook_id: str, steps: list[dict[str, Any]]) -> dict[str, Any
         "delegation_map": {},
         "steps": steps,
         "dependency_graph": {},
-        "parallel_groups": {"group-1": step_ids} if step_ids else {},
         "state_initialization": {
             "metadata_schema_version": 1,
             "require_step_files": True,
@@ -82,7 +80,6 @@ def _step_xml(step: dict[str, Any]) -> str:
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <step id="{step['id']}">
   <depends_on>{_items(step['depends_on'])}</depends_on>
-  <parallel_group>{escape(step['parallel_group'])}</parallel_group>
   <worker family="{step['worker']['family']}" size="{step['worker']['size']}" />
   <skill>{escape(skill)}</skill>
   <minimum_capable_tier>{escape(step['minimum_capable_tier'])}</minimum_capable_tier>
@@ -130,7 +127,6 @@ def _write_v2_runbook(
         for step in steps
     )
     ref_xml = "".join(f'<step_ref id="{ref["id"]}" file="{ref["file"]}" />' for ref in refs)
-    group_steps = "".join(f'<step id="{step["id"]}" />' for step in steps)
     main_file = runbook_dir / "main.xml"
     main_file.write_text(f'''<?xml version="1.0" encoding="UTF-8"?>
 <runbook artifact_type="runbook" format_version="2" id="{runbook_id}">
@@ -138,7 +134,7 @@ def _write_v2_runbook(
   <proposal>../../.proposals/test.md</proposal><plan>../../.plans/test.md</plan><state_dir>{state_dir or f'../../.state/{runbook_id}/'}</state_dir><active_step>{steps[0]['id'] if steps else ''}</active_step>
   <objective>Test runbook validation</objective><plan_summary>Testing runbook validation</plan_summary>
   <inputs/><constraints/><execution_strategy>Test strategy</execution_strategy><delegation_map/>
-  <steps>{ref_xml}</steps><dependency_graph>{dep_steps}</dependency_graph><parallel_groups><group id="group-1">{group_steps}</group></parallel_groups>
+  <steps>{ref_xml}</steps><dependency_graph>{dep_steps}</dependency_graph>
   <state_initialization><metadata_schema_version>1</metadata_schema_version><require_step_files>true</require_step_files><step_file_extension>.json</step_file_extension><main_dashboard>MAIN.json</main_dashboard></state_initialization>
   <verification_gates/><embedded_quality_check><performed_by/><findings/><status>pending</status></embedded_quality_check>
   <rollback_recovery>Test recovery</rollback_recovery><final_report_contract>Test contract</final_report_contract>
@@ -166,7 +162,6 @@ def _write_v3_runbook(
         for step in steps
     )
     ref_xml = "".join(f'<step_ref id="{ref["id"]}" file="{ref["file"]}" />' for ref in refs)
-    group_steps = "".join(f'<step id="{step["id"]}" />' for step in steps)
     main_file = runbook_dir / "main.xml"
     main_file.write_text(f'''<?xml version="1.0" encoding="UTF-8"?>
 <runbook artifact_type="runbook" format_version="3" id="{runbook_id}">
@@ -174,7 +169,7 @@ def _write_v3_runbook(
   <proposal>../../.proposals/test.md</proposal><plan>../../.plans/test.md</plan><state>state.xml</state><active_step>{steps[0]['id'] if steps else ''}</active_step>
   <objective>Test runbook validation</objective><plan_summary>Testing v3 runbook validation</plan_summary>
   <inputs/><constraints/><execution_strategy>Test strategy</execution_strategy><delegation_map/>
-  <steps>{ref_xml}</steps><dependency_graph>{dep_steps}</dependency_graph><parallel_groups><group id="group-1">{group_steps}</group></parallel_groups>
+  <steps>{ref_xml}</steps><dependency_graph>{dep_steps}</dependency_graph>
   <evidence_manifest>evidence/index.xml</evidence_manifest><snippets_manifest>snippets/index.xml</snippets_manifest><reference_manifest>reference/index.xml</reference_manifest>
   <verification_gates/><embedded_quality_check><performed_by/><findings/><status>pending</status></embedded_quality_check>
   <rollback_recovery>Test recovery</rollback_recovery><final_report_contract>Test contract</final_report_contract>
