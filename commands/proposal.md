@@ -1,5 +1,5 @@
 ---
-description: Load the proposal skill and start a deep proposal for the given topic, selecting appropriate worker lanes and running delegated exploration/analysis before drafting.
+description: Load the proposal skill and start a deep proposal for the given topic, running delegated exploration/analysis with worker-md before drafting.
 ---
 
 Load skill `proposal`, then create a proposal artifact for:
@@ -10,9 +10,9 @@ Load skill `proposal`, then create a proposal artifact for:
 
 1. Load the `proposal` skill.
 2. Classify intent and depth for the request above.
-3. Run discovery (local file inventory, prior art, conventions). For `deep` proposals, select the appropriate worker lanes from the proposal skill's depth-tier lane matrix and run delegated exploration/analysis before drafting.
+3. Run discovery (local file inventory, prior art, conventions). For `deep` proposals, run delegated exploration/analysis with `worker-md` before drafting.
 4. Create `.proposals/<unix-timestamp>-slug/INDEX.md` as a table of contents only, plus `metadata.md` and the canonical section files from the proposal workspace template, including lane rationale, evidence, analysis, and clarification markers in their section files when applicable.
-5. Run embedded quality check via `worker-*` with review-mode instructions.
+5. Run embedded quality check via `worker-md` with review-mode instructions.
 6. Report the artifact path, status, key tradeoffs, and next user decision.
 
 ## Constraints

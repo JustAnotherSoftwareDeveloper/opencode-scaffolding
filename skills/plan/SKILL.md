@@ -90,13 +90,13 @@ Phase 2: Add plan workspace templates — touches `skills/plan/templates/plan-wo
 Phase 3: Update lifecycle references — touches prompts or commands found by inventory; use focused harness documentation-editing instructions.
 ```
 
-**Skill/File Routing Summary** — Mapping of files or workstreams to skills and how to use them. Do not hardcode a fixed worker tier as policy; defer worker sizing to the `delegation` skill during runbook execution. Example:
+**Skill/File Routing Summary** — Mapping of files or workstreams to skills and how to use them. Defer worker sizing to the `delegation` skill during runbook execution: there is a single text worker (`worker-md`) plus optional visual exception support via `multimodal-looker`.
 
 | File / Workstream | Skill | How to use it | Do not use it for |
 | --- | --- | --- | --- |
 | `skills/plan/SKILL.md` | `skill-hygiene` when frontmatter or skill framework metadata changes | Check name/description/class hygiene and keep the skill concise. | Do not redesign unrelated skills. |
 | Plan workspace templates | none, or `skill-hygiene` for framework-sensitive template conventions | Create markdown examples that teach the plan contract. | Do not create executable runbook templates. |
-| Runbook handoff | `delegation` during execution | Select the smallest capable configured worker for each atomic runbook unit. | Do not hardcode static worker tiers in the plan. |
+| Runbook handoff | `delegation` during execution | Select the appropriate worker (`worker-md`) for each atomic unit. | Do not hardcode static worker tiers in the plan. |
 | Embedded review | `review-work` | Review changed artifacts for prompt quality, scope, permission safety, and missing verification. | Do not turn review into new implementation scope. |
 
 **Artifact Impact** — Table of files with create/modify/delete action:

@@ -30,10 +30,10 @@ Out of scope:
 
 ## Suggested Delegation / Skills
 
-- discovery: worker-* with generic-mode instructions
-- analysis: worker-* with review-mode instructions
-- implementation: worker-* with coding-mode instructions
-- docs/templates: worker-* with documentation-mode instructions
+- discovery: worker-md with generic-mode instructions
+- analysis: worker-md with review-mode instructions
+- implementation: worker-md with coding-mode instructions
+- docs/templates: worker-md with documentation-mode instructions
 
 ## OpenCode Docs Required for Handoff / Delegation Design
 

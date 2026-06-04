@@ -34,7 +34,7 @@ Fields:
 - `debug`: logs missing or stale lease details with `console.warn`.
 - `mode`: `reject` throws immediately when a provider is full; `queue` waits for a slot.
 - `providerLimits`: provider to max concurrent `task` calls. Set a provider value to `null` to make that provider explicitly unlimited, for example `{ "openrouter": null }`.
-- `agentProviderOverrides`: agent name to provider, for example `{ "worker-xs": "ollama" }`.
+- `agentProviderOverrides`: agent name to provider, for example `{ "worker-md": "ollama" }`.
 - `agentModelOverrides`: agent name to model string with provider prefix, for example `{ "worker-md": "ollama/worker-md-local" }`.
 - `queueTimeoutMs`: max queue wait before throwing in `queue` mode. Set to `null` for no queue timeout.
 - `staleLeaseMs`: age after which a lease can be cleaned up before another same-provider acquire. Set to `0` to disable stale cleanup.
@@ -52,19 +52,15 @@ If no provider is found, the provider has no configured limit, or the provider l
 
 ## Local Examples
 
-Current worker examples in this config:
+Current configured text worker in this config:
 
-- `worker-xs`: `ollama/worker-xs-local`, so it resolves to `ollama`.
-- `worker-sm`: `ollama/worker-sm-local`, so it resolves to `ollama`.
 - `worker-md`: `ollama/worker-md-local`, so it resolves to `ollama`.
 
-Equivalent explicit overrides:
+Equivalent explicit override:
 
 ```json
 {
   "agentModelOverrides": {
-    "worker-xs": "ollama/worker-xs-local",
-    "worker-sm": "ollama/worker-sm-local",
     "worker-md": "ollama/worker-md-local"
   }
 }

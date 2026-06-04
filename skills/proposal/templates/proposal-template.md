@@ -69,7 +69,7 @@ none | light | standard | deep
 
 | Lane | Worker | Source | Claim / Fact | Inference | Assumption | Confidence | Relevance | Fit Caveat | Decision Impact |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| <!-- e.g., Local explorer --> | <!-- e.g., worker-sm --> | <!-- e.g., skills/proposal/SKILL.md --> | <!-- Observed fact --> | <!-- Inferred meaning --> | <!-- Stated assumption --> | <!-- High/Medium/Low --> | <!-- Why this matters --> | <!-- Limitations or staleness --> | <!-- How this influences the approach --> |
+| <!-- e.g., Local explorer --> | <!-- e.g., worker-md --> | <!-- e.g., skills/proposal/SKILL.md --> | <!-- Observed fact --> | <!-- Inferred meaning --> | <!-- Stated assumption --> | <!-- High/Medium/Low --> | <!-- Why this matters --> | <!-- Limitations or staleness --> | <!-- How this influences the approach --> |
 
 ## Clarification Questions
 
@@ -100,10 +100,10 @@ Out of scope:
 - ...
 
 ### Suggested Delegation / Skills
-- discovery: worker-* with generic-mode instructions
-- analysis: worker-* with review-mode instructions
-- implementation: worker-* with coding-mode instructions
-- docs/templates: worker-* with documentation-mode instructions
+- discovery: worker-md with generic-mode instructions
+- analysis: worker-md with review-mode instructions
+- implementation: worker-md with coding-mode instructions
+- docs/templates: worker-md with documentation-mode instructions
 
 ### OpenCode Docs Required for Handoff / Delegation Design
 - Agents: <https://opencode.ai/docs/agents/>

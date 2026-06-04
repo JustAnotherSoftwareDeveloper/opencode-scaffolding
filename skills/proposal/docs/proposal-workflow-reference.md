@@ -121,9 +121,9 @@ A markdown document with the following sections:
 | Lane | Worker | Source | Claim / Fact | Inference | Assumption | Confidence | Relevance | Fit Caveat | Decision Impact |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Local explorer | worker-md | skills/runbook/SKILL.md | The current runbook skill uses XML format for state management | The XML format is deeply integrated into the runbook lifecycle | None | High | High | None | Supports maintaining XML format due to integration depth |
-| External reference explorer | worker-lg | https://raw.githubusercontent.com/opensoft/oh-my-opencode/dev/sisyphus-prompt.md | Sisyphus uses a strong Phase 0 intent gate and parallel exploration/research | We could improve our proposal workflow with more structured exploration phases | Sisyphus concepts can be adapted without adopting its agents | Medium | High | Sisyphus uses different agent names and categories that don't match our configured workers | Supports adding structured exploration to proposals, but using our existing worker tiers |
+| External reference explorer | worker-md | https://raw.githubusercontent.com/opensoft/oh-my-opencode/dev/sisyphus-prompt.md | Sisyphus uses a strong Phase 0 intent gate and parallel exploration/research | We could improve our proposal workflow with more structured exploration phases | Sisyphus concepts can be adapted without adopting its agents | Medium | High | Sisyphus uses different agent names and categories that don't match our configured worker | Supports adding structured exploration to proposals using the configured text worker |
 | Historical explorer | worker-md | .proposals/1778883198-xml-runbook-format-replacement.md | A previous proposal considered replacing XML format but was rejected due to migration complexity | Similar migration concerns would apply to any format change | The migration complexity assessment is still valid | High | High | None | Strengthens the case for incremental improvement over format replacement |
-| Adversarial / gap analyst | worker-lg | Internal analysis | The proposal underestimates the risk of format migration | A full migration would require changes to runbook state initialization, validation, and execution | None | High | High | None | Requires adding stronger risk mitigation strategies to the proposal |
+| Adversarial / gap analyst | worker-md | Internal analysis | The proposal underestimates the risk of format migration | A full migration would require changes to runbook state initialization, validation, and execution | None | High | High | None | Requires adding stronger risk mitigation strategies to the proposal |
 
 ## Depth-Tier Lane Matrix
 
@@ -168,8 +168,8 @@ Example return format:
 - External reference suggests full replacement is common, but our constraints make this risky
 
 ## Framework-fit Assessment
-- Sisyphus delegation concepts are valuable but must be adapted to our existing `worker-*` tiers
-- We cannot adopt OMO's agent names or categories as they don't match our configured workers
+- Sisyphus delegation concepts are valuable but must be adapted to the configured text worker
+- We cannot adopt OMO's agent names or categories as they don't match our configured worker model
 
 ## Decision Impact
 Recommend incremental improvement approach with a phased migration strategy to address both short-term needs and long-term goals.
@@ -221,4 +221,4 @@ Use this checklist to ensure proposal quality before the embedded critique phase
 
 ## Important Reminder
 
-**Explorer and analyst lanes are roles, not new agents.** These labels represent proposal-phase activities that are implemented using existing `worker-*` tiers and the `delegation` skill. No new worker agents, agent families, or provider configurations are created by this workflow. The `delegation` skill remains the canonical source of truth for worker routing and sizing.
+**Explorer and analyst lanes are roles, not new agents.** These labels represent proposal-phase activities that are implemented using the configured text worker and the `delegation` skill. No new worker agents, agent families, or provider configurations are created by this workflow. The `delegation` skill remains the canonical source of truth for worker routing and handoff construction.

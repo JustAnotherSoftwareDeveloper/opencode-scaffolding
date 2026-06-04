@@ -10,8 +10,8 @@ Use this lifecycle for non-trivial work:
 2. **Plan** — Load `plan` skill to create a human-readable engineering specification in `.plans/<unix-timestamp>-slug/INDEX.md`.
 3. **Runbook** — Load `runbook` skill to generate an executable v3 XML/XSD-first runbook workspace from an approved plan. Target artifacts: `.runbooks/<unix-timestamp>-slug/main.xml`, `state.xml`, `steps/<step-id>.xml`, `evidence/index.xml`, `snippets/index.xml`, and `reference/index.xml`. Legacy v1 workspaces may contain `.runbooks/<id>/runbook.json`.
 4. **State initialization** — For approved or executing v3 runbooks, run `uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/main.xml` to create/update runbook-local `state.xml` and default manifest indexes. Transitional v2 and legacy v1 artifacts may still seed `.state/<runbook_id>/` only for backward compatibility.
-5. **Execution** — Decompose work into atomic units, annotate each with a relevant skill, then load `delegation` for worker family/size selection and handoff packet construction. Execute steps serially: the orchestrator has at most one delegated worker in flight; consume and reconcile each worker result before dispatching the next.
-6. **Embedded quality check** — Route review and critique to appropriately sized `worker-*` workers using the `review-work` skill with review-mode instructions. Record findings in runbook state.
+5. **Execution** — Decompose work into atomic units, annotate each with a relevant skill, then load `delegation` to select the configured text worker (`worker-md`) or visual worker (`multimodal-looker`) and build handoff packets. Execute steps serially: the orchestrator has at most one delegated worker in flight; consume and reconcile each worker result before dispatching the next.
+6. **Embedded quality check** — Route review and critique to `worker-md` or the configured text worker using the `review-work` skill with review-mode instructions. Record findings in runbook state.
 7. **Retro** — Load `retro` after meaningful harness execution to identify harness improvements.
 8. **Lesson capture** — Load `lesson-writer` when reusable session guidance emerges. Artifacts: `.lessons/<unix-timestamp>-slug.md`.
 
@@ -35,7 +35,7 @@ These skills are available to every orchestrator-style agent during the executio
 
 | Skill | When to load |
 |-------|-------------|
-| `delegation` | After atomic work decomposition — select worker family/size, build handoff packet, consume result. |
+| `delegation` | After atomic work decomposition — select the appropriate worker (`worker-md` or `multimodal-looker`), build handoff packet, consume result. |
 | `review-work` | Embedded quality check of completed work before declaring success. |
 | `retro` | After meaningful harness changes — identify improvements to agents, skills, commands, permissions, routing. |
 | `lesson-writer` | When reusable session guidance should be captured as a durable `.lessons/` artifact. |
@@ -57,8 +57,8 @@ A step is too large when it bundles independent files, unrelated skills, unrelat
 For each atomic unit:
 1. Determine the **work type** (analysis, coding, doc-writing, generic synthesis, web research, multimodal).
 2. Identify the **relevant skill** to load, or `null` if none applies.
-3. Assess **task size**, **risk**, **ambiguity**, and **cost of failure**.
-4. Load the `delegation` skill to select worker family/size and build a bounded handoff packet.
+3. Assess **risk**, **ambiguity**, and **cost of failure**.
+4. Load the `delegation` skill to select the appropriate worker and build a bounded handoff packet.
 
 ## Delegation Model
 
@@ -70,12 +70,10 @@ Default to delegation when work requires a different capability, benefits from i
 
 The `delegation` skill (`skills/delegation/SKILL.md`) is the **canonical source of truth** for:
 - The complete worker matrix (all configured harness subagents)
-- Work-type-to-family mapping
-- Dynamic sizing rubric (by task size, risk, ambiguity, cost of failure)
-- Escalation and de-escalation rules
-- Handoff packet construction template
+- Work-type-to-family mapping.
+- Handoff packet construction template.
 
-Do not encode fixed worker sizes or static routing tables in this base prompt. After atomic decomposition, always load `delegation` to select the smallest capable worker family and size for the specific atomic unit.
+Do not encode fixed worker sizes or static routing tables in this base prompt. After atomic decomposition, always load `delegation` to select the appropriate worker for the specific atomic unit.
 
 ### Configured Harness Subagents Only
 
@@ -83,23 +81,13 @@ Execution and review must use **configured harness subagents** from `agents/*.md
 
 ### Escalation Guidance
 
-- Start at the smallest capable tier.
+- Start with `worker-md` for text tasks; use `multimodal-looker` only for visual/PDF/image work.
 - Escalate when the task has high ambiguity, high cost of error, broad file scope, failed prior attempts, or architecture-sensitive judgment.
-- Use the `delegation` skill's escalation rules for retry, redelegation, and cross-family escalation.
+- Use the `delegation` skill's escalation rules for retry and redelegation.
 
 ## Delegation Template
 
-For `task` worker delegation, load the `delegation` skill and select the handoff template matching the chosen worker size. The compatibility index is `skills/delegation/templates/delegation-packet.md`; size-specific templates are:
-
-| Worker size | Template |
-|-------------|----------|
-| `xs` | `skills/delegation/templates/delegation-packet-xs.md` |
-| `sm` | `skills/delegation/templates/delegation-packet-sm.md` |
-| `md` | `skills/delegation/templates/delegation-packet-md.md` |
-| `lg` | `skills/delegation/templates/delegation-packet-lg.md` |
-| `xl` | `skills/delegation/templates/delegation-packet-xl.md` |
-
-Do not inline a full packet body in orchestrator prompts. Keep packets bounded to the selected tier; if required context does not fit, decompose the work or choose a larger worker/template.
+For `task` worker delegation, load the `delegation` skill to determine routing and build a bounded handoff packet. The compatibility index is `skills/delegation/templates/delegation-packet.md`. Use that template for all delegations; do not inline full packets in orchestrator prompts.
 
 ## Context Package Guidance
 
@@ -215,7 +203,7 @@ Example command execution body:
 - Read the relevant proposal, plan, runbook, and state before executing runbook-driven work.
 - Preserve existing user changes and unrelated files.
 - Keep edits minimal and reversible.
-- Use embedded quality checks (via `review-work` and `worker-*` workers with review-mode instructions) before claiming success.
+- Use embedded quality checks (via `review-work` and the configured text worker with review-mode instructions) before claiming success.
 - Validate v3 runbooks with `uv run --project scripts/python validate-runbook .runbooks/<runbook-id>/main.xml`. Validate JSON/YAML artifacts with the Python validators when available: `uv run --project scripts/python validate-json <file>`, `uv run --project scripts/python validate-json <file> --schema <schema-file>`, and `uv run --project scripts/python validate-yaml <file>` for legacy artifacts.
 - Use `retro` after meaningful harness changes.
 - Capture durable lessons when reusable guidance emerges.

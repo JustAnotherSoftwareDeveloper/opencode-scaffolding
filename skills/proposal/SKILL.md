@@ -28,9 +28,25 @@ Proposal artifacts live at:
 - `<unix-timestamp>` is seconds since epoch at artifact creation time.
 - `slug` is lowercase, hyphen-separated, and human-readable.
 - The current proposal file stem becomes the proposal directory name.
-- `INDEX.md` is a table of contents only: no YAML frontmatter, status, source request, decision body, summaries, or duplicated section prose.
-- `metadata.md` owns proposal frontmatter and status metadata.
-- Each canonical proposal section lives in its own markdown file inside the proposal directory.
+- **Required workspace files (13 total)**: Every future proposal workspace must contain exactly these markdown files:
+
+  | File | Purpose |
+  | --- | --- |
+  | `INDEX.md` | Table of contents only; no frontmatter, status, or duplicated prose. |
+  | `metadata.md` | Proposal frontmatter and status metadata owner. |
+  | `goal.md` | Outcome definition and success criteria. |
+  | `problem-opportunity.md` | Current state (under "Current State" heading) plus problem/opportunity statement. |
+  | `scope.md` | In-scope/out-of-scope boundaries. |
+  | `recommended-approach.md` | Preferred path with rationale. |
+  | `alternatives-considered.md` | Viable alternatives comparison and rejection reasons. |
+  | `risks-and-unknowns.md` | Uncertainty, compatibility concerns, and mitigations. |
+  | `acceptance-criteria.md` | Independently verifiable success checks (Given/When/Then for behavior). |
+  | `decision.md` | Status (`draft`/`accepted`/etc.), decision maker, next action, quality-check summary. |
+  | `clarification-questions.md` | Blocking unknowns; explicitly state "None required" when applicable. |
+  | `artifact-and-state-impact.md` | Files/artifact paths that will be created or modified later. |
+  | `discovery-results.md` | Source-backed evidence ledger, lane rationale, and delegated analysis summary (if any). |
+
+- File presence is **not** gated by ambiguity, depth tier, or proposal type; all 13 files are required for every future workspace. Use "None" / "Not applicable" content when a section has nothing to report.
 - Existing historical `.proposals/*.md` proposal files remain valid read-only artifacts; do not migrate, rewrite, move, or split them unless a future accepted proposal explicitly authorizes migration.
 - Preserve the original timestamp and slug when updating an existing directory proposal unless superseding it is explicitly intended.
 
@@ -38,56 +54,49 @@ Proposal artifacts live at:
 
 1. **Classify intent and depth**: Determine proposal depth tier and intent classification before drafting.
 2. **Explore** (deep): Decompose discovery into bounded worker-lane roles; launch lanes per the depth-tier lane matrix; record evidence in the ledger.
-3. **Analyze** (deep): Delegate bounded analysis lanes; synthesize findings into decision-ready tradeoffs, risks, and impact.
+3. **Analyze** (deep): Delegate bounded analysis lanes; synthesize findings into decision-ready tradeoffs, risks, and impact. For deep proposals that require harness-wide or architecture-sensitive analysis, delegate to `worker-md` with the proposal-skill's lane topology guidance.
 4. **Specify**: Resolve blocking ambiguity with clarification markers; draft acceptance criteria as independently testable statements.
 5. **Create or update artifact**: Write the proposal workspace to `.proposals/<unix-timestamp>-slug/INDEX.md` plus `metadata.md` and canonical section files.
-6. **Run embedded critique**: Delegate critique to an appropriately sized `worker-*` worker with review-mode instructions and record findings directly in the proposal.
+6. **Run embedded critique**: Delegate critique to `worker-md` with review-mode instructions and record findings directly in the proposal.
 7. **Revise**: Incorporate user feedback and critique into the same proposal artifact.
 8. **Decision**: Mark the proposal `accepted`, `needs-clarification`, `rejected`, or `superseded`.
 9. **Return summary**: Report artifact path, status, key tradeoffs, and the next user decision.
 
 ## Routing
 
-Worker sizing and escalation are governed by the `delegation` skill, which is the **canonical source of truth** for the configured worker matrix, dynamic sizing, and handoff packet construction. This skill describes lane intent; it does not duplicate the worker matrix.
+Worker sizing and escalation are governed by the `delegation` skill, which is the **canonical source of truth** for the configured worker matrix. This skill describes lane intent; it does not duplicate the full worker configuration.
 
 | Work | Worker Family | Purpose |
 | --- | --- | --- |
-| Local discovery | `worker-*` with generic-mode instructions | Inventory files, conventions, and constraints |
-| External research | `worker-*` with web-research-mode instructions | Gather current source-backed information |
-| Proposal drafting and revision | `worker-*` with documentation-mode instructions | Write clear proposal prose |
-| Embedded critique | `worker-*` with review-mode instructions | Identify gaps, risks, and acceptance problems |
+| Local discovery | `worker-md` with generic-mode instructions | Inventory files, conventions, and constraints |
+| External research | `worker-md` with web-research-mode instructions | Gather current source-backed information |
+| Proposal drafting and revision | `worker-md` with documentation-mode instructions | Write clear proposal prose |
+| Embedded critique | `worker-md` with review-mode instructions | Identify gaps, risks, and acceptance problems |
 
-Choose the smallest capable worker size for each bounded task. Escalate only when scope, ambiguity, or risk requires it. See the **Delegated Analysis Contract** section for deep-proposal lane sizing guidance.
+Choose the appropriate worker for each bounded task.
 
 ## Proposal Artifact Format
 
-Use the shared proposal workspace skeleton at:
-
-```text
-templates/proposal-workspace/
-```
-
-Create `.proposals/<unix-timestamp>-slug/`, copy the files from `templates/proposal-workspace/`, fill all placeholders, and preserve the canonical file map unless the proposal explicitly requires a justified deviation. Keep `INDEX.md` as a table of contents only. Put metadata/frontmatter in `metadata.md` and detailed content in section files.
+Create `.proposals/<unix-timestamp>-slug/` with all 13 required files as specified in the Artifact Contract section. Each file should document its respective concern using the linked guidance above. When a section has no meaningful contribution for the current proposal (e.g., deep-lane work not triggered), explicitly state "None" or "Not applicable to this proposal."
 
 `templates/proposal-template.md` is retained only as a legacy reference for historical single-file proposals. Do not use it for new proposals unless recovering or reading an existing `.proposals/*.md` artifact.
 
 ## Section Guidance
 
-- **Goal**: Restate the outcome and what success means.
-- **Intent Classification**: Classify work type, risk, needed research, needed discovery, and whether user choices are required.
-- **Current State**: Summarize discovered facts, exact files, conventions, and constraints.
-- **Problem / Opportunity**: Explain the pain or improvement target.
-- **In Scope / Out of Scope**: Draw explicit boundaries.
-- **Recommended Approach**: State the preferred path and why it is the smallest correct direction.
-- **Alternatives Considered**: Compare viable alternatives and explain why they are not preferred.
-- **Artifact and State Impact**: Identify files, artifact paths, and state areas that will be created or modified later.
-- **Delegation Model**: Identify worker families, skills, and review approach at a high level; detailed steps belong in a plan.
-- **Risks and Unknowns**: Capture uncertainty, compatibility concerns, permission concerns, state drift, and user choices.
-- **Discovery Evidence Ledger** (deep): Record source-backed findings with lane, source, claim/fact, inference, assumption, confidence, relevance, fit caveat, and decision impact.
-- **Delegated Analysis Summary** (deep): Record tradeoffs, risks, contradictions, framework-fit assessment, and recommended decision impacts from analysis lanes.
-- **Embedded Quality Check**: Record critique directly in this proposal artifact.
-- **Acceptance Criteria**: Provide independently verifiable checks; use Given/When/Then scenarios when behavior is involved.
-- **Decision**: Record current status, decision maker when known, and next action.
+For each section, use the dedicated file and provide substantive content. When a section has no meaningful contribution for the current proposal: explicitly state "None required" or "Not applicable to this proposal." Deep proposals follow the same rule—results go in required files even if they require minimal effort.
+
+- **Goal** (`goal.md`): Outcome definition and success criteria.
+- **Current State / Problem-Opportunity**: Use `problem-opportunity.md` with a "Current State" heading for discovered facts, then the problem/opportunity statement.
+- **Problem / Opportunity** (`problem-opportunity.md`): The pain point or improvement target after current state summary.
+- **Scope** (`scope.md`): In-scope/out-of-scope boundaries drawn explicitly.
+- **Recommended Approach** (`recommended-approach.md`): Preferred path with rationale for why it is the smallest correct direction.
+- **Alternatives Considered** (`alternatives-considered.md`): Compare viable alternatives; explain why they are not preferred or provide explicit explanation of why no meaningful alternative exists.
+- **Artifact and State Impact** (`artifact-and-state-impact.md`): Files, artifact paths, and state areas that will be created or modified later.
+- **Risks and Unknowns** (`risks-and-unknowns.md`): Uncertainty, compatibility concerns, permission concerns, state drift, mitigation strategies (severity + mitigation).
+- **Discovery Results** (`discovery-results.md`): Source-backed evidence ledger with lane, worker, source, claim/fact, inference, assumption, confidence, relevance, fit caveat, decision impact; also includes delegated analysis summary if any lanes were launched.
+- **Clarification Questions** (`clarification-questions.md`): Blocking unknowns marked for user resolution or explicitly state "None required."
+- **Acceptance Criteria** (`acceptance-criteria.md`): Independently verifiable checks using Given/When/Then when behavior is involved.
+- **Decision** (`decision.md`): Current status, decision maker when known, next action, and embedded quality-check summary.
 
 ## Proposal Depth Tiers
 
@@ -96,25 +105,25 @@ Use the following depth tiers to determine the appropriate level of effort:
 | Depth | When to use | Discovery needed | Research needed | Planning notes |
 | --- | --- | --- | --- | --- |
 | `none` | Trivial/direct execution; no proposal needed | None | None | Direct execution without proposal |
-| `light` | Narrow, low-risk change with a short proposal | Minimal local check (file existence, constraints) | None | No formal handoff required |
-| `standard` | Normal non-trivial harness/product/code change | Local discovery of files, constraints, and conventions | Optional, for syntax/config conventions or comparable examples | Handoff section required |
-| `deep` | Ambiguous, architecture-sensitive, high-risk, or cross-cutting change | Serial local analysis/research to stabilize understanding | External research as needed for standards or breaking changes | Full handoff with traceability into plan gates |
+| `light` | Narrow, low-risk change with a short proposal | Minimal local check (file existence, constraints) or explicit "None" in required files | None | Plan extracts goals/scope/acceptance from workspace |
+ | `standard` | Normal non-trivial harness/product/code change | Local discovery of files, constraints, and conventions documented in `discovery-results.md` | Optional, for syntax/config conventions or comparable examples | Plan derives handoff from accepted proposal sections |
+| `deep` | Ambiguous, architecture-sensitive, high-risk, or cross-cutting change | Serial local analysis/research to stabilize understanding; results recorded in required files | External research as needed for standards or breaking changes | All lane findings consolidated into the 13-file workspace |
 
 Use `none` for trivial tasks (e.g., typo fixes, surface changes). Use `light` for narrow changes in one file. Use `standard` for normal non-trivial work. Use `deep` for architecture-sensitive or harness-wide changes.
 
 ## Worker-Lane Topology
 
-Explorer and analyst lanes are **proposal-phase roles** implemented with existing `worker-*` tiers, relevant skills, and bounded handoff packets. They are **not new agents** and do not require new agent configurations. The `delegation` skill governs which worker size and family routes each lane.
+Explorer and analyst lanes are **proposal-phase roles** implemented with the configured text worker, relevant skills, and bounded handoff packets. They are **not new agents** and do not require new agent configurations. The `delegation` skill governs lane intent and worker routing for each bounded task.
 
-| Lane | Purpose | Typical worker size |
+| Lane | Purpose | Worker |
 | --- | --- | --- |
-| Local explorer | Inventory current harness files, commands, skills, conventions, and constraints. | `worker-sm` / `worker-md` |
-| Historical explorer | Inspect prior proposals, plans, runbooks, state, and lessons for related decisions or conflicts. | `worker-sm` / `worker-md` |
-| External reference explorer | Research one external source per lane with cited facts and fit caveats. | `worker-md` / `worker-lg` |
-| Delegation-pattern analyst | Map external delegation concepts onto `worker-*` tiers and the `delegation` skill. | `worker-md` / `worker-lg` |
-| Adversarial / gap analyst | Challenge assumptions, detect contradictions, shallow evidence, and plan leakage. | `worker-md` / `worker-lg`; escalate to `worker-xl` for high stakes. |
-| Synthesis analyst | Merge lane outputs into proposal-ready decisions, risks, and acceptance criteria. | `worker-lg` |
-| Embedded review analyst | Apply `review-work` and proposal quality checks before user decision. | `worker-sm` through `worker-xl` |
+| Local explorer | Inventory current harness files, commands, skills, conventions, and constraints. | `worker-md` |
+| Historical explorer | Inspect prior proposals, plans, runbooks, state, and lessons for related decisions or conflicts. | `worker-md` |
+| External reference explorer | Research one external source per lane with cited facts and fit caveats. | `worker-md` |
+| Delegation-pattern analyst | Map external delegation concepts onto the harness; review the proposal skill's depth-tier matrix guidance. | `worker-md` |
+| Adversarial / gap analyst | Challenge assumptions, detect contradictions, shallow evidence, and plan leakage. | `worker-md` |
+| Synthesis analyst | Merge lane outputs into proposal-ready decisions, risks, and acceptance criteria. Required when three or more lanes were launched. | `worker-md` |
+| Embedded review analyst | Apply `review-work` and proposal quality checks before user decision. Route to `worker-md`. | `worker-md`
 
 ## Depth-Tier Lane Matrix
 
@@ -132,17 +141,17 @@ Light and standard proposals must not be forced through the full deep analyst to
 
 ## Lane Packet Contract
 
-Each delegated lane uses a bounded handoff packet constructed via the `delegation` skill. The packet is the **input contract** for the worker; the evidence ledger is the **proposal artifact output** that records what the orchestrator accepted.
+Each delegated lane uses a bounded handoff packet constructed via the `delegation` skill. The packet is the **input contract** for the worker; the evidence ledger in `discovery-results.md` is the **proposal artifact output** that records what the orchestrator accepted.
 
 Every lane packet must include:
 
 - **Objective**: One clear, bounded objective for the lane.
 - **Source / file boundaries**: Exact files, paths, or URLs in scope.
 - **Out-of-scope**: Files, URLs, or behaviors explicitly excluded.
-- **Output contract**: Required return format (facts, inferences, assumptions, confidence, caveats, decision impact).
+- **Output contract**: Required return format (facts, inferences, assumptions with rationale, confidence levels, caveats, decision impact). All findings go into `discovery-results.md` regardless of depth tier.
 - **Evidence format**: How findings should be recorded (markdown table, bullet list, etc.).
 - **Assumptions policy**: State any assumptions the worker may make; flag if uncertain.
-- **Do / do-not rules**: Explicit boundaries, including proposal-only guardrails (no dependency graphs, no task breakdowns, no runbook state, no implementation planning).
+- **Do / do-not rules**: Explicit boundaries including proposal-only guardrails—workers must not create dependency graphs, task breakdowns, runbook states, or implementation planning deliverables.
 
 Workers should return structured findings rather than broad narrative summaries. See the support reference for full packet examples.
 
@@ -204,73 +213,23 @@ Record the Update-vs-New decision in the proposal artifact with a brief justific
 
 ## Proposal-to-Plan Handoff
 
-For `standard` and `deep` proposals, include a structured handoff section that planning can consume:
+The proposal contains all information a plan needs via the required workspace files. Planning derives handoff content from accepted decisions in `decision.md`, scope boundaries in `scope.md`, constraints noted across relevant section files, and acceptance criteria documented in `acceptance-criteria.md`. A separate structured "Planning Handoff" file is **not** required; plans extract what they need directly from the 13-file workspace.
 
-```md
-## Planning Handoff
-
-### Agreed Objective
-<One or two sentences that become plan.objective.>
-
-### Accepted Decisions
-- <Decision and reason.>
-
-### Scope Boundaries
-In scope:
-- ...
-
-Out of scope:
-- ...
-
-### Constraints
-- ...
-
-### Acceptance Criteria to Preserve
-- <Criterion that planning must map to gates/steps.>
-
-### Risks to Monitor During Planning
-- ...
-
-### Suggested Delegation / Skills
-- discovery: worker-* with generic-mode instructions
-- analysis: worker-* with review-mode instructions
-- implementation: worker-* with coding-mode instructions
-- docs/templates: worker-* with documentation-mode instructions
-
-### OpenCode Docs Required for Handoff / Delegation Design
-- Agents: <https://opencode.ai/docs/agents/>
-- Skills: <https://opencode.ai/docs/skills/>
-- Permissions: <https://opencode.ai/docs/permissions/>
-- Tools: <https://opencode.ai/docs/tools/>
-- Rules / AGENTS.md: <https://opencode.ai/docs/rules/>
-- Commands, when command handoffs are in scope: <https://opencode.ai/docs/commands/>
-- Config, when agent or permission registration is in scope: <https://opencode.ai/docs/config/>
-
-### Required Planning Analysis
-- problem breakdown
-- dependency graph
-- serial sequencing analysis
-- delegation packet inventory
-```
-
-This section should be human-readable markdown with consistent headings so the planning skill can consume it reliably.
+Historical proposals may contain a "Planning Handoff" section as evidence of prior practice; such sections are preserved read-only but not replicated for new workspaces.
 
 ## Enhanced Embedded Critique Criteria
 
 Critique should check:
 
-- **Completeness**: All required sections are filled
-- **Clarity**: Language is precise and unambiguous
-- **Scope boundaries**: In/out of scope are explicit
-- **Alternatives**: At least one plausible non-trivial alternative is considered
-- **Risk handling**: Risks are listed with severity and mitigation
-- **Acceptance criteria**: Criteria are independently verifiable; scenarios used when behavior is involved
-- **Plan-readiness**: Standard/deep proposals contain a complete planning handoff section
-- **Evidence quality**: Deep proposals include a structured evidence ledger with confidence and fit caveats; findings are source-backed, not assumed
-- **Ambiguity handling**: Blocking unknowns are marked with `[NEEDS CLARIFICATION: ...]`; minor ambiguity has recommended defaults
-- **Specification clarity**: What/why is separated from how; acceptance criteria are independently testable
-- **Depth-tier appropriateness**: Deep proposals launched appropriate lanes; light/standard proposals were not over-delegated
-- **Proposal-vs-plan boundary**: The artifact does not contain dependency graphs, task breakdowns, implementation steps, or runbook state behavior
+- **Completeness**: All 13 required files are present and minimally populated.
+- **Clarity**: Language is precise and unambiguous; what/why separated from how.
+- **Scope boundaries**: In/out of scope are explicit in `scope.md`.
+- **Alternatives**: At least one plausible non-trivial alternative considered or explicit explanation why none.
+- **Risk handling**: Risks listed with severity, impact, and mitigation.
+- **Acceptance criteria**: Criteria are independently testable; Given/When/Then used when behavior is involved.
+- **Evidence quality**: Findings are source-backed with confidence and fit caveats in `discovery-results.md`.
+- **Ambiguity handling**: Blocking unknowns marked with `[NEEDS CLARIFICATION: ...]`; minor ambiguity has recommended defaults.
+- **Proposal-vs-plan boundary**: No dependency graphs, task breakdowns, implementation steps, or runbook state behavior.
 
 Critique should not turn the proposal into an execution plan.
 
@@ -278,29 +237,26 @@ Critique should not turn the proposal into an execution plan.
 
 A proposal is valid when:
 
-- Depth and intent classification are fully populated
-- Discovery results are recorded as facts rather than assumptions
-- Clarification questions are asked only when critical to set boundaries
-- Unresolved gaps are tagged as critical, minor, or ambiguous
-- Assumptions are explicitly listed with rationale
-- Standard/deep proposals contain a planning handoff section with agreed objective, scope boundaries, acceptance criteria, risks, and suggested delegation
-- Alternatives include at least one plausible non-trivial alternative or an explicit explanation of why alternatives are not meaningful
-- Risks are listed with severity and mitigation strategy
-- Deep proposals include a depth-tier-appropriate lane matrix with lane-selection rationale
-- Deep proposals include an evidence ledger with confidence and fit caveats for accepted findings
-- Deep proposals include a delegated analysis summary with tradeoffs and decision impact
-- `[NEEDS CLARIFICATION: ...]` markers are used for blocking ambiguity
-- Acceptance criteria are independently testable
-- Update-vs-New decision is recorded when revising related proposals
+- Depth and intent classification are fully populated (may be documented in `metadata.md`).
+- Discovery results are recorded as facts rather than assumptions.
+- Clarification questions are asked only when critical to set boundaries; otherwise, `clarification-questions.md` explicitly states no clarification is required.
+- Unresolved gaps are tagged as critical, minor, or ambiguous.
+- Assumptions are explicitly listed with rationale in `discovery-results.md`.
+- All 13 required workspace files are present and populated (use "None" / "Not applicable" when appropriate).
+- Alternatives include at least one plausible non-trivial alternative or an explicit explanation of why alternatives are not meaningful.
+- Risks are listed with severity and mitigation strategy.
+- Evidence ledger includes confidence and fit caveats for accepted findings.
+- `[NEEDS CLARIFICATION: ...]` markers are used for blocking ambiguity.
+- Acceptance criteria are independently testable.
 
 ## Rules
 
 - Do not implement changes while using this skill.
 - Do not write the execution plan here; use the `plan` skill only after the proposal is accepted.
 - Keep critique embedded in the proposal artifact rather than creating a separate review lane.
-- Use only currently available sized worker families for delegation, plus `multimodal-looker` only for visual/PDF/image work.
+- Use only the configured text worker (`worker-md`) for delegation, plus `multimodal-looker` only for visual/PDF/image work.
 - Do not create new worker agents, change model IDs, alter provider configuration, or edit generated/runtime directories unless explicitly requested.
 - Ask targeted questions when critical facts are missing.
-- Worker-lane roles are implemented by existing `worker-*` tiers and the `delegation` skill; do not introduce new agents or agent families.
+- Worker-lane roles are implemented by the configured text worker and the `delegation` skill; do not introduce new agents or agent families.
 - The `delegation` skill is the routing source of truth; do not duplicate the full worker matrix here.
-- Deep proposals must not produce implementation plans, task breakdowns, dependency graphs, or runbook state behavior.
+- All proposal workspaces contain exactly 13 required files regardless of depth tier.

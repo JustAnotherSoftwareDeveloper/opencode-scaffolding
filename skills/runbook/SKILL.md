@@ -48,7 +48,7 @@ If the plan is too vague to execute safely, stop and repair the plan with the `p
 1. Extract proposal and plan context.
 2. Split plan phases into bounded executable steps.
 3. Build dependency graph and serial sequencing order (one step at a time; no parallel dispatch).
-4. Load `delegation` for dynamic worker family/size guidance.
+4. Load `delegation` for worker routing guidance.
 5. Create `.runbooks/<id>/main.xml`, `state.xml`, and `steps/<step-id>.xml` files using XSDs under `skills/runbook/schemas/` as the only schema/template contract.
 6. Validate with `uv run --project scripts/python validate-runbook .runbooks/<id>/main.xml`.
 7. Initialize state only when execution is authorized: `uv run --project scripts/python init-runbook-state .runbooks/<id>/main.xml`.
@@ -84,7 +84,7 @@ Legacy validation is not supported for new target workflows.
 
 ## Embedded Quality Check
 
-Every non-trivial runbook should include or trigger an embedded quality check using `review-work` and an appropriately sized `worker-*` worker with review-mode instructions. The review should check plan fidelity, step granularity, dependency correctness, worker routing, file scope safety, runbook validation, state initialization, and recovery coverage.
+Every non-trivial runbook should include or trigger an embedded quality check using `review-work` and the configured text worker (`worker-md`) with review-mode instructions. The review should check plan fidelity, step granularity, dependency correctness,  file scope safety, runbook validation, state initialization, and recovery coverage.
 
 ## Rules
 

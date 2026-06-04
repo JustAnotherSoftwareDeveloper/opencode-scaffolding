@@ -84,7 +84,7 @@
       "permission": {
         "task": {
           "*": "deny",
-          "worker-*": "allow",
+          "worker-md": "allow",
           "multimodal-looker": "allow"
         },
         "skill": {
@@ -100,7 +100,7 @@
       "permission": {
         "task": {
           "*": "deny",
-          "worker-*": "allow",
+          "worker-md": "allow",
           "multimodal-looker": "allow",
           "orchestrator-base": "allow"
         },
