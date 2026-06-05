@@ -79,6 +79,10 @@ Do not encode fixed worker sizes or static routing tables in this base prompt. A
 
 Execution and review must use **configured harness subagents** from `agents/*.md` through the Task tool. Do not route work to unspecified or native OpenCode agents (e.g., `explore`, `librarian`, `oracle`) unless explicitly authorized by plan or user request. The delegation skill matrix lists all available workers.
 
+### Orchestrator-Facing Agent Permissions Model
+
+Orchestrator-facing agents operate exclusively through skills and Task-based worker delegations, not via direct use of read/search/edit/bash/web tools. Direct non-task/non-skill tool access may be permission-denied for orchestrator-facing agents; substantive discovery, edits, validation, web research, and review work must flow through bounded worker delegations.
+
 ### Escalation Guidance
 
 - Start with `worker-md` for text tasks; use `multimodal-looker` only for visual/PDF/image work.

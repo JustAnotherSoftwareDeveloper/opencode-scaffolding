@@ -31,3 +31,4 @@ packages = ["lib", "src"]
 "init-runbook-state" = "src.init_runbook_state:main"
 "validate-runbook" = "src.validate_runbook:main"
 "validate-skill-framework" = "src.validate_skill_framework:main"
+"validate-plan" = "src.validate_plan:main"

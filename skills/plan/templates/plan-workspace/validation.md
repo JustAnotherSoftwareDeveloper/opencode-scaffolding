@@ -1,25 +1,38 @@
-# Validation & Gates
+id: <unix-timestamp>-<slug>
+title: "<Human-readable title>"
+status: draft
+created_at: "<ISO 8601 timestamp>"
+updated_at: "<ISO 8601 timestamp>"
+proposal: "../../.proposals/<timestamp>-<proposal-slug>/INDEX.md"
+---
 
-## Pre-Approval Validation
+# Validation & Checkpoints
 
-- [ ] `INDEX.md` has every required section from the plan skill.
-- [ ] Supporting files linked from `INDEX.md` exist.
-- [ ] File scopes are concrete and bounded.
-- [ ] Skill/file routing aligns with `skill-map.md`.
-- [ ] The plan does not contain executable runbook XML/state.
+## Pre-Execution Gates (Plan Approval)
 
-## Post-Execution Verification
+- [ ] All required files present with frontmatter matching proposal reference.
+- [ ] `execution-overview.md` goal aligns with accepted proposal.
+- [ ] No executable runbook XML/state in any markdown file.
 
-- [ ] All planned artifact changes were made or explicitly skipped with rationale.
-- [ ] Required command checks ran and results are recorded.
-- [ ] Embedded `review-work` completed and findings were reconciled.
-- [ ] No sensitive information was introduced.
-- [ ] Links in `INDEX.md` remain valid.
+### Commands to Verify Template Compliance
 
-## Rollback / Recovery
+```bash
+# Check for prohibited sections (should return nothing)
+grep -rE "problem-opportunity|alternatives-considered|risks-and-unknowns" . --include="*.md" || echo "OK: no proposal-style rationale found"
 
-| Change | Recovery |
-| --- | --- |
-| Modify `<file>` | Restore from git or revert the specific section. |
-| Create `<directory>` | Delete the directory if review rejects it. |
-| Delete `<file>` | Restore from git if validation finds an active dependency. |
+# List required files exist
+ls INDEX.md metadata.md source.md execution-overview.md constraints.md \
+   file-impact.md validation.md rollback-recovery.md handoff.md \
+   steps/01-implementation.md
+```
+
+## Execution Checkpoints
+
+| Step | Checkpoint Command | Expected Result | Pass/Fail |
+|------|-------------------|-----------------|-----------|
+| `steps/01-implementation` | `<command>` | `<expected output>` | ☐ |
+
+### Manual Verification Items
+
+- [ ] Review file changes in scope before modification.
+- [ ] Confirm rollback strategy works by dry-run.

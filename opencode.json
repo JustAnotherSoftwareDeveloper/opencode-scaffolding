@@ -82,6 +82,7 @@
       "model": "openrouter/deepseek/deepseek-v4-pro",
       "prompt": "{file:./prompts/orchestrator-base.md}",
       "permission": {
+        "*": "deny",
         "task": {
           "*": "deny",
           "worker-md": "allow",
@@ -98,6 +99,7 @@
       "model": "openrouter/deepseek/deepseek-v4-pro",
       "prompt": "{file:./prompts/orchestrator-base.md}\n\n{file:./prompts/agent-architect.md}",
       "permission": {
+        "*": "deny",
         "task": {
           "*": "deny",
           "worker-md": "allow",
