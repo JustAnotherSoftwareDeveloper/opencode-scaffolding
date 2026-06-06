@@ -15,18 +15,18 @@ from src.validate_plan import (
     validate_path_shape,
     validate_required_files,
     validate_rejected_files,
-    validate_steps_directory,
+    validate_tasks_directory,  # Updated from steps to tasks per hard cutover
 )
 
 
 def _create_valid_plan(tmp_path: Path, plan_id: str = "test-plan") -> Path:
     """Create a valid plan workspace for testing."""
     workspace = tmp_path / ".plans" / plan_id
-    steps_dir = workspace / "steps"
-    steps_dir.mkdir(parents=True)
+    tasks_dir = workspace / "tasks"  # Updated from steps to tasks per hard cutover
+    tasks_dir.mkdir(parents=True)
     
     # Create required files
-    (workspace / "INDEX.md").write_text("# Test Plan\n\n## Steps\n\n- [Step 1](steps/01-example.md)\n", encoding="utf-8")
+    (workspace / "INDEX.md").write_text("# Test Plan\n\n## Tasks\n\n- [Task 1](tasks/01-example.md)\n", encoding="utf-8")
     
     metadata_content = """---
 id: test-plan
@@ -50,8 +50,8 @@ Plan body here.
     (workspace / "rollback-recovery.md").write_text("# Rollback Recovery\n", encoding="utf-8")
     (workspace / "handoff.md").write_text("# Handoff\n", encoding="utf-8")
     
-    # Create valid step file
-    (steps_dir / "01-example.md").write_text("# Step 1\n", encoding="utf-8")
+    # Create valid task file
+    (tasks_dir / "01-example.md").write_text("# Task 1\n", encoding="utf-8")
     
     return workspace / "INDEX.md"
 
@@ -91,27 +91,27 @@ def test_validate_required_files_missing(tmp_path: Path) -> None:
     assert any("constraints.md" in message for message in result.messages)
 
 
-def test_validate_steps_directory_missing(tmp_path: Path) -> None:
+def test_validate_tasks_directory_missing(tmp_path: Path) -> None:
     plan_file = _create_valid_plan(tmp_path, "test-id")
     workspace_root = plan_file.parent
     
-    # Remove steps directory
+    # Remove tasks directory
     import shutil
-    shutil.rmtree(workspace_root / "steps")
+    shutil.rmtree(workspace_root / "tasks")
     
-    result = validate_steps_directory(workspace_root)
+    result = validate_tasks_directory(workspace_root)
     assert not result.ok
-    assert any("steps/" in message for message in result.messages)
+    assert any("tasks/" in message for message in result.messages)
 
 
-def test_validate_steps_directory_invalid_filename(tmp_path: Path) -> None:
+def test_validate_tasks_directory_invalid_filename(tmp_path: Path) -> None:
     plan_file = _create_valid_plan(tmp_path, "test-id")
     workspace_root = plan_file.parent
     
-    # Create invalid step file name
-    (workspace_root / "steps" / "invalid-name.md").write_text("# Invalid\n", encoding="utf-8")
+    # Create invalid task file name
+    (workspace_root / "tasks" / "invalid-name.md").write_text("# Invalid\n", encoding="utf-8")
     
-    result = validate_steps_directory(workspace_root)
+    result = validate_tasks_directory(workspace_root)
     assert not result.ok
     assert any("invalid-name.md" in message for message in result.messages or any("XX-description" in m for m in result.messages))
 

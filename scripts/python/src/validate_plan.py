@@ -108,33 +108,33 @@ def validate_rejected_files(workspace_root: Path) -> CheckResult:
     return CheckResult(len(found) == 0, messages)
 
 
-def validate_steps_directory(workspace_root: Path) -> CheckResult:
-    """Validate steps/ directory exists and contains valid step files."""
+def validate_tasks_directory(workspace_root: Path) -> CheckResult:
+    """Validate tasks/ directory exists and contains valid task files."""
     messages: list[str] = []
-    steps_dir = workspace_root / "steps"
+    tasks_dir = workspace_root / "tasks"
     
-    if not steps_dir.exists():
-        return CheckResult(False, ["missing required directory: steps/"])
+    if not tasks_dir.exists():
+        return CheckResult(False, ["missing required directory: tasks/"])
     
-    if not steps_dir.is_dir():
-        return CheckResult(False, ["steps must be a directory"])
+    if not tasks_dir.is_dir():
+        return CheckResult(False, ["tasks must be a directory"])
     
-    step_files = list(steps_dir.glob("*.md"))
-    if not step_files:
-        return CheckResult(False, ["steps/ must contain at least one markdown file"])
+    task_files = list(tasks_dir.glob("*.md"))
+    if not task_files:
+        return CheckResult(False, ["tasks/ must contain at least one markdown file"])
     
     invalid_names: list[str] = []
-    for step_file in step_files:
-        if not NAME_RE.match(step_file.name):
-            invalid_names.append(f"{step_file.name} (must match pattern XX-description.md)")
+    for task_file in task_files:
+        if not NAME_RE.match(task_file.name):
+            invalid_names.append(f"{task_file.name} (must match pattern XX-description.md)")
     
     if invalid_names:
-        messages.append("invalid step file names:")
+        messages.append("invalid task file names:")
         for name in invalid_names:
             messages.append(f"  - {name}")
         return CheckResult(False, messages)
     
-    return CheckResult(True, [f"steps/ directory valid with {len(step_files)} steps"])
+    return CheckResult(True, [f"tasks/ directory valid with {len(task_files)} tasks"])
 
 
 def validate_index_toc(workspace_root: Path) -> CheckResult:
@@ -200,7 +200,7 @@ def validate_plan(plan_path: Path) -> CheckResult:
     validators = [
         ("required files", validate_required_files),
         ("rejected files", validate_rejected_files),
-        ("steps directory", lambda p: validate_steps_directory(p)),
+        ("tasks directory", lambda p: validate_tasks_directory(p)),  # Updated from steps/ to tasks/ per hard cutover
         ("INDEX.md TOC", lambda p: validate_index_toc(p)),
         ("metadata frontmatter", lambda p: validate_metadata_frontmatter(p)),
     ]
@@ -210,7 +210,7 @@ def validate_plan(plan_path: Path) -> CheckResult:
         all_messages.extend(result.messages)
         ok = ok and result.ok
     
-    return CheckResult(ok, [f"=== Plan Workspace Validation ==="] + all_messages if not ok else ["✓ Plan workspace is valid"])
+    return CheckResult(ok, ["=== Plan Workspace Validation ==="] + all_messages if not ok else ["✓ Plan workspace is valid"])
 
 
 def build_parser() -> argparse.ArgumentParser:

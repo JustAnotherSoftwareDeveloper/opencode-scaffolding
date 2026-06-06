@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Create directory-based markdown engineering plans from accepted proposals. Use when a proposal has been accepted and an execution blueprint is needed. Plans are required-execution workspaces with validation steps/ directory for senior-dev-to-intern instructions.
+description: Create directory-based markdown engineering plans from accepted proposals. Use when a proposal has been accepted and an execution blueprint is needed. Plans are required-execution workspaces with validation tasks/ directory for senior-dev-to-intern instructions.
 class: planning
 ---
 
@@ -18,7 +18,7 @@ Plan artifacts are **required-execution workspaces** with a mandatory file struc
 .plans/<unix-timestamp>-<slug>/INDEX.md
 ```
 
-Each plan workspace must contain all required files listed below. The `steps/` directory is mandatory — it contains numbered senior-to-intern instruction files, not runbook XML execution state.
+Each plan workspace must contain all required files listed below. The `tasks/` directory is mandatory — it contains numbered senior-to-intern instruction files, not runbook XML execution state.
 
 ### Required Files
 
@@ -34,9 +34,9 @@ Each plan workspace must contain all required files listed below. The `steps/` d
 | **validation.md** | Verification commands and checkpoints |
 | **rollback-recovery.md** | Undo instructions if execution fails partway through |
 | **handoff.md** | Optional transition guidance to runbook/next owner |
-| **steps/** | REQUIRED: At least one numbered markdown file, e.g., `01-implementation.md` |
+| **tasks/** | REQUIRED: At least one numbered markdown file, e.g., `01-implementation.md` |
 
-### Steps Directory Semantics (`steps/*.md`)
+### Tasks Directory Semantics (`tasks/*.md`)
 
 Files in this directory are **human-facing senior-to-intern instructions**. Each file must include:
 
@@ -49,11 +49,11 @@ Files in this directory are **human-facing senior-to-intern instructions**. Each
 
 **NOT runbook XML. NOT execution state.** These are markdown instructions workers follow directly.
 
-Example structure for `steps/01-update-skill-contract.md`:
+Example structure for `tasks/01-update-skill-contract.md`:
 
 ```markdown
 ## Purpose
-Update the Plan Skill contract to reflect required file structure and steps/ directory purpose.
+Update the Plan Skill contract to reflect required file structure and tasks/ directory purpose.
 
 ## Files in Scope
 - `skills/plan/SKILL.md`
@@ -126,8 +126,8 @@ Before creating a plan, verify:
 ## Rules
 
 - Do not implement changes while using this skill; produce the plan artifact only
-- Plan workspaces must follow required 10-file + steps/ taxonomy (not proposal-like rationale)
+- Plan workspaces must follow required 10-file + tasks/ taxonomy (not proposal-like rationale)
 - Do not create `.plans/*.json` executable artifacts  
 - Do not reference schema_version, init-*state files, or plan state schemas — these were deprecated in May 2026.
-- Steps files are senior-to-intern instructions, NOT runbook XML/execution state
+- Tasks files are senior-to-intern instructions, NOT runbook XML/execution state
 - For non-trivial execution routing, load the **runbook** skill after validation

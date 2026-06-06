@@ -10,8 +10,8 @@ Use this lifecycle for non-trivial work:
 2. **Plan** — Load `plan` skill to create a human-readable engineering specification in `.plans/<unix-timestamp>-slug/INDEX.md`.
 3. **Runbook** — Load `runbook` skill to generate an executable v3 XML/XSD-first runbook workspace from an approved plan. Target artifacts: `.runbooks/<unix-timestamp>-slug/main.xml`, `state.xml`, `steps/<step-id>.xml`, `evidence/index.xml`, `snippets/index.xml`, and `reference/index.xml`. Legacy v1 workspaces may contain `.runbooks/<id>/runbook.json`.
 4. **State initialization** — For approved or executing v3 runbooks, run `uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/main.xml` to create/update runbook-local `state.xml` and default manifest indexes. Transitional v2 and legacy v1 artifacts may still seed `.state/<runbook_id>/` only for backward compatibility.
-5. **Execution** — Decompose work into atomic units, annotate each with a relevant skill, then load `delegation` to select the configured text worker (`worker-md`) or visual worker (`multimodal-looker`) and build handoff packets. Execute steps serially: the orchestrator has at most one delegated worker in flight; consume and reconcile each worker result before dispatching the next.
-6. **Embedded quality check** — Route review and critique to `worker-md` or the configured text worker using the `review-work` skill with review-mode instructions. Record findings in runbook state.
+5. **Execution** — Decompose work into atomic units, annotate each with a relevant skill, then load `delegation` to select the configured text worker (`worker`) or visual worker (`multimodal-looker`) and build handoff packets. Execute steps serially: the orchestrator has at most one delegated worker in flight; consume and reconcile each worker result before dispatching the next.
+6. **Embedded quality check** — Route review and critique to `worker` or the configured text worker using the `review-work` skill with review-mode instructions. Record findings in runbook state.
 7. **Retro** — Load `retro` after meaningful harness execution to identify harness improvements.
 8. **Lesson capture** — Load `lesson-writer` when reusable session guidance emerges. Artifacts: `.lessons/<unix-timestamp>-slug.md`.
 
@@ -35,7 +35,7 @@ These skills are available to every orchestrator-style agent during the executio
 
 | Skill | When to load |
 |-------|-------------|
-| `delegation` | After atomic work decomposition — select the appropriate worker (`worker-md` or `multimodal-looker`), build handoff packet, consume result. |
+| `delegation` | After atomic work decomposition — select the appropriate worker (`worker` or `multimodal-looker`), build handoff packet, consume result. |
 | `review-work` | Embedded quality check of completed work before declaring success. |
 | `retro` | After meaningful harness changes — identify improvements to agents, skills, commands, permissions, routing. |
 | `lesson-writer` | When reusable session guidance should be captured as a durable `.lessons/` artifact. |
@@ -85,7 +85,7 @@ Orchestrator-facing agents operate exclusively through skills and Task-based wor
 
 ### Escalation Guidance
 
-- Start with `worker-md` for text tasks; use `multimodal-looker` only for visual/PDF/image work.
+- Start with `worker` for text tasks; use `multimodal-looker` only for visual/PDF/image work.
 - Escalate when the task has high ambiguity, high cost of error, broad file scope, failed prior attempts, or architecture-sensitive judgment.
 - Use the `delegation` skill's escalation rules for retry and redelegation.
 
@@ -182,7 +182,7 @@ Example delegated API message body:
 
 ```json
 {
-  "agent": "worker-md",
+  "agent": "worker",
   "parts": [
     {
       "type": "text",
@@ -214,3 +214,12 @@ Example command execution body:
 - Manage active artifacts in `.proposals/`, `.plans/`, `.runbooks/`, v3 `state.xml` or legacy `.state/`, and `.lessons/`.
 - Use only configured harness subagents (`agents/*.md`) for execution and review; do not route work to unspecified/native OpenCode agents unless explicitly authorized.
 - Report what changed, what was verified, what state was updated, and what remains risky.
+
+## Plan Tasks vs Runbook Steps Terminology
+
+**Important distinction**: Plan workspaces use `tasks/` for human-facing senior-to-intern instructions. Runbooks retain their own isolated `steps/` XML structure under `.runbooks/*/steps/*.xml`. These are separate semantic domains that must not be confused:
+
+- **Plan tasks** (`tasks/*.md`): Markdown files with implementation instructions for workers
+- **Runbook steps** (`.runbooks/*/.steps/*.xml`): XML execution units in the v3 runbook format
+
+When referencing plan artifacts, always use `tasks/`. When discussing runbook execution, reference `.runbooks/*/steps/` as XML units.

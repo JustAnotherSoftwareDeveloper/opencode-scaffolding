@@ -7,7 +7,7 @@ description: Review completed harness work for correctness, config validity, pro
 
 Use this skill after execution and before the orchestrator reports success. The review should identify defects, regressions, missing validation, and harness-quality problems.
 
-This skill is intended to be loaded by the configured text worker (`worker-md`) with review-mode instructions as an embedded quality check in the workflow.
+This skill is intended to be loaded by the configured text worker (`worker`) with review-mode instructions as an embedded quality check in the workflow.
 
 ## Inputs
 

@@ -54,10 +54,10 @@ Proposal artifacts live at:
 
 1. **Classify intent and depth**: Determine proposal depth tier and intent classification before drafting.
 2. **Explore** (deep): Decompose discovery into bounded worker-lane roles; launch lanes per the depth-tier lane matrix; record evidence in the ledger.
-3. **Analyze** (deep): Delegate bounded analysis lanes; synthesize findings into decision-ready tradeoffs, risks, and impact. For deep proposals that require harness-wide or architecture-sensitive analysis, delegate to `worker-md` with the proposal-skill's lane topology guidance.
+3. **Analyze** (deep): Delegate bounded analysis lanes; synthesize findings into decision-ready tradeoffs, risks, and impact. For deep proposals that require harness-wide or architecture-sensitive analysis, delegate to `worker` with the proposal-skill's lane topology guidance.
 4. **Specify**: Resolve blocking ambiguity with clarification markers; draft acceptance criteria as independently testable statements.
 5. **Create or update artifact**: Write the proposal workspace to `.proposals/<unix-timestamp>-slug/INDEX.md` plus `metadata.md` and canonical section files.
-6. **Run embedded critique**: Delegate critique to `worker-md` with review-mode instructions and record findings directly in the proposal.
+6. **Run embedded critique**: Delegate critique to `worker` with review-mode instructions and record findings directly in the proposal.
 7. **Revise**: Incorporate user feedback and critique into the same proposal artifact.
 8. **Decision**: Mark the proposal `accepted`, `needs-clarification`, `rejected`, or `superseded`.
 9. **Return summary**: Report artifact path, status, key tradeoffs, and the next user decision.
@@ -68,10 +68,10 @@ Worker sizing and escalation are governed by the `delegation` skill, which is th
 
 | Work | Worker Family | Purpose |
 | --- | --- | --- |
-| Local discovery | `worker-md` with generic-mode instructions | Inventory files, conventions, and constraints |
-| External research | `worker-md` with web-research-mode instructions | Gather current source-backed information |
-| Proposal drafting and revision | `worker-md` with documentation-mode instructions | Write clear proposal prose |
-| Embedded critique | `worker-md` with review-mode instructions | Identify gaps, risks, and acceptance problems |
+| Local discovery | `worker` with generic-mode instructions | Inventory files, conventions, and constraints |
+| External research | `worker` with web-research-mode instructions | Gather current source-backed information |
+| Proposal drafting and revision | `worker` with documentation-mode instructions | Write clear proposal prose |
+| Embedded critique | `worker` with review-mode instructions | Identify gaps, risks, and acceptance problems |
 
 Choose the appropriate worker for each bounded task.
 
@@ -117,13 +117,13 @@ Explorer and analyst lanes are **proposal-phase roles** implemented with the con
 
 | Lane | Purpose | Worker |
 | --- | --- | --- |
-| Local explorer | Inventory current harness files, commands, skills, conventions, and constraints. | `worker-md` |
-| Historical explorer | Inspect prior proposals, plans, runbooks, state, and lessons for related decisions or conflicts. | `worker-md` |
-| External reference explorer | Research one external source per lane with cited facts and fit caveats. | `worker-md` |
-| Delegation-pattern analyst | Map external delegation concepts onto the harness; review the proposal skill's depth-tier matrix guidance. | `worker-md` |
-| Adversarial / gap analyst | Challenge assumptions, detect contradictions, shallow evidence, and plan leakage. | `worker-md` |
-| Synthesis analyst | Merge lane outputs into proposal-ready decisions, risks, and acceptance criteria. Required when three or more lanes were launched. | `worker-md` |
-| Embedded review analyst | Apply `review-work` and proposal quality checks before user decision. Route to `worker-md`. | `worker-md`
+| Local explorer | Inventory current harness files, commands, skills, conventions, and constraints. | `worker` |
+| Historical explorer | Inspect prior proposals, plans, runbooks, state, and lessons for related decisions or conflicts. | `worker` |
+| External reference explorer | Research one external source per lane with cited facts and fit caveats. | `worker` |
+| Delegation-pattern analyst | Map external delegation concepts onto the harness; review the proposal skill's depth-tier matrix guidance. | `worker` |
+| Adversarial / gap analyst | Challenge assumptions, detect contradictions, shallow evidence, and plan leakage. | `worker` |
+| Synthesis analyst | Merge lane outputs into proposal-ready decisions, risks, and acceptance criteria. Required when three or more lanes were launched. | `worker` |
+| Embedded review analyst | Apply `review-work` and proposal quality checks before user decision. Route to `worker`. | `worker`
 
 ## Depth-Tier Lane Matrix
 
@@ -229,7 +229,7 @@ Critique should check:
 - **Acceptance criteria**: Criteria are independently testable; Given/When/Then used when behavior is involved.
 - **Evidence quality**: Findings are source-backed with confidence and fit caveats in `discovery-results.md`.
 - **Ambiguity handling**: Blocking unknowns marked with `[NEEDS CLARIFICATION: ...]`; minor ambiguity has recommended defaults.
-- **Proposal-vs-plan boundary**: No dependency graphs, task breakdowns, implementation steps, or runbook state behavior.
+- **Proposal-vs-plan boundary**: No dependency graphs, task breakdowns, implementation steps, or runbook state behavior. Plans use `tasks/` for instructions; runbooks use isolated `steps/` XML.
 
 Critique should not turn the proposal into an execution plan.
 
@@ -254,7 +254,7 @@ A proposal is valid when:
 - Do not implement changes while using this skill.
 - Do not write the execution plan here; use the `plan` skill only after the proposal is accepted.
 - Keep critique embedded in the proposal artifact rather than creating a separate review lane.
-- Use only the configured text worker (`worker-md`) for delegation, plus `multimodal-looker` only for visual/PDF/image work.
+- Use only the configured text worker (`worker`) for delegation, plus `multimodal-looker` only for visual/PDF/image work.
 - Do not create new worker agents, change model IDs, alter provider configuration, or edit generated/runtime directories unless explicitly requested.
 - Ask targeted questions when critical facts are missing.
 - Worker-lane roles are implemented by the configured text worker and the `delegation` skill; do not introduce new agents or agent families.

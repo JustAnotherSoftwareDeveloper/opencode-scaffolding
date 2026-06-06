@@ -14,7 +14,7 @@ Generate a v3 XML/XSD-first runbook workspace from a plan slug. If no slug is pr
 3. Load the `runbook` skill.
 4. Create `.runbooks/<unix-timestamp>-slug/main.xml`, `state.xml`, one `steps/<step-id>.xml` file per executable step, and default manifest indexes at `evidence/index.xml`, `snippets/index.xml`, and `reference/index.xml`.
 5. Validate the v3 runbook workspace with script-backed checks: `uv run --project scripts/python validate-runbook .runbooks/<runbook_id>/main.xml`.
-6. Run embedded quality check via `worker-md` with review-mode instructions.
+6. Run embedded quality check via `worker` with review-mode instructions.
 7. Report the artifact path, status, and next step (state init + execution).
 
 ### If `$ARGUMENTS` is empty

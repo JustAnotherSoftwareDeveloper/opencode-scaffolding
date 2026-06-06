@@ -8,11 +8,11 @@ proposal: "../../.proposals/<timestamp>-<proposal-slug>/INDEX.md"
 
 # Handoff Guidance
 
-**Optional transition notes for the next owner or runbook conversion.** Include only if non-obvious routing decisions need clarification beyond what's in `steps/`.
+**Optional transition notes for the next owner or runbook conversion.** Include only if non-obvious routing decisions need clarification beyond what's in `tasks/`.
 
 ## To Runbook Skill Owner
 
-- Load order: validation → rollback-recovery → steps/* files.
+- Load order: validation → rollback-recovery → tasks/* files.
 - Worker sizing guidance (use delegation): <specific unit estimates>.
 - Open questions blocked on external input: none / <list>.
 

@@ -85,7 +85,8 @@
         "*": "deny",
         "task": {
           "*": "deny",
-          "worker-md": "allow",
+          "worker": "allow",
+          "nano-reader": "allow",
           "multimodal-looker": "allow"
         },
         "skill": {
@@ -102,7 +103,8 @@
         "*": "deny",
         "task": {
           "*": "deny",
-          "worker-md": "allow",
+          "worker": "allow",
+          "nano-reader": "allow",
           "multimodal-looker": "allow",
           "orchestrator-base": "allow"
         },

@@ -13,7 +13,7 @@ Generate a plan from a proposal slug. If no slug is provided, use the most recen
 2. Verify the proposal has `status: accepted` in `metadata.md` for proposal workspaces, or in frontmatter for historical single-file proposals.
 3. Load the `plan` skill.
 4. Create `.plans/<unix-timestamp>-slug/INDEX.md` from the proposal.
-5. Run embedded quality check via `worker-md` with review-mode instructions.
+5. Run embedded quality check via `worker` with review-mode instructions.
 6. Report the artifact path, status, and next step (runbook).
 
 ### If `$ARGUMENTS` is empty

@@ -23,14 +23,13 @@ grep -rE "problem-opportunity|alternatives-considered|risks-and-unknowns" . --in
 # List required files exist
 ls INDEX.md metadata.md source.md execution-overview.md constraints.md \
    file-impact.md validation.md rollback-recovery.md handoff.md \
-   steps/01-implementation.md
-```
+   tasks/01-implementation.md
 
 ## Execution Checkpoints
 
 | Step | Checkpoint Command | Expected Result | Pass/Fail |
 |------|-------------------|-----------------|-----------|
-| `steps/01-implementation` | `<command>` | `<expected output>` | ☐ |
+| `tasks/01-implementation` | `<command>` | `<expected output>` | ☐ |
 
 ### Manual Verification Items
 

@@ -84,7 +84,7 @@ Legacy validation is not supported for new target workflows.
 
 ## Embedded Quality Check
 
-Every non-trivial runbook should include or trigger an embedded quality check using `review-work` and the configured text worker (`worker-md`) with review-mode instructions. The review should check plan fidelity, step granularity, dependency correctness,  file scope safety, runbook validation, state initialization, and recovery coverage.
+Every non-trivial runbook should include or trigger an embedded quality check using `review-work` and the configured text worker (`worker`) with review-mode instructions. The review should check plan fidelity, step granularity, dependency correctness,  file scope safety, runbook validation, state initialization, and recovery coverage.
 
 ## Rules
 

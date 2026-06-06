@@ -1,6 +1,6 @@
 ---
 name: delegation
-description: Construct bounded worker handoff packets for single-worker text processing (worker-md) or visual analysis (multimodal-looker), consume results, and handle packet repair.
+description: Construct bounded worker handoff packets for single-worker text processing (worker) or visual analysis (multimodal-looker), consume results, and handle packet repair.
 class: orchestrated
 ---
 
@@ -10,7 +10,7 @@ Use this skill when a runbook step should be handed to a worker subagent through
 
 ## Responsibilities
 
-1. Route text work to `worker-md`; route visual/PDF/image analysis to `multimodal-looker`.
+1. Route text work to `worker`; route visual/PDF/image analysis to `multimodal-looker`.
 2. Construct a bounded worker handoff packet using the template at `templates/delegation-packet.md`.
 3. Consume the worker result and reconcile it into runbook state.
 4. Handle failures via packet repair, same-worker retry (for defective packets or transient issues), or return to user.
@@ -19,18 +19,18 @@ Use this skill when a runbook step should be handed to a worker subagent through
 
 - Do not replace OpenCode's Task tool.
 - Do not add team-mode, tmux, plugin, MCP, model, provider, or agent-registration infrastructure.
-- Do not create new worker families beyond `worker-md` and `multimodal-looker`.
+- Do not create new worker families beyond `worker` and `multimodal-looker`.
 - Do not bypass plan dependencies, file scopes, permissions, or state ownership.
 
 ## Worker Routing
 
 | Work type | Route to |
 |-----------|----------|
-| Analysis, reasoning, tradeoffs, risk, architecture, critique | `worker-md` |
-| Code editing, implementation, refactor, debugging, config writing | `worker-md` |
-| Documentation, prompts, skills, commands, guides, structured prose | `worker-md` |
-| Synthesis, coordination, classification, extraction, general-purpose tasks | `worker-md` |
-| Web research, current facts, source synthesis, evidence comparison | `worker-md` |
+| Analysis, reasoning, tradeoffs, risk, architecture, critique | `worker` |
+| Code editing, implementation, refactor, debugging, config writing | `worker` |
+| Documentation, prompts, skills, commands, guides, structured prose | `worker` |
+| Synthesis, coordination, classification, extraction, general-purpose tasks | `worker` |
+| Web research, current facts, source synthesis, evidence comparison | `worker` |
 | Image/screenshot/diagram/PDF analysis | `multimodal-looker` |
 
 ## Handoff Packet Construction
@@ -77,4 +77,12 @@ OpenCode does not provide a documented structured child-session result protocol.
 - Do not ask a worker to modify files outside `files_in_scope`.
 - Do not delegate destructive git operations or provider/model/config edits unless explicitly authorized.
 - Do not hide unresolved assumptions; include in packet or stop for clarification.
-- Only route to configured workers: `worker-md` and `multimodal-looker`.
+- Only route to configured workers: `worker` and `multimodal-looker`.
+
+## Nano-Reader Routing (Workflow Artifact Inspection)
+
+The following bounded routing applies for workflow artifact inspection only:
+
+| Work Type | Route to | Scope/Constraints |
+|-----------|----------|-------------------|
+| Read-only summary/stamp of `.proposals/`, `.plans/`, `.runbooks/` state or evidence files | `nano-reader` | Read-only; cannot edit any files. Used when orchestrator needs quick verification of workflow artifacts without full analysis depth. |

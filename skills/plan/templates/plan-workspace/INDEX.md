@@ -15,6 +15,6 @@
 | Non-Goals | execution-overview.md | What this plan explicitly does NOT address |
 | Accepted Decisions | source.md | Key decisions from accepted proposal (summary only) |
 
-## Steps
+## Tasks
 
-- [Step 01: Implementation](steps/01-implementation.md)
+- [Task 01: Implementation](tasks/01-implementation.md)
