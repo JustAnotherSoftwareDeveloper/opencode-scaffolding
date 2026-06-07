@@ -1,7 +1,5 @@
 ---
 description: "Auto-approval pipeline command that routes to Agent Architect and executes the full proposal-plan-runbook sequence without human intervention after initial prompt"
-agent: agent-architect
-model: ollama/worker-md-local
 ---
 
 You are executing the leeroy-jenkins auto-orchestration pipeline. The user has given initial consent for fully automated execution. Proceed immediately through all steps without further approval prompts.
