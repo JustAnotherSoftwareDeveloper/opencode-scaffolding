@@ -45,13 +45,14 @@ If the plan is too vague to execute safely, stop and repair the plan with the `p
 
 ## Runbook Generation Workflow (v3 Target)
 
-1. Extract proposal and plan context.
-2. Split plan phases into bounded executable steps.
-3. Build dependency graph and serial sequencing order (one step at a time; no parallel dispatch).
-4. Load `delegation` for worker routing guidance.
-5. Create `.runbooks/<id>/main.xml`, `state.xml`, and `steps/<step-id>.xml` files using XSDs under `skills/runbook/schemas/` as the only schema/template contract.
-6. Validate with `uv run --project scripts/python validate-runbook .runbooks/<id>/main.xml`.
-7. Initialize state only when execution is authorized: `uv run --project scripts/python init-runbook-state .runbooks/<id>/main.xml`.
+1. **Extract proposal and plan context.** Verify plan path, status, and linked proposal acceptance.
+2. **Plan task decomposition pass.** Convert `tasks/*.md` human instructions into SUPER-atomic steps: each must be exactly one primary operation, at most one skill routing target per step, with explicit input/output artifacts and precise file scope. Broad tasks are split; empty/missing scope is a defect requiring repair before proceeding.
+3. **Split decomposed units into bounded executable steps.** One operation, one skill target, clear boundaries.
+4. **Build dependency graph** from decomposition output (one step at a time; no parallel dispatch).
+5. **Load `delegation`** for worker routing guidance.
+6. Create `.runbooks/<id>/main.xml`, `state.xml`, and `steps/<step-id>.xml` files using XSDs under `skills/runbook/schemas/` as the only schema/template contract.
+7. Validate with `uv run --project scripts/python validate-runbook .runbooks/<id>/main.xml`.
+8. Initialize state only when execution is authorized: `uv run --project scripts/python init-runbook-state .runbooks/<id>/main.xml`.
 
 ## Execution Model
 
@@ -96,3 +97,17 @@ Every non-trivial runbook should include or trigger an embedded quality check us
 - Do not modify worker agent names, model IDs, provider settings, or fallback ordering.
 - Do not write outside `.runbooks/`, or explicitly authorized harness files.
 - Do not hide unresolved assumptions; either encode them in the runbook or return to the plan/proposal stage.
+
+## Atomic Step Criteria (SUPER Atomics)
+
+Each step must meet **exactly** these criteria before a v3 XML file is created:
+
+1. **Single primary operation**: One clear action that, if completed successfully, satisfies the step's objective.
+2. **At most one skill routing target per step**: Either `worker` or another specific skill—never multiple skills dispatched within a single step.
+3. **Explicit input artifacts**: Specific file paths, state locations, or prior outputs the worker must read before starting.
+4. **Explicit output artifacts/evidence**: Exact files that will be created/modified and how to verify success.
+5. **Precise `files_in_scope`**: Actual file paths—not directories or globs—unless the operation is explicitly inventorying a directory.
+6. **Clear `files_out_scope`**: Explicitly excluded items to prevent scope creep.
+7. **Expected return format**: Structured response with evidence markers, validation output, or defined artifacts.
+
+**Repair guidance:** If a plan task describes "update documentation" or lacks file-level scope, split into multiple atomic steps rather than copying the broad task directly into a step XML. Empty `files_in_scope` or directory-only scope is treated as a defect requiring repair before runbook creation proceeds.
