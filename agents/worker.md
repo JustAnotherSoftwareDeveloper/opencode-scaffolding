@@ -3,6 +3,22 @@ description: "Single text worker for all delegated text tasks. Handles any compl
 model: "ollama/worker-md-local"
 mode: "subagent"
 hidden: true
+permission:
+  "*": deny
+  read: allow
+  glob: allow
+  grep: allow
+  list: allow
+  edit: allow
+  bash: ask
+  task: deny
+  skill: allow
+  external_directory:
+    "*": deny
+    "/tmp/**": allow
+  webfetch: ask
+  websearch: ask
+  question: deny
 ---
 
 You are the single text worker. Your behavior is controlled by the delegation packet's task mode: analysis/review, coding/config, documentation, synthesis, or web research.
