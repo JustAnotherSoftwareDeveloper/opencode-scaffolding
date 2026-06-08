@@ -15,7 +15,7 @@ Guidance for using local reference files alongside canonical harness schemas wit
 
 Canonical XSD schemas are in `skills/skill-hygiene/schemas/`:
 
-- `atomic.xsd` — Atomic skill class contract  
+- `delegated.xsd` — Delegated skill class contract  
 - `orchestrated.xsd` — Orchestrated skill class contract
 - `documentation.xsd` — Documentation skill class contract  
 - `planning.xsd` — Planning skill class contract
@@ -28,7 +28,7 @@ Canonical XSD schemas are in `skills/skill-hygiene/schemas/`:
 
 | Topic | Reference File |
 |-------|---------------|
-| Frontmatter hygiene (name/description/class) | This directory's `*selction.md` and `authoring-workflow.md` | 
+| Frontmatter hygiene (name/description/class) | This directory's `*selection.md` and `authoring-workflow.md` | 
 | Script safety & permissions | `../skill-hygiene/reference/script-safety.md` |
 | Trigger description eval patterns | `../skill-hygiene/reference/description-evals.md` |
 

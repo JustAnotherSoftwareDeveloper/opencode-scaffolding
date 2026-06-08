@@ -1,6 +1,6 @@
 ---
 name: <skill-name>
-description: Use when orchestrating subskills, workers, state ownership, or quality gates across multi-phase workflows.
+description: Use when coordinating delegated skills, state ownership, quality gates, or multi-phase workflows.
 class: orchestrated
 ---
 
@@ -10,22 +10,25 @@ Replace all `<placeholder>` values before using. Match `name` to the directory n
 
 ## Class Purpose
 
-Orchestrated skills coordinate subskills, workers, state ownership, quality gates, and failure handling across multi-phase workflows. They delegate work and manage execution flow rather than perform tasks directly.
+Orchestrated skills are coordinator-only procedural instruction sets that delegate execution to delegated skills or workers. They do NOT perform bounded worker tasks directly, but coordinate multi-phase workflows with state ownership handoffs, quality gates, and failure handling strategies.
+
+**Key distinction from `delegated`:** Orchestrated skills define coordination protocols; delegated skills execute them as isolated workers.
 
 ## When to Use This Template
 
-- You need to coordinate multiple skills or steps
-- Work spans phases with handoffs between them
+- You need to coordinate multiple phases with handoffs between them
   - Subskill dependencies exist (e.g., requires other skills)
   - State ownership transfers between steps
-    Quality gates are needed before progression
-    
+  - Quality gates are needed before progression
+  
+**Required:** List all delegated backing skills in the [Delegated Backing Skills](#delegated-backing-skills) section below.
+
 ## Template Structure
 
 ```markdown
 ---
 name: <skill-name>                    # Must match directory name, lowercase with hyphens
-description: Use when ...            # Trigger for orchestration scenario
+description: Use when ...            # Trigger for orchestration scenario  
 class: orchestrated                  # Required class declaration
 ---
 
@@ -33,34 +36,34 @@ class: orchestrated                  # Required class declaration
 
 A brief description of the workflow coordination this skill provides.
 
+## Delegated Backing Skills
+
+List delegated skills that orchestrator spawns to perform worker-side work. Each must have explicit input/output contracts.
+
+| Delegated Skill | Purpose | Input From Orchestrator | Output To Orchestrator |
+|-----------------|---------|------------------------|------------------------|
+| `<skill-name>`  | <brief purpose> | JSON fields: `field1`, `path/to/state.xml` | Structured result via `/tmp/...`, stdout, or state update |
+
 ## Subskills / Dependencies
 
-List skills that must run before/after or are called by this orchestration:
+List skills that must run before/after in the orchestration sequence. Delegated skills are listed under [Delegated Backing Skills](#delegated-backing-skills) above.
 
-- `skill-one` — precondition step...
-  - `skill-two` — core processing...
+- `<skill-name>` — precondition step...
+  - `validate-skill-framework` — verify artifacts (non-worker phase)
   
-## Delegation Boundaries
-
-Describe what work is delegated to workers vs orchestrated here:
-
-| Work Item | Route To | Notes |
-|-----------|----------|-------|
-| Task A    | worker-md | ...   |
-| Review    | multimodal-looker | For visuals only |
-
 ## State Ownership Map
 
 Document which skill/steps own which state files during execution lifecycle.
 
-- Phase 1: `skill-a` owns `<path>` until completion
-- Phase 2: Transition to `skill-b` ownership
+- Phase 1: Owned by this orchestrator until delegation packet is constructed
+- Phase 2: Delegated skill `<name>` owns execution with input from orchestrator
+- Phase 3: Return to orchestrator ownership for reconciliation  
 
 ## Quality Gates / Validation
 
-Specify checkpoints that must pass before progressing:
+Specify checkpoints that must pass before progressing. Runbook-level gates use `review-work`; delegated-side validation runs within worker context.
 
-```text
+```txt
 Gate: <name>
 Condition: ...
 Action if fail: Return/pause with error state
@@ -68,19 +71,14 @@ Action if fail: Return/pause with error state
 
 ## Failure Handling Strategy
 
-Describe recovery paths for common failure scenarios. Include state cleanup or rollback requirements.
+Describe recovery paths for common failure scenarios. Include state cleanup or rollback requirements. Note that delegated skills may return `failed` status requiring orchestrator retry/repair.
+
+- **Delegated skill fails**: Receive failure JSON from worker, analyze error_type, decide: repair packet and retry, skip dependent tasks, or escalate to user
+- **Packet defect detected**: Modify delegation-packet.md template and re-spawn delegated skill  
 
 ## Gotchas & Recovery
 
 | Problem | Solution |
 |---------|----------|
-| Subskill fails partway through | Retry from last good checkpoint, preserve partial outputs |
+| Delegated skill fails validation | Inspect worker output JSON; check evidence requirements in its SKILL.md; update packet and retry |
 ```
-
-## Required Frontmatter Fields
-
-- `name` (string): Directory-matched skill identifier, lowercase with hyphens
-- `description` (string): Starts with "Use when" describing the trigger condition  
-- `class` (enum: orchestrated): Must be exactly this value for class identification
-
-> **Warning**: This is a template file. Copy it to create actual skills; do not load `templates/orchestrated-skill-template.md` as an active skill.

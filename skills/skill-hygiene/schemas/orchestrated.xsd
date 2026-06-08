@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
-  <xs:annotation><xs:documentation>Orchestrated skills coordinate subskills, workers, state ownership, quality gates, and failure handling across multi-phase workflows.</xs:documentation></xs:annotation>
+  <xs:annotation><xs:documentation>Orchestrated skills are coordinator-only procedural instruction sets that delegate execution to delegated skills or workers. They do NOT perform bounded worker tasks directly, but define coordination protocols for multi-phase workflows, state ownership handoffs, quality gates, and failure handling.</xs:documentation></xs:annotation>
   <xs:element name="skill_class_manifest">
     <xs:annotation><xs:documentation>Canonical XML manifest shape for an orchestrated skill class review.</xs:documentation></xs:annotation>
     <xs:complexType><xs:sequence>

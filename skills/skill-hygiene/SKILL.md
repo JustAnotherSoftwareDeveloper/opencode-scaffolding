@@ -13,7 +13,8 @@ Use this skill when creating, revising, or reviewing skills under `skills/<name>
 1. Confirm the work really needs a skill: repeated procedure, specialized domain knowledge, or reusable workflow.
 2. Choose exactly one class before drafting:
    - `atomic` — one bounded procedure with independent validation.
-   - `orchestrated` — coordinates subskills, workers, state, or quality gates.
+   - `orchestrated` — procedural coordinator that delegates to workers; does not execute directly, only coordinates/state/quality gates.
+   - `delegated` — worker-executed backing specialist spawned by an orchestrator with explicit input/output contracts.
    - `documentation` — reference/context store loaded for knowledge or conventions.
    - `planning` — proposal, plan, runbook, review, or lifecycle skill.
 3. Use OpenCode-compatible frontmatter plus the local framework class:
@@ -45,6 +46,7 @@ The canonical class contracts are XSDs, one per class:
 
 - `schemas/atomic.xsd`
 - `schemas/orchestrated.xsd`
+- `schemas/delegated.xsd`
 - `schemas/documentation.xsd`
 - `schemas/planning.xsd`
 
