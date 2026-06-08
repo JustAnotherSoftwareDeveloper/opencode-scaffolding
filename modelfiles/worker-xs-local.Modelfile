@@ -1,0 +1,5 @@
+FROM granite4.1:8b
+
+PARAMETER num_ctx 16384
+PARAMETER temperature 0.2
+PARAMETER top_p 0.9
