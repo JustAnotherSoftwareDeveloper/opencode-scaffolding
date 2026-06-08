@@ -13,7 +13,7 @@ Use this skill when creating, revising, or reviewing skills under `skills/<name>
 1. Confirm the work really needs a skill: repeated procedure, specialized domain knowledge, or reusable workflow.
 2. Choose exactly one class before drafting:
    - `atomic` — one bounded procedure with independent validation.
-   - `orchestrated` — procedural coordinator that delegates to workers; does not execute directly, only coordinates/state/quality gates.
+   - `orchestrated` — heavy-procedure coordinator that delegates execution to workers or delegated backing skills; does not perform worker tasks directly. Owns routing, state transitions, reconciliation, failure handling, and quality gates.
    - `delegated` — worker-executed backing specialist spawned by an orchestrator with explicit input/output contracts.
    - `documentation` — reference/context store loaded for knowledge or conventions.
    - `planning` — proposal, plan, runbook, review, or lifecycle skill.

@@ -10,7 +10,7 @@ Replace all `<placeholder>` values before using. Match `name` to the directory n
 
 ## Class Purpose
 
-Delegated skills are specialized workers spawned by an orchestrator (the `delegation` skill). Each defines a single bounded worker objective with explicit input/output contracts, state boundaries, and independent validation criteria. They execute in isolation from the parent orchestrator thread.
+**Delegated backing role:** Delegated skills are worker-executed specialists spawned by orchestrated skills or other orchestrators through delegation packets. They provide the execution backing for orchestrated procedures - performing the actual bounded work that coordinators manage and coordinate.
 
 ## When to Use This Template
 

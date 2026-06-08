@@ -40,6 +40,8 @@ Coordinates phases, workers, state, quality gates, or multiple skills. Use when 
 
 **Triggers:** Multiple steps needing different specialists; conditional branching; retry loops with quality checks.
 
+**Non-Execution Guardrail:** Orchestrated skills are heavy-procedure coordinators only—they delegate all worker tasks to backing delegated skills or workers. Does not embed step execution that belongs in delegated skills/workers.
+
 ### documentation — Reference Store
 Reference material loaded via delegation for knowledge sharing. Primary value comes from other skills loading it, not executing procedures. Includes freshness policy and citations. See schema: `skills/skill-hygiene/schemas/documentation.xsd`.
 

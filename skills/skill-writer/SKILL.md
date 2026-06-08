@@ -37,7 +37,7 @@ Each template contains a description of the skill class purpose followed by a st
 |----------|---------|
 | `atomic-skill-template.md` | Single bounded procedure with independent validation |
 | `delegated-skill-template.md` | Worker specialization for isolated execution via delegation packet |
-| `orchestrated-skill-template.md` | Coordinates subskills, workers, state, or quality gates |
+| `orchestrated-skill-template.md` | Coordinates subskills, workers, state, or quality gates; heavy-procedure coordinator that delegates execution to backing delegated skills/workers. |
 | `documentation-skill-template.md` | Reference material with explicit load conditions |
 | `planning-skill-template.md` | Proposal/plan/runbook lifecycle creation |
 

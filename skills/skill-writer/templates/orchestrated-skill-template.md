@@ -10,7 +10,12 @@ Replace all `<placeholder>` values before using. Match `name` to the directory n
 
 ## Class Purpose
 
-Orchestrated skills are coordinator-only procedural instruction sets that delegate execution to delegated skills or workers. They do NOT perform bounded worker tasks directly, but coordinate multi-phase workflows with state ownership handoffs, quality gates, and failure handling strategies.
+**Heavy-procedure coordinator-only.** Orchestrated skills own routing, state transitions, reconciliation, failure handling, and quality gates. **Does not perform worker tasks directly.** Everything is delegated to workers or delegated backing skills spawned via delegation packets.
+
+- Listens for trigger events requiring multi-phase coordination
+- Constructs delegation packets with explicit input/output contracts
+- Spawns delegated skills as specialized workers
+- Owns state file transitions and reconciliation between phases
 
 **Key distinction from `delegated`:** Orchestrated skills define coordination protocols; delegated skills execute them as isolated workers.
 
