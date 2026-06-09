@@ -11,17 +11,95 @@
         "apiKey": "ollama"
       },
       "models": {
-        "worker-xs-local": {
-          "name": "Worker XS Local"
+        "xs-local": {
+          "name": "Worker XS Local",
+          "limit": {
+            "context": 16384,
+            "output": 4096
+          },
+          "options": {
+            "temperature": 0.2,
+            "top_p": 0.9
+          }
         },
-        "worker-sm-local": {
-          "name": "Worker SM Local"
+        "sm-local": {
+          "name": "Worker SM Local",
+          "limit": {
+            "context": 32768,
+            "output": 4096
+          },
+          "options": {
+            "temperature": 0.2,
+            "top_p": 0.9
+          }
         },
-        "worker-md-local": {
-          "name": "Worker MD Local"
+        "md-local": {
+          "name": "Worker MD Local",
+          "limit": {
+            "context": 65536,
+            "output": 4096
+          },
+          "options": {
+            "temperature": 0.2,
+            "top_p": 0.9
+          }
         },
-        "worker-lg-local": {
-          "name": "Worker LG Local"
+        "lg-local": {
+          "name": "Worker LG Local",
+          "limit": {
+            "context": 32768,
+            "output": 4096
+          },
+          "options": {
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "repeat_penalty": 1.05
+          }
+        },
+        "qwen": {
+          "name": "Worker Qwen",
+          "limit": {
+            "context": 131072,
+            "output": 4096
+          },
+          "options": {
+            "temperature": 0.3,
+            "top_p": 0.9,
+            "top_k": 20,
+            "min_p": 0,
+            "repeat_penalty": 1.05,
+            "repeat_last_n": 512
+          }
+        },
+        "laguna": {
+          "name": "Worker Laguna",
+          "limit": {
+            "context": 131072,
+            "output": 4096
+          },
+          "options": {
+            "temperature": 0.2,
+            "top_p": 0.9,
+            "top_k": 20,
+            "min_p": 0,
+            "repeat_penalty": 1.05,
+            "repeat_last_n": 512
+          }
+        },
+        "granite": {
+          "name": "Worker Granite",
+          "limit": {
+            "context": 16384,
+            "output": 4096
+          },
+          "options": {
+            "temperature": 0.2,
+            "top_p": 0.9,
+            "top_k": 20,
+            "min_p": 0,
+            "repeat_penalty": 1.05,
+            "repeat_last_n": 512
+          }
         }
       }
     }

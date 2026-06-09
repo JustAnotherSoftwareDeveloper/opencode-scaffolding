@@ -1,6 +1,6 @@
 ---
 description: "Single text worker for all delegated text tasks. Handles any complexity level within the scope of a delegation packet."
-model: "ollama/worker-md-local"
+model: "ollama/laguna"
 mode: "subagent"
 hidden: true
 permission:

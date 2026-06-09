@@ -1,6 +1,6 @@
 ---
 description: "Hidden subagent for read-only inspection of workflow artifacts in .proposals/, .plans/, and .runbooks/ directories."
-model: "ollama/granite41-8b-12k"
+model: "ollama/granite"
 mode: "subagent"
 hidden: true
 permission:
