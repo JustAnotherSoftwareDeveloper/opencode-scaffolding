@@ -29,17 +29,16 @@ Use when creating a bounded proposal for non-trivial, ambiguous, or high-impact 
 ### Do Not Use When
 
 - Direct implementation without analysis is required (use worker mode directly)
-- The task is trivial (typo fix, surface change)—proposals are not needed for `none` depth tier
+- The task is trivial (typo fix, surface change)—no proposal needed for such changes
 
 ## Serial Delegation Workflow
 
-1. **Classify intent and depth** — Determine proposal depth tier (`light`, `standard`, or `deep`) before drafting.
-2. **Launch exploration lanes** — Per the Depth-Tier Lane Matrix in the delegated skills, route discovery work via delegation packets:
+1. **Launch exploration lanes** — Per the delegated skills, route discovery work via delegation packets:
    - Local lane: inventory current state when harness impact exists
    - Historical lane: inspect priors when similar artifacts may conflict
-   - External lane: research frameworks only for `deep` proposals citing external standards
-3. **Synthesize findings** — After lanes complete, delegate to synthesis analyst if 2+ lanes were launched or architectural tradeoffs exist.
-4. **Draft proposal artifact** — Create `.proposals/<unix-timestamp>-slug/` with all 13 required files:
+   - External lane: research frameworks as needed citing external standards
+2. **Synthesize findings** — After lanes complete, delegate to synthesis analyst if 2+ lanes were launched or architectural tradeoffs exist.
+3. **Draft proposal artifact** — Create `.proposals/<unix-timestamp>-slug/` with all 13 required files:
    - `INDEX.md`, `metadata.md`, `goal.md`, `problem-opportunity.md`
    - `scope.md`, `recommended-approach.md`, `alternatives-considered.md`
    - `risks-and-unknowns.md`, `acceptance-criteria.md`, `decision.md`

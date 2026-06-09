@@ -33,10 +33,11 @@ none | agents | commands | permissions | skills | tools | rules | config | multi
 none | optional | required
 
 ### Planning Requirement
-skip | light plan | full plan
+skip | plan required (for non-trivial changes)
 
-## Proposal Depth Tier
-none | light | standard | deep
+## Analysis Lanes Required
+
+This proposal requires the following analysis lanes based on the exploration scope:
 
 ## Current State
 
@@ -55,17 +56,20 @@ none | light | standard | deep
 ## Delegation Model
 
 ### Analyst Lane Selection Rationale
-<!-- For deep proposals: justify which exploration/analysis lanes are required, recommended, or optional based on the depth-tier lane matrix. -->
+
+Justify which exploration/analysis lanes are required, recommended, or optional based on the discovery scope. Map to lane selection criteria in the proposal skill documentation.
 
 ### Delegated Analysis Summary
-<!-- For deep proposals: summarize tradeoffs, risks, contradictions, framework-fit assessment, and decision impact from analysis lanes. -->
+
+Summarize tradeoffs, risks, contradictions, framework-fit assessment, and decision impact from analysis lanes.
 
 ## Risks and Unknowns
 
 ## Discovery Results
 
 ### Discovery Evidence Ledger
-<!-- For deep proposals: record source-backed findings with lane, worker, source, claim/fact, inference, assumption, confidence, relevance, fit caveat, and decision impact. -->
+
+Record source-backed findings with lane, worker, source, claim/fact, inference, assumption, confidence, relevance, fit caveat, and decision impact.
 
 | Lane | Worker | Source | Claim / Fact | Inference | Assumption | Confidence | Relevance | Fit Caveat | Decision Impact |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

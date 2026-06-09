@@ -125,19 +125,21 @@ A markdown document with the following sections:
 | Historical explorer | worker-md | .proposals/1778883198-xml-runbook-format-replacement.md | A previous proposal considered replacing XML format but was rejected due to migration complexity | Similar migration concerns would apply to any format change | The migration complexity assessment is still valid | High | High | None | Strengthens the case for incremental improvement over format replacement |
 | Adversarial / gap analyst | worker-md | Internal analysis | The proposal underestimates the risk of format migration | A full migration would require changes to runbook state initialization, validation, and execution | None | High | High | None | Requires adding stronger risk mitigation strategies to the proposal |
 
-## Depth-Tier Lane Matrix
+## Lane Requirement Matrix
 
-| Lane | `light` | `standard` | `deep` |
-| --- | --- | --- | --- |
-| Local explorer | Recommended if local facts unknown | Recommended | Required when local harness/code impact exists |
-| Historical explorer | Optional | Optional | Required when similar artifacts or prior policy exist |
-| External reference explorer | Not needed | Optional | Required when external frameworks are cited |
-| Delegation-pattern analyst | Not needed | Not needed | Required for harness-routing / workflow changes |
-| Adversarial / gap analyst | Not needed | Not needed | Required for core workflow changes |
-| Synthesis analyst | Not needed | Not needed | Required when three or more lanes were launched |
-| Embedded review analyst | Not needed | Recommended | Required |
+The following table defines the requirement level for each analysis lane based on evidence needs. All requirements reflect the unified deep-proposal approach:
 
-*Note: This matrix is derived from `skills/proposal/SKILL.md` and reflects the current depth-tier behavior for proposal lanes.*
+| Lane | Requirement Level | Evidence Need Trigger |
+|------|-------------------|----------------------|
+| Local explorer | Required | When local harness files, skills, runbooks, or configuration may be impacted by changes |
+| Historical explorer | Optional | When similar artifacts or prior policy decisions exist that could inform the proposal |
+ | External reference explorer | Recommended | When external frameworks or comparable solutions should be evaluated for fit |
+| Delegation-pattern analyst | Required | For harness-routing, workflow changes, or delegation infrastructure modifications |
+| Adversarial / gap analyst | Required | For core workflow changes where risk analysis is critical to decision quality |
+| Synthesis analyst | Required | When two or more exploration lanes are launched and tradeoffs need synthesis |
+| Embedded review analyst | Recommended | Before final user decision to validate completeness and scope boundaries |
+
+*Note: Lane requirements are determined by evidence needs, not proposal tier. All lanes follow unified deep-proposal approach with comprehensive discovery expectations.*
 
 ## Delegated Analysis Examples
 
@@ -191,7 +193,7 @@ Use this checklist to ensure proposal quality before the embedded critique phase
 - [ ] **Update-vs-new decided**: Decision made on whether to revise, supersede, or create new proposal
 - [ ] **Proposal-only**: No dependency graphs, task breakdowns, or implementation steps are included
 
-*Note: This checklist is illustrative. The actual embedded critique should verify these items based on the proposal's depth tier.*
+*Note: This checklist verifies complete artifact structure per the unified deep proposal approach.*
 
 ## Update-vs-New Examples
 

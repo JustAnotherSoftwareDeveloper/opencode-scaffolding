@@ -16,4 +16,4 @@ none | agents | commands | permissions | skills | tools | rules | config | multi
 none | optional | required
 
 ### Planning Requirement
-skip | light plan | full plan
+skip | plan required (for non-trivial changes)
