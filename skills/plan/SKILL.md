@@ -1,133 +1,149 @@
 ---
 name: plan
-description: Create directory-based markdown engineering plans from accepted proposals. Use when a proposal has been accepted and an execution blueprint is needed. Plans are required-execution workspaces with validation tasks/ directory for senior-dev-to-intern instructions.
-class: planning
+description: Use when a spawning orchestrator delegates creation of directory-based markdown engineering plans from accepted proposals, coordinating named delegated backing skills to produce structured workspace artifacts.
+class: orchestrated
 ---
 
-# Plan Skill
+# Plan Skill (Orchestrator)
 
-Use this skill after a proposal is accepted. Planning requires an accepted proposal artifact: prefer a proposal workspace at `.proposals/<timestamp>-<slug>/INDEX.md` with accepted status in `metadata.md`; historical single-file `.proposals/<timestamp>-<slug>.md` artifacts remain readable but must not be migrated. Direct planning from raw user requests is not supported.
+**Heavy-procedure coordinator-only.** Orchestrated skills own routing, state transitions, reconciliation, failure handling, and quality gates. **Does not perform worker tasks directly.** Everything is delegated to workers or named delegated backing skills spawned via delegation packets constructed using `skills/delegation/templates/delegation-packet.md`.
 
-**This skill does not implement changes.** It produces a markdown plan artifact that defines required execution-focused workspaces. Non-trivial execution proceeds by loading the **runbook** skill after the plan is approved.
+Coordinates the post-acceptance phase of the proposal→plan→runbook lifecycle: transforms accepted proposals into structured plan workspace artifacts ready for downstream runbook execution.
 
-## Plan Artifact Contract (Future Taxonomy)
+## Delegated Backing Skills
 
-Plan artifacts are **required-execution workspaces** with a mandatory file structure:
+This orchestrator spawns five named delegated backing skills in sequence. Each has explicit input/output contracts per delegation packets referencing this skill's taxonomy requirements.
+
+| Delegated Skill | Purpose | Input From Orchestrator | Output To Orchestrator |
+|-----------------|---------|------------------------|------------------------|
+| `plan-intake-lane` | Validate accepted proposal artifact and extract structured handoff data | Proposal path (`.proposals/<timestamp>-<slug>/INDEX.md`) from state or packet field | JSON with goal, non_goals, constraints, scope boundaries, risks_to_monitor, suggested_delegation |
+| `plan-specification-analyst` | Transform intake output into plan workspace specification content | Intake data JSON + plan_id_slug | JSON with goal_section, file_impact_analysis, validation_checkpoints ready for task rendering |
+| `plan-workspace-creator` | Create `.plans/<timestamp>-<slug>/` workspace scaffold with 10-file taxonomy and tasks directory | Spec content JSON + target_workspace path | JSON with status, workspace_path, files_created array, verification_summary |
+| `plan-task-writer` | Create numbered senior-to-intern task markdown files in tasks/ directory | Plan spec JSON + target_workspace path | Array of created task file paths with frontmatter/validation confirmation |
+| `plan-review-analyst` | Validate complete plan artifact set against required taxonomy quality gates | workspace_path, proposal_path, expected_delegated_skills array | Validation report: status, files_checked, quality_gates_passed, recommendation ("accept"/"revise") |
+
+## Orchestration Protocol
+
+### When to Use This Skill
+Use when a spawning orchestrator has accepted proposal artifacts and needs structured plan workspaces for downstream runbook execution. Trigger conditions:
+- Proposal has `status: accepted` in metadata.md (workspace) or frontmatter (historical)
+- Execution work is non-trivial requiring multi-phase coordination
+
+### Do Not Use When
+- User request is trivial (typo fix, surface change)—no proposal/plan needed
+- No accepted proposal exists—request explicit acceptance first via original `proposal` skill path
+
+## Serial Delegation Workflow
+
+**Phase 1: Intake Lane Launch** → **Phase 2: Specification Analysis** → **Phase 3: Workspace Creation (Delegated)** → **Phase 4: Task Drafting** → **Phase 5: Review/QA Gate** → **Phase 6: Approval Handoff to Runbook Skill**
+
+```
+┌─────────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
+│ plan-intake-lane │ → │ spec-analyst │ → │ workspace-   │ → │ task-writer  │
+│ (worker skill)   │   │ (delegated)  │   │ creator      │   │ (delegated)  │
+└─────────────────┘   └──────────────┘   └──────────────┘   └──────────────┘
+                                                          ↓
+                                                ┌──────────────┐
+                                                │ review-analyst│
+                                                │              │
+                                                └──────────────┘
+                                                          ↓ pass/failing to runbook skill
+```
+
+### Phase Details
+
+1. **Launch Intake Lane** — Spawn `plan-intake-lane` via delegation packet with proposal path and unix-timestamp slug for new plan workspace. Skill loads as `Skill to load` per delegation template requirement.
+
+2. **Specification Analysis** — After intake completes, spawn `plan-specification-analyst` with intake_data JSON + plan_id_slug. Worker produces structured spec ready for task rendering.
+
+3. **Workspace Creation (Delegated)** — Spawn `plan-workspace-creator` with spec_content JSON + target_workspace path. Worker creates `.plans/<timestamp>-<slug>/` directory structure with all 10 root files and tasks/ subdirectory.
+
+4. **Task Drafting** — Spawn `plan-task-writer` with spec content and target_workspace path. Creates numbered senior-to-intern markdown files (e.g., `01-implementation.md`) in tasks/.
+
+5. **Review/QA Gate** — Spawn `plan-review-analyst` to validate 10-file + tasks/ taxonomy completeness, frontmatter validity, no proposal duplication, delegated skills named correctly. Result is pass/fail recommendation.
+
+6. **Approval Handoff** — On quality gate pass: Update state.xml step status, return handoff JSON with plan_workspace_path and approved_tasks list for runbook skill to consume. On failure: Return revision request with missing files/sections enumerated.
+
+## Plan Artifact Contract (Required)
+
+Plan workspaces are execution-focused artifacts at `.plans/<unix-timestamp>-<slug>/INDEX.md` containing **required** structure:
 
 ```text
-.plans/<unix-timestamp>-<slug>/INDEX.md
+.plans/<timestamp>-<slug>/
+├── INDEX.md              # TOC-only navigation, no frontmatter/body
+├── metadata.md           # id, title, status, created_at, proposal reference
+├── source.md             # Link to accepted proposal with decision summary only
+├── execution-overview.md # High-level approach for what's executing today
+├── constraints.md        # Prerequisites, sequencing rules, hard boundaries
+├── file-impact.md        # Files/dirs that will be created/modified/deleted
+├── implementation-notes.md | OR "TBD" if omitted
+├── validation.md         # Verification commands and checkpoints
+├── rollback-recovery.md  # Undo instructions for partial execution failure
+└── tasks/                # REQUIRED: numbered senior-to-intern instruction files
+    ├── 01-description.md
+    └── ...
 ```
 
-Each plan workspace must contain all required files listed below. The `tasks/` directory is mandatory — it contains numbered senior-to-intern instruction files, not runbook XML execution state.
+## Tasks Directory Semantics (`tasks/*.md`)
 
-### Required Files
+Files in this directory are **human-facing senior-to-intern instructions**, not runbook XML or execution state. Each file must include Purpose, Files In Scope (exact paths), Actions with concrete steps/commands, Expected Observations, Common Mistakes & How to Avoid Them table, and Completion Criteria (pass/fail checklists).
 
-| File | Purpose |
-|------|---------|
-| **INDEX.md** | TOC-only navigation file; no frontmatter or prose body |
-| **metadata.md** | YAML lifecycle/status/source metadata: id, title, status, created_at, proposal reference |
-| **source.md** | Short link to source proposal with accepted-decision summary only — NOT rationale duplication |
-| **execution-overview.md** | What we're executing today (high-level approach) |
-| **constraints.md** | Prerequisites, sequencing rules, hard boundaries |
- | **file-impact.md** | Files/dirs that will be created, modified, or deleted |
-| **implementation-notes.md** | OR document why omitted for this plan |
-| **validation.md** | Verification commands and checkpoints |
-| **rollback-recovery.md** | Undo instructions if execution fails partway through |
-| **handoff.md** | Optional transition guidance to runbook/next owner |
-| **tasks/** | REQUIRED: At least one numbered markdown file, e.g., `01-implementation.md` |
-
-### Tasks Directory Semantics (`tasks/*.md`)
-
-Files in this directory are **human-facing senior-to-intern instructions**. Each file must include:
-
-- Purpose statement for the step
-- Files in scope (exact paths)
-- Concrete actions/edits with specific commands or edit specifications  
-- Expected observations/outputs
-- Common mistakes and how to avoid them
-- Completion criteria (pass/fail conditions verifiable at that step)
-
-**NOT runbook XML. NOT execution state.** These are markdown instructions workers follow directly.
-
-Example structure for `tasks/01-update-skill-contract.md`:
-
-```markdown
-## Purpose
-Update the Plan Skill contract to reflect required file structure and tasks/ directory purpose.
-
-## Files in Scope
-- `skills/plan/SKILL.md`
-
-## Actions
-1. Edit SKILL.md sections 4–6 ...
-2. Run validation: uv run --project scripts/python validate-skill-framework skills/plan/SKILL.md
-
-## Expected Observations
-- Grep for legacy references finds zero matches
-```
-
-### Frontmatter (per file)
-
-Every plan markdown file starts with YAML frontmatter:
-
+Example frontmatter for task files:
 ```yaml
 ---
 id: <unix-timestamp>-<slug>
-title: "<Human-readable title>"
-status: draft  # draft | approved | superseded
+title: "<Descriptive Task Title>"
+status: draft
 created_at: "<ISO 8601 timestamp>"
 updated_at: "<ISO 8601 timestamp>"
 proposal: ".proposals/<timestamp>-<proposal-slug>/INDEX.md"
 ---
 ```
 
-## Required Sections in INDEX.md
+## Delegation Packet Requirements
 
-The `INDEX.md` file must contain each section listed below. Sections not yet filled should state "TBD".
+All delegation packets must follow `skills/delegation/templates/delegation-packet.md`:
+- **Skill to load** must be one of the five named delegated backing skills listed above
+- Include bounded objective, context inputs, files in/out scope, Do/Do-not rules
+- State ownership per step (or "none" for read-only workers)
+- Verification command expecting valid JSON output
 
-| Section | Purpose |
-|---------|---------|
-| **Goal** | Clear statement of what this plan accomplishes (from proposal goal) |
-| **Non-Goals** | What this plan explicitly does NOT address |
-| **Source Proposal** | Link to accepted proposal with summary of key decisions only |
- | **Accepted Decisions** | Planning-level decisions: phase ordering, worker routing, skill selection |
-| **Workspace Contents** | File tree structure matching required taxonomy above |
- | **Constraints** | Prerequisites and sequencing rules (may duplicate constraints.md content) |
-| **Artifact Impact** | Files that will be created, modified, or deleted |
-| **Validation** | Commands to verify correctness (see also validation.md) |
-| **Rollback / Recovery** | Steps to undo if execution fails; may reference rollback-recovery.md |
-| **Acceptance Criteria** | Concrete pass/fail conditions for plan completion |
+## Task Naming / Identity Mapping
 
-## Lifecycle Rule
+Tasks are numbered and kebab-case (`01-core-refactor.md`). Suggested delegation assignments from proposal's `suggested_delegation` field map to worker capability recommendations within each task file. The orchestrator uses these hints but respects reviewer override via review-analyst quality gates.
 
-**Plan skill does not implement changes.** It produces the execution-focused workspace. Non-trivial execution proceeds through the runbook skill after plan approval and validation.
+## State Ownership & Failure Handling
 
-Load `skill-hygiene` only if frontmatter or framework metadata changes; otherwise use documentation-mode instructions. Load `review-work` for reviewing completed work. Use `delegation` during runbook execution to select worker sizes dynamically.
+| Phase | Owner | Mutable Paths | Notes |
+|-------|-------|---------------|-------|
+| Intake/Spec | Delegated workers | None (read-only from proposal) | Failure: return JSON with error_type, skip downstream steps |
+| Workspace Creation | Delegated worker (`plan-workspace-creator`) | `.plans/<id>/INDEX.md`, `metadata.md` etc. | Worker creates taxonomy; orchestrator reconciles state |
+| Task Writing/Review | Delegated workers | `tasks/*.md` creation | Worker may update state file path if specified in packet |
 
-## Validation Guidance (Future)
+**Failure Strategy:** 
+- If any delegated skill returns `"status": "failed"`, analyze error_type from worker output JSON. Options: repair delegation packet (iterate), skip dependent tasks with explanation, or escalate to user for clarification/decision.
+- Partial artifacts are preserved under `.runbooks/<id>/evidence/` when available for inspection.
 
-Once the validator is added, future plan workspaces validate with:
+## Quality Gates Checklist
+
+| Gate | Condition | Action if Fail |
+|------|-----------|----------------|
+| Intake Success | JSON output has all required keys (goal, constraints non-empty) | Skip spec phase; request clearer proposal data from user |
+ |Workspace Exists | Directory `.plans/<slug>/` with 10 files minimum | Create missing structure before task writing |
+| Tasks Valid | Each task file parses YAML frontmatter and contains all sections | Return to plan-task-writer for revision |
+| Review Pass | `quality_gates_passed: true`, `recommendation: "accept"` | Proceed to runbook handoff; update state.xml |
+
+## Validation Command
 
 ```bash
-uv run --project scripts/python validate-plan .plans/<id>/INDEX.md
+uv run --project scripts/python validate-skill-framework skills/plan/SKILL.md
+# Grep verification checklist:
+grep -E "^class:" skills/plan/SKILL.md  # should show: orchestrated (not planning)
+grep "plan-intake-lane\|plan-specification-analyst\|plan-workspace-creator\|plan-task-writer\|plan-review-analyst" skills/plan/SKILL.md  # all five present
 ```
 
-Until then, verify by file presence/readback checks and grep for legacy references.
+## Related Skills
 
----
-
-## Proposal Intake
-
-Before creating a plan, verify:
-1. The proposal path exists as `.proposals/<timestamp>-<slug>/INDEX.md` workspace or historical `.md` file
-2. The proposal has `status: accepted` in workspace `metadata.md` or historical frontmatter
-3. Extract goal → Goal section; non-goals → Non-Goals; decisions → Accepted Decisions
-
-## Rules
-
-- Do not implement changes while using this skill; produce the plan artifact only
-- Plan workspaces must follow required 10-file + tasks/ taxonomy (not proposal-like rationale)
-- Do not create `.plans/*.json` executable artifacts  
-- Do not reference schema_version, init-*state files, or plan state schemas — these were deprecated in May 2026.
-- Tasks files are senior-to-intern instructions, NOT runbook XML/execution state
-- For non-trivial execution routing, load the **runbook** skill after validation
+- `proposal` — Creates accepted proposal artifacts this skill consumes
+- `runbook` — Executes approved plans after plan approval handoff  
+- `delegation` — Routes work via Worker Handoff Packets and template
