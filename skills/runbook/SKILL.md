@@ -1,13 +1,50 @@
 ---
 name: runbook
-description: Generate executable runbook directory workspaces from approved markdown plans. Use for .runbooks/<id>/main.xml (v3 target) creation, validation, state initialization, and runbook-driven execution handoff.
+description: Use when converting approved markdown plans into executable v3 XML runbook workspaces with delegated backing skills for input validation, specification analysis, workspace creation, step writing, and validation/QA before state initialization handoff.
+class: orchestrated
 ---
 
-# Runbook Skill
+# Runbook Skill (Orchestrator)
 
-Use this skill after a markdown plan has been approved and before execution begins. The runbook is the machine-readable execution contract for orchestrators and workers.
+Coordinates multi-phase runbook generation from approved plans using delegated backing skills. This orchestrator owns routing, state transitions, reconciliation, failure handling, and quality gates; it does **not** perform worker tasks directly.
 
-This skill does **not** implement requested changes directly. It converts an approved human engineering plan into an executable runbook workspace, validates that workspace, and prepares it for runbook-keyed state initialization.
+Uses the `delegation` skill as the routing source of truth; all worker assignments flow through delegation packets constructed per `skills/delegation/templates/delegation-packet.md`.
+
+## Delegated Backing Skills
+
+| Lane Name | Purpose | Input From Orchestrator | Output To Orchestrator |
+|-----------|---------|------------------------|------------------------|
+| runbook-intake-lane | Validate approved plan and extract runbook-generation handoff data | Plan path, proposal path | Structured JSON with goal, constraints, scope boundaries, acceptance criteria |
+| runbook-specification-analyst | Transform validated intake JSON into runbook workspace specification | Intake JSON, runbook_id_slug | Structured JSON defining step units, dependency edges, delegation map, manifest requirements |
+| runbook-workspace-creator | Create `.runbooks/<id>/` v3 XML scaffold directory structure | runbook_id, target_workspace, spec_content | Workspace path, files created, verification summary |
+| runbook-step-writer | Generate individual v3 XML step files from plan tasks | runbook_id, target_workspace, steps_spec | Steps created, verification summary |
+| runbook-validation-analyst | Validate v3 XML runbook workspace completeness and readiness | workspace_path, checklist, validation_depth | Quality gates status, blockers, recommendation |
+
+## Orchestration Protocol
+
+### When to Use This Skill
+
+Use when a markdown plan has been approved and you need to generate an executable runbook workspace before execution begins. The runbook is the machine-readable execution contract for orchestrators and workers.
+
+Trigger conditions:
+- Plan exists at `.plans/<timestamp>-slug/INDEX.md` with `status: approved`
+- Linked proposal has `status: accepted`
+- Plan contains enough detail for executable steps: objective, scope, artifact impact, implementation strategy, validation, rollback/recovery, and acceptance criteria
+
+### Do Not Use When
+
+- Direct implementation without runbook generation is required
+- The task is trivial (typo fix, surface change)—no runbook needed
+- Plan is too vague to execute safely—repair the plan first
+
+## Serial Delegation Workflow
+
+1. **Launch intake lane** — Delegate to `runbook-intake-lane` with plan path and proposal path to validate plan status and extract structured handoff data.
+2. **Synthesize specification** — After intake completes, delegate to `runbook-specification-analyst` with intake JSON and runbook_id_slug to produce runbook workspace specification.
+3. **Create workspace scaffold** — After specification completes, delegate to `runbook-workspace-creator` with runbook_id, target_workspace, and spec_content to materialize the `.runbooks/<id>/` directory structure.
+4. **Write step files** — After workspace creation, delegate to `runbook-step-writer` with runbook_id, target_workspace, and steps_spec to create individual v3 XML step files.
+5. **Validate workspace** — After step writing, delegate to `runbook-validation-analyst` with workspace_path and checklist to verify schema compliance, manifest presence, step granularity, dependency correctness, and state initialization readiness.
+6. **Initialize state** — Only after all validations pass, initialize state via `uv run --project scripts/python init-runbook-state .runbooks/<id>/main.xml`.
 
 ## Artifact Contract (v3 Target)
 
@@ -31,67 +68,58 @@ The primary manifest is `main.xml`. Each step is defined in its own XML file und
 
 Legacy v1 JSON workspaces with `.runbooks/<id>/runbook.json` are deprecated and not created for new target workflows.
 
-## Plan Intake Validation
+## Lane Packet Requirements (Per Delegation Skill)
 
-Before creating a runbook, verify:
+For each delegated backing skill, construct a bounded handoff packet via the delegation template that includes:
 
-1. The plan path exists and matches `.plans/<timestamp>-slug/INDEX.md`.
-2. The plan is a markdown engineering specification produced by the `plan` skill.
-3. The plan frontmatter has `status: approved` or the user explicitly authorizes runbook generation.
-4. The plan links to an accepted proposal.
-5. The plan contains enough detail to derive executable steps: objective, scope, artifact impact, implementation strategy, validation, rollback/recovery, and acceptance criteria.
+| Item | Requirement |
+|------|-------------|
+ | Objective | One clear, bounded goal for the lane |
+ | Source / file boundaries | Exact paths or URLs in scope |
+ | Out-of-scope | Explicit exclusions to prevent scope creep |
+ | Output contract | Required format with facts/inferences/assumptions and confidence levels |
+ | Do / do-not rules | Must reject implementation steps per runbook boundary rule |
 
-If the plan is too vague to execute safely, stop and repair the plan with the `plan` skill before generating a runbook.
+## Evidence Ledger Mapping
 
-## Runbook Generation Workflow (v3 Target)
+Accept worker findings into discovery results using this structure:
 
-1. **Extract proposal and plan context.** Verify plan path, status, and linked proposal acceptance.
-2. **Plan task decomposition pass.** Convert `tasks/*.md` human instructions into SUPER-atomic steps: each must be exactly one primary operation, at most one skill routing target per step, with explicit input/output artifacts and precise file scope. Broad tasks are split; empty/missing scope is a defect requiring repair before proceeding.
-3. **Split decomposed units into bounded executable steps.** One operation, one skill target, clear boundaries.
-4. **Build dependency graph** from decomposition output (one step at a time; no parallel dispatch).
-5. **Load `delegation`** for worker routing guidance.
-6. Create `.runbooks/<id>/main.xml`, `state.xml`, and `steps/<step-id>.xml` files using XSDs under `skills/runbook/schemas/` as the only schema/template contract.
-7. Validate with `uv run --project scripts/python validate-runbook .runbooks/<id>/main.xml`.
-8. Initialize state only when execution is authorized: `uv run --project scripts/python init-runbook-state .runbooks/<id>/main.xml`.
+| Lane | Worker | Source | Claim/Fact | Inference | Assumption | Confidence | Relevance | Fit Caveat | Decision Impact |
+|------|--------|--------|------------|-----------|------------|------------|-----------|------------|-----------------|
 
-## Execution Model
+External-source facts must include `[Source: URL]` citations. Historical and local findings map to lane origin per packet receipt.
 
-Runbooks use **strict serial execution**. Steps are ordered by the dependency graph and dispatched one at a time. The `dependency_graph` element encodes precedence constraints; it is **not** a parallel dispatch mechanism. There are no executable parallel groups.
+## Validation Commands
 
-## XML Shape Requirements
+```bash
+# Validate orchestrator skill framework compliance
+uv run --project scripts/python validate-skill-framework skills/runbook/SKILL.md
 
-- `main.xml` root: `<runbook artifact_type="runbook" format_version="3" id="<runbook-id>">`.
-- Step references: `<step_ref id="01-step" file="steps/01-step.xml" />`.
-- Step files root: `<step id="01-step">`.
-- Paths are relative to `.runbooks/<id>/`.
-- Step references must start with `steps/`, end with `.xml`, avoid `..`, and stay within the runbook directory.
-- The runbook directory name, manifest `id`, and `state.xml` runbook ID must match.
-- Required manifests: `evidence/index.xml`, `snippets/index.xml`, `reference/index.xml`.
+# Validate all five delegated backing skills
+uv run --project scripts/python validate-skill-framework skills/runbook-intake-lane/SKILL.md
+uv run --project scripts/python validate-skill-framework skills/runbook-specification-analyst/SKILL.md
+uv run --project scripts/python validate-skill-framework skills/runbook-workspace-creator/SKILL.md
+uv run --project scripts/python validate-skill-framework skills/runbook-step-writer/SKILL.md
+uv run --project scripts/python validate-skill-framework skills/runbook-validation-analyst/SKILL.md
 
-## Validation
-
-v3 XML runbooks use XSD structure validation under `skills/runbook/schemas/` as the only schema contract, plus parser-backed invariants in `scripts/python/lib/runbook_xml.py` and `scripts/python/lib/runbook_state.py`.
-
-Validation must be script-backed (Python/bash), not LLM judgment.
-
-Validate v3 XML:
-
-```text
-uv run --project scripts/python validate-runbook .runbooks/<runbook_id>/main.xml
-uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/main.xml
+# Grep verification for delegation matrix
+grep -E "runbook-intake-lane|runbook-specification-analyst|runbook-workspace-creator|runbook-step-writer|runbook-validation-analyst" skills/runbook/SKILL.md
 ```
 
-Legacy validation is not supported for new target workflows.
+## Quality Gate Checklist
 
-## Embedded Quality Check
-
-Every non-trivial runbook should include or trigger an embedded quality check using `review-work` and the configured text worker (`worker`) with review-mode instructions. The review should check plan fidelity, step granularity, dependency correctness,  file scope safety, runbook validation, state initialization, and recovery coverage.
+Before user decision, verify:
+- **Completeness**: All 5 backing skills present with required content
+- **Class identification**: `class: orchestrated` confirmed
+- **Delegation matrix**: All five skill names appear exactly as listed
+- **Workflow integrity**: Serial sequence matches intake → specification → workspace → steps → validation → state init
+- **Boundary preservation**: No dependency graphs, task breakdowns, or implementation steps leaked from proposal/plan
 
 ## Rules
 
 - Do not execute implementation changes while generating the runbook.
 - Do not create `.plans/*.json` executable artifacts.
-- Do not use `init-plan-state`; use `init-runbook-state` only.
+- Do not use `init-plan-state`; use `init-runbook-state` only after validation passes.
 - Do not store runbooks as single files directly under `.runbooks/`; use `.runbooks/<id>/main.xml` (v3 target).
 - Do not create new v3 runbooks with TOON or JSON; use XML/XSD-first format.
 - Do not modify worker agent names, model IDs, provider settings, or fallback ordering.
