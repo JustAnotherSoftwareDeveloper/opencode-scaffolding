@@ -8,7 +8,7 @@ Platform rules, authoring guidance, and on-demand reference for creating OpenCod
 - **Entry point**: `SKILL.md` — the file the agent loads
 - **Support files**: `REFERENCE.md`, `reference/*.md`, schemas, templates alongside `SKILL.md`
 - **Archived versions**: `~/.config/opencode/archive/<<name>>/SKILL.md` — read for shape only, never prose
-- **Templates**: `~/.config/opencode/skills/templates/<<class>>.SKILL.template.md` — e.g. `operation.SKILL.template.md`, `delegated.SKILL.template.md`, `orchestrated.SKILL.template.md`, `planning.SKILL.template.md`
+- **Templates**: `~/.config/opencode/skills/templates/<<class>>.SKILL.template.md` — e.g. `operation.SKILL.template.md`, `delegated.SKILL.template.md`, `inline.SKILL.template.md`, `orchestrated.SKILL.template.md`, `planning.SKILL.template.md`
 - **Schemas (future)**: `~/.config/opencode/skills/skill-hygiene/schemas/*.xsd` — canonical class contracts
 
 **Discovery**: The OpenCode agent selects a skill when its `description` field (in frontmatter) matches the current task context. Skill files are not auto-indexed beyond their description field — the match is string/relevance-based, not structural.
@@ -21,7 +21,7 @@ Every `SKILL.md` must open with valid YAML frontmatter containing exactly three 
 ---
 name: <<skill-name>>
 description: "Use when <<trigger description>>."
-class: <<one-of-four-classes>>
+class: <<one-of-five-classes>>
 ---
 ```
 
@@ -41,10 +41,11 @@ class: <<one-of-four-classes>>
 
 ### `class`
 
-One of exactly four values:
+One of exactly five values:
 
 - **`operation`** — Single bounded procedure, self-validating, no sub-delegation
 - **`delegated`** — Worker specialization designed to receive delegation packets
+- **`inline`** — Single-pass reasoning-heavy skill executed directly by the main agent, optional direct tool calls, no worker/sub-skill orchestration as its own workflow
 - **`orchestrated`** — Coordinates sub-skills, workers, phases, or quality gates
 - **`planning`** — Proposal / plan / runbook lifecycle creation and review
 
@@ -89,7 +90,7 @@ Every authored skill should be verified against this checklist before declaring 
 
 - **Name match**: `name` in frontmatter matches directory under `skills/`.
 - **Description prefix**: Starts with `"Use when"`, is specific, and captures trigger intent.
-- **Class validity**: One of the four allowed values.
+- **Class validity**: One of the five allowed values.
 - **Original prose**: No text copied from archived versions, templates, or reference files.
 - **Body is procedural**: Steps, conditions, decisions. Not a tutorial, not a reference.
 - **No examples**: Do not add an examples section or inline example commands.
@@ -113,16 +114,9 @@ Use these questions when uncertain:
 
 - **Does this do one thing and validate in isolation?** → `operation`
 - **Is this a specialized worker that receives a delegation packet?** → `delegated`
+- **Is this a single-pass, reasoning-heavy procedure the main agent executes directly, calling tools as needed but not orchestrating sub-skills or workers?** → `inline`
 - **Does this coordinate phases, workers, or sub-skills?** → `orchestrated`
 - **Is the primary job creating or reviewing lifecycle artifacts (proposal → plan → runbook)?** → `planning`
 
-## Claude Code Compatibility (Optional)
 
-If the skill is also intended for use with Claude Code (Anthropic's CLI agent), note that:
 
-- Claude Code uses a `CLAUDE.md` file pattern rather than `SKILL.md`.
-- Frontmatter (`---`) is not recognized by Claude Code.
-- Description-based triggering does not apply — Claude Code uses tool/instruction based routing.
-- Cross-platform skills should maintain two entry points, or document the divergence here.
-
-This section is optional; omit if the skill is OpenCode-only.

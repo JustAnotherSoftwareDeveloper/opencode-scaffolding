@@ -24,6 +24,7 @@ Pick exactly one class. If uncertain, pause and read `REFERENCE.md`.
 
 - **operation** — single bounded procedure, independent, no sub-delegation
 - **delegated** — worker specialization, designed to receive delegation packets
+- **inline** — short, reasoning-heavy skill executed directly by the main agent in a single pass; may call tools directly but does not delegate or coordinate sub-skills/workers as its own execution model
 - **orchestrated** — coordinates subskills or workers across phases
 - **planning** — proposal/plan/runbook lifecycle
 
@@ -54,7 +55,7 @@ Manually verify before finishing:
 
 - `name` in frontmatter matches the directory name under `skills/`
 - `description` starts with "Use when" and captures the trigger intent
-- `class` is one of: operation, delegated, orchestrated, planning
+- `class` is one of: operation, delegated, inline, orchestrated, planning
 - No prose copied from archive or templates — original writing
 - Body references `REFERENCE.md` and/or `templates/` if applicable, without inlining their content
 - No examples section present
