@@ -77,8 +77,20 @@
           "*": "deny",
           "ask-question": "allow",
           "breakdown-tasks": "allow",
-          "task-delegation": "allow"
+          "task-delegation": "allow",
+          "todo-writer": "allow"
         }
+      }
+    },
+    "worker": {
+      "description": "Single text worker for all delegated text tasks. Handles any complexity level within the scope of a delegation packet.",
+      "mode": "subagent",
+      "prompt": "{file:./agents/worker.md}",
+      "permission": {
+        "*": "allow",
+        "task": "deny",
+        "todowrite": "deny",
+        "question": "deny"
       }
     }
   },

@@ -10,7 +10,7 @@ This skill validates a delegation packet and forwards it to a worker via the tas
 
 ## Input
 
-One delegation packet using the standard header format (`## PURPOSE`, `## DETAILS`, `## FILES TO READ`, `## FILES TO WRITE`, `## SKILLS`, `## EXECUTION INSTRUCTIONS`, `## VERIFICATION`, `## EXPECTED OUTPUT`).
+One already-split delegation packet using the standard header format (`## PURPOSE`, `## DETAILS`, `## FILES TO READ`, `## FILES TO WRITE`, `## SKILLS`, `## EXECUTION INSTRUCTIONS`, `## VERIFICATION`, `## EXPECTED OUTPUT`). Do not split, merge, or transform the packet.
 
 ## Delegation Packet Template
 
@@ -27,7 +27,7 @@ Flat structure optimized for small worker models. This is the format the input p
 <comma-separated file paths to read>
 
 ## FILES TO WRITE
-<comma-separated file paths to write, if any>
+<single file path, or "None">
 
 ## SKILLS
 <comma-separated skill names to load>
@@ -42,13 +42,13 @@ Flat structure optimized for small worker models. This is the format the input p
 <what the worker should produce>
 ```
 
-Since the packet arrives as plaintext headers, array values are already formatted as bullet lists or comma-separated values by the sender. No conversion is needed.
+Packet values arrive as plaintext headers. No conversion is needed.
 
 ## Execution Plan
 
 1. Validate the delegation packet has all required sections: `## PURPOSE`, `## DETAILS`, `## FILES TO READ`, `## FILES TO WRITE`, `## SKILLS`, `## EXECUTION INSTRUCTIONS`, `## VERIFICATION`, `## EXPECTED OUTPUT`.
-2. Use the packet as-is — no transformation needed. The packet is already in the Delegation Packet Template format.
-3. Invoke the `task` tool with `subagent_type: "worker"`, `description` from `## PURPOSE`, `prompt` as the full delegation packet, and `command` as the `## PURPOSE` content or original user request.
+2. Use the packet as-is -- no transformation needed. The packet is already in the Delegation Packet Template format.
+3. Invoke the `task` tool with `subagent_type: "worker"`, `description` from `## PURPOSE`, `prompt` as the full delegation packet, and `command` set to the `## PURPOSE` content.
 4. Return the worker result requested by `## EXPECTED OUTPUT`.
 
 ## Guardrails

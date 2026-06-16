@@ -22,7 +22,7 @@ A list of discrete work items, each with clear scope and boundaries.
 
 ### Output Format
 
-A plaintext string of one or more delegation packets separated by `---` on its own line. Each packet uses the exact header names from task-delegation's Delegation Packet Template.
+A plaintext string of one or more delegation packets separated by `---` on its own line. The consumer/base-delegator splits the output on those `---` delimiter lines before forwarding each individual packet to a worker. Each packet uses the exact header names from task-delegation's Delegation Packet Template.
 
 Each packet includes all of the following sections:
 
@@ -37,7 +37,7 @@ Each packet includes all of the following sections:
 <comma-separated file paths to read>
 
 ## FILES TO WRITE
-<comma-separated file paths to write, if any>
+<single file path or "None">
 
 ## SKILLS
 <comma-separated skill names to load>
@@ -93,15 +93,15 @@ An atomic task is the smallest useful unit of work that can be delegated, execut
 
 ### Core Rules
 
-**1. Single file, single change** — Each atomic task touches exactly one file and makes exactly one logical change to it. A "logical change" is one coherent edit: adding a single function, renaming one identifier, updating one configuration value, writing one test case, etc. If a task would need to modify two files or make two unrelated edits to the same file, it must be split.
+**1. Single file, single change** -- Each atomic task touches exactly one file and makes exactly one logical change to it. A "logical change" is one coherent edit: adding a single function, renaming one identifier, updating one configuration value, writing one test case, etc. If a task would need to modify two files or make two unrelated edits to the same file, it must be split.
 
-**2. Single output artifact** — Each atomic task produces exactly one verifiable output. That output is one of: one file written, one test result, one report, one lint/type-check pass, one deployment step, etc. If a task produces two outputs (e.g., writes a file *and* runs a test), it is too large — split the verification from the production.
+**2. Single output artifact** -- Each atomic task produces exactly one verifiable output. That output is one of: one file written, one test result, one report, one lint/type-check pass, one deployment step, etc. If a task produces two outputs (e.g., writes a file *and* runs a test), it is too large -- split the verification from the production.
 
-**3. Logical step pipeline** — Tasks form a pipeline where each is one discrete step in a sequence. Steps that can be done independently (no dependency on prior output) should be separate parallel-capable tasks. Steps that depend on prior output should be sequential but still individually atomic. Examples of valid pipelines:
+**3. Logical step pipeline** -- Tasks form a pipeline where each is one discrete step in a sequence. Steps that can be done independently (no dependency on prior output) should be separate parallel-capable tasks. Steps that depend on prior output should be sequential but still individually atomic. Examples of valid pipelines:
 
-- Design stubs → implement one function → check code style → fix style issues
-- Write test stubs → implement one test → verify that test passes
-- Define schema → write migration → update model → update query
+- Design stubs -> implement one function -> check code style -> fix style issues
+- Write test stubs -> implement one test -> verify that test passes
+- Define schema -> write migration -> update model -> update query
 
 ### Anti-Patterns (Too Large)
 
@@ -114,7 +114,7 @@ An atomic task is the smallest useful unit of work that can be delegated, execut
 
 ### Correct Examples (Atomic)
 
-**Example 1 — Single function addition:**
+**Example 1 -- Single function addition:**
 ```
 ## PURPOSE
 Add a `validate_email` function to utils/validation.py
@@ -127,7 +127,7 @@ utils/validation.py
 The updated utils/validation.py with the new function
 ```
 
-**Example 2 — Verify after change (separate task):**
+**Example 2 -- Verify after change (separate task):**
 ```
 ## PURPOSE
 Run the test suite for utils/validation.py to confirm `validate_email` passes
