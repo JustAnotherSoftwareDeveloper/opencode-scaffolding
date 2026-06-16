@@ -178,7 +178,7 @@ def seed_runbook_state(runbook_data: Any, runbook_path: Path, state_dir: Path | 
     }
     metadata_path = state_dir / "metadata.json"
     metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
-    metadata_schema_path = harness_root / "skills/runbook/schemas/state-metadata.schema.json"
+    metadata_schema_path = harness_root / "skills/build-runbook/schemas/state-metadata.schema.json"
     if validate_json_path and metadata_schema_path.exists():
         validate_json_path(metadata_path, metadata_schema_path)
 
@@ -195,7 +195,7 @@ def seed_runbook_state(runbook_data: Any, runbook_path: Path, state_dir: Path | 
     }
     main_path = state_dir / main_dashboard
     main_path.write_text(json.dumps(main_data, indent=2), encoding="utf-8")
-    main_schema_path = harness_root / "skills/runbook/schemas/state-main.schema.json"
+    main_schema_path = harness_root / "skills/build-runbook/schemas/state-main.schema.json"
     if validate_json_path and main_schema_path.exists():
         validate_json_path(main_path, main_schema_path)
 
@@ -223,6 +223,6 @@ def seed_runbook_state(runbook_data: Any, runbook_path: Path, state_dir: Path | 
             }
             step_path = state_dir / f"{step_id}{step_file_extension}"
             step_path.write_text(json.dumps(step_data, indent=2), encoding="utf-8")
-            step_schema_path = harness_root / "skills/runbook/schemas/state-step.schema.json"
+            step_schema_path = harness_root / "skills/build-runbook/schemas/state-step.schema.json"
             if validate_json_path and step_schema_path.exists():
                 validate_json_path(step_path, step_schema_path)

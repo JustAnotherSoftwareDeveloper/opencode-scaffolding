@@ -25,7 +25,7 @@ def main() -> int:
             return 1
 
         if runbook_path.name == "runbook.json":
-            schema_path = HARNESS_ROOT / "skills/runbook/schema.json"
+            schema_path = HARNESS_ROOT / "skills/build-runbook/schemas/schema.json"
             if schema_path.exists():
                 from lib.json_validation import validate_json_path
 

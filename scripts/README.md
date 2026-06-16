@@ -42,7 +42,7 @@ uv run --project scripts/python validate-runbook .runbooks/<id>/main.xml
 uv run --project scripts/python init-runbook-state .runbooks/<id>/main.xml  # v3 creates runbook-local state.xml and manifest indexes
 ```
 
-Runbook validation is XML/XSD-first for the v3 target workflow. XSDs under `skills/runbook/schemas/` are the schema contract; validation must run through Python/bash helpers, not LLM judgment. Legacy JSON runbook schemas/templates are retired for new target workflows.
+Runbook validation is XML/XSD-first for the v3 target workflow. XSDs under `skills/build-runbook/schemas/` are the schema contract; validation must run through Python/bash helpers, not LLM judgment. Legacy JSON runbook schemas/templates are retired for new target workflows.
 
 Run `uv sync --project scripts/python` after dependency or script-target changes. The Python workspace now has deliberate validation dependencies, so `scripts/python/uv.lock` should be kept with the workspace for reproducible validator execution.
 

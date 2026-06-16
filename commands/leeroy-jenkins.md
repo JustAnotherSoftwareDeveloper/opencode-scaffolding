@@ -18,7 +18,7 @@ You are executing the leeroy-jenkins auto-orchestration pipeline. The user has g
 
 3. **Create Plan**: Load the `plan` skill. Generate `.plans/<timestamp>-slug/INDEX.md` from the accepted proposal. Ensure `status: approved` is set in metadata. Continue without asking about tradeoffs or structure concerns.
 
-4. **Build Runbook**: Load the `runbook` skill. Create `.runbooks/<timestamp>-slug/main.xml` with v3 XML format. Initialize all step files and default manifest indexes. Validate workspace immediately after creation. Log any validation warnings but do not halt.
+4. **Build Runbook**: Load the `build-runbook` skill. Create `.runbooks/<timestamp>-slug/main.xml` with v3 XML format. Initialize all step files and default manifest indexes. Validate workspace immediately after creation. Log any validation warnings but do not halt.
 
 5. **Initialize State**: For a v3 runbook, create or update `state.xml`. Mark active_step to first executable item. If state exists already from partial execution, resume from current position - do not ask about conflict resolution.
 

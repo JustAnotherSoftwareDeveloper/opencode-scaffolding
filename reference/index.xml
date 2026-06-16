@@ -5,7 +5,7 @@ Reference Manifest for OpenCode Runbooks
 This manifest tracks all reference documentation files in the /reference/ directory,
 which serve as persistent guidance artifacts linked from runbook and plan workspaces.
 -->
-<reference-manifest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../skills/runbook/schemas/reference-manifest.xsd">
+<reference-manifest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../skills/build-runbook/schemas/reference-manifest.xsd">
   <generated>2026-06-07T08:34:00Z</generated>
   
   <runbook_id>superatomic-pattern-documentation</runbook_id>

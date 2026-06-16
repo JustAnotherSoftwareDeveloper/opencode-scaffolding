@@ -1,7 +1,7 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": ["AGENTS.md"],
-  "model": "openrouter/deepseek/deepseek-v4-pro",
+  "instructions": [],
+  "model": "openai/gpt-5.5",
   "provider": {
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
@@ -11,51 +11,6 @@
         "apiKey": "ollama"
       },
       "models": {
-        "xs-local": {
-          "name": "Worker XS Local",
-          "limit": {
-            "context": 16384,
-            "output": 4096
-          },
-          "options": {
-            "temperature": 0.2,
-            "top_p": 0.9
-          }
-        },
-        "sm-local": {
-          "name": "Worker SM Local",
-          "limit": {
-            "context": 32768,
-            "output": 4096
-          },
-          "options": {
-            "temperature": 0.2,
-            "top_p": 0.9
-          }
-        },
-        "md-local": {
-          "name": "Worker MD Local",
-          "limit": {
-            "context": 65536,
-            "output": 4096
-          },
-          "options": {
-            "temperature": 0.2,
-            "top_p": 0.9
-          }
-        },
-        "lg-local": {
-          "name": "Worker LG Local",
-          "limit": {
-            "context": 32768,
-            "output": 4096
-          },
-          "options": {
-            "temperature": 0.6,
-            "top_p": 0.95,
-            "repeat_penalty": 1.05
-          }
-        },
         "qwen": {
           "name": "Worker Qwen",
           "limit": {
@@ -105,41 +60,24 @@
     }
   },
   "agent": {
-    "orchestrator-base": {
-      "description": "Hidden base orchestrator pattern for aggressive delegation, proposal-plan-execution workflows, runbook-driven execution, review, and retro loops.",
-      "mode": "subagent",
-      "hidden": true,
-      "model": "openrouter/deepseek/deepseek-v4-pro",
-      "prompt": "{file:./prompts/orchestrator-base.md}",
-      "permission": {
-        "*": "deny",
-        "task": {
-          "*": "deny",
-          "worker": "allow",
-          "nano-reader": "allow",
-          "multimodal-looker": "allow"
-        },
-        "skill": {
-          "*": "allow"
-        }
-      }
-    },
-    "agent-architect": {
-      "description": "Primary orchestrator for creating and improving OpenCode agents, skills, commands, migrations, and the orchestration harness.",
+    "base-delegator": {
+      "description": "Clarifies requests, decomposes them into atomic tasks, and delegates each task to workers in serial. Does not perform implementation work directly.",
       "mode": "primary",
-      "model": "openrouter/deepseek/deepseek-v4-pro",
-      "prompt": "{file:./prompts/orchestrator-base.md}\n\n{file:./prompts/agent-architect.md}",
+      "prompt": "{file:./prompts/base-delegator.md}",
       "permission": {
         "*": "deny",
+        "edit": "deny",
+        "todowrite": "allow",
+        "question": "allow",
         "task": {
           "*": "deny",
-          "worker": "allow",
-          "nano-reader": "allow",
-          "multimodal-looker": "allow",
-          "orchestrator-base": "allow"
+          "worker": "allow"
         },
         "skill": {
-          "*": "allow"
+          "*": "deny",
+          "ask-question": "allow",
+          "breakdown-tasks": "allow",
+          "task-delegation": "allow"
         }
       }
     }
