@@ -18,7 +18,7 @@ Free-form prompt from caller containing a user request that may require clarific
 
 ## Output
 
-Clarifying answers returned to the caller. If there is no material ambiguity, return no questions and `answers: []`.
+Clarifying answers returned to the caller. Even when the request is clear, ask 2 confirmation, scope, assumption, constraint, or verification-preference questions. A question array of zero must never be returned.
 
 ### Question Tool Input Schema
 
@@ -29,7 +29,7 @@ Clarifying answers returned to the caller. If there is no material ambiguity, re
   "properties": {
     "questions": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 2,
       "maxItems": 5,
       "description": "Questions to ask the user via the question tool",
       "items": {
@@ -100,11 +100,12 @@ Each question should resolve one decision point:
 
 ## Execution Plan
 
-1. Analyze [Input](#input) for ambiguity that would change the next step
-2. If no material ambiguity exists, return `answers: []`
-3. Otherwise, formulate 1-5 questions using [Question Granularity](#question-granularity)
-4. Invoke the `question` tool with [Question Tool Input Schema](#question-tool-input-schema)
-5. Return results using [Skill Output Schema](#skill-output-schema)
+1. Analyze [Input](#input) for areas needing clarification
+2. Formulate 2-5 questions using [Question Granularity](#question-granularity) — do not skip questions due to apparent clarity; even clear requests get 2 confirmation/scope/assumption/constraint/verification-preference questions
+3. Invoke the `question` tool once with [Question Tool Input Schema](#question-tool-input-schema), passing all 2-5 questions in a single call
+4. Return results using [Skill Output Schema](#skill-output-schema)
+
+This is a single-pass process. Ask all clarifying questions in one invocation. Do not perform follow-up rounds, multi-pass clarification, or iterative narrowing within the same request.
 
 ## Question Formulation Guidelines
 
@@ -115,6 +116,8 @@ Each question should resolve one decision point:
 
 ## Guardrails
 
+- Always ask at least 2 questions, at most 5 questions.
+- Do not skip questions because the request appears clear — ask confirmation, scope, assumption, constraint, or verification-preference questions instead.
 - Ask only when the answer changes execution.
 - Do not ask what the request already answers.
 - Return answers without filtering.
