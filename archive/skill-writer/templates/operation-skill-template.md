@@ -1,16 +1,16 @@
 ---
 name: <skill-name>
 description: Use when <trigger condition for this single bounded procedure>.
-class: atomic
+class: operation
 ---
 
-# <<Skill Name>> Skill Template (Atomic)
+# <<Skill Name>> Skill Template (Operation)
 
 Replace all `<placeholder>` values before using. Match `name` to the directory name exactly.
 
 ## Class Purpose
 
-Atomic skills are small, single-objective procedures with bounded inputs, bounded outputs, and independent validation. Each performs one thing well and can be validated in isolation.
+Operation skills are small, single-objective procedures with bounded inputs, bounded outputs, and independent validation. Each performs one thing well and can be validated in isolation.
 
 ## When to Use This Template
 
@@ -25,7 +25,7 @@ Atomic skills are small, single-objective procedures with bounded inputs, bounde
 ---
 name: <skill-name>          # Must match directory name, lowercase alphanumeric with hyphens
 description: Use when ...   # Trigger condition for this procedure
-class: atomic               # Required class declaration
+class: operation               # Required class declaration
 ---
 
 # <<Concrete Skill Name>>
@@ -60,6 +60,6 @@ Define how success is verified:
 
 - `name` (string): Directory-matched skill identifier, lowercase with hyphens
 - `description` (string): Starts with "Use when" describing the trigger condition  
-- `class` (enum: atomic): Must be exactly this value for class identification
+- `class` (enum: operation): Must be exactly this value for class identification
 
-> **Warning**: This is a template file. Copy it to create actual skills; do not load `templates/atomic-skill-template.md` as an active skill.
+> **Warning**: This is a template file. Copy it to create actual skills; do not load `templates/operation-skill-template.md` as an active skill.

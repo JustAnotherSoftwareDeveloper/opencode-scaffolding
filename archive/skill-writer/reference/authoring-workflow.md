@@ -17,7 +17,7 @@ Before drafting, confirm the work addresses:
 |-------|-------------|
 | `name` | Matches `skills/<name>/` exactly, lowercase alphanumeric with hyphens |
 | `description` | Starts with "Use when", specific and under 1024 characters |
- | `class` | One of: `atomic`, `delegated`, `orchestrated`, `documentation`, or `planning` |
+ | `class` | One of: `operation`, `delegated`, `orchestrated`, or `planning` |
 
 ## Body Structure (Procedural)
 

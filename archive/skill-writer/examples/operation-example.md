@@ -1,10 +1,10 @@
 ---
 name: validate-skill-framework
 description: Use when validating OpenCode skill artifacts against the skill-hygiene framework schema requirements.
-class: atomic
+class: operation
 ---
 
-# Validate Skill Framework Skill (Atomic)
+# Validate Skill Framework Skill (Operation)
 
 Validates a SKILL.md file for proper frontmatter structure, required fields, and basic syntax compliance with the skill-hygiene conventions.
 
@@ -25,7 +25,7 @@ Run this skill when you need to verify that an OpenCode skill artifact follows f
 - [ ] Frontmatter YAML block is present and properly formatted
 - [ ] `name` field matches the skill's parent directory name exactly (lowercase, hyphens)
 - [ ] `description` starts with "Use when" followed by trigger condition
-- [ ] `class` value is one of: atomic, orchestrated, documentation, or planning
+- [ ] `class` value is one of: operation, delegated, orchestrated, or planning
 - [ ] No tabs found in YAML frontmatter block
 
 ## Example Usage

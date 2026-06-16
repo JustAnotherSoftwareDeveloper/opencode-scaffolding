@@ -12,10 +12,9 @@ Use this skill when creating, revising, or reviewing skills under `skills/<name>
 
 1. Confirm the work really needs a skill: repeated procedure, specialized domain knowledge, or reusable workflow.
 2. Choose exactly one class before drafting:
-   - `atomic` — one bounded procedure with independent validation.
+   - `operation` — one bounded procedure with independent validation.
    - `orchestrated` — heavy-procedure coordinator that delegates execution to workers or delegated backing skills; does not perform worker tasks directly. Owns routing, state transitions, reconciliation, failure handling, and quality gates.
    - `delegated` — worker-executed backing specialist spawned by an orchestrator with explicit input/output contracts.
-   - `documentation` — reference/context store loaded for knowledge or conventions.
    - `planning` — proposal, plan, runbook, review, or lifecycle skill.
 3. Use OpenCode-compatible frontmatter plus the local framework class:
 
@@ -23,7 +22,7 @@ Use this skill when creating, revising, or reviewing skills under `skills/<name>
    ---
    name: example-skill
    description: Use when ...
-   class: atomic
+   class: operation
    ---
    ```
 
@@ -44,10 +43,9 @@ Use this skill when creating, revising, or reviewing skills under `skills/<name>
 
 The canonical class contracts are XSDs, one per class:
 
-- `schemas/atomic.xsd`
+- `schemas/operation.xsd`
 - `schemas/orchestrated.xsd`
 - `schemas/delegated.xsd`
-- `schemas/documentation.xsd`
 - `schemas/planning.xsd`
 
 Markdown guidance is generated on demand from XSD annotations; do not create checked-in markdown class templates or example fixtures.
@@ -57,7 +55,7 @@ Markdown guidance is generated on demand from XSD annotations; do not create che
 ```text
 uv run --project scripts/python validate-skill-framework skills/skill-hygiene/SKILL.md
 uv run --project scripts/python validate-skill-framework --class-schemas skills/skill-hygiene
-uv run --project scripts/python validate-skill-framework --render-markdown atomic
+uv run --project scripts/python validate-skill-framework --render-markdown operation
 uv run --project scripts/python validate-skill-framework --all
 ```
 

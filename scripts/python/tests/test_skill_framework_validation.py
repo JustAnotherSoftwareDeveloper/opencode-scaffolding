@@ -19,20 +19,20 @@ def _skill(tmp_path: Path, name: str, frontmatter: str, body: str = "# Body\n") 
 
 
 def test_valid_skill_with_class(tmp_path: Path) -> None:
-    path = _skill(tmp_path, "example-skill", "name: example-skill\ndescription: Use when testing skills.\nclass: atomic\n")
+    path = _skill(tmp_path, "example-skill", "name: example-skill\ndescription: Use when testing skills.\nclass: operation\n")
     result = validate_skill_file(path, require_class=True)
     assert result.ok, result.messages
 
 
 def test_invalid_name_fails(tmp_path: Path) -> None:
-    path = _skill(tmp_path, "bad-skill", "name: BadSkill\ndescription: Use when testing skills.\nclass: atomic\n")
+    path = _skill(tmp_path, "bad-skill", "name: BadSkill\ndescription: Use when testing skills.\nclass: operation\n")
     result = validate_skill_file(path)
     assert not result.ok
     assert any("lowercase" in message for message in result.messages)
 
 
 def test_missing_description_fails(tmp_path: Path) -> None:
-    path = _skill(tmp_path, "example-skill", "name: example-skill\nclass: atomic\n")
+    path = _skill(tmp_path, "example-skill", "name: example-skill\nclass: operation\n")
     result = validate_skill_file(path)
     assert not result.ok
     assert any("description" in message for message in result.messages)

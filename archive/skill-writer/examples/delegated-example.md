@@ -54,7 +54,7 @@ Example successful output:
 {
   "status": "passed",  
   "errors": [],
-  "summary": "File /tmp/artifact.json validated successfully against schema atomic.xsd"
+  "summary": "File /tmp/artifact.json validated successfully against schema operation.xsd"
 }
 ```
 
@@ -66,7 +66,7 @@ Example failure output:
     {"line": 42, "message": "Element 'xyz' is not allowed"},
     {"field": "/artifact/name", "issue": "required attribute missing"}
   ],
-  "summary": "3 validation errors found in atomic.xsd constraints"  
+  "summary": "3 validation errors found in operation.xsd constraints"  
 }
 ```
 

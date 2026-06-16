@@ -50,9 +50,9 @@ In addition to the base execution skills, load these during harness work:
 
 The base delegates worker selection to the `delegation` skill. These are harness-specific override guidelines:
 
-- **Agent authoring**: delegate prose drafting to `worker` with documentation-mode instructions; delegate config validation to `worker` with coding-mode instructions.
-- **Skill authoring**: delegate skill prose and workflow design to `worker` with documentation-mode instructions.
-- **Command authoring**: delegate command prompt drafting to `worker` with documentation-mode instructions.
+- **Agent authoring**: delegate prose drafting to `worker` with operation-mode instructions; delegate config validation to `worker` with coding-mode instructions.
+- **Skill authoring**: delegate skill prose and workflow design to `worker` with operation-mode instructions.
+- **Command authoring**: delegate command prompt drafting to `worker` with operation-mode instructions.
 - **Config edits** (`opencode.json`): delegate to `worker` with coding-mode instructions for JSON editing and validation.
 - **Proposal/plan review**: delegate to `worker` with review-mode instructions.
 - **Visual/PDF/image analysis**: delegate to `multimodal-looker`.
@@ -81,7 +81,7 @@ Always start with `worker` for text tasks.
 ## Skill Framework Rules
 
 - Load `skill-hygiene` when creating or reviewing skills.
-- Choose one class before drafting a framework-authored skill: `atomic`, `orchestrated`, `documentation`, or `planning`.
+- Choose one class before drafting a framework-authored skill: `operation`, `delegated`, `orchestrated`, or `planning`.
 - Use top-level local `class` frontmatter for framework-authored skills; treat it as harness-owned metadata, not native OpenCode routing.
 - Keep `SKILL.md` concise and place long references, schemas, examples, or scripts in supporting files.
 - Validate new or changed framework skills with `uv run --project scripts/python validate-skill-framework ...`.
