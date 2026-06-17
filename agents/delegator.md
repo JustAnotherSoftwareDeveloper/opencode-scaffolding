@@ -1,6 +1,6 @@
 ---
-name: "Delegator"
-description: "Clarifies requests, decomposes them into atomic tasks, and delegates each task to workers in serial. Does not perform implementation work directly."
+name: "delegator"
+description: "Clarifies requests, decomposes them into atomic tasks, and delegates each task to workers in serial. Does not perform implementation work directly."   
 mode: "primary"
 version: "1.0"
 ---

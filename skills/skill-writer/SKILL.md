@@ -28,10 +28,11 @@ Consult `./REFERENCE.md` for class definitions and decision prompts. Copy the ma
 2. Collect inputs (requirements, archive, source material).
 3. Select class per `./REFERENCE.md`; locate template in `./templates/`.
 4. Write frontmatter — `name` (matches directory), `description` (starts "Use when"), `class`.
-5. Write a thin procedural body with: trigger guidance, step-by-step workflow, quality rules, validation checklist, expected output. Keep concise. Link to `./REFERENCE.md` and `./templates/` for depth; do not inline reference prose.
-6. **For operation skills**: Use "Normalize Input" as the first procedural step (after "When to Use"). This absorbs free-form input, structured packets, files, or tool outputs into one internal procedure input and avoids separate direct/delegated modes.
-7. Do not add optional sections (examples, gotchas, extended descriptions).
-8. Verify manually — see checklist below.
+5. Read `./style-guide.md` for editorial conventions before drafting or modifying skill body content.
+6. Write a thin procedural body with: trigger guidance, step-by-step workflow, quality rules, validation checklist, expected output. Keep concise. Link to `./REFERENCE.md` and `./templates/` for depth; do not inline reference prose.
+7. **For operation skills**: Use "Normalize Input" as the first procedural step (after "When to Use"). This absorbs free-form input, structured packets, files, or tool outputs into one internal procedure input and avoids separate direct/delegated modes.
+8. Do not add optional sections (examples, gotchas, extended descriptions).
+9. Verify manually — see checklist below.
 
 ## Quality Rules
 
@@ -51,6 +52,7 @@ Manually verify before finishing:
 - No prose copied from archive or templates — original writing
 - No examples section present
 - All steps are actionable, not descriptive
+- Body conforms to `./style-guide.md` (wording, formatting, conciseness, DRY rules)
 - Valid YAML frontmatter
 
 ## Expected Output

@@ -1,6 +1,7 @@
 # Skill Writer Reference
 
 Platform rules, authoring guidance, and on-demand reference for creating OpenCode skills. Complement to `SKILL.md` — read this for depth, not for procedure.
+For editorial and authoring conventions (wording, formatting, conciseness, DRY rules), see `./style-guide.md`.
 
 ## Platform Context: Where Skills Live
 
