@@ -45,7 +45,7 @@ class: <<one-of-five-classes>>
 One of exactly five values:
 
 - **`operation`** — Broad/default class for single bounded procedures that are independent, self-validating, and do not sub-delegate. A Normalize Input step absorbs free-form input, structured packets, files, or tool outputs into one internal input, avoiding separate modes for different invocation shapes.
-- **`delegated`** — Worker specialization designed to receive delegation packets
+- **`delegated`** — Receives delegation packets and performs bounded subtasks within a pipeline or orchestration; includes final workers and workflow stages (including decomposers) invoked by a delegator
 - **`inline`** — Single-pass reasoning-heavy skill executed directly by the main agent, optional direct tool calls, no worker/sub-skill orchestration as its own workflow
 - **`orchestrated`** — Coordinates sub-skills, workers, phases, or quality gates
 - **`planning`** — Proposal / plan / runbook lifecycle creation and review

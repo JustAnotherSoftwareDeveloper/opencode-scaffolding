@@ -1,26 +1,29 @@
 ---
 name: breakdown-tasks
 description: Use when decomposing a request into the smallest possible task-delegation work items.
-class: inline
+class: delegated
 ---
 
 # Breakdown Tasks
 
 Decompose a request into atomic work items suitable for serial worker delegation.
 
-## Input
+## Input Contract
 
-Free-form prompt containing a request to decompose.
+Incoming standard delegation packet with the following sections:
 
-- **Overall goal**: The unified outcome the user wants.
-- **Implicit or explicit phases**: Multi-step aspects already mentioned.
-- **Provided context**: Preserve meaning; do not omit details.
+- **`## PURPOSE`** — The decomposition goal: what must be broken down.
+- **`## DETAILS`** — The clarified user request and all relevant context to decompose. This is the primary input for splitting into atomic tasks.
+- **`## FILES TO READ`** — Constrains which files are relevant to the request.
+- **`## FILES TO WRITE`** — Should normally be `None`; this skill decomposes rather than writes output files.
+- Malformed or missing `## DETAILS` is **`BLOCKED:`** — the skill cannot proceed without a clear request to decompose.
 
-## Output
+## Output Contract
 
-A plaintext string of one or more delegation packets separated by `---` on its own line.
-The consumer splits the output on `---` delimiters before forwarding each packet to a worker.
-Each packet uses the exact header names from the Delegation Packet Template.
+The output is a single plaintext string — no JSON, no Markdown code fences, no preamble, no postscript.
+It consists of one or more delegation packets separated by `---` on its own line.
+The consumer splits the output on the `---` delimiter before forwarding each packet to a worker.
+Each packet uses the exact header names from the Packet Template below.
 
 ### Packet Template
 
@@ -56,48 +59,34 @@ Delimit multiple packets with `---` on its own line between them.
 
 An atomic task is the smallest useful unit of work that can be delegated, executed, and verified independently.
 
-### Core Rules
+Core Rules and Anti-Patterns governing atomic task decomposition are defined in [./REFERENCE.md](./REFERENCE.md). All decomposition must conform to those rules.
 
-1. **Single unit of work** — Each task performs exactly one logical change or answers exactly one analytical question.
-   If a task modifies two files, makes two unrelated edits in one file, or answers two independent questions, split it.
+## Execution Steps
 
-2. **Single output artifact** — Each task produces exactly one verifiable result — either one output artifact or one documented finding.
-   If a task produces two outputs (e.g., writes a file and runs a test, or produces two distinct findings), split verification from production.
+1. **Parse incoming packet** — Read the delegation packet's `## PURPOSE` and `## DETAILS` sections to understand the decomposition goal and the request to decompose.
+2. **Extract request from `## DETAILS`** — Treat the content of `## DETAILS` as the primary input for decomposition. If `## DETAILS` is missing or malformed, report `BLOCKED: ## DETAILS is missing or malformed — cannot decompose without a clear request.`
+3. **Decompose per ./REFERENCE.md** — Split the request into atomic tasks following Core Rules (single unit of work, single output artifact, logical step pipeline, dependent work serialization) and avoiding Anti-Patterns.
+4. **Order tasks by prerequisites** — Arrange tasks so that each task's dependencies are satisfied by earlier tasks. Independent tasks may be ordered arbitrarily (use a stable heuristic such as alphabetical).
+5. **Format each downstream packet** — For every atomic task, produce a complete delegation packet using the Packet Template (## PURPOSE, ## DETAILS, ## FILES TO READ, ## FILES TO WRITE, ## SKILLS, ## EXECUTION INSTRUCTIONS, ## VERIFICATION, ## EXPECTED OUTPUT).
+6. **Join packets with `---`** — Concatenate all formatted packets with `---` on its own line between consecutive packets.
+7. **Return plaintext** — Output the joined string with no JSON, no Markdown code fences, no preamble, and no postscript.
 
-3. **Logical step pipeline** — Tasks form a pipeline where each is one discrete step in a sequence.
-   Independent steps must be separate parallel-capable tasks.
-   Dependent steps must be sequential but still individually atomic.
+## Verification
 
-4. **Dependent work serialization** — When multiple changes to the same file or multiple analysis steps on the same subject are needed, serialize them as separate sequential tasks.
-   Each task lists the target file or subject in `## FILES TO READ` or `## FILES TO WRITE`.
-   Run tasks in order so each sees the prior task's output.
+After decomposition, verify the output against these checks. If any check fails, rework the affected packet(s) before returning.
 
-### Anti-Patterns
-
-- **"Add user authentication"** — Touches multiple files and produces multiple outputs.
-  Split into: middleware, route, model, tests, test run.
-- **"Implement X and add error handling"** — Two logical changes to the same file.
-  Split into two sequential tasks.
-- **"Write utils.py with three helpers"** — Three logical changes in one file write.
-  Split into three sequential tasks.
-- **"Refactor checkout and run tests"** — Produces two outputs.
-  Split into refactor task then test-run task.
-- **"Analyze codebase for security vulnerabilities"** — Broad analysis with multiple independent concerns.
-  Split into: analyze authentication, analyze input validation, analyze dependency risk.
-- **"Review checkout flow and suggest improvements"** — Combines analysis and planning in one task.
-  Split into: document current flow, identify issues, propose improvements.
-- **"Compare all frontend frameworks and pick one"** — Multiple independent comparisons in one task.
-  Split into: evaluate framework A, evaluate framework B, compare findings and recommend.
-
-## Execution Plan
-
-1. Parse [Input](#input) into independently verifiable work items.
-2. Split work to the finest useful granularity per [Core Rules](#core-rules) and [Anti-Patterns](#anti-patterns).
-3. Order tasks so prerequisites are satisfied by earlier tasks.
-4. Return tasks as plaintext `---` delimited delegation packets per [Packet Template](#packet-template).
+- **Eight headers present** — Every downstream packet must contain exactly these eight headers: `## PURPOSE`, `## DETAILS`, `## FILES TO READ`, `## FILES TO WRITE`, `## SKILLS`, `## EXECUTION INSTRUCTIONS`, `## VERIFICATION`, `## EXPECTED OUTPUT`. Missing or misspelled headers are a blocker.
+- **No combined tasks** — Each packet must represent exactly one atomic unit of work. Verify no packet bundles independent or logically separable steps under a single PURPOSE.
+- **Dependencies ordered** — Confirm that every task's prerequisites (files it reads, skills it needs, context it depends on) are satisfied by an earlier packet in the sequence. If not, reorder or split.
+- **Delimiter is `---`** — Between consecutive packets the separator must be exactly `---` on its own line, with no surrounding whitespace or additional characters.
+- **No wrapping prose, fences, or JSON** — The entire output is a raw concatenation of packets. Reject any leading/trailing explanations, Markdown code fences, or JSON wrappers.
 
 ## Guardrails
 
 - Preserve original intent and context.
 - Include only information necessary for a worker to execute the task; omit background and rationale.
 - Do not bundle dependent changes into a single task.
+- **Do not execute the decomposed work** — This skill produces delegation packets only. Do not attempt to run the tasks, read files beyond scanning for dependency ordering, or produce any artifact other than packets.
+- **Do not write files** — `## FILES TO WRITE` in the output packets belongs to the downstream worker, not this skill. This skill writes nothing to disk.
+- **Produce only delegation packets** — The output is a sequence of packets and `---` delimiters with no surrounding text, fences, or JSON. Any non-packet content (status messages, summaries, questions) is a violation.
+- **Return `BLOCKED:` for malformed input** — If `## DETAILS` is missing, empty, or cannot be parsed as a decomposable request, return `BLOCKED: <reason>` immediately. Do not attempt to decompose an underspecified request.
