@@ -6,19 +6,21 @@ class: inline
 
 # Ask Question
 
-This skill resolves ambiguity before work proceeds. Ask only questions whose answers would materially change the next step.
+This skill resolves ambiguity before work proceeds.
+Ask only questions whose answers would materially change the next step.
 
 ## Input
 
 Free-form prompt from caller containing a user request that may require clarification.
 
-- **Request text**: What the user wants to accomplish
-- **Any provided context**: Files, directories, constraints, or background info already mentioned
-- **All provided context**: Preserve meaning; do not omit details
+- **Request text**: What the user wants to accomplish.
+- **Provided context**: Files, directories, constraints, or background already mentioned.
+- **All provided context**: Preserve meaning; do not omit details.
 
 ## Output
 
-Clarifying answers returned to the caller. Even when the request is clear, ask 2 confirmation, scope, assumption, constraint, or verification-preference questions. A question array of zero must never be returned.
+Clarifying answers returned to the caller.
+A question array of zero must never be returned.
 
 ### Question Tool Input Schema
 
@@ -90,33 +92,35 @@ Clarifying answers returned to the caller. Even when the request is clear, ask 2
 }
 ```
 
-## Question Granularity
+## Question Guidelines
 
-Each question should resolve one decision point:
+Formulate each question to resolve one decision point.
+Ask about one file, test, behavior, constraint, or preference at a time.
+Use clear choices with a useful custom-answer escape hatch.
+Do not ask broad questions when a narrower question would decide the next step.
 
-- Ask about one file, test, behavior, constraint, or preference at a time
-- Prefer clear choices with a useful custom-answer escape hatch
-- Do not ask broad questions when a narrower question would decide the next step
+Cover these dimensions across the 2-5 questions:
+
+- **Purpose**: what outcome is needed.
+- **Scope**: what is included or excluded.
+- **Constraints**: what limits the approach.
+- **Preference**: what style or pattern to follow.
 
 ## Execution Plan
 
-1. Analyze [Input](#input) for areas needing clarification
-2. Formulate 2-5 questions using [Question Granularity](#question-granularity) — do not skip questions due to apparent clarity; even clear requests get 2 confirmation/scope/assumption/constraint/verification-preference questions
-3. Invoke the `question` tool once with [Question Tool Input Schema](#question-tool-input-schema), passing all 2-5 questions in a single call
-4. Return results using [Skill Output Schema](#skill-output-schema)
+1. Analyze [Input](#input) for areas needing clarification.
+2. Formulate 2-5 questions per [Question Guidelines](#question-guidelines).
+   See [Guardrails](#guardrails) for mandatory question rules.
+3. Invoke the `question` tool once with [Question Tool Input Schema](#question-tool-input-schema), passing all 2-5 questions in a single call.
+4. Return results using [Skill Output Schema](#skill-output-schema).
 
-This is a single-pass process. Ask all clarifying questions in one invocation. Do not perform follow-up rounds, multi-pass clarification, or iterative narrowing within the same request.
-
-## Question Formulation Guidelines
-
-- Purpose: what outcome is needed?
-- Scope: what is included or excluded?
-- Constraints: what limits the approach?
-- Preference: what style or pattern should be followed?
+This is a single-pass process.
+Ask all clarifying questions in one invocation.
+Do not perform follow-up rounds, multi-pass clarification, or iterative narrowing.
 
 ## Guardrails
 
-- Always ask at least 2 questions, at most 5 questions.
+- Always ask at least 2 questions and at most 5 questions.
 - Do not skip questions because the request appears clear — ask confirmation, scope, assumption, constraint, or verification-preference questions instead.
 - Ask only when the answer changes execution.
 - Do not ask what the request already answers.

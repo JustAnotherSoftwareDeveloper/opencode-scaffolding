@@ -38,7 +38,7 @@ All rules in this section apply to all body text.
 
 ## Conciseness
 
-- **Target length**: under 100 lines for `SKILL.md`. If content exceeds 100 lines, push depth into `./REFERENCE.md` or `./reference/*.md`.
+- **Target length**: under 300 lines for `SKILL.md`. If content exceeds 300 lines, push depth into `./REFERENCE.md` or `./reference/*.md`.
 - **One idea per sentence**: do not chain clauses with "and", "or", "while".
 - **Omit preamble**: start with the first actionable statement. Do not introduce the section or recap prior content.
 - **No repeated information**: if a step appears earlier, reference it by number — do not restate it.

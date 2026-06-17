@@ -6,15 +6,16 @@ class: inline
 
 # Task Delegation
 
-This skill validates a delegation packet and forwards it to a worker via the task tool.
+Validate a delegation packet and forward it to a worker via the task tool.
 
 ## Input
 
-One already-split delegation packet using the standard header format (`## PURPOSE`, `## DETAILS`, `## FILES TO READ`, `## FILES TO WRITE`, `## SKILLS`, `## EXECUTION INSTRUCTIONS`, `## VERIFICATION`, `## EXPECTED OUTPUT`). Do not split, merge, or transform the packet.
+One delegation packet using the standard header format.
+See [Packet Format](#packet-format) for required sections.
+Do not split, merge, or transform the packet.
+Forward it to the worker as-is.
 
-## Delegation Packet Template
-
-Flat structure optimized for small worker models. This is the format the input packet should conform to and the format forwarded to workers.
+### Packet Format
 
 ```
 ## PURPOSE
@@ -42,18 +43,20 @@ Flat structure optimized for small worker models. This is the format the input p
 <what the worker should produce>
 ```
 
-Packet values arrive as plaintext headers. No conversion is needed.
+## Output
+
+The result returned by the worker matching the packet's `## EXPECTED OUTPUT`.
 
 ## Execution Plan
 
-1. Validate the delegation packet has all required sections: `## PURPOSE`, `## DETAILS`, `## FILES TO READ`, `## FILES TO WRITE`, `## SKILLS`, `## EXECUTION INSTRUCTIONS`, `## VERIFICATION`, `## EXPECTED OUTPUT`.
-2. Use the packet as-is -- no transformation needed. The packet is already in the Delegation Packet Template format.
-3. Invoke the `task` tool with `subagent_type: "worker"`, `description` from `## PURPOSE`, `prompt` as the full delegation packet, and `command` set to the `## PURPOSE` content.
-4. Return the worker result requested by `## EXPECTED OUTPUT`.
+1. Validate the packet has all 8 required sections — see [Packet Format](#packet-format).
+2. Invoke the `task` tool with `subagent_type: "worker"`, `description` from `## PURPOSE`, `prompt` as the full delegation packet, and `command` set to the `## PURPOSE` content.
+3. Return the worker result.
+
+This is a single-pass process.
+Launch exactly one worker task per invocation.
 
 ## Guardrails
 
-- Validate that all 8 required sections (`## PURPOSE`, `## DETAILS`, `## FILES TO READ`, `## FILES TO WRITE`, `## SKILLS`, `## EXECUTION INSTRUCTIONS`, `## VERIFICATION`, `## EXPECTED OUTPUT`) are present in the packet.
-- Reject malformed packets (missing sections, unrecognized format) with a clear description of what is missing or invalid.
-- Do not modify, re-encode, or transform the packet. Forward it to the worker exactly as received.
-- Launch exactly one worker task per invocation.
+- Reject malformed packets with a clear description of what is missing or invalid.
+- Do not modify, re-encode, or transform the packet.
