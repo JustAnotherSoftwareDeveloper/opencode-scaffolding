@@ -1,0 +1,59 @@
+---
+name: display-tasks
+description: "Use when rendering task delegation packets as a concise Markdown summary table."
+class: inline
+---
+
+# Display Tasks
+
+Render one or more delegation packets into a Markdown table with only safe user-facing fields.
+
+## Input
+
+Accepts full delegation packet text plus optional externally supplied status values.
+
+- **Packets**: One or more delegation packets containing standard headers (`## PURPOSE`, `## FILES TO READ`, `## FILES TO WRITE`, `## SKILLS`, etc.).
+- **Status** (optional): A map of packet index to status string.
+  If absent for a given packet, render `pending`.
+
+## Output
+
+A single Markdown table with no surrounding commentary.
+
+### Output Format
+
+```
+| Purpose | Status | Files | Skill |
+| ------- | ------ | ----- | ----- |
+| ...     | ...    | ...   | ...   |
+```
+
+One row per input packet.
+
+## Extraction Rules
+
+1. **Purpose** — Extract the text after `## PURPOSE` on the next non-blank line.
+   Truncate to 80 characters if longer.
+2. **Files** — Combine `## FILES TO READ` and `## FILES TO WRITE` into a compact, comma-separated list.
+   Strip paths to basenames when they share a common prefix.
+3. **Skill** — Extract the text after `## SKILLS` on the next non-blank line.
+   If empty or absent, render `none`.
+4. **Status** — Use the supplied status for this packet's index.
+   If no status is supplied, render `pending`.
+
+## Execution Plan
+
+1. Normalize input — split on `---` delimiters to isolate each delegation packet.
+2. Extract fields per [Extraction Rules](#extraction-rules) for each packet.
+3. Apply status from supplied map or default to `pending`.
+4. Produce output per [Output Format](#output-format).
+
+## Guardrails
+
+- Never render `## DETAILS`, `## EXECUTION INSTRUCTIONS`, `## VERIFICATION`, or `## EXPECTED OUTPUT` in the table body, headers, or any accompanying text.
+- Never render full packet bodies — only the extracted columns.
+- Never add commentary, summaries, or explanations outside the table.
+- Do not own workflow decisions, task state, or delegation logic.
+  The delegator decides when to call this skill and what status applies.
+- Do not modify, validate, or execute the packet contents.
+  This is a rendering helper only.

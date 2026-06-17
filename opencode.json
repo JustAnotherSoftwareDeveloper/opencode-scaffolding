@@ -77,7 +77,8 @@
           "ask-question": "allow",
           "breakdown-tasks": "allow",
           "task-delegation": "allow",
-          "todo-writer": "allow"
+          "todo-writer": "allow",
+          "display-tasks": "allow"
         }
       }
     },
