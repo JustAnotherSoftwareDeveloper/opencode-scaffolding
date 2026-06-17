@@ -4,25 +4,27 @@ description: "Use when <<trigger-condition>>."
 class: operation
 ---
 
-# <<Skill Name>>
+## Normalize Input
 
-One-line summary of what this operation skill accomplishes.
+Map invocation context to one internal input object. Define required fields, defaults, and `BLOCKED: <reason>` conditions for missing required input.
 
-## When to Use
+## Procedure
 
-Use this skill when <<trigger-condition>>.
+Each step is one imperative action. Do not delegate sub-tasks.
 
-## Workflow
+1. <<step>>.
+2. <<step>>.
+3. <<step>>.
+4. <<step>>.
 
-1. <<first-step>>.
-2. <<second-step>>.
-3. <<final-step>>.
+## Self-Validation
 
-## Validation
+Each check is a yes/no assertion.
 
-- <<validation-check-1>>.
-- <<validation-check-2>>.
+- <<yes/no check>>.
+- <<yes/no check>>.
+- <<yes/no check>>.
 
 ## Expected Output
 
-<<expected-output-files-or-state>>
+Specify: artifact path/location, format, contents, and completeness criteria.

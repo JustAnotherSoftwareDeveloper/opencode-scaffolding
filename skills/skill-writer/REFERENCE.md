@@ -43,7 +43,7 @@ class: <<one-of-five-classes>>
 
 One of exactly five values:
 
-- **`operation`** — Single bounded procedure, self-validating, no sub-delegation
+- **`operation`** — Broad/default class for single bounded procedures that are independent, self-validating, and do not sub-delegate. A Normalize Input step absorbs free-form input, structured packets, files, or tool outputs into one internal input, avoiding separate modes for different invocation shapes.
 - **`delegated`** — Worker specialization designed to receive delegation packets
 - **`inline`** — Single-pass reasoning-heavy skill executed directly by the main agent, optional direct tool calls, no worker/sub-skill orchestration as its own workflow
 - **`orchestrated`** — Coordinates sub-skills, workers, phases, or quality gates
@@ -59,7 +59,7 @@ Keep `SKILL.md` procedural and compact (under ~100 lines). Push reference materi
 
 > See `REFERENCE.md` for class selection guide and frontmatter rules.
 
-Do **not** inline reference prose into `SKILL.md`. The skill body is procedure; the reference is depth.
+Do **not** inline reference prose into `SKILL.md`.
 
 ## Trigger / Non-Trigger Eval
 
@@ -110,13 +110,13 @@ Every authored skill should be verified against this checklist before declaring 
 
 ## Decision Prompts for Class Selection
 
-Use these questions when uncertain:
+Use these questions when uncertain. Start with operation as the default; only choose another class when a specific condition clearly applies:
 
-- **Does this do one thing and validate in isolation?** → `operation`
-- **Is this a specialized worker that receives a delegation packet?** → `delegated`
-- **Is this a single-pass, reasoning-heavy procedure the main agent executes directly, calling tools as needed but not orchestrating sub-skills or workers?** → `inline`
-- **Does this coordinate phases, workers, or sub-skills?** → `orchestrated`
-- **Is the primary job creating or reviewing lifecycle artifacts (proposal → plan → runbook)?** → `planning`
+- **Default — Single bounded, independent, self-validating, no sub-delegation?** → `operation`
+- **Receives a delegation packet?** → `delegated`
+- **Single-pass reasoning-heavy, main agent executes directly?** → `inline`
+- **Coordinates phases, workers, or sub-skills?** → `orchestrated`
+- **Primary output is a lifecycle artifact (proposal → plan → runbook)?** → `planning`
 
 
 
