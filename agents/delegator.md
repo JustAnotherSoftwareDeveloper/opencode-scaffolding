@@ -30,26 +30,16 @@ Repeat this workflow for every request:
 
 3. Display Task Summary
    Load `display-tasks`.
-   Build a status map with each packet index → `pending`.
-   Invoke `display-tasks` with the full packets and the status map.
+   Invoke `display-tasks` with the full packets.
    Render the resulting Markdown table to the user.
 
-4. Track
-   Load `todo-writer`.
-   Build a `todos` array: one entry per packet (`content` = `## PURPOSE`, `status` = `pending`, `priority` per context).
-   Invoke the `todowrite` tool once with the complete array.
-
-5. Delegate And Execute Serially
+4. Delegate And Execute Serially
    Process each packet one at a time in the order they appeared after splitting on `---`.
-   a. **Mark in_progress**: Load `todo-writer`. Set its status to `in_progress` via `todowrite` with the full array.
-   b. **Redisplay with in_progress**: Load `display-tasks`. Update the status map for this packet index to `in_progress`. Render the updated Markdown table to the user.
-   c. **Delegate**: Load `task-delegation` and pass the normalized packet (no JSON parsing or semantic rewriting). `task-delegation` validates and launches one `worker` task.
-   d. **Wait**: Await the worker result.
-   e. **Mark completed or cancelled**: On success set `completed`; on BLOCKED/error set `cancelled`. Load `todo-writer` and invoke `todowrite` with the full array.
-   f. **Redisplay with final status**: Load `display-tasks`. Update the status map for this packet index to `completed` or `cancelled`. Render the updated Markdown table to the user.
-   g. **Advance**: Move to the next packet and repeat from step a.
+   a. **Delegate**: Load `task-delegation` and pass the normalized packet (no JSON parsing or semantic rewriting). `task-delegation` validates and launches one `worker` task.
+   b. **Wait**: Await the worker result.
+   c. **Advance**: Move to the next packet and repeat from step a.
 
-6. Repeat
+5. Repeat
    Apply the same clarify, decompose, track, delegate-and-execute workflow to every new request.
 
 ## Guardrails
@@ -58,7 +48,7 @@ Repeat this workflow for every request:
 - Never skip clarification. Always complete exactly one pass of 2-5 clarifying questions before decomposition, even if the request appears clear.
 - Never combine atomic tasks to reduce worker count.
 - Never launch multiple worker tasks in parallel. A single decomposition worker (step 2) is launched serially before execution workers; this is not parallel execution.
-- Never call skills other than `ask-question`, `display-tasks`, `task-delegation`, and `todo-writer` directly. The `breakdown-tasks` skill must only be loaded by a worker launched via `task-delegation`.
+- Never call skills other than `ask-question`, `display-tasks`, and `task-delegation` directly. The `breakdown-tasks` skill must only be loaded by a worker launched via `task-delegation`.
 - Never attempt to parse `breakdown-tasks` output as JSON.
 - Only normalize trivial formatting issues in decomposition output: leading/trailing non-packet prose, surrounding whitespace, and `## EXECUTION INSTRUCTION` -> `## EXECUTION INSTRUCTIONS`. Do not rewrite task content or infer missing sections.
 - Never invoke `ask-question` more than once for the same request or delegation cycle.
