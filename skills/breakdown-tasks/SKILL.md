@@ -58,18 +58,18 @@ An atomic task is the smallest useful unit of work that can be delegated, execut
 
 ### Core Rules
 
-1. **Single file, single change** — Each task touches exactly one file and makes exactly one logical change.
-   If a task modifies two files or makes two unrelated edits to the same file, split it.
+1. **Single unit of work** — Each task performs exactly one logical change or answers exactly one analytical question.
+   If a task modifies two files, makes two unrelated edits in one file, or answers two independent questions, split it.
 
-2. **Single output artifact** — Each task produces exactly one verifiable output.
-   If a task produces two outputs (e.g., writes a file and runs a test), split verification from production.
+2. **Single output artifact** — Each task produces exactly one verifiable result — either one output artifact or one documented finding.
+   If a task produces two outputs (e.g., writes a file and runs a test, or produces two distinct findings), split verification from production.
 
 3. **Logical step pipeline** — Tasks form a pipeline where each is one discrete step in a sequence.
    Independent steps must be separate parallel-capable tasks.
    Dependent steps must be sequential but still individually atomic.
 
-4. **Same-file serialization** — When multiple changes to the same file are needed, serialize them as separate sequential tasks.
-   Each task lists the file in `## FILES TO WRITE`.
+4. **Dependent work serialization** — When multiple changes to the same file or multiple analysis steps on the same subject are needed, serialize them as separate sequential tasks.
+   Each task lists the target file or subject in `## FILES TO READ` or `## FILES TO WRITE`.
    Run tasks in order so each sees the prior task's output.
 
 ### Anti-Patterns
@@ -82,6 +82,12 @@ An atomic task is the smallest useful unit of work that can be delegated, execut
   Split into three sequential tasks.
 - **"Refactor checkout and run tests"** — Produces two outputs.
   Split into refactor task then test-run task.
+- **"Analyze codebase for security vulnerabilities"** — Broad analysis with multiple independent concerns.
+  Split into: analyze authentication, analyze input validation, analyze dependency risk.
+- **"Review checkout flow and suggest improvements"** — Combines analysis and planning in one task.
+  Split into: document current flow, identify issues, propose improvements.
+- **"Compare all frontend frameworks and pick one"** — Multiple independent comparisons in one task.
+  Split into: evaluate framework A, evaluate framework B, compare findings and recommend.
 
 ## Execution Plan
 

@@ -38,7 +38,7 @@ All rules in this section apply to all body text.
 
 ## Conciseness
 
-- **Target length**: under 300 lines for `SKILL.md`. If content exceeds 300 lines, push depth into `./REFERENCE.md` or `./reference/*.md`.
+- **Target length**: under 200 lines for `SKILL.md`. If content exceeds 200 lines, push depth into `./REFERENCE.md` or `./reference/*.md`.
 - **One idea per sentence**: do not chain clauses with "and", "or", "while".
 - **Omit preamble**: start with the first actionable statement. Do not introduce the section or recap prior content.
 - **No repeated information**: if a step appears earlier, reference it by number — do not restate it.
@@ -73,7 +73,7 @@ Before declaring a `SKILL.md` complete, verify:
 - [ ] One `H1` per file; all subsections are `H2` or deeper.
 - [ ] YAML frontmatter has exactly `name`, `description`, `class`.
 - [ ] `description` starts with `"Use when"`.
-- [ ] File is under 100 lines.
+- [ ] File is under 200 lines.
 - [ ] No Examples section present.
 - [ ] Reference detail is not inlined — cross-references via `./REFERENCE.md` instead.
 - [ ] No prose copied from archived versions or templates.
