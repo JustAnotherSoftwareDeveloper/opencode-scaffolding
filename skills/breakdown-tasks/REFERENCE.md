@@ -2,10 +2,6 @@
 
 > Atomic task unit definition, core rules, and anti-patterns for decomposing work into delegatable packets.
 
-## Atomic Task Unit
-
-An atomic task is the smallest unit of work that can be delegated, executed, and verified independently.
-
 ## Core Rules
 
 ### 1. Single Unit of Work
@@ -34,7 +30,18 @@ When multiple changes to the same file or multiple analysis steps on the same su
 - Each task lists the target file or subject in `## FILES TO READ` or `## FILES TO WRITE`.
 - Run tasks in order so each sees the prior task's output.
 
+### 5. Skill-Aware But Not Skill-Bound
+
+Available skills inform task decomposition but do not override atomicity.
+Use the discovered skill list to assign matching skills, shape task boundaries, and identify missing capabilities.
+Never merge or split tasks to match skill scope.
+
+- If a skill covers two adjacent concerns, keep them as separate atomic packets — assign the skill to the matching packet only.
+- Do not adjust task granularity to fit a skill's scope; atomicity rules take precedence.
+
 ## Anti-Patterns
+
+### Work-Boundary Anti-Patterns
 
 - **"Add user authentication"** — Touches multiple files and produces multiple outputs.
   Split into: middleware, route, model, tests, test run.
@@ -50,3 +57,8 @@ When multiple changes to the same file or multiple analysis steps on the same su
   Split into document current flow, identify issues, propose improvements.
 - **"Compare all frontend frameworks and pick one"** — Multiple independent comparisons in one task.
   Split into evaluate framework A, evaluate framework B, compare findings and recommend.
+
+### Skill-Assignment Anti-Patterns
+
+- **"Assign no skills when skills are available"** — The decomposer has skill data but leaves `## SKILLS` empty despite obvious matches in the discovered skill list.
+- **"Force-assign a skill to every packet"** — Assigning a skill to purely structural tasks just to avoid empty `## SKILLS` fields. Leave empty when no match exists.
