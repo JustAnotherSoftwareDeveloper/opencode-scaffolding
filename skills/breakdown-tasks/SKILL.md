@@ -19,33 +19,56 @@ Incoming packet is a standard delegation packet.
 2. Extract the request from `## DETAILS`.
    Treat `## DETAILS` as the primary input for decomposition.
 3. Discover available skills.
-   Run `uv run --directory ~/.config/opencode/scripts/python collect-skills`, capture stdout, and parse the JSON array into a list of skill objects (`name`, `description`, `class`, `location`, `source`).
+   Run `uv run --directory ~/.config/opencode/scripts/python collect-skills`.
+   Capture stdout and parse the JSON array into a list of skill objects (`name`, `description`, `class`, `location`, `source`).
    Hold the list in working memory for the remainder of execution.
-   If the command fails (non-zero exit), report `BLOCKED: Unable to discover available skills — collect-skills invocation failed.`
+   If the command exits non-zero, report `BLOCKED: Unable to discover available skills — collect-skills invocation failed.`
    If the output is an empty array, proceed with an empty skill index.
 4. Decompose per `./REFERENCE.md`.
-   Split the request into atomic tasks following Core Rules (single unit of work, single output artifact, logical step pipeline, dependent work serialization) and avoiding Anti-Patterns.
-   The available skill list informs decomposition choices, but atomicity rules take precedence over skill availability.
+   Split the request into atomic tasks following Core Rules (single unit of work, single output artifact, logical step pipeline, dependent work serialization).
+   Avoid Anti-Patterns.
+   Use the available skill list to inform decomposition choices.
+   Atomicity rules take precedence over skill availability.
 5. Order tasks by prerequisites.
-   Arrange tasks so that each task's dependencies are satisfied by earlier tasks.
-   Independent tasks are ordered arbitrarily using a stable heuristic such as alphabetical.
+   Arrange tasks so that earlier tasks satisfy each task's dependencies.
+   Order independent tasks using a stable heuristic such as alphabetical order.
 6. Format each downstream packet.
-    For every atomic task, produce a JSON object with exactly these 8 camelCase keys:
-    `purpose`, `details`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `verification`, `expectedOutput`.
-    Populate `skills` by cross-referencing the task's PURPOSE and DETAILS against the discovered skill list.
-    Assign the best-matching skill name(s) based on description alignment into the `skills` array.
-    If no match exists, set `skills` to an empty array.
-    `filesToRead` is an array of path strings; `filesToWrite` is a single path string or `null`; all other keys are plain strings.
- 7. Collect all JSON objects into a JSON array.
-    Build a JSON array literal `[...]` containing every formatted packet object in dependency order.
- 8. Return the JSON array as a valid JSON string.
-    No leading/trailing text, no Markdown code fences, no preamble, no postscript.
+   For every atomic task, produce a JSON object with exactly these 8 camelCase keys:
+   `purpose`, `details`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `verification`, `expectedOutput`.
+   Populate `skills` by cross-referencing the task's PURPOSE and DETAILS against the discovered skill list.
+   Assign the best-matching skill name(s) into the `skills` array based on description alignment.
+   If no match exists, set `skills` to an empty array.
+   Use `filesToRead` as an array of path strings.
+   Use `filesToWrite` as a single path string or `null`.
+   Use all other keys as plain strings.
+7. Collect all JSON objects into a JSON array.
+   Build a JSON array literal `[...]` containing every formatted packet object in dependency order.
+8. Return the JSON array as a valid JSON string.
+   Do not wrap output in ```json fences.
+   Do not prepend or append explanatory text.
+   Do not include a leading or trailing newline beyond standard JSON formatting.
+   Do not add any non-JSON characters.
+   Return only the raw JSON array literal.
 
 ## Output Contract
 
 Return a single JSON array of packet objects.
-No leading/trailing text, no Markdown code fences, no preamble, no postscript.
-Each object conforms to the JSON Schema defined below.
+Any output violating this contract is a BLOCKER for the receiver.
+The delegator rejects non-conforming output.
+Do not include leading or trailing text, Markdown code fences (```json), preamble sentences, postscript commentary, or any non-JSON characters.
+Return only the raw JSON array literal.
+Ensure each object conforms to the JSON Schema defined below.
+
+### Verbatim JSON Requirement
+
+Return the JSON array as a raw, unadorned JSON literal.
+Do not wrap it in Markdown code fences (```` ```json ... ``` ````).
+Do not prefix it with preamble sentences.
+Do not suffix it with commentary, summary, or sign-off text.
+Start the output with `[`.
+End it with `]`.
+Any deviation from this verbatim requirement is a blocker.
+The delegator discards non-conforming output.
 
 ### JSON Schema
 

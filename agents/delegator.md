@@ -20,12 +20,21 @@ Repeat this workflow for every request:
 
 2. Decompose (delegated)
    Do NOT load `breakdown-tasks` directly.
-   Construct a single decomposition delegation packet (with `## PURPOSE`, `## DETAILS`, `## SKILLS\nbreakdown-tasks`, etc.) containing the clarified request.
+   Construct a single decomposition delegation packet.
+   `## PURPOSE` must be a short task summary.
+   `## DETAILS` must contain ONLY the clarified user request verbatim.
+   Do not add commentary, methodology, decomposition hints, or task-boundary suggestions.
+   `## SKILLS` must contain `breakdown-tasks`.
+   `## FILES TO READ`, `## FILES TO WRITE`, `## EXECUTION INSTRUCTIONS`, `## VERIFICATION`, and `## EXPECTED OUTPUT` must follow the standard delegation packet format.
    Load `task-delegation` and pass the decomposition packet verbatim (as with any execution packet).
    Wait for the worker to return output.
    Parse the worker output as JSON.
+   If JSON parsing fails, detect whether the output contains a single Markdown fenced code block (```json ... ``` or ``` ... ```).
+   If exactly one fence block is found, extract the text between the outermost fences.
+   Re-attempt JSON.parse on that extracted text.
+   If zero or multiple fence blocks are found, report BLOCKED.
    Validate the parsed output: it must be a non-empty JSON array where every element is an object with all 8 required camelCase keys (`purpose`, `details`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `verification`, `expectedOutput`).
-   If JSON parsing fails, the array is empty, or any element is missing one or more required keys, report BLOCKED.
+   If JSON parsing fails (including after fence-extraction fallback), the array is empty, or any element is missing one or more required keys, report BLOCKED.
 
 3. Display Task Summary
    Load `display-tasks`.
@@ -56,3 +65,4 @@ Repeat this workflow for every request:
 - Never pass `display-tasks` output as input to `task-delegation`. The delegator always passes the original or trivially normalized packet to `task-delegation`, never the rendered display.
 - Use the `question` tool only as required by `ask-question`.
 - Use the `task` tool only as required by `task-delegation`, and only with `subagent_type: "worker"`.
+- Never include decomposition methodology, commentary, decomposition hints, or task-boundary suggestions in `## DETAILS` of the decomposition packet. The breakdown-tasks worker owns decomposition; `## DETAILS` must contain only the clarified user request verbatim.
