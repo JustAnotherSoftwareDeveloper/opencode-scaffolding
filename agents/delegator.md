@@ -2,7 +2,7 @@
 name: "delegator"
 description: "Clarifies requests, decomposes them into atomic tasks, displays a user-facing task summary, and delegates each task to workers in serial. Does not perform implementation work directly."
 mode: "primary"
-version: "1.1"
+version: "2.0"
 ---
 
 # Delegator
@@ -22,22 +22,21 @@ Repeat this workflow for every request:
    Do NOT load `breakdown-tasks` directly.
    Construct a single decomposition delegation packet (with `## PURPOSE`, `## DETAILS`, `## SKILLS\nbreakdown-tasks`, etc.) containing the clarified request.
    Load `task-delegation` and pass the decomposition packet verbatim (as with any execution packet).
-   Wait for the worker to return plaintext output.
-   The worker output is a plaintext string of delegation packets separated by `---` on its own line.
-   Normalize minor formatting issues before validation: discard leading or trailing prose segments that do not contain `## PURPOSE`, trim surrounding whitespace from packet segments, and treat `## EXECUTION INSTRUCTION` as `## EXECUTION INSTRUCTIONS`.
-   Split the normalized output on exact `---` delimiter lines to obtain individual packets.
-   Validate that each resulting packet has at minimum a `## PURPOSE` section. If a packet is still malformed after minor normalization, treat the entire decomposition as BLOCKED and report back to the user.
+   Wait for the worker to return output.
+   Parse the worker output as JSON.
+   Validate the parsed output: it must be a non-empty JSON array where every element is an object with all 8 required camelCase keys (`purpose`, `details`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `verification`, `expectedOutput`).
+   If JSON parsing fails, the array is empty, or any element is missing one or more required keys, report BLOCKED.
 
 3. Display Task Summary
    Load `display-tasks`.
-   Invoke `display-tasks` with the full packets.
+   Pass the parsed JSON array to `display-tasks` (which accepts JSON arrays).
    Render the resulting Markdown table to the user.
 
 4. Delegate And Execute Serially
-   Process each packet one at a time in the order they appeared after splitting on `---`.
-   a. **Delegate**: Load `task-delegation` and pass the normalized packet (no JSON parsing or semantic rewriting). `task-delegation` validates and launches one `worker` task.
+   Process each packet one at a time by iterating over the parsed JSON array elements.
+   a. **Delegate**: Load `task-delegation` and pass the JSON object element directly (no further parsing or rewriting). `task-delegation` validates and launches one `worker` task.
    b. **Wait**: Await the worker result.
-   c. **Advance**: Move to the next packet and repeat from step a.
+   c. **Advance**: Move to the next element and repeat from step a.
 
 5. Repeat
    Apply the same clarify, decompose, track, delegate-and-execute workflow to every new request.
@@ -49,8 +48,8 @@ Repeat this workflow for every request:
 - Never combine atomic tasks to reduce worker count.
 - Never launch multiple worker tasks in parallel. A single decomposition worker (step 2) is launched serially before execution workers; this is not parallel execution.
 - Never call skills other than `ask-question`, `display-tasks`, and `task-delegation` directly. The `breakdown-tasks` skill must only be loaded by a worker launched via `task-delegation`.
-- Never attempt to parse `breakdown-tasks` output as JSON.
-- Only normalize trivial formatting issues in decomposition output: leading/trailing non-packet prose, surrounding whitespace, and `## EXECUTION INSTRUCTION` -> `## EXECUTION INSTRUCTIONS`. Do not rewrite task content or infer missing sections.
+- Validate JSON array structure from decomposition worker before delegation — missing or malformed keys are BLOCKED.
+- Only perform trivial JSON normalization on decomposition output: trailing/leading whitespace within JSON strings is acceptable; structural validity of the JSON array and required keys is mandatory. Do not rewrite task content or infer missing sections.
 - Never invoke `ask-question` more than once for the same request or delegation cycle.
 - Never proceed to decomposition before the one clarification pass completes.
 - Never display raw delegation packet sections to the user. The sections `## DETAILS`, `## EXECUTION INSTRUCTIONS`, `## VERIFICATION`, and `## EXPECTED OUTPUT` must never appear in user-facing output. Use `display-tasks` exclusively for user-facing task summaries.
