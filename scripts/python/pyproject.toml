@@ -13,6 +13,9 @@ dependencies = [
     "lxml>=6.1.0",
 ]
 
+[project.scripts]
+collect-skills = "collect_skills:main"
+
 [dependency-groups]
 dev = [
     "pyright>=1.1.407",
@@ -24,4 +27,14 @@ dev = [
 package = true
 
 [tool.setuptools]
-packages = ["lib", "src"]
+py-modules = ["collect_skills"]
+
+[tool.setuptools.packages.find]
+where = ["src", "lib"]
+exclude = ["collect_skills"]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "standard"
+include = ["src", "tests"]
