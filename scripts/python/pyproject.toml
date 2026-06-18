@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=69"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "scripts-python"
@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-collect-skills = "collect_skills:main"
+collect-skills = "cli.collect_skills:main"
 
 [dependency-groups]
 dev = [
@@ -23,18 +23,8 @@ dev = [
     "ruff>=0.15.17",
 ]
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/cli", "src/lib"]
+
 [tool.uv]
 package = true
-
-[tool.setuptools]
-py-modules = ["collect_skills"]
-
-[tool.setuptools.packages.find]
-where = ["src", "lib"]
-exclude = ["collect_skills"]
-
-[tool.pyright]
-venvPath = "."
-venv = ".venv"
-typeCheckingMode = "standard"
-include = ["src", "tests"]
