@@ -6,48 +6,67 @@ class: operation
 
 # Skill Writer
 
-Writes a single `skills/<name>/SKILL.md`. This skill is procedural, not documentary. It consumes user requirements, archived versions, and support files, and produces a validated skill artifact.
+Write a single `skills/<name>/SKILL.md`.
+Consume user requirements, archived versions, and support files.
+Produce a validated skill artifact.
 
 ## Inputs to Collect
 
-Before writing, gather:
+Gather:
 
-- **Purpose** — one-sentence intent for the skill
+- **Purpose** — define a one-sentence intent for the skill
 - **Source material** — any reference content, workflows, or specifications the skill must encode
-- **Archived version** (if any) — prior iteration under `archive/<name>/SKILL.md`; read for shape only, not prose
+- **Archived version** (if any) — locate under `archive/<name>/SKILL.md`.
+  Read for shape only, not prose.
 - **Class guidance** — consult `./REFERENCE.md` for taxonomy details
 - **Template** — locate the matching template under `./templates/<class>.SKILL.template.md`
 
 ## Class / Template Selection
 
-Consult `./REFERENCE.md` for class definitions and decision prompts. Copy the matching template from `./templates/<class>.SKILL.template.md`, then customise.
+Consult `./REFERENCE.md` for class definitions and decision prompts.
+Copy the matching template from `./templates/<class>.SKILL.template.md`.
+Customise it.
+For orchestrated skills, use the canonical template at `orchestrated.SKILL.template.md`.
 
 ## Workflow
 
 1. Determine skill name from context or `<name>` in the request.
 2. Collect inputs (requirements, archive, source material).
-3. Select class per `./REFERENCE.md`; locate template in `./templates/`.
-4. Write frontmatter — `name` (matches directory), `description` (starts "Use when"), `class`.
-5. Read `./style-guide.md` for editorial conventions before drafting or modifying skill body content.
-6. Write a thin procedural body with: trigger guidance, step-by-step workflow, quality rules, validation checklist, expected output. Keep concise. Link to `./REFERENCE.md` and `./templates/` for depth; do not inline reference prose.
-7. **For operation skills**: Use "Normalize Input" as the first procedural step (after "When to Use"). This absorbs free-form input, structured packets, files, or tool outputs into one internal procedure input and avoids separate direct/delegated modes.
+3. Select class per `./REFERENCE.md`.
+   Locate template in `./templates/`.
+4. Write frontmatter: `name`, `description`, `class`.
+   Ensure `name` matches the directory.
+   Ensure `description` starts with "Use when".
+5. Read `./style-guide.md` for editorial conventions.
+   Draft skill body content accordingly.
+6. Write a thin procedural body with: trigger guidance, step-by-step workflow, quality rules, validation checklist, expected output.
+   Link to `./REFERENCE.md` and `./templates/` for depth.
+   - **For orchestrated skills**: follow the canonical template.
+7. **For operation skills**: use "Normalize Input" as the first procedural step, after "When to Use".
+   See `./REFERENCE.md` for rationale.
 8. Do not add optional sections (examples, gotchas, extended descriptions).
 9. Verify manually — see checklist below.
 
 ## Quality Rules
 
-- Frontmatter is valid YAML; description begins with "Use when".
-- Body is procedural: steps, conditions, decisions. Not a tutorial or guide.
-- Every claim about what the skill does must be derivable from the inputs collected.
+- Validate frontmatter YAML.
+- Ensure `description` begins with "Use when".
+- Keep the body procedural: steps, conditions, decisions.
+  Omit tutorial explanations.
+- Derive every claim from the collected inputs.
+- **For orchestrated skills**: prefix Execution Steps with typed prefixes (Delegated, Inline, Decompose, Verify).
+  See `./REFERENCE.md` for definitions.
 
 ## Validation Checklist
 
-Manually verify before finishing:
-
 - `name` in frontmatter matches the directory name under `skills/`
-- `description` starts with "Use when" and captures the trigger intent
+- `description` starts with "Use when".
 - `class` is one of operation, delegated, inline, orchestrated, planning (see `./REFERENCE.md`)
-- If class is `operation`: "Normalize Input" is the first procedural step; no direct/delegated mode sections present
+- If class is `operation`: "Normalize Input" is the first procedural step.
+  No direct/delegated mode sections.
+- If class is `orchestrated`: verify 7-section canonical layout and correct step prefixes.
+  See `./REFERENCE.md` for exact section list.
+- No general breakdown instructions outside Decompose steps.
 - Body references `./REFERENCE.md` and/or `./templates/` if applicable, without inlining their content
 - No prose copied from archive or templates — original writing
 - No examples section present
@@ -58,7 +77,7 @@ Manually verify before finishing:
 ## Expected Output
 
 ```
-skills/<name>/SKILL.md   # Single file — the authored skill
+skills/<name>/SKILL.md
 ```
 
-The file must be valid, original, and pass manual validation. No other files are produced.
+Passes all validation checklist items.

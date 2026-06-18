@@ -6,35 +6,37 @@ class: orchestrated
 
 # <<Skill Name>>
 
-One-line description of the workflow this orchestrator coordinates.
+<<One-line description of the workflow this orchestrator coordinates.>>
 
-## Delegated Backing Skills
+## Execution Steps
 
-- <<Skill A>> — <<purpose>>. Input from orchestrator: <<input>>. Output to orchestrator: <<output>>.
-- <<Skill B>> — <<purpose>>. Input from orchestrator: <<input>>. Output to orchestrator: <<output>>.
+1. **Delegated: <<Worker Skill A>>** — <<purpose of delegation>>.
+2. **Inline: <<Inline Skill Name>>** — <<what this inline step does in a single pass>>.
+3. **Decompose** — <<what to decompose into sub-packets>>.
+4. **Delegated: <<Worker Skill B>>** — <<purpose of delegation>>.
+5. **Verify** — <<what to verify>>.
 
-## Phases
+## Worker Strategy
 
-1. **Phase 1: <<name>>** — Owner: <<owner>>. Entry: <<entry condition>>. Action: <<action>>. Exit: <<exit condition>>.
-2. **Phase 2: <<name>>** — Owner: <<owner>>. Entry: <<entry condition>>. Action: <<action>>. Exit: <<exit condition>>.
-3. **Phase 3: <<name>>** — Owner: <<owner>>. Entry: <<entry condition>>. Action: <<action>>. Exit: <<exit condition>>.
-
-## State Ownership
-
-- <<Phase / File>> — owned by <<component>>.
-- <<Phase / File>> — owned by <<component>>.
-
-## Quality Gates / Checkpoints
-
-- Condition: <<gate condition>>. If fail: <<action>>.
-- Condition: <<gate condition>>. If fail: <<action>>.
-
-## Failure Handling
-
-- <<Failure mode>> — <<recovery path: retry / skip / escalate>>.
-- <<Failure mode>> — <<recovery path: retry / skip / escalate>>.
+- <<dispatch model: parallel fan-out / sequential pipeline / conditional branching>>.
+- <<concurrency limits and data flow between steps>>.
 
 ## Verification Checklist
 
-- <<verification step>>
-- <<verification step>>
+- <<verification assertion that a worker must pass>>.
+- <<verification assertion that a worker must pass>>.
+
+## Self-Validation
+
+- Name matches directory name.
+- Description starts with "Use when".
+- Class is `orchestrated`.
+- All `<<placeholders>>` are replaced.
+- No remaining old-template sections.
+- One H1 only; all headings use Title Case.
+
+## Cross-References
+
+- `./REFERENCE.md`
+- `./reference/*.md`
+- `./style-guide.md`
