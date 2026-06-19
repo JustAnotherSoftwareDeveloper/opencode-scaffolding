@@ -1,35 +1,31 @@
 ---
 name: <<skill-name>>
-description: "Use when <<trigger: planning/reviewing lifecycle artifacts>>."
+description: "Use when planning or architecting <<domain>>."
 class: planning
 ---
 
-# <<Skill Name>> — Planning Skill
+# <<Skill Name>> — Domain Planning Reference
 
-Match `name` field to the directory name exactly. Replace all `<<placeholder>>` items below.
+Replace all `<<placeholder>>` items below.
+This template captures planning context for a single domain — not cross-cutting architecture, test strategy, external services, or framework conventions.
+See `./REFERENCE.md` for class rules and frontmatter requirements.
 
-## Scope
+## When to Use
 
-Define the artifact lifecycle this skill owns. Examples: proposal, plan, runbook, review, decision log, recovery path.
+<<Describe trigger conditions for loading this reference: planning or design discussion within the domain, code review affecting domain code, or onboarding to the domain.>>
 
-## Constraints
+## Decision Records
 
-List boundaries:
-- What this skill does NOT cover
-- Preconditions that must be met
-- Required inputs
+<<Record key decisions within this domain with rationale and trade-offs.>>
+<<Link to ADR files if they exist.>>
+<<Explain why past domain choices were made and what alternatives were considered.>>
 
-## Plan Structure
+## Constraints & Assumptions
 
-Template for the artifact this skill produces. Use headings, lists, or a table with these columns: section, purpose, owner. Keep abstract — do not fill in real content.
-
-## Risk Handling
-
-How risks, blockers, and deviations are flagged. Include criteria for:
-- Escalation
-- Pause
-- Rollback
+<<List domain-specific preconditions, invariants, non-goals, and known limitations.>>
+<<Explain what the domain boundary does not include and why.>>
 
 ## Verification Criteria
 
-Gate checks the artifact must pass before handoff. List as brief bullet points.
+- <<gate check the domain planning artifact must pass before handoff>>.
+- <<gate check the domain planning artifact must pass before handoff>>.

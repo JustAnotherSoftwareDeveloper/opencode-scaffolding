@@ -62,6 +62,7 @@ For orchestrated skills, use the canonical template at `orchestrated.SKILL.templ
 - `name` in frontmatter matches the directory name under `skills/`
 - `description` starts with "Use when".
 - `class` is one of operation, delegated, inline, orchestrated, planning (see `./REFERENCE.md`)
+- If class is `planning`: template includes When to Use and Verification Criteria sections.
 - If class is `operation`: "Normalize Input" is the first procedural step.
   No direct/delegated mode sections.
 - If class is `orchestrated`: verify 7-section canonical layout and correct step prefixes.

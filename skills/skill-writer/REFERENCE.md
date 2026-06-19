@@ -48,7 +48,7 @@ One of exactly five values:
 - **`delegated`** — Receives delegation packets and performs bounded subtasks within a pipeline or orchestration; includes final workers and workflow stages (including decomposers) invoked by a delegator
 - **`inline`** — Single-pass reasoning-heavy skill executed directly by the main agent, optional direct tool calls, no worker/sub-skill orchestration as its own workflow
 - **`orchestrated`** — Coordinates sub-skills, workers, phases, or quality gates. Orchestrated skills use the 7-section canonical layout (Frontmatter, Purpose/Intro, Execution Steps, Worker Strategy, Verification Checklist, Self-Validation, Cross-References). See `./templates/orchestrated.SKILL.template.md` for the canonical skeleton.
-- **`planning`** — Proposal / plan / runbook lifecycle creation and review
+- **`planning`** — Reference sources loaded during planning or architecting activities (formal plan creation, informal discussion, design review, onboarding, code review). Documents dependency rationale, design decisions, and other high-level structural knowledge about the codebase.
 
 No other classes are valid. If uncertain, lean toward `operation`.
 
@@ -152,6 +152,7 @@ Every authored skill should be verified against this checklist before declaring 
 - **No stale Inline Skills section**: Orchestrated skills must not contain a standalone Inline Skills section. Inline work goes into Execution Steps as `Inline:` steps.
 - **No Exit Criteria section**: Exit Criteria has been replaced by Verification Checklist. Orchestrated skills must not contain an Exit Criteria section.
 - **No general breakdown instructions**: Breakdown logic belongs only in `Decompose` step types. Do not add free-standing breakdown instructions elsewhere.
+- **Verification criteria gate the planning artifact**: Planning skills should include verification criteria that gate acceptance of the artifact.
 
 ## Gotchas
 
@@ -164,7 +165,7 @@ Every authored skill should be verified against this checklist before declaring 
 - **Class selected by habit** — Mismatch between class contract and actual behavior. Fix: Consult the class list and the decision prompts below.
 - **Assumes templates exist** — REFERENCE.md references nonexistent files. Fix: Use forward-looking relative paths; note the file may not exist yet.
 - **Old template sections remain** — Verification Checklist exists but Phases, Failure Handling, or Quality Gates sections linger from the old template. Fix: Remove all old-template sections. The canonical 7-section layout replaces them.
-- **Inline step used where delegated step needed** — `Inline:` is for single-pass reasoning that runs in one pass. `Delegated:` is for multi-step sub-work that merits its own skill context. Use the right type for the right granularity.
+- **Planning skill used for execution** — Planning skills are reference/context sources, not procedure runners. Do not load them as substitute for operation skills.
 
 ## Decision Prompts for Class Selection
 
@@ -174,4 +175,4 @@ Use these questions when uncertain. Start with operation as the default; only ch
 - **Receives a delegation packet?** → `delegated`
 - **Single-pass reasoning-heavy, main agent executes directly?** → `inline`
 - **Coordinates phases, workers, or sub-skills?** → `orchestrated`
-- **Primary output is a lifecycle artifact (proposal → plan → runbook)?** → `planning`
+- **Primary output is a reference document for planning/architecting activities?** → `planning`
