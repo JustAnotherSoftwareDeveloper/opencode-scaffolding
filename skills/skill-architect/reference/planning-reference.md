@@ -2,7 +2,7 @@
 
 Depth material for planning-class skills.
 Provides philosophical grounding, authoring guidance, per-section writing direction, a conformance checklist, and a class relationship matrix.
-See `./planning.SKILL.template.md` for the canonical section layout.
+See `../../skill-writer/templates/planning.SKILL.template.md` for the canonical section layout.
 
 ## Philosophical Overview
 
@@ -73,4 +73,4 @@ Run this checklist against a completed planning SKILL.md before declaring it don
 | **orchestrated** | Coordinate sub-skills and phases | Collated results from workers | Multi-phase workflow with delegation |
 
 A planning skill should never be loaded when the goal is to modify files or run a procedure.
-Use the Decision Prompts in `./REFERENCE.md` when the boundary is unclear.
+Use the Decision Prompts in `../REFERENCE.md` when the boundary is unclear.

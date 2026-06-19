@@ -42,7 +42,7 @@ Orchestrator waits for all workers to complete, then collates results into a uni
 
 ## Cross-References
 
-- `./REFERENCE.md`
-- `./reference/orchestrated-usage.md`
-- `./reference/collation-reference.md`
-- `./reference/worker-patterns.md`
+- `../../REFERENCE.md`
+- `../orchestrated-usage.md`
+- `../collation-reference.md`
+- `../worker-patterns.md`

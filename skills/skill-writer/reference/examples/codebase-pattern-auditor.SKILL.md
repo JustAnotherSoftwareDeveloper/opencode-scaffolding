@@ -41,7 +41,7 @@ The orchestrator passes accumulated state via delegation packets.
 
 ## Cross-References
 
-- `./REFERENCE.md`
-- `./reference/orchestrated-usage.md`
-- `./reference/worker-patterns.md`
-- `./reference/collation-reference.md`
+- `../../REFERENCE.md`
+- `../orchestrated-usage.md`
+- `../worker-patterns.md`
+- `../collation-reference.md`

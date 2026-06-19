@@ -1,4 +1,4 @@
-<!-- This is a worked example for demonstration. It follows the single-domain template — no Architecture Overview, Test Strategy, External Services, or Framework & Conventions sections. See ./reference/planning-reference.md for authoring guidance. -->
+<!-- This is a worked example for demonstration. It follows the single-domain template — no Architecture Overview, Test Strategy, External Services, or Framework & Conventions sections. See ../planning-reference.md for authoring guidance. -->
 ---
 name: example-payment-domain-planning
 description: "Use when planning or architecting the payment processing domain."
@@ -8,7 +8,7 @@ class: planning
 # Example Payment Domain — Domain Planning Reference
 
 This example demonstrates the single-domain template structure for the payment processing bounded context.
-See the template at `templates/planning.SKILL.template.md` and the reference at `reference/planning-reference.md`.
+See the template at `../../../skill-writer/templates/planning.SKILL.template.md` and the reference at `../planning-reference.md`.
 
 ## When to Use
 

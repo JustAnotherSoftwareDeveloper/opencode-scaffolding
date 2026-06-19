@@ -59,7 +59,7 @@ All rules in this section apply to all body text.
 ## Examples
 
 - `SKILL.md` **must not** include an Examples section or inline example commands.
-- If worked examples are essential, place them in `./reference/examples.md` and link from `SKILL.md` or `./REFERENCE.md`.
+- If worked examples are essential, place them in `./reference/examples/` and link from `SKILL.md` or `./REFERENCE.md`.
 - Examples in reference files should show real skill output — not toy data, not generic placeholders.
 - Each example should demonstrate one principle from this guide (conciseness, formatting, DRY usage) and be annotated with the rule it follows.
 

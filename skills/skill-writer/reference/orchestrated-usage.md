@@ -55,8 +55,8 @@ Structural checks on the SKILL.md file itself.
 
 Relative links to support files the orchestrator depends on.
 **Pitfall**: Absolute paths or omitting links to referenced files.
-- `./style-guide.md`
-- `./reference/collation-reference.md`
+- `../style-guide.md`
+- `./collation-reference.md`
 
 ## Step Types Reference
 
