@@ -86,6 +86,51 @@ Each Execution Step uses a bold type prefix. Choose the type that matches work g
   Use when the next step depends on a prior gate result.
   Example: if lint passes, delegate to test-runner; else delegate to fix-worker.
 
+## Updating an Existing Orchestrated Skill
+
+When updating an orchestrated skill (a skill using the 7-section canonical layout), apply the general update procedure from `../SKILL.md` and `../REFERENCE.md` with these orchestration-specific considerations.
+
+### Identifying Changed Sections
+
+Before editing, compare the update request against each of the 7 sections:
+
+- **Frontmatter** — Does the requirement change `name`, `description`, or `class`? If not, leave unchanged.
+- **Purpose / H1 Intro** — Does the workflow scope change? If the purpose remains the same, keep the intro.
+- **Execution Steps** — Are steps being added, removed, reordered, or retyped? This is the most common update target.
+- **Worker Strategy** — Did the dispatch model, concurrency, or data flow change? If not, preserve the existing strategy.
+- **Verification Checklist** — Are new run-time gates needed? Existing checks are rarely removed; additions are common.
+- **Self-Validation** — Does the update affect structural SKILL.md conventions? Update only if the template or convention changed.
+- **Cross-References** — Are new support files added or old ones moved? Add or update links as needed.
+
+Mark each section as **unchanged**, **modified**, or **new**. Do not touch unchanged sections.
+
+### Preserving Worker Strategy Decisions
+
+Worker strategy patterns (sequential pipeline, parallel fan-out, conditional branching) embody design decisions that may predate the current update:
+
+- Keep existing strategy descriptions unless the update explicitly changes the dispatch model.
+- If adding a new execution step that runs alongside existing steps, extend the strategy description (e.g., "Fan-out: existing test batches plus new lint worker, concurrent up to 5").
+- If the update changes concurrency limits or data flow, update only the affected part of the strategy.
+- Do not rewrite strategy prose that the request does not address.
+
+### Preserving Verification Checklist Items
+
+The Verification Checklist accumulates run-time assertions that must be satisfied on every execution:
+
+- Retain all pre-existing checklist items unless the request explicitly deprecates or replaces them.
+- Add new items below existing ones. Order matters only if it reflects execution sequence.
+- If a worker or step is being removed, remove only the verification item that gates it.
+- If the update introduces a new step type (e.g., adding a `Verify` step), add a corresponding verification item for that step's outcome.
+
+### Step Types in the Update Context
+
+The same step type prefixes (`Delegated`, `Inline`, `Decompose`, `Verify`) apply regardless of CREATE or UPDATE mode. However, during an update:
+
+- **Changing a step's type** — If a previously `Inline` step now merits a separate worker skill, change the prefix to `Delegated: <Worker Skill>` and add the worker to Cross-References.
+- **Adding a new step** — Choose the step type as you would for a new skill: `Delegated` for multi-step sub-work, `Inline` for single-pass reasoning, `Decompose` for fan-out, `Verify` for gates.
+- **Removing a step** — Delete the step line and its description. Also remove any Cross-Reference link that pointed exclusively to that step's worker.
+- **Reordering steps** — Update the step numbers. Ensure the Worker Strategy still describes the resulting dispatch order.
+
 ## H1 Heading Pattern
 
 Use the naming convention:

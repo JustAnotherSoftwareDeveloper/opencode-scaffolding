@@ -1,6 +1,6 @@
 # Skill Writer Reference
 
-Platform rules, authoring guidance, and on-demand reference for creating OpenCode skills. Complement to `SKILL.md` — read this for depth, not for procedure.
+Platform rules, authoring guidance, and on-demand reference for creating or updating OpenCode skills. Complement to `SKILL.md` — read this for depth, not for procedure.
 For editorial and authoring conventions (wording, formatting, conciseness, DRY rules), see `./style-guide.md`.
 For planning-class skill authoring depth, see `../skill-architect/REFERENCE.md`.
 
@@ -76,7 +76,7 @@ When composing a skill's `description`, anticipate both **positive** and **near-
 ### Near-miss negative
 
 - The description should *not* match adjacent but unrelated requests.
-- Example: A skill for *"creating skill files under skills/<name>/"* should not match *"editing an existing skill's SKILL.md"* — those are different tasks.
+- Example: A skill for *"creating or updating skill files under skills/<name>/"* should not match *"debugging a Python script under skills/<name>/"* — those are different tasks.
 - Test mentally: "Would this description match a request for X?" If yes for the wrong X, tighten.
 
 ### Manual eval procedure
@@ -165,8 +165,52 @@ Every authored skill should be verified against this checklist before declaring 
 - **Class selected by habit** — Mismatch between class contract and actual behavior. Fix: Consult the class list and the decision prompts below.
 - **Assumes templates exist** — REFERENCE.md references nonexistent files. Fix: Use forward-looking relative paths; note the file may not exist yet.
 - **Old template sections remain** — Verification Checklist exists but Phases, Failure Handling, or Quality Gates sections linger from the old template. Fix: Remove all old-template sections. The canonical 7-section layout replaces them.
+- **Silently deleting content** — An update removes existing lines without acknowledging the removal. Fix: Every deletion must be intentional. If the request does not call for removal, preserve surrounding content.
+- **Overwriting user customizations** — An update replaces REFERENCE.md or style-guide.md wholesale, wiping user additions. Fix: Use targeted edits. Only modify sections the request targets. Preserve frontmatter, structure, and prose outside the edit scope.
+- **Incomplete partial updates** — A partial update (e.g., SKILL.md only) accidentally modifies REFERENCE.md or templates. Fix: Scope each edit to exactly the files listed in the request. Verify only targeted files changed.
 
-## Decision Prompts for Class Selection
+## Update Workflow Reference
+
+Reference material for the UPDATE path. Complements the procedural UPDATE steps in `SKILL.md`.
+
+### Mode Determination
+
+- **CREATE**: `skills/<name>/` does not exist. Produce a new skill directory from scratch.
+- **UPDATE**: `skills/<name>/` exists. Edit one or more files in the existing directory.
+
+### Determining What Changed
+
+- Compare the user request against the current state of every file under `skills/<name>/`.
+- Read full current content of each targeted file before applying edits — never assume content.
+- Identify the minimal set of sections, paragraphs, or lines that the request affects.
+- If the request is open-ended ("update to match new conventions"), audit every section against the latest `SKILL.md` structure before editing.
+
+### Preserving Existing Content During Targeted Edits
+
+- Keep frontmatter, structure, and prose outside the edit scope intact.
+- Only modify sections that the request explicitly targets.
+- When updating `SKILL.md`, do not rewrite `REFERENCE.md` or `style-guide.md` unless they are listed as targets.
+- Preserve user additions to reference files (gotchas, examples in `reference/`, custom conventions) when updating core files.
+- If a request targets a single file, leave all other files untouched.
+
+### Partial Update Scope Boundaries
+
+A request may target only a subset of the skill directory:
+
+- **SKILL.md only** — Update procedure, quality rules, validation checklist. Leave REFERENCE.md and style-guide.md untouched.
+- **Reference files only** — Update REFERENCE.md or files under `reference/`. Leave SKILL.md and templates untouched.
+- **Templates only** — Update template files. Leave other files untouched.
+- **Full directory update** — Update all files. In this case, still preserve existing content that the request does not address.
+
+When scope is ambiguous, ask: "Update only SKILL.md? Only reference files? Entire skill directory?"
+
+### Content Integrity Rules
+
+- Never silently delete content — every removal must be intentional and justified by the request.
+- Preserve user customizations in REFERENCE.md and style-guide.md when updating SKILL.md.
+- When adding new reference sections, do not duplicate content already in SKILL.md.
+- If the request requires removing content, state the removal explicitly in the edit.
+- Verify after each edit that unchanged sections still render as expected.
 
 Use these questions when uncertain. Start with operation as the default; only choose another class when a specific condition clearly applies:
 
@@ -174,5 +218,15 @@ Use these questions when uncertain. Start with operation as the default; only ch
 - **Receives a delegation packet?** → `delegated`
 - **Single-pass reasoning-heavy, main agent executes directly?** → `inline`
 - **Coordinates phases, workers, or sub-skills?** → `orchestrated`
+
+### Update-Mode Decision Prompts
+
+When in UPDATE mode, decide scope before editing:
+
+- **Request targets only SKILL.md procedure or structure?** → Edit SKILL.md only. Do not touch REFERENCE.md, style-guide.md, or templates.
+- **Request targets only reference content (REFERENCE.md or reference/*)?** → Edit only reference files. Leave SKILL.md and templates untouched.
+- **Request adds or modifies templates?** → Edit only template files. Leave other files untouched.
+- **Request is a full directory rework?** → Update all files, but preserve any content the request does not explicitly address.
+- **Request is ambiguous about scope?** → Clarify before editing. Do not assume full directory scope.
 
 For planning-class depth, see `../skill-architect/REFERENCE.md`.

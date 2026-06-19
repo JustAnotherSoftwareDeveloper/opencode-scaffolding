@@ -16,6 +16,34 @@ See `../templates/orchestrated.SKILL.template.md` for the target structure.
 | Verification Checklist | Self-Validation | Old checklist moved to structural self-checks. |
 | Exit Criteria | Verification Checklist | Exit conditions become verification assertions. |
 
+## Updating a Migrated Skill
+
+When a skill has been partially migrated (some sections converted, others not) or requires targeted updates after an initial migration, follow the UPDATE path from `SKILL.md` rather than re-running the full migration.
+
+### Incremental Checklist Application
+
+Apply the [Migration Checklist](#migration-checklist) selectively based on what remains:
+
+- **Old sections still present** — Remove each remaining old section (Delegated Backing Skills, Phases, State Ownership, Quality Gates, Failure Handling). Update section mappings per the table above.
+- **New sections still missing** — Add any missing new sections (Worker Strategy, Verification Checklist, Self-Validation, Cross-References).
+- **Already-converted sections** — Leave unchanged unless the request targets them for revision.
+
+### Partial Update Verification
+
+After a partial migration update, verify:
+
+- [ ] All old-template sections that were targeted for removal are gone.
+- [ ] New sections that were added are structurally complete.
+- [ ] Unchanged sections are preserved exactly (no accidental overwrites).
+- [ ] Cross-references and relative paths still resolve correctly.
+- [ ] The 7-section layout is internally consistent — no duplicate section headings or misplaced content.
+
+### Content Integrity During Partial Updates
+
+- Apply targeted edits only to the sections the request addresses.
+- Do not rewrite full files — use precise edits for minimal changes.
+- Preserve any user customizations (gotchas, examples in `reference/`, custom conventions) added after the original migration.
+
 ## Migration Checklist
 
 - [ ] Remove Delegated Backing Skills section
