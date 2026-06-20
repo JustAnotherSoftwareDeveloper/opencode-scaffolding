@@ -42,7 +42,7 @@ After a partial migration update, verify:
 
 - Apply targeted edits only to the sections the request addresses.
 - Do not rewrite full files — use precise edits for minimal changes.
-- Preserve any user customizations (gotchas, examples in `reference/`, custom conventions) added after the original migration.
+- Preserve any user customizations (gotchas, custom conventions) added after the original migration.
 
 ## Migration Checklist
 
@@ -63,4 +63,5 @@ After a partial migration update, verify:
 
 - `../templates/orchestrated.SKILL.template.md`
 - `./orchestrated-usage.md`
-- `../REFERENCE.md`
+- `./frontmatter-rules.md` — Frontmatter rules and class selection.
+- `./update-workflow.md` — Update workflow reference.

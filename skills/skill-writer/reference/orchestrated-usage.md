@@ -1,7 +1,30 @@
 # Orchestrated Skill Usage
 
 Reference for authors filling the 7-section orchestrated template.
-See `../templates/orchestrated.SKILL.template.md` (canonical skeleton) and `../REFERENCE.md` (class selection, frontmatter rules, collation).
+See `../templates/orchestrated.SKILL.template.md` (canonical skeleton), `./frontmatter-rules.md` (class selection and frontmatter rules), and `./platform-context.md` (platform rules).
+
+## Seven Sections
+
+1. **Frontmatter** — Standard `name`, `description`, `class` YAML block.
+2. **Purpose / H1 Intro** — One-line description of the orchestrated workflow.
+3. **Execution Steps** — Ordered sequence of steps, each prefixed with a step type.
+4. **Worker Strategy** — Dispatch model, concurrency limits, data flow.
+5. **Verification Checklist** — Assertions that every orchestrated run must pass.
+6. **Self-Validation** — Structural checks for the SKILL.md itself.
+7. **Cross-References** — Relative links to support files.
+
+## Step Types
+
+Each step in the Execution Steps section uses a type prefix in bold:
+
+- **`Delegated: <Worker Skill>`** — Delegates a sub-task to a worker skill by forwarding a delegation packet. The worker is another SKILL.md that receives the packet and executes autonomously. Use when the sub-work is multi-step, domain-specific, or benefits from a separate skill's context.
+- **`Inline: <Inline Skill Name>`** — Declares and executes a named inline reasoning step directly within the orchestrator's body. Inline steps are single-pass, non-delegated reasoning blocks that do not merit a standalone skill. Use when the work is a focused logical or transform step that runs in one pass.
+- **`Decompose`** — Breaks a complex input or goal into multiple sub-packets, typically fanning out to parallel delegated workers. No worker name follows the prefix; the step body describes the decomposition strategy.
+- **`Verify`** — Runs verification checks against the output of prior steps. No worker name follows the prefix; the step body describes what to verify and how.
+
+## Inline Steps vs. Standalone Inline Skills
+
+**Inline steps replace the old standalone Inline Skills section concept.** Do not create a separate Inline Skills section in an orchestrated skill. Instead, use `Inline:` prefixed steps inside Execution Steps. The `inline` class is still valid for standalone skills that are self-contained, but within an orchestrated skill, inline work is expressed as a step type, not a separate section.
 
 ## Section Walkthrough
 
@@ -88,7 +111,7 @@ Each Execution Step uses a bold type prefix. Choose the type that matches work g
 
 ## Updating an Existing Orchestrated Skill
 
-When updating an orchestrated skill (a skill using the 7-section canonical layout), apply the general update procedure from `../SKILL.md` and `../REFERENCE.md` with these orchestration-specific considerations.
+When updating an orchestrated skill (a skill using the 7-section canonical layout), apply the general update procedure from `../SKILL.md` and `./update-workflow.md` with these orchestration-specific considerations.
 
 ### Identifying Changed Sections
 

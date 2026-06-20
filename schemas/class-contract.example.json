@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/class-contract.json",
+  "title": "Class Contract",
+  "description": "Describes the canonical structure of a skill class contract.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the contract."
+    },
+    "description": {
+      "type": "string",
+      "description": "A brief description of the contract's purpose."
+    },
+    "class": {
+      "type": "string",
+      "description": "The skill class assigned to this contract.",
+      "enum": [
+        "operation",
+        "delegated",
+        "inline",
+        "orchestrated",
+        "planning"
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional metadata associated with the contract.",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "The version of the contract."
+        },
+        "author": {
+          "type": "string",
+          "description": "The author of the contract."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "required": ["name", "class"],
+  "additionalProperties": false,
+  "definitions": {
+    "skillClass": {
+      "type": "string",
+      "description": "One of the five recognized skill classes.",
+      "enum": [
+        "operation",
+        "delegated",
+        "inline",
+        "orchestrated",
+        "planning"
+      ]
+    }
+  }
+}

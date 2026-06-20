@@ -46,6 +46,7 @@ The delegation packet's `## EXPECTED OUTPUT` is the sole authority for what the 
 - Artifact exists at expected path.
 - Content contains required elements.
 - No failure markers.
+- `## Docs` section present with links and descriptions for all supporting files within the skill folder.
 
 ## Guardrails
 
@@ -54,4 +55,20 @@ The delegation packet's `## EXPECTED OUTPUT` is the sole authority for what the 
 - Do not edit files outside `## FILES TO WRITE`.
 - Prefer the simplest sufficient approach.
 - Report blockers as `BLOCKED: <reason>` when contradictions or missing dependencies prevent completion.
+
+## Docs
+
+See the generated skill's `reference/`, `templates/`, `schemas/`, and `snippets/` directories for supporting documentation.
+- `./reference/frontmatter-rules.md` — Class taxonomy and frontmatter field rules
+- `./reference/platform-context.md` — Platform context where skills live
+- `./reference/progressive-disclosure.md` — Pushing detail to reference files
+- `./reference/trigger-eval.md` — Description composition eval
+- `./reference/validation-checklist.md` — Skill verification checklist
+- `./reference/gotchas.md` — Common pitfalls
+- `./reference/update-workflow.md` — UPDATE mode reference
+- `./templates/delegated.SKILL.template.md` — This template
+- `./schemas/class-contract.example.json` — Example JSON Schema for class contracts
+- `./schemas/class-contract.example.xsd` — Example XSD for class contracts
+- `./snippets/README.md` — Reusable code snippets
+- `./style-guide.md` — Editorial conventions
 
