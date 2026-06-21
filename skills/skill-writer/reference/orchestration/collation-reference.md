@@ -46,8 +46,8 @@ The orchestrator sets `status` based on worker outcomes, populates `source_tags`
 
 ## Cross-References
 
-- `./frontmatter-rules.md` — Class taxonomy and frontmatter rules.
-- `./platform-context.md` — Platform context.
+- `../authoring/frontmatter-rules.md` — Class taxonomy and frontmatter rules.
+- `../platform/platform-context.md` — Platform context.
 - `./orchestrated-usage.md` — Collation note with usage context.
 
 > **Note**: The full collation section has been migrated here from the combined REFERENCE.md.

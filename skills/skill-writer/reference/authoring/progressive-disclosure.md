@@ -4,6 +4,6 @@ Keep `SKILL.md` procedural and compact (under ~100 lines). Push reference materi
 
 **Pattern**: In `SKILL.md`, write something like:
 
-> See `./reference/frontmatter-rules.md` for class selection guide and `./reference/platform-context.md` for platform rules.
+> See `./frontmatter-rules.md` for class selection guide and `../platform/platform-context.md` for platform rules.
 
 Do **not** inline reference prose into `SKILL.md`.

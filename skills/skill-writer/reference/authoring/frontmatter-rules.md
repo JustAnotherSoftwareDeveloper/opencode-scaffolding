@@ -33,7 +33,7 @@ class: <<one-of-five-classes>>
 - **Should capture** the *trigger intent*, not a feature list. Bad: *"Use when needing to write files."* Good: *"Use when creating or rewriting all OpenCode skill files under skills/<name>/ (SKILL.md, reference/*.md, and templates/) from requirements and source material."*
 - **Length**: Under 1024 characters. Prefer 60–200 characters; shorter is sharper.
 - **Avoid** referencing specific filenames, paths, or future infrastructure that may not exist.
-- For task-mode guardrails, see `./reference/trigger-eval.md`.
+- For task-mode guardrails, see `./trigger-eval.md`.
 
 ### `class`
 
@@ -42,7 +42,7 @@ One of exactly five values:
 - **`operation`** — Broad/default class for single bounded procedures that are independent, self-validating, and do not sub-delegate. A Normalize Input step absorbs free-form input, structured packets, files, or tool outputs into one internal input, avoiding separate modes for different invocation shapes.
 - **`delegated`** — Receives delegation packets and performs bounded subtasks within a pipeline or orchestration; includes final workers and workflow stages (including decomposers) invoked by a delegator
 - **`inline`** — Single-pass reasoning-heavy skill executed directly by the main agent, optional direct tool calls, no worker/sub-skill orchestration as its own workflow
-- **`orchestrated`** — Coordinates sub-skills, workers, phases, or quality gates. Orchestrated skills use the 7-section canonical layout (Frontmatter, Purpose/Intro, Execution Steps, Worker Strategy, Verification Checklist, Self-Validation, Cross-References). See `./templates/orchestrated.SKILL.template.md` for the canonical skeleton.
+- **`orchestrated`** — Coordinates sub-skills, workers, phases, or quality gates. Orchestrated skills use the 7-section canonical layout (Frontmatter, Purpose/Intro, Execution Steps, Worker Strategy, Verification Checklist, Self-Validation, Cross-References). See `../templates/orchestrated.SKILL.template.md` for the canonical skeleton.
 - **`planning`** — Reference sources loaded during planning or architecting activities (formal plan creation, informal discussion, design review, onboarding, code review) that document structural knowledge about the codebase. Planning skills must not produce side effects, modify files, invoke tools, or define execution steps.
 
 No other classes are valid. If uncertain, lean toward `operation`.
@@ -50,7 +50,7 @@ No other classes are valid. If uncertain, lean toward `operation`.
 ### Planning Skill Authoring Guidance
 
 The following rules govern each section of a planning-class `SKILL.md`.
-Apply them when filling the `templates/planning.SKILL.template.md`.
+Apply them when filling the `../templates/planning.SKILL.template.md`.
 
 #### When To Use
 

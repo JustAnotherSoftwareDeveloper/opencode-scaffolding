@@ -28,20 +28,8 @@ Each check is a yes/no assertion.
 ## Expected Output
 
 Specify: artifact path/location, format, contents, and completeness criteria.
-- `## Docs` section present at bottom with links and descriptions for all supporting files.
+- `## Docs` section present at bottom referencing the skill's reference/README.md.
 
 ## Docs
 
-See the generated skill's `reference/`, `templates/`, `schemas/`, and `snippets/` directories for supporting documentation.
-- `./reference/frontmatter-rules.md` — Class taxonomy and frontmatter field rules
-- `./reference/platform-context.md` — Platform context where skills live
-- `./reference/progressive-disclosure.md` — Pushing detail to reference files
-- `./reference/trigger-eval.md` — Description composition eval
-- `./reference/validation-checklist.md` — Skill verification checklist
-- `./reference/gotchas.md` — Common pitfalls
-- `./reference/update-workflow.md` — UPDATE mode reference
-- `./templates/operation.SKILL.template.md` — This template
-- `./schemas/class-contract.example.json` — Example JSON Schema for class contracts
-- `./schemas/class-contract.example.xsd` — Example XSD for class contracts
-- `./snippets/README.md` — Reusable code snippets
-- `./style-guide.md` — Editorial conventions
+See the generated skill's `reference/README.md` for documentation of supporting files.

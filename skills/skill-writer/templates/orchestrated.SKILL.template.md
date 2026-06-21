@@ -34,19 +34,8 @@ class: orchestrated
 - All `<<placeholders>>` are replaced.
 - No remaining old-template sections.
 - One H1 only; all headings use Title Case.
-- `## Docs` section present with relative links and descriptions for all supporting files.
+- `## Docs` section present referencing the skill's reference/README.md.
 
 ## Docs
 
-- `./reference/frontmatter-rules.md` — Class taxonomy and frontmatter rules
-- `./reference/platform-context.md` — Platform context
-- `./reference/orchestrated-usage.md` — 7-section template walkthrough
-- `./reference/collation-reference.md` — Collation output structure
-- `./reference/worker-patterns.md` — Worker pattern reference
-- `./reference/update-workflow.md` — UPDATE mode reference
-- `./reference/validation-checklist.md` — Skill verification checklist
-- `./templates/orchestrated.SKILL.template.md` — This template
-- `./schemas/class-contract.example.json` — Example JSON Schema for class contracts
-- `./schemas/class-contract.example.xsd` — Example XSD for class contracts
-- `./snippets/README.md` — Reusable code snippets
-- `./style-guide.md` — Editorial conventions
+See the generated skill's `reference/README.md` for documentation of supporting files.

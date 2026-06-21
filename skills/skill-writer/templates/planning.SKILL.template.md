@@ -8,7 +8,7 @@ class: planning
 
 Replace all `<<placeholder>>` items below.
 This template captures planning context for a single domain — not cross-cutting architecture, test strategy, external services, or framework conventions.
-See `./reference/frontmatter-rules.md` for class rules and frontmatter requirements.
+See `./reference/authoring/frontmatter-rules.md` for class rules and frontmatter requirements.
 
 ## When to Use
 
@@ -32,16 +32,4 @@ See `./reference/frontmatter-rules.md` for class rules and frontmatter requireme
 
 ## Docs
 
-See the generated skill's `reference/`, `templates/`, `schemas/`, and `snippets/` directories for supporting documentation.
-- `./reference/frontmatter-rules.md` — Class taxonomy and frontmatter field rules
-- `./reference/platform-context.md` — Platform context where skills live
-- `./reference/progressive-disclosure.md` — Pushing detail to reference files
-- `./reference/trigger-eval.md` — Description composition eval
-- `./reference/validation-checklist.md` — Skill verification checklist
-- `./reference/gotchas.md` — Common pitfalls
-- `./reference/update-workflow.md` — UPDATE mode reference
-- `./templates/planning.SKILL.template.md` — This template
-- `./schemas/class-contract.example.json` — Example JSON Schema for class contracts
-- `./schemas/class-contract.example.xsd` — Example XSD for class contracts
-- `./snippets/README.md` — Reusable code snippets
-- `./style-guide.md` — Editorial conventions
+See the generated skill's `reference/README.md` for documentation of supporting files.

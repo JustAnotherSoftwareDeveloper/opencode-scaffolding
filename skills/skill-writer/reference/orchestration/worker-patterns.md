@@ -2,7 +2,7 @@
 
 Reference for designing workers that receive delegation packets from orchestrated skills.
 Workers are `class: delegated` skills that execute autonomously within a pipeline.
-See `./orchestrated-usage.md` for how orchestrators dispatch workers and `./frontmatter-rules.md` for class taxonomy.
+See `./orchestrated-usage.md` for how orchestrators dispatch workers and `../authoring/frontmatter-rules.md` for class taxonomy.
 
 ## Worker Contract
 

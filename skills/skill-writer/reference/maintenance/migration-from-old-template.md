@@ -62,6 +62,6 @@ After a partial migration update, verify:
 ## Cross-References
 
 - `../templates/orchestrated.SKILL.template.md`
-- `./orchestrated-usage.md`
-- `./frontmatter-rules.md` — Frontmatter rules and class selection.
+- `../orchestration/orchestrated-usage.md`
+- `../authoring/frontmatter-rules.md` — Frontmatter rules and class selection.
 - `./update-workflow.md` — Update workflow reference.

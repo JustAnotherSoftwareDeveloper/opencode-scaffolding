@@ -1,7 +1,7 @@
 # Orchestrated Skill Usage
 
 Reference for authors filling the 7-section orchestrated template.
-See `../templates/orchestrated.SKILL.template.md` (canonical skeleton), `./frontmatter-rules.md` (class selection and frontmatter rules), and `./platform-context.md` (platform rules).
+See `../templates/orchestrated.SKILL.template.md` (canonical skeleton), `../authoring/frontmatter-rules.md` (class selection and frontmatter rules), and `../platform/platform-context.md` (platform rules).
 
 ## Seven Sections
 
@@ -78,7 +78,7 @@ Structural checks on the SKILL.md file itself.
 
 Relative links to support files the orchestrator depends on.
 **Pitfall**: Absolute paths or omitting links to referenced files.
-- `../style-guide.md`
+- `../authoring/authoring-style.md`
 - `./collation-reference.md`
 
 ## Step Types Reference
@@ -111,7 +111,7 @@ Each Execution Step uses a bold type prefix. Choose the type that matches work g
 
 ## Updating an Existing Orchestrated Skill
 
-When updating an orchestrated skill (a skill using the 7-section canonical layout), apply the general update procedure from `../SKILL.md` and `./update-workflow.md` with these orchestration-specific considerations.
+When updating an orchestrated skill (a skill using the 7-section canonical layout), apply the general update procedure from `../../SKILL.md` and `../maintenance/update-workflow.md` with these orchestration-specific considerations.
 
 ### Identifying Changed Sections
 
