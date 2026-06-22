@@ -1,1 +1,0 @@
-The planning skill is more or less wrong. It should be about how to help us do ana
