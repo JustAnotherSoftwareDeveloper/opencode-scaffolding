@@ -61,7 +61,7 @@
   },
   "agent": {
     "delegator": {
-      "description": "Clarifies requests, decomposes them into atomic tasks, and delegates each task to workers in serial. Does not perform implementation work directly.",
+      "description": "Clarifies requests, dispatches decomposition to breakdown-tasks, and delegates each task to workers in serial. Does not perform implementation work directly.",
       "mode": "primary",
       "prompt": "{file:./agents/delegator.md}",
       "permission": {
@@ -75,8 +75,9 @@
         "skill": {
           "*": "deny",
           "ask-question": "allow",
-          "task-delegation": "allow",
-          "display-tasks": "allow"
+          "dispatch-decompose": "allow",
+          "display-tasks": "allow",
+          "task-delegation": "allow"
         }
       }
     },
