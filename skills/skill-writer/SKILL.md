@@ -29,7 +29,7 @@ Produce a new skill directory from scratch.
 1. Select class per `./reference/authoring/frontmatter-rules.md`. Copy the matching template.
 2. Write frontmatter: `name`, `description`, `class`.
    Ensure `name` matches directory.
-   Ensure `description` starts with "Use when".
+   Ensure `description` starts with "Use when" (or "Use as planning reference" for planning class).
 3. Read `./reference/authoring/authoring-style.md` for editorial conventions. Draft body accordingly.
 4. Write a thin procedural body with: trigger guidance, step-by-step workflow, quality rules, validation checklist, expected output.
    Link to `./reference/` (organized by module) and `./templates/` for depth.
@@ -54,7 +54,7 @@ Edit one or more files in an existing skill directory.
 **Shared checks (CREATE + UPDATE):**
 
 - `name` in frontmatter matches the directory name under `skills/`
-- `description` starts with "Use when"
+- `description` starts with "Use when" (or "Use as planning reference" for planning class)
 - `class` is one of operation, delegated, inline, orchestrated, planning (see `./reference/authoring/frontmatter-rules.md`)
 - If class is `operation`: "Normalize Input" is the first procedural step
 - No general breakdown instructions outside Decompose steps
@@ -75,7 +75,7 @@ Edit one or more files in an existing skill directory.
 ## Quality Rules
 
 - Validate frontmatter YAML.
-- Ensure `description` begins with "Use when".
+- Ensure `description` begins with "Use when" (or "Use as planning reference" for planning class).
 - Keep the body procedural: steps, conditions, decisions.
   Omit tutorial explanations.
 - Derive every claim from the collected inputs.

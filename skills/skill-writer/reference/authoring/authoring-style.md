@@ -66,7 +66,7 @@ Before declaring a `SKILL.md` complete, verify:
 - [ ] No fluff words, no hedging, no tutorial language.
 - [ ] One `H1` per file; all subsections are `H2` or deeper.
 - [ ] YAML frontmatter has exactly `name`, `description`, `class`.
-- [ ] `description` starts with `"Use when"`.
+- [ ] `description` starts with `"Use when"` (or `"Use as planning reference"` for the planning class).
 - [ ] File is under 200 lines.
 - [ ] No Examples section present.
 - [ ] Reference detail is not inlined — cross-references via `./reference/<module>/*.md` instead.

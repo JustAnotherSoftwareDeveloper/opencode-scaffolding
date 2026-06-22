@@ -30,6 +30,7 @@ class: <<one-of-five-classes>>
 ### `description`
 
 - **Must start** with `"Use when"` — this is the agent's primary selection signal.
+- **Exception**: For the `planning` class, the description must start with `"Use as planning reference"` instead.
 - **Should capture** the *trigger intent*, not a feature list. Bad: *"Use when needing to write files."* Good: *"Use when creating or rewriting all OpenCode skill files under skills/<name>/ (SKILL.md, reference/*.md, and templates/) from requirements and source material."*
 - **Length**: Under 1024 characters. Prefer 60–200 characters; shorter is sharper.
 - **Avoid** referencing specific filenames, paths, or future infrastructure that may not exist.
@@ -52,32 +53,26 @@ No other classes are valid. If uncertain, lean toward `operation`.
 The following rules govern each section of a planning-class `SKILL.md`.
 Apply them when filling the `../templates/planning.SKILL.template.md`.
 
-#### When To Use
+#### Domain Context
 
-Write 2-4 bullet points covering domain-specific triggers.
-Each trigger must be specific enough for an agent to decide yes/no within one sentence.
-Do not include generic triggers that match every task — qualify by domain.
+Capture structural knowledge about the domain: API architecture, testing setup, code architecture, data flow, deployment topology.
+Use 2-5 bullet points or short paragraphs.
 
-#### Decision Records
+#### Key Considerations
 
-Record key architectural decisions with rationale and trade-offs.
+Capture domain-specific constraints, assumptions, trade-offs, non-goals, and known limitations.
 Use 2-5 bullet points.
-Link to ADR files under `docs/adr/` or similar when they exist.
-Explain why past domain choices were made and what alternatives were considered.
-Every decision record must include a Trade-off statement that acknowledges what was lost or deferred.
 
-#### Constraints & Assumptions
+#### Related Skills
 
-List domain-specific preconditions, invariants, non-goals, and known limitations.
-Use 2-5 bullet points.
-Explain what the domain boundary does not include and why.
-This section prevents downstream reasoning from assuming capabilities that do not exist.
+List related skill names with one-sentence descriptions.
+Format: `<skill-name>: <one-sentence description of when to use this skill>`.
+This is for quick reference during planning.
 
-#### Verification Criteria
+#### Cross-References
 
-Define 2-5 gate checks that the planning artifact must pass before handoff.
-Each check must be a concrete, testable assertion — not a subjective guideline.
-Prefer checks that an automated tool or agent can evaluate: YAML validity, regex matches, line counts, presence or absence of specific patterns.
+Link to relevant docs, common workflows, examples, ADRs, or other reference material.
+Use bullet list of links.
 
 #### Triggers for Creating a Planning Skill
 

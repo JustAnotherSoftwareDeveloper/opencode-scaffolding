@@ -1,34 +1,34 @@
 ---
 name: <<skill-name>>
-description: "Use when planning or architecting <<domain>>."
+description: "Use as planning reference for <<domain>>."
 class: planning
 ---
 
 # <<Skill Name>> — Domain Planning Reference
 
 Replace all `<<placeholder>>` items below.
-This template captures planning context for a single domain — not cross-cutting architecture, test strategy, external services, or framework conventions.
+This template captures planning context for a single domain.
+It is a **reference context**, not a procedure runner.
+Planning skills must not produce side effects, modify files, invoke tools, or define execution steps.
 See `./reference/authoring/frontmatter-rules.md` for class rules and frontmatter requirements.
 
-## When to Use
+## Domain Context
 
-<<Describe trigger conditions for loading this reference: planning or design discussion within the domain, code review affecting domain code, or onboarding to the domain.>>
+<<Capture domain context such as API architecture, testing setup, code architecture, and other structural knowledge about the domain.>>
 
-## Decision Records
+## Key Considerations
 
-<<Record key decisions within this domain with rationale and trade-offs.>>
-<<Link to ADR files if they exist.>>
-<<Explain why past domain choices were made and what alternatives were considered.>>
-
-## Constraints & Assumptions
-
-<<List domain-specific preconditions, invariants, non-goals, and known limitations.>>
+<<Capture key constraints, assumptions, and trade-offs in this domain.>>
 <<Explain what the domain boundary does not include and why.>>
 
-## Verification Criteria
+## Related Skills
 
-- <<gate check the domain planning artifact must pass before handoff>>.
-- <<gate check the domain planning artifact must pass before handoff>>.
+- <<skill-name>>: <<one-sentence description of when to use this skill>>
+- <<skill-name>>: <<one-sentence description of when to use this skill>>
+
+## Cross-References
+
+<<Link to relevant docs, common workflows, and examples.>>
 
 ## Docs
 
