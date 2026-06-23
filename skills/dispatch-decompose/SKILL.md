@@ -46,6 +46,7 @@ A non-empty JSON array of delegation packet objects with exactly the required ca
 ## Output
 
 Return the result from the `breakdown-tasks` worker unchanged.
+`PARTIAL:` is a valid success signal from the worker — preserve and forward it as-is without transformation or rejection.
 
 ## Execution Plan
 
@@ -68,6 +69,8 @@ Return the result from the `breakdown-tasks` worker unchanged.
    Set `prompt` to the complete decomposition packet.
 6. **Return the worker result unchanged.**
    Do not parse, normalize, summarize, or reformat the worker output.
+   If the output contains `PARTIAL:` followed by JSON, treat it as a valid completion signal and forward it as-is.
+   Do not reject, re-route, or re-wrap `PARTIAL:` responses.
 
 This is a single-pass process.
 Launch exactly one worker task per invocation.
@@ -80,6 +83,7 @@ Launch exactly one worker task per invocation.
 - Never invoke more than one worker.
 - Never call any subagent type other than `worker`.
 - Never parse or rewrite the worker result before returning it.
+- Never treat `PARTIAL:` as an error — it is a valid success signal from the worker and must be forwarded unchanged.
 - Never write files.
 
 ## Docs

@@ -40,7 +40,8 @@ Repeat this workflow for every request:
    Process each packet one at a time by iterating over the parsed JSON array elements.
    a. **Delegate**: Load `task-delegation` and pass the JSON object element directly (no further parsing or rewriting). `task-delegation` validates and launches one `worker` task.
    b. **Wait**: Await the worker result.
-   c. **Advance**: Move to the next element and repeat from step a.
+   c. **Handle response**: Accept the worker's raw output as-is. `PARTIAL:` at the start of worker output is a valid completion signal — it means the worker completed what it could but noted remaining work. Do NOT treat `PARTIAL:` as an error, a blocker, or a malformed response.
+   d. **Advance**: Move to the next element and repeat from step a.
 
 5. Repeat
    Apply the same clarify, decompose, track, delegate-and-execute workflow to every new request.
@@ -58,6 +59,7 @@ Repeat this workflow for every request:
 - Never proceed to decomposition before the one clarification pass completes.
 - Never display raw delegation packet sections to the user. The sections `## DETAILS`, `## EXECUTION INSTRUCTIONS`, `## VERIFICATION`, and `## EXPECTED OUTPUT` must never appear in user-facing output. Use `display-tasks` exclusively for user-facing task summaries.
 - Never pass `display-tasks` output as input to `task-delegation`. The delegator always passes the original or trivially normalized packet to `task-delegation`, never the rendered display.
+- Accept worker output verbatim. `PARTIAL:` is a valid completion prefix — the delegator must not strip, reject, or re-validate it. Pass `PARTIAL:` output through to aggregation or to the next workflow step unchanged.
 - Use the `question` tool only as required by `ask-question`.
 - Use the `task` tool only as required by `dispatch-decompose` or `task-delegation`, and only with `subagent_type: "worker"`.
 - Never include decomposition methodology, commentary, decomposition hints, or task-boundary suggestions in `## DETAILS` of the decomposition packet. The breakdown-tasks worker owns decomposition; `## DETAILS` must contain only the full original user request and clarification context verbatim.

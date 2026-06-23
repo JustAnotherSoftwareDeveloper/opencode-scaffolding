@@ -22,7 +22,7 @@ The skill accepts any and all input formats with no preference — including pla
 <full task description, constraints, and context>
 
 ## FILES TO READ
-<comma-separated file paths to read>
+<comma-separated file paths to read — exclusive source; no implicit discovery outside this list>
 
 ## FILES TO WRITE
 <single file path, or "None">
@@ -31,7 +31,7 @@ The skill accepts any and all input formats with no preference — including pla
 <comma-separated skill names to load>
 
 ## EXECUTION INSTRUCTIONS
-<step-by-step instructions for execution>
+<step-by-step instructions — include the balanced productivity directive ("Balance cost and capability; use simplest sufficient approach") and pre-tool checklist reminder (5-question internal checklist before each tool call)>
 
 ## VERIFICATION
 <how to check work completed correctly>
@@ -52,12 +52,15 @@ The result returned by the worker matching the packet's `## EXPECTED OUTPUT`.
    - Extracting key-value pairs from structured input (JSON, YAML).
    - Matching known aliases (e.g., `instructions` → EXECUTION INSTRUCTIONS, `context` → DETAILS).
    - Extracting best-guess content from freeform text.
-   Do not formalize or prefer any single inference strategy.
+     Do not formalize or prefer any single inference strategy.
 3. **Mark uninferable fields** — For any of the 8 fields that cannot be inferred from the input, set its value to the explicit marker: `UNKNOWN — not provided in input`.
 4. **Construct complete plaintext packet** — Build a well-formed plaintext delegation packet with all 8 sections present using the Packet Template. Every section header (`## PURPOSE`, `## DETAILS`, etc.) must appear, even if its content is the UNKNOWN marker.
+   - **FILES TO READ: enforce explicit-only scope.** Only include files the worker is authorized to access. Do not add files from implicit discovery — FILES TO READ is the exclusive source of file access for the worker. The worker must not discover or read files beyond this list unless EXECUTION INSTRUCTIONS explicitly authorizes it.
+   - **EXECUTION INSTRUCTIONS: embed balanced productivity and pre-tool checklist.** Include the directive "Balance cost and capability — use the simplest sufficient approach" and the pre-tool checklist from worker.md (5-question internal review before each tool call: Is this call strictly necessary? Is there a simpler alternative? Have I read all FILES TO READ? Am I respecting explicit-only scope? Is the simplest sufficient tool chosen?).
 5. **Validate all sections present** — Confirm the constructed packet has exactly 8 sections and none are missing. If sections are absent, report a clear error describing which sections are missing and stop.
 6. **Invoke the worker** — Invoke the `task` tool with `subagent_type: "worker"`, `description` set to the inferred PURPOSE content, `prompt` set to the full plaintext packet, and `command` set to the inferred PURPOSE content.
-7. **Return the worker result** — Return the result from the worker unchanged.
+7. **Return the worker result unchanged** — Return the result from the worker exactly as received.
+   - **Preserve PARTIAL: as a valid success signal.** If the worker returns `PARTIAL:`, do not treat it as an error or a blocker. Accept it as a valid response and pass it through to the caller. The delegator will forward the partial output to subsequent steps as appropriate. Do not rewrap, prefix, or modify the PARTIAL: response.
 
 This is a single-pass process.
 Launch exactly one worker task per invocation.
