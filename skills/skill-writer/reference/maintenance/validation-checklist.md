@@ -1,19 +1,24 @@
 # Validation / Manual Checklist Guidance
 
-Every authored skill should be verified against this checklist before declaring done:
+Every authored skill must be verified against this checklist before declaring done:
 
 - **Name match**: `name` in frontmatter matches directory under `skills/`.
 - **Description prefix**: Starts with `"Use when"`, is specific, and captures trigger intent.
-- **Class validity**: One of the five allowed values.
+- **Class validity**: One of the six allowed values.
 - **Original prose**: No text copied from archived versions, templates, or reference files.
-- **Body is procedural**: Steps, conditions, decisions. Not a tutorial, not a reference.
+- **Body is procedural**: Steps, conditions, decisions.
+  Not a tutorial, not a reference.
 - **No examples**: Do not add an examples section or inline example commands.
 - **Reference links**: If `reference/*.md` or `templates/` are referenced, they are linked by relative path but their content is not inlined.
 - **Valid YAML**: Frontmatter parses without errors.
-- **7-section layout (orchestrated only)**: Orchestrated skills use the canonical 7-section layout. Verify all seven sections are present and in order.
-- **No stale Inline Skills section**: Orchestrated skills must not contain a standalone Inline Skills section. Inline work goes into Execution Steps as `Inline:` steps.
-- **No Exit Criteria section**: Exit Criteria has been replaced by Verification Checklist. Orchestrated skills must not contain an Exit Criteria section.
-- **No general breakdown instructions**: Breakdown logic belongs only in `Decompose` step types. Do not add free-standing breakdown instructions elsewhere.
+- **7-section layout (orchestrated only)**: Orchestrated skills use the canonical 7-section layout.
+  Verify all seven sections are present and in order.
+- **No stale Inline Skills section**: Orchestrated skills must not contain a standalone Inline Skills section.
+  Inline work goes into Execution Steps as `Inline:` steps.
+- **No Exit Criteria section**: Exit Criteria has been replaced by Verification Checklist.
+  Orchestrated skills must not contain an Exit Criteria section.
+- **No general breakdown instructions**: Breakdown logic belongs only in `Decompose` step types.
+  Do not add free-standing breakdown instructions elsewhere.
 
 ### Planning-Specific Checks
 

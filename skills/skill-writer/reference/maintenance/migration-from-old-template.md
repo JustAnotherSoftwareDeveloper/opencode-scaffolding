@@ -11,7 +11,7 @@ See `../templates/orchestrated.SKILL.template.md` for the target structure.
 | Phases | Execution Steps | Phase actions become Delegated, Inline, Decompose, or Verify steps. |
 | State Ownership | Worker Strategy | Dispatch model replaces ownership table. |
 | Quality Gates / Checkpoints | Verification Checklist | Gate conditions become per-skill verification assertions. |
-| Failure Handling | Worker Strategy (note) | Orchestrator handles failures; may note recovery hints. |
+| Failure Handling | Worker Strategy (note) | Orchestrator handles failures; can note recovery hints. |
 | Inline Skills (standalone) | Execution Steps (Inline:) | Convert to `Inline:` prefixed steps. |
 | Verification Checklist | Self-Validation | Old checklist moved to structural self-checks. |
 | Exit Criteria | Verification Checklist | Exit conditions become verification assertions. |
@@ -24,7 +24,8 @@ When a skill has been partially migrated (some sections converted, others not) o
 
 Apply the [Migration Checklist](#migration-checklist) selectively based on what remains:
 
-- **Old sections still present** — Remove each remaining old section (Delegated Backing Skills, Phases, State Ownership, Quality Gates, Failure Handling). Update section mappings per the table above.
+- **Old sections still present** — Remove each remaining old section (Delegated Backing Skills, Phases, State Ownership, Quality Gates, Failure Handling).
+  Update section mappings per the table above.
 - **New sections still missing** — Add any missing new sections (Worker Strategy, Verification Checklist, Self-Validation, Cross-References).
 - **Already-converted sections** — Leave unchanged unless the request targets them for revision.
 

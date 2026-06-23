@@ -32,7 +32,7 @@ JSON with schema validation deferred (can add later without breaking the shape).
 ## Item Shape
 
 Each collation unit defines its own item structure.
-Items may be heterogeneous within a single collation.
+Items are heterogeneous within a single collation.
 
 Examples:
 - Finding items: `{file, line, severity, message}`
@@ -42,7 +42,9 @@ Examples:
 ## Usage
 
 Orchestrated skills use this structure when collating worker results.
-The orchestrator sets `status` based on worker outcomes, populates `source_tags` from worker or deployment tags, and collects worker outputs into `items`.
+The orchestrator sets `status` based on worker outcomes.
+It populates `source_tags` from worker or deployment tags.
+It collects worker outputs into `items`.
 
 ## Cross-References
 
@@ -50,4 +52,4 @@ The orchestrator sets `status` based on worker outcomes, populates `source_tags`
 - `../platform/platform-context.md` — Platform context.
 - `./orchestrated-usage.md` — Collation note with usage context.
 
-> **Note**: The full collation section has been migrated here from the combined REFERENCE.md.
+> Keep the canonical collation definition in this file. Do not reintroduce it in REFERENCE.md.

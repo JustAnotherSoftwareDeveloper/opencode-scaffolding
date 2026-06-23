@@ -1,6 +1,9 @@
 # Progressive Disclosure
 
-Keep `SKILL.md` procedural and compact (under ~100 lines). Push reference material into `reference/*.md` files. The agent should be able to act on `SKILL.md` alone; support files are consulted on demand for depth.
+Keep `SKILL.md` procedural and compact (under ~100 lines).
+Push reference material into `reference/*.md` files.
+The agent acts on `SKILL.md` alone.
+Support files are consulted on demand for depth.
 
 **Pattern**: In `SKILL.md`, write something like:
 

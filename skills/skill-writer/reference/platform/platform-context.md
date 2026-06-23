@@ -4,7 +4,37 @@
 - **Entry point**: `SKILL.md` — the file the agent loads
 - **Support files**: `reference/*.md`, `templates/`, `schemas/`, `snippets/`
 - **Archived versions**: `<archive>/<name>/SKILL.md` — read for shape only, never prose
-- **Templates**: `./templates/<class>.SKILL.template.md` — e.g. `operation.SKILL.template.md`, `delegated.SKILL.template.md`, `inline.SKILL.template.md`, `orchestrated.SKILL.template.md`, `planning.SKILL.template.md`
+
+## Skill Classes
+
+Each skill has a `class` field in its frontmatter.
+The six valid classes are:
+
+- `operation` — `./templates/operation.SKILL.template.md` — Broad/default class for single bounded procedures that are independent and self-validating
+- `delegated` — `./templates/delegated.SKILL.template.md` — Receives delegation packets and performs bounded subtasks within a pipeline or orchestration
+- `inline` — `./templates/inline.SKILL.template.md` — Single-pass reasoning-heavy skill executed directly by the main agent
+- `orchestrated` — `./templates/orchestrated.SKILL.template.md` — Coordinates sub-skills, workers, phases, or quality gates
+- `planning` — `./templates/planning.SKILL.template.md` — Reference sources loaded during planning or architecting activities; no side effects
+- `documentation` — `./templates/documentation.SKILL.template.md` — Passive data store for domain-shared reference content.
+  No side effects, no execution steps.
+  Other skills consume its content via relative-path references.
+
+Each template lives at `./templates/<class>.SKILL.template.md`.
+It provides the canonical skeleton for that class.
+
+### Platform Rules by Class
+
+- **Side effects**: `operation`, `delegated`, `inline`, and `orchestrated` produce side effects (file writes, tool calls).
+    `planning` and `documentation` must not.
+- **Delegation**: `orchestrated` and `delegated` participate in delegation pipelines.
+    `operation`, `inline`, `planning`, and `documentation` do not sub-delegate.
+- **Execution steps**: All classes except `planning` and `documentation` define execution steps with numbered prefixes.
+    `planning` and `documentation` use passive content sections instead.
 - **Schemas**: `./schemas/class-contract.example.json` (JSON Schema) and `./schemas/class-contract.example.xsd` (XSD) — example class contract schemas
 
-**Discovery**: The OpenCode agent selects a skill when its `description` field (in frontmatter) matches the current task context. Skill files are not auto-indexed beyond their description field — the match is string/relevance-based, not structural.
+**Discovery**: The OpenCode agent selects a skill when its `description` field (in frontmatter) matches the current task context.
+The `class` field further constrains behavior.
+
+For example, `planning` and `documentation` skills are loaded as passive references, while `operation` skills are loaded as executable procedures.
+Skill files are not auto-indexed beyond their description field.
+The match is string/relevance-based, not structural.

@@ -1,11 +1,14 @@
 # Update Workflow Reference
 
-Reference material for the UPDATE path. Complements the procedural UPDATE steps in `SKILL.md`.
+Reference material for the UPDATE path.
+Complements the procedural UPDATE steps in `SKILL.md`.
 
 ### Mode Determination
 
-- **CREATE**: `skills/<name>/` does not exist. Produce a new skill directory from scratch.
-- **UPDATE**: `skills/<name>/` exists. Edit one or more files in the existing directory.
+- **CREATE**: `skills/<name>/` does not exist.
+  Produce a new skill directory from scratch.
+- **UPDATE**: `skills/<name>/` exists.
+  Edit one or more files in the existing directory.
 
 ### Determining What Changed
 
@@ -24,12 +27,16 @@ Reference material for the UPDATE path. Complements the procedural UPDATE steps 
 
 ### Partial Update Scope Boundaries
 
-A request may target only a subset of the skill directory:
+A request can target only a subset of the skill directory:
 
-- **SKILL.md only** — Update procedure, quality rules, validation checklist. Leave reference files and reference/authoring/authoring-style.md untouched.
-- **Reference files only** — Update files under `reference/`. Leave SKILL.md and templates untouched.
-- **Templates only** — Update template files. Leave other files untouched.
-- **Full directory update** — Update all files. In this case, still preserve existing content that the request does not address.
+- **SKILL.md only** — Update procedure, quality rules, validation checklist.
+  Leave reference files and reference/authoring/authoring-style.md untouched.
+- **Reference files only** — Update files under `reference/`.
+  Leave SKILL.md and templates untouched.
+- **Templates only** — Update template files.
+  Leave other files untouched.
+- **Full directory update** — Update all files.
+  In this case, still preserve existing content that the request does not address.
 
 When scope is ambiguous, ask: "Update only SKILL.md? Only reference files? Entire skill directory?"
 
@@ -45,8 +52,11 @@ When scope is ambiguous, ask: "Update only SKILL.md? Only reference files? Entir
 
 When in UPDATE mode, decide scope before editing:
 
-- **Request targets only SKILL.md procedure or structure?** → Edit SKILL.md only. Do not touch reference files, reference/authoring/authoring-style.md, or templates.
-- **Request targets only reference content (reference/*)?** → Edit only reference files. Leave SKILL.md and templates untouched.
-- **Request adds or modifies templates?** → Edit only template files. Leave other files untouched.
-- **Request is a full directory rework?** → Update all files, but preserve any content the request does not explicitly address.
-- **Request is ambiguous about scope?** → Clarify before editing. Do not assume full directory scope.
+- **Request targets only SKILL.md procedure or structure?** → Edit SKILL.md only.
+  Do not touch reference files, reference/authoring/authoring-style.md, or templates.
+- **Request targets only reference content (reference/*)?** → Edit only reference files.
+  Leave SKILL.md and templates untouched.
+- **Request adds or modifies templates?** → Edit only template files.
+  Leave other files untouched.
+- **Request is ambiguous about scope?** → Clarify before editing.
+  Do not assume full directory scope.

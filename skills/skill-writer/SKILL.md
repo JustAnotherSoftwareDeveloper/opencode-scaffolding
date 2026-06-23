@@ -23,21 +23,22 @@ Produce a validated skill artifact.
 
 ## Procedure
 
-### CREATE Path
+### Create Path
 Produce a new skill directory from scratch.
 
-1. Select class per `./reference/authoring/frontmatter-rules.md`. Copy the matching template.
+1. Select class per `./reference/authoring/frontmatter-rules.md`.
+   Copy the matching template.
 2. Write frontmatter: `name`, `description`, `class`.
-   Ensure `name` matches directory.
-   Ensure `description` starts with "Use when" (or "Use as planning reference" for planning class).
-3. Read `./reference/authoring/authoring-style.md` for editorial conventions. Draft body accordingly.
+3. Read `./reference/authoring/authoring-style.md` for editorial conventions.
+   Draft body accordingly.
 4. Write a thin procedural body with: trigger guidance, step-by-step workflow, quality rules, validation checklist, expected output.
    Link to `./reference/` (organized by module) and `./templates/` for depth.
 5. For operation skills: "Normalize Input" is the first procedural step, after the H1 intro.
-6. Do not add optional sections (examples, gotchas, extended descriptions).
-7. Verify manually — see checklist below.
+6. For documentation skills: the body contains structured reference data (schema, field definitions, conventions) with no execution steps, no side effects, no tool invocations.
+7. Do not add optional sections (examples, gotchas, extended descriptions).
+8. Verify manually — see checklist below.
 
-### UPDATE Path
+### Update Path
 Edit one or more files in an existing skill directory.
 
 1. Read every existing file under `skills/<name>/`: SKILL.md, REFERENCE.md, reference/authoring/authoring-style.md, templates/*, reference/*.
@@ -55,8 +56,9 @@ Edit one or more files in an existing skill directory.
 
 - `name` in frontmatter matches the directory name under `skills/`
 - `description` starts with "Use when" (or "Use as planning reference" for planning class)
-- `class` is one of operation, delegated, inline, orchestrated, planning (see `./reference/authoring/frontmatter-rules.md`)
+- `class` is one of operation, delegated, inline, orchestrated, planning, documentation (see `./reference/authoring/frontmatter-rules.md`)
 - If class is `operation`: "Normalize Input" is the first procedural step
+- If class is `documentation`: no execution steps or side effects; body is structured reference data only
 - No general breakdown instructions outside Decompose steps
 - Body references `./reference/` and/or `./templates/` if applicable, without inlining their content
 - No prose copied from archive or templates — original writing
@@ -75,15 +77,13 @@ Edit one or more files in an existing skill directory.
 ## Quality Rules
 
 - Validate frontmatter YAML.
-- Ensure `description` begins with "Use when" (or "Use as planning reference" for planning class).
-- Keep the body procedural: steps, conditions, decisions.
+- Keep the body procedural: steps, conditions, decisions (unless class is `documentation` — structured reference data only).
   Omit tutorial explanations.
 - Derive every claim from the collected inputs.
-- Generated skill must have a `## Docs` section at the bottom referencing its reference/README.md.
 
 ## Expected Output
 
-```
+```text
 skills/<name>/SKILL.md             created (CREATE) or edited (UPDATE)
 skills/<name>/reference/authoring/authoring-style.md        created (CREATE) or edited if targeted (UPDATE)
 skills/<name>/templates/            created (CREATE) or updated if files targeted (UPDATE)
