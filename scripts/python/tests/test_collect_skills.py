@@ -15,17 +15,17 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Any
 
 import pytest
 import yaml
 
-from lib.collect_skills.cli import parse_args
 from lib.collect_skills.discovery import (
     _should_exclude_dir,
+    discover_all_skills,
     discover_skills_from_root,
     find_git_root,
+    get_standard_search_roots,
 )
 from lib.collect_skills.models import Skill, SkillIndex
 from lib.collect_skills.parser import extract_frontmatter, validate_skill_frontmatter
@@ -35,15 +35,6 @@ from lib.collect_skills.parser import extract_frontmatter, validate_skill_frontm
 # ---------------------------------------------------------------------------
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
-
-# Helper: default options object for discovery tests.
-_DEFAULT_OPTS = SimpleNamespace(
-    verbose=False,
-    project_root=Path.cwd(),
-    config_dir=Path.home() / ".config" / "opencode",
-    extra_paths=[],
-    include_archive=False,
-)
 
 
 # ============================================================================
@@ -248,7 +239,7 @@ class TestDirectoryTraversal:
         """Discover one valid skill from a root directory."""
         index = SkillIndex()
         root = FIXTURES_DIR / "valid"
-        discover_skills_from_root(root, "project", index, _DEFAULT_OPTS)
+        discover_skills_from_root(root, "project", index, verbose=False)
         skills = index.resolve()
         # ``valid/`` has two subdirectories: ask-question, breakdown-tasks
         assert len(skills) == 2
@@ -257,7 +248,7 @@ class TestDirectoryTraversal:
         """Discovering two valid skills produces both in the index."""
         index = SkillIndex()
         root = FIXTURES_DIR / "valid"
-        discover_skills_from_root(root, "project", index, _DEFAULT_OPTS)
+        discover_skills_from_root(root, "project", index, verbose=False)
         names = {s.name for s in index.resolve()}
         assert "ask-question" in names
         assert "breakdown-tasks" in names
@@ -267,21 +258,21 @@ class TestDirectoryTraversal:
         empty = tmp_path / "empty-root"
         empty.mkdir()
         index = SkillIndex()
-        discover_skills_from_root(empty, "project", index, _DEFAULT_OPTS)
+        discover_skills_from_root(empty, "project", index, verbose=False)
         assert index.resolve() == []
 
     def test_non_existent_root(self) -> None:
         """A non-existent root is handled gracefully (no skills)."""
         index = SkillIndex()
         root = FIXTURES_DIR / "path" / "does" / "not" / "exist"
-        discover_skills_from_root(root, "project", index, _DEFAULT_OPTS)
+        discover_skills_from_root(root, "project", index, verbose=False)
         assert index.resolve() == []
 
     def test_dot_dir_exclusion(self) -> None:
         """Dot-directories (e.g. ``.hidden``) are excluded from traversal."""
         index = SkillIndex()
         root = FIXTURES_DIR / "dot-dir"
-        discover_skills_from_root(root, "project", index, _DEFAULT_OPTS)
+        discover_skills_from_root(root, "project", index, verbose=False)
         # The only entry is ``.hidden/`` which is excluded.
         assert index.resolve() == []
 
@@ -295,14 +286,14 @@ class TestDirectoryTraversal:
             "---\nname: some-skill\ndescription: test\n---\n"
         )
         index = SkillIndex()
-        discover_skills_from_root(root, "project", index, _DEFAULT_OPTS)
+        discover_skills_from_root(root, "project", index, verbose=False)
         assert index.resolve() == []
 
     def test_nested_dir_exclusion(self) -> None:
         """Nested subdirectories (not immediate children) are excluded."""
         index = SkillIndex()
         root = FIXTURES_DIR / "nested"
-        discover_skills_from_root(root, "project", index, _DEFAULT_OPTS)
+        discover_skills_from_root(root, "project", index, verbose=False)
         # ``nested/group/subgroup/SKILL.md`` is not an immediate child of root.
         assert index.resolve() == []
 
@@ -320,7 +311,7 @@ class TestDirectoryTraversal:
         link.symlink_to(real_skill, target_is_directory=True)
 
         index = SkillIndex()
-        discover_skills_from_root(root, "project", index, _DEFAULT_OPTS)
+        discover_skills_from_root(root, "project", index, verbose=False)
         skills = index.resolve()
         assert len(skills) == 1
         assert skills[0].name == "real-skill"  # uses real dir name
@@ -343,7 +334,7 @@ class TestDirectoryTraversal:
         )
 
         index = SkillIndex()
-        discover_skills_from_root(root, "project", index, _DEFAULT_OPTS)
+        discover_skills_from_root(root, "project", index, verbose=False)
         # The loop entry is skipped; valid-skill is discovered.
         names = {s.name for s in index.resolve()}
         assert "valid-skill" in names
@@ -465,7 +456,7 @@ class TestJsonOutput:
         index = SkillIndex()
         # The display-tasks fixture has ``location: /fake/path/...`` in YAML.
         root = FIXTURES_DIR / "valid-full"
-        discover_skills_from_root(root, "project", index, _DEFAULT_OPTS)
+        discover_skills_from_root(root, "project", index, verbose=False)
         data = json.loads(index.to_json())
         assert len(data) == 1
         item = data[0]
@@ -514,58 +505,394 @@ class TestJsonOutput:
 
 
 # ============================================================================
-# TestCli
+# TestParserEdgeCases
 # ============================================================================
 
 
-class TestCli:
-    """Tests for CLI argument parsing."""
+class TestParserEdgeCases:
+    """Tests for uncovered branches in lib/collect_skills/parser.py."""
 
-    def test_default_args(self) -> None:
-        """Default values are as expected."""
-        args = parse_args([])
-        assert args.project_root == Path.cwd()
-        assert args.config_dir == Path.home() / ".config" / "opencode"
-        assert args.extra_paths == []
-        assert args.include_archive is False
-        assert args.builtins_manifest is None
-        assert args.verbose is False
-        assert args.output is None
+    def test_opening_dash_dash_no_closing(self, tmp_path: Path) -> None:
+        """Opening ``---`` but no closing ``---`` returns ``None``."""
+        from lib.collect_skills.parser import extract_frontmatter
 
-    def test_custom_project_root(self) -> None:
-        """``--project-root`` sets the project root."""
-        args = parse_args(["--project-root", "/tmp/myproject"])
-        assert args.project_root == Path("/tmp/myproject")
+        skill_dir = tmp_path / "no-close"
+        skill_dir.mkdir()
+        f = skill_dir / "SKILL.md"
+        f.write_text("---\nname: test\n")
+        assert extract_frontmatter(f) is None
 
-    def test_custom_config_dir(self) -> None:
-        """``--config-dir`` sets the config directory."""
-        args = parse_args(["--config-dir", "/custom/config"])
-        assert args.config_dir == Path("/custom/config")
+    def test_name_non_string(self, tmp_path: Path) -> None:
+        """``name`` is not a string is reported."""
+        from lib.collect_skills.parser import validate_skill_frontmatter
 
-    def test_extra_paths(self) -> None:
-        """``--extra-paths`` accepts multiple directories."""
-        args = parse_args(["--extra-paths", "/path/a", "/path/b", "/path/c"])
-        assert args.extra_paths == [
-            Path("/path/a"),
-            Path("/path/b"),
-            Path("/path/c"),
-        ]
+        f = tmp_path / "SKILL.md"
+        f.write_text("---\nname: 42\n---\n")
+        errors = validate_skill_frontmatter({"name": 42, "description": "Use when test"}, "test", f)
+        assert any("non-empty string" in e for e in errors)
 
-    def test_include_archive_flag(self) -> None:
-        """``--include-archive`` flag sets True."""
-        args = parse_args(["--include-archive"])
-        assert args.include_archive is True
+    def test_description_non_string(self, tmp_path: Path) -> None:
+        """``description`` is not a string is reported."""
+        from lib.collect_skills.parser import validate_skill_frontmatter
 
-    def test_verbose_flag(self) -> None:
-        """``--verbose`` / ``-v`` sets verbose."""
-        args = parse_args(["--verbose"])
-        assert args.verbose is True
-        args2 = parse_args(["-v"])
-        assert args2.verbose is True
+        f = tmp_path / "SKILL.md"
+        f.write_text("---\ndescription: 123\n---\n")
+        errors = validate_skill_frontmatter({"name": "test", "description": 123}, "test", f)
+        assert any("non-empty string" in e for e in errors)
 
-    def test_output_flag(self) -> None:
-        """``--output`` / ``-o`` sets output path."""
-        args = parse_args(["--output", "/tmp/skills.json"])
-        assert args.output == Path("/tmp/skills.json")
-        args2 = parse_args(["-o", "/tmp/out.json"])
-        assert args2.output == Path("/tmp/out.json")
+
+# ============================================================================
+# TestGetStandardSearchRoots
+# ============================================================================
+
+
+class TestGetStandardSearchRoots:
+    """Tests for ``get_standard_search_roots()``."""
+
+    def test_no_dirs_exist(self, tmp_path: Path) -> None:
+        """When no subdirectories exist, returns empty list."""
+        result = get_standard_search_roots(tmp_path / "project", tmp_path / "config")
+        assert result == []
+
+    def test_project_dirs_exist(self, tmp_path: Path) -> None:
+        """Project subdirs that exist are returned with source 'project'."""
+        project = tmp_path / "proj"
+        project.mkdir()
+        (project / ".opencode" / "skills").mkdir(parents=True)
+        result = get_standard_search_roots(project, tmp_path / "config")
+        assert len(result) >= 1
+        assert any(source == "project" for _, source in result)
+
+    def test_global_dirs_exist(self, tmp_path: Path) -> None:
+        """Global subdirs that exist are returned with source 'global'."""
+        config = tmp_path / ".config" / "opencode"
+        config.mkdir(parents=True)
+        (config / "skills").mkdir()
+        result = get_standard_search_roots(tmp_path / "proj", config)
+        found = [(p, s) for p, s in result if s == "global"]
+        assert len(found) >= 1
+
+    def test_all_project_roots(self, tmp_path: Path) -> None:
+        """All three project search roots are checked."""
+        project = tmp_path / "proj"
+        project.mkdir()
+        for sub in [".opencode/skills", ".claude/skills", ".agents/skills"]:
+            (project / sub).mkdir(parents=True)
+        result = get_standard_search_roots(project, tmp_path / "config")
+        project_roots = [p for p, s in result if s == "project"]
+        assert len(project_roots) == 3
+
+    def test_all_global_roots(self, tmp_path: Path) -> None:
+        """All three global search roots are checked."""
+        config = tmp_path / ".config" / "opencode"
+        config.mkdir(parents=True)
+        (config / "skills").mkdir()
+        parent = config.parent
+        (parent / ".claude" / "skills").mkdir(parents=True)
+        (parent / ".agents" / "skills").mkdir(parents=True)
+        result = get_standard_search_roots(tmp_path / "proj", config)
+        global_roots = [p for p, s in result if s == "global"]
+        assert len(global_roots) == 3
+
+
+# ============================================================================
+# TestDiscoverAllSkills
+# ============================================================================
+
+
+class TestDiscoverAllSkills:
+    """Tests for ``discover_all_skills()`` orchestrator."""
+
+    def test_with_standard_roots(self, tmp_path: Path) -> None:
+        """Standard search roots are scanned for skills."""
+        project = tmp_path / "proj"
+        project.mkdir()
+        skill_root = project / ".opencode" / "skills"
+        skill_root.mkdir(parents=True)
+        skill_dir = skill_root / "my-skill"
+        skill_dir.mkdir()
+        (skill_dir / "SKILL.md").write_text(
+            "---\nname: my-skill\ndescription: Use when testing\nclass: operation\n---\n"
+        )
+        index = SkillIndex()
+        discover_all_skills(index, verbose=False, project_root=project, config_dir=tmp_path / "config", extra_paths=[], include_archive=False)
+        assert len(index.resolve()) == 1
+        assert index.resolve()[0].name == "my-skill"
+
+    def test_with_extra_paths(self, tmp_path: Path) -> None:
+        """Extra paths are scanned with source 'extra'."""
+        extra_root = tmp_path / "extra"
+        extra_root.mkdir()
+        skill_dir = extra_root / "extra-skill"
+        skill_dir.mkdir()
+        (skill_dir / "SKILL.md").write_text(
+            "---\nname: extra-skill\ndescription: Use when testing\nclass: operation\n---\n"
+        )
+        index = SkillIndex()
+        discover_all_skills(index, verbose=False, project_root=tmp_path / "proj", config_dir=tmp_path / "config", extra_paths=[extra_root], include_archive=False)
+        names = {s.name for s in index.resolve()}
+        assert "extra-skill" in names
+
+    def test_with_archive_paths(self, tmp_path: Path) -> None:
+        """Archive paths are scanned when include_archive is True."""
+        project = tmp_path / "proj"
+        project.mkdir()
+        archive_root = project / ".opencode" / "archive" / "skills"
+        archive_root.mkdir(parents=True)
+        skill_dir = archive_root / "archived-skill"
+        skill_dir.mkdir()
+        (skill_dir / "SKILL.md").write_text(
+            "---\nname: archived-skill\ndescription: Use when testing\nclass: operation\n---\n"
+        )
+        index = SkillIndex()
+        discover_all_skills(index, verbose=False, project_root=project, config_dir=tmp_path / "config", extra_paths=[], include_archive=True)
+        names = {s.name for s in index.resolve()}
+        assert "archived-skill" in names
+
+    def test_verbose_mode(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+        """Verbose mode prints progress messages to stderr."""
+        project = tmp_path / "proj-verbose"
+        project.mkdir()
+        index = SkillIndex()
+        discover_all_skills(index, verbose=True, project_root=project, config_dir=tmp_path / "config", extra_paths=[], include_archive=False)
+        captured = capsys.readouterr()
+        # No standard roots exist, so no scanning messages
+        # but verbose mode should not crash
+        assert captured.err == ""
+
+    def test_verbose_with_standard_roots(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+        """Verbose mode prints when standard roots are scanned."""
+        project = tmp_path / "proj-verbose2"
+        project.mkdir()
+        skill_root = project / ".opencode" / "skills"
+        skill_root.mkdir(parents=True)
+        index = SkillIndex()
+        discover_all_skills(index, verbose=True, project_root=project, config_dir=tmp_path / "config", extra_paths=[], include_archive=False)
+        captured = capsys.readouterr()
+        assert "Scanning" in captured.err
+        assert "project" in captured.err
+
+    def test_verbose_with_extra_paths(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+        """Verbose mode prints when extra paths are scanned."""
+        project = tmp_path / "proj-extra-verbose"
+        project.mkdir()
+        extra = tmp_path / "extra-verbose"
+        extra.mkdir()
+        index = SkillIndex()
+        discover_all_skills(index, verbose=True, project_root=project, config_dir=tmp_path / "config", extra_paths=[extra], include_archive=False)
+        captured = capsys.readouterr()
+        assert "Scanning extra root" in captured.err
+
+    def test_verbose_with_archive(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+        """Verbose mode prints when archive paths are scanned."""
+        project = tmp_path / "proj-archive-verbose"
+        project.mkdir()
+        archive_root = project / ".opencode" / "archive" / "skills"
+        archive_root.mkdir(parents=True)
+        skill_dir = archive_root / "archive-skill"
+        skill_dir.mkdir()
+        (skill_dir / "SKILL.md").write_text(
+            "---\nname: archive-skill\ndescription: Use when testing\nclass: operation\n---\n"
+        )
+        index = SkillIndex()
+        discover_all_skills(index, verbose=True, project_root=project, config_dir=tmp_path / "config", extra_paths=[], include_archive=True)
+        captured = capsys.readouterr()
+        assert "Scanning archive root" in captured.err
+
+    def test_extra_path_path_conversion(self, tmp_path: Path) -> None:
+        """Extra paths that are already Path objects are not double-converted."""
+        extra_root = tmp_path / "extra-path-obj"
+        extra_root.mkdir()
+        skill_dir = extra_root / "path-skill"
+        skill_dir.mkdir()
+        (skill_dir / "SKILL.md").write_text(
+            "---\nname: path-skill\ndescription: Use when testing\nclass: operation\n---\n"
+        )
+        index = SkillIndex()
+        discover_all_skills(index, verbose=False, project_root=tmp_path / "proj", config_dir=tmp_path / "config", extra_paths=[str(extra_root)], include_archive=False)
+        names = {s.name for s in index.resolve()}
+        assert "path-skill" in names
+
+
+# ============================================================================
+# TestDiscoverSkillsFromRootEdgeCases
+# ============================================================================
+
+
+class TestDiscoverSkillsFromRootEdgeCases:
+    """Edge cases for ``discover_skills_from_root()``."""
+
+    def test_non_existent_root_verbose(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+        """Non-existent root with verbose prints a warning."""
+        index = SkillIndex()
+        discover_skills_from_root(tmp_path / "nope", "project", index, verbose=True)
+        captured = capsys.readouterr()
+        assert "does not exist" in captured.err
+
+    def test_non_existent_root_silent(self, tmp_path: Path) -> None:
+        """Non-existent root without verbose is silent."""
+        index = SkillIndex()
+        discover_skills_from_root(tmp_path / "nope", "project", index, verbose=False)
+        # Should not crash, no skills added
+        assert index.resolve() == []
+
+    def test_non_directory_root_verbose(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+        """A file as root with verbose prints a warning."""
+        f = tmp_path / "not-a-dir"
+        f.write_text("I am a file")
+        index = SkillIndex()
+        discover_skills_from_root(f, "project", index, verbose=True)
+        captured = capsys.readouterr()
+        assert "not a directory" in captured.err
+
+    def test_non_directory_root_silent(self, tmp_path: Path) -> None:
+        """A file as root without verbose is silent."""
+        f = tmp_path / "not-a-dir"
+        f.write_text("I am a file")
+        index = SkillIndex()
+        discover_skills_from_root(f, "project", index, verbose=False)
+        assert index.resolve() == []
+
+    def test_permission_error_on_directory(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+        """PermissionError when listing directory is caught."""
+        root = tmp_path / "no-list"
+        root.mkdir()
+        root.chmod(0o000)
+        index = SkillIndex()
+        try:
+            discover_skills_from_root(root, "project", index, verbose=True)
+        finally:
+            root.chmod(0o755)
+
+    def test_file_entry_skipped(self, tmp_path: Path) -> None:
+        """A file entry in the root is skipped (not a directory or symlink)."""
+        root = tmp_path / "root"
+        root.mkdir()
+        (root / "README.txt").write_text("not a skill")
+        index = SkillIndex()
+        discover_skills_from_root(root, "project", index, verbose=False)
+        assert index.resolve() == []
+
+    def test_skill_file_not_a_file(self, tmp_path: Path) -> None:
+        """SKILL.md exists but is not a regular file (e.g. directory)."""
+        root = tmp_path / "root"
+        root.mkdir()
+        skill_dir = root / "weird"
+        skill_dir.mkdir()
+        # Create SKILL.md as a directory instead of a file
+        (skill_dir / "SKILL.md").mkdir()
+        index = SkillIndex()
+        discover_skills_from_root(root, "project", index, verbose=False)
+        assert index.resolve() == []
+
+    def test_permission_denied_on_file_read(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        """PermissionError when reading SKILL.md is caught."""
+        root = tmp_path / "root-perm"
+        root.mkdir()
+        skill_dir = root / "no-read"
+        skill_dir.mkdir()
+        skill_file = skill_dir / "SKILL.md"
+        skill_file.write_text(
+            "---\nname: no-read\ndescription: test\n---\n"
+        )
+        skill_file.chmod(0o000)
+        index = SkillIndex()
+        try:
+            discover_skills_from_root(root, "project", index, verbose=True)
+            captured = capsys.readouterr()
+            assert "permission denied" in captured.err
+        finally:
+            skill_file.chmod(0o644)
+
+    def test_broken_symlink(self, tmp_path: Path) -> None:
+        """A broken symlink is skipped (not a valid directory)."""
+        root = tmp_path / "root-broken"
+        root.mkdir()
+        broken = root / "broken-link"
+        broken.symlink_to(tmp_path / "nonexistent")
+        index = SkillIndex()
+        discover_skills_from_root(root, "project", index, verbose=True)
+        # Broken symlink is skipped (resolve() finds target, is_dir() is False)
+        assert index.resolve() == []
+
+    def test_no_frontmatter_verbose(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+        """SKILL.md with no frontmatter triggers verbose warning."""
+        root = tmp_path / "root-no-fm"
+        root.mkdir()
+        skill_dir = root / "no-fm"
+        skill_dir.mkdir()
+        (skill_dir / "SKILL.md").write_text("# Just content\n")
+        index = SkillIndex()
+        discover_skills_from_root(root, "project", index, verbose=True)
+        captured = capsys.readouterr()
+        assert "no frontmatter" in captured.err
+
+    def test_validation_errors_verbose(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+        """Validation errors trigger verbose warnings."""
+        root = tmp_path / "root-valid-err"
+        root.mkdir()
+        skill_dir = root / "bad-name"
+        skill_dir.mkdir()
+        (skill_dir / "SKILL.md").write_text(
+            "---\nname: different-name\ndescription: Use when testing\nclass: operation\n---\n"
+        )
+        index = SkillIndex()
+        discover_skills_from_root(root, "project", index, verbose=True)
+        captured = capsys.readouterr()
+        assert "Warning" in captured.err
+
+
+# ============================================================================
+# TestModelEdgeCases
+# ============================================================================
+
+
+class TestModelEdgeCases:
+    """Edge cases for models.py."""
+
+    def test_equal_priority_same_location(self, tmp_path: Path) -> None:
+        """Equal priority entries keep the existing one silently."""
+        index = SkillIndex()
+        index.add(Skill(name="same", description="first", source="project", location="/tmp/.opencode/skills/same"))
+        index.add(Skill(name="same", description="second", source="project", location="/tmp/.opencode/skills/same"))
+        assert len(index.resolve()) == 1
+        assert index.resolve()[0].description == "first"
+        # No warning for equal priority
+        assert index.warnings == []
+
+    def test_to_dict_renames_class(self) -> None:
+        """``to_dict()`` renames ``class_`` to ``class``."""
+        skill = Skill(name="test", class_="operation")
+        d = skill.to_dict()
+        assert d["class"] == "operation"
+        assert "class_" not in d
+
+    def test_to_dict_excludes_internal(self) -> None:
+        """Internal fields like ``_source_priority`` are not in dict."""
+        skill = Skill(name="test")
+        d = skill.to_dict()
+        assert set(d.keys()) == {
+            "name", "description", "class", "version", "license",
+            "compatibility", "metadata", "location", "source", "permission",
+        }
+
+    def test_warnings_property_returns_copy(self) -> None:
+        """``warnings`` property returns a copy, not the internal list."""
+        index = SkillIndex()
+        index._warnings.append("test warning")
+        w = index.warnings
+        w.append("mutated")
+        assert len(index.warnings) == 1  # original unchanged
+
+    def test_location_priority_different_locations(self) -> None:
+        """Different location priorities within same source."""
+        index = SkillIndex()
+        # .opencode has highest location priority (3)
+        index.add(Skill(name="tool", source="project", location="/a/.opencode/skills/tool/SKILL.md"))
+        # .agents has lowest location priority (1)
+        index.add(Skill(name="tool", source="project", location="/a/.agents/skills/tool/SKILL.md"))
+        assert len(index.resolve()) == 1
+        # The higher location priority (.opencode) should win
+        assert ".opencode" in index.resolve()[0].location

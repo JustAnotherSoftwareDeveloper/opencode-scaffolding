@@ -3,12 +3,11 @@
 
 from __future__ import annotations
 
-import argparse
 import re
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+import click
 import yaml
 from lxml import etree
 
@@ -158,34 +157,61 @@ def validate_all() -> CheckResult:
     return CheckResult(ok, messages)
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Validate OpenCode skill framework artifacts.")
-    parser.add_argument("skill_file", nargs="?", help="Path to a SKILL.md file")
-    parser.add_argument("--all", action="store_true", help="Validate all skills and skill-hygiene schemas")
-    parser.add_argument("--class-schemas", metavar="SKILL_DIR", help="Validate per-class canonical XSD templates")
-    parser.add_argument("--render-markdown", choices=CLASSES, help="Render markdown guidance from a class XSD annotation")
-    return parser
+@click.command(name="validate-skill-framework")
+@click.argument(
+    "skill_file",
+    required=False,
+    type=click.Path(exists=True, readable=True),
+)
+@click.option(
+    "--all",
+    "all_skills",
+    is_flag=True,
+    default=False,
+    help="Validate all skills and skill-hygiene schemas",
+)
+@click.option(
+    "--class-schemas",
+    "class_schemas",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True),
+    default=None,
+    help="Validate per-class canonical XSD templates in the given skill directory",
+)
+@click.option(
+    "--render-markdown",
+    "render_markdown_option",
+    type=click.Choice(CLASSES, case_sensitive=False),
+    default=None,
+    help="Render markdown guidance from a class XSD annotation",
+)
+def cli(
+    skill_file: str | None,
+    all_skills: bool,
+    class_schemas: str | None,
+    render_markdown_option: str | None,
+) -> None:
+    """Validate OpenCode skill framework artifacts.
 
-
-def main() -> int:
-    args = build_parser().parse_args()
-    if args.all:
+    Provide a SKILL_FILE to validate a single skill, or use one of the
+    flags (--all, --class-schemas, --render-markdown) for batch operations.
+    """
+    if all_skills:
         result = validate_all()
-    elif args.class_schemas:
-        result = validate_class_schemas(Path(args.class_schemas))
-    elif args.render_markdown:
-        result = render_markdown(args.render_markdown)
-    elif args.skill_file:
-        path = Path(args.skill_file)
+    elif class_schemas:
+        result = validate_class_schemas(Path(class_schemas))
+    elif render_markdown_option:
+        result = render_markdown(render_markdown_option)
+    elif skill_file:
+        path = Path(skill_file)
         result = validate_skill_file(path, require_class=path.parent.name == "skill-hygiene")
     else:
-        print("No validation target supplied. Use --help for usage.", file=sys.stderr)
-        return 2
+        click.echo("No validation target supplied. Use --help for usage.", err=True)
+        raise SystemExit(2)
 
     for message in result.messages:
-        print(message)
-    return 0 if result.ok else 1
+        click.echo(message)
+    raise SystemExit(0 if result.ok else 1)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    cli()

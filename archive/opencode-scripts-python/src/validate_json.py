@@ -1,31 +1,37 @@
+#!/usr/bin/env python3
+"""Validate JSON syntax and optional JSON Schema conformance."""
+
 from __future__ import annotations
 
-import argparse
-import sys
+import click
 
 from lib.json_validation import JsonValidationError, validate_json_path
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Validate JSON syntax and optional JSON Schema conformance.")
-    parser.add_argument("json_file", help="Path to the JSON file to validate.")
-    parser.add_argument("--schema", help="Optional path to a JSON Schema file.")
-    return parser
+@click.command(name="validate-json")
+@click.argument(
+    "json_file",
+    type=click.Path(exists=True, readable=True),
+)
+@click.option(
+    "--schema",
+    type=click.Path(exists=True, readable=True),
+    default=None,
+    help="Optional path to a JSON Schema file",
+)
+def cli(json_file: str, schema: str | None) -> None:
+    """Validate JSON syntax and optional JSON Schema conformance.
 
-
-def main() -> int:
-    parser = build_parser()
-    args = parser.parse_args()
-
+    JSON_FILE is the path to the JSON file to validate.
+    """
     try:
-        validate_json_path(args.json_file, args.schema)
+        validate_json_path(json_file, schema)
     except JsonValidationError as exc:
-        print(f"validate-json: {exc}", file=sys.stderr)
-        return 1
+        click.echo(f"validate-json: {exc}", err=True)
+        raise SystemExit(1)
 
-    print(f"validate-json: valid: {args.json_file}", file=sys.stderr)
-    return 0
+    click.echo(f"validate-json: valid: {json_file}", err=True)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    cli()

@@ -105,7 +105,7 @@ def discover_skills_from_root(
     root: Path,
     source: str,
     index: SkillIndex,
-    options: Any,
+    verbose: bool = False,
 ) -> None:
     """Walk a single *root* directory and add discovered skills to *index*.
 
@@ -119,13 +119,12 @@ def discover_skills_from_root(
     5. Create a :class:`Skill` instance and add it to *index*.
 
     Edge cases handled:
-    * Non-existent roots are skipped (warning if *options.verbose*).
+    * Non-existent roots are skipped (warning if *verbose*).
     * Broken symlinks are caught and skipped (warning if verbose).
     * Permission errors on directories or files are caught and skipped.
     * Malformed YAML / missing frontmatter / validation errors are caught
       and the skill is skipped.
     """
-    verbose: bool = getattr(options, "verbose", False)
 
     if not root.exists():
         if verbose:
@@ -286,24 +285,29 @@ def discover_skills_from_root(
 # ---------------------------------------------------------------------------
 
 
-def discover_all_skills(index: SkillIndex, options: Any) -> None:
+def discover_all_skills(
+    index: SkillIndex,
+    verbose: bool = False,
+    project_root: Path | None = None,
+    config_dir: Path | None = None,
+    extra_paths: list[Path] | None = None,
+    include_archive: bool = False,
+) -> None:
     """Orchestrate discovery across all configured search roots.
 
     Discovers skills from:
     1. Standard search roots (project + global).
-    2. Extra paths (``options.extra_paths``) with source ``"extra"``.
-    3. Archive paths (if ``options.include_archive`` is true) with source
-       ``"archive"``.
+    2. Extra paths (*extra_paths*) with source ``"extra"``.
+    3. Archive paths (if *include_archive* is true) with source ``"archive"``.
 
     Each root is passed to :func:`discover_skills_from_root`.
     """
-    verbose: bool = getattr(options, "verbose", False)
-
-    # Determine project_root and config_dir from options or use defaults.
-    project_root: Path = getattr(options, "project_root", Path.cwd())
-    config_dir: Path = getattr(
-        options, "config_dir", Path.home() / ".config" / "opencode"
-    )
+    if project_root is None:
+        project_root = Path.cwd()
+    if config_dir is None:
+        config_dir = Path.home() / ".config" / "opencode"
+    if extra_paths is None:
+        extra_paths = []
 
     # --- 1. Standard search roots ------------------------------------------
     standard_roots = get_standard_search_roots(project_root, config_dir)
@@ -313,25 +317,20 @@ def discover_all_skills(index: SkillIndex, options: Any) -> None:
                 f"[collect-skills] Scanning {source} root: {root}",
                 file=sys.stderr,
             )
-        discover_skills_from_root(root, source, index, options)
+        discover_skills_from_root(root, source, index, verbose=verbose)
 
     # --- 2. Extra paths ----------------------------------------------------
-    extra_paths: list[Path] = getattr(options, "extra_paths", [])
     for extra_root in extra_paths:
-        extra_path = (
-            Path(extra_root) if not isinstance(extra_root, Path) else extra_root
-        )
+        extra_path = Path(extra_root) if not isinstance(extra_root, Path) else extra_root
         if verbose:
             print(
                 f"[collect-skills] Scanning extra root: {extra_path}",
                 file=sys.stderr,
             )
-        discover_skills_from_root(extra_path, "extra", index, options)
+        discover_skills_from_root(extra_path, "extra", index, verbose=verbose)
 
     # --- 3. Archive paths (optional) ---------------------------------------
-    include_archive: bool = getattr(options, "include_archive", False)
     if include_archive:
-        # Archive paths follow the same pattern as standard search roots.
         archive_project_paths = [
             project_root / ".opencode" / "archive" / "skills",
             project_root / ".claude" / "archive" / "skills",
@@ -350,4 +349,4 @@ def discover_all_skills(index: SkillIndex, options: Any) -> None:
                         f"[collect-skills] Scanning archive root: {archive_root}",
                         file=sys.stderr,
                     )
-                discover_skills_from_root(archive_root, "archive", index, options)
+                discover_skills_from_root(archive_root, "archive", index, verbose=verbose)
