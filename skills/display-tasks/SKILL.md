@@ -10,10 +10,12 @@ Render one or more delegation packets into a Markdown table with only safe user-
 
 ## Input
 
-Accepts full delegation packet text. Input may be in either of two formats:
+Accepts full delegation packet text. Input is in either of two formats:
 
 - **Plaintext packets** — One or more delegation packets delimited by `---` containing standard headers (`## PURPOSE`, `## FILES TO READ`, `## FILES TO WRITE`, `## SKILLS`, etc.).
-- **JSON array** — A JSON array of objects, each object conforming to the 8-field camelCase schema produced by the breakdown-tasks skill (fields: `purpose`, `details`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `verification`, `expectedOutput`). A single JSON object (not wrapped in an array) is also accepted and treated as a one-element array.
+- **JSON array** — A JSON array of objects, each object conforming to the expanded camelCase schema produced by the breakdown-tasks skill (fields: `id` (UUID v4), `purpose`, `context` (long-form string, replaces `details`), `filesToRead`, `filesToWrite`, `skills`, `dependencies` (task-local array of UUID strings for serial ordering), `executionInstructions` (array of `{step, action, verification}` step objects), `verification` (string array), `expectedOutput`).
+  The parser tolerates unknown keys, so no code change is required.
+  A single JSON object (not wrapped in an array) is also accepted and treated as a one-element array.
 
 ## Output
 

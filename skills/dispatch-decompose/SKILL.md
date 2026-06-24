@@ -13,7 +13,7 @@ Return the worker result unchanged.
 
 Accept the full decomposition context as plaintext.
 The input must include the original user request and the complete clarification context gathered by the delegator.
-The clarification context should preserve question text and answers when available.
+The clarification context preserves question text and answers when available.
 
 ### Plaintext Packet Format Sent To Worker
 
@@ -34,13 +34,30 @@ None
 breakdown-tasks
 
 ## EXECUTION INSTRUCTIONS
-Load the breakdown-tasks skill and use it to decompose the full request and clarification context into atomic delegation packets. Return only the decomposition result.
+Load the breakdown-tasks skill and use it to decompose the full request and clarification context into atomic delegation packets.
+Return only the decomposition result.
 
 ## VERIFICATION
-The output must be valid JSON parseable as a non-empty array. Every array element must be an object containing all 8 required camelCase keys: purpose, details, filesToRead, filesToWrite, skills, executionInstructions, verification, expectedOutput.
+The output must be valid JSON parseable as an object with a required `summary` field (string, maxLength 2000) and a required `tasks` array (non-empty).
+Every task in the `tasks` array must be an object containing all required fields: id, purpose, context, filesToRead, filesToWrite, skills, executionInstructions, verification, expectedOutput.
+Each `id` must be a valid UUID v4 string.
+If a task has a `dependencies` array, each entry must reference a valid task `id` within the same decomposition.
+Each `executionInstructions` array must be non-empty, with items containing at minimum `step` (integer ≥1) and `action` (string).
+The `tags` field is not part of the schema and must not be validated or expected.
 
 ## EXPECTED OUTPUT
-A non-empty JSON array of delegation packet objects with exactly the required camelCase keys for each object.
+A JSON object containing a root-level `summary` string and a non-empty `tasks` array.
+Each task in `tasks` is a delegation packet object with the following fields:
+- `id` (UUID v4) — unique task identifier
+- `purpose` (string) — single-sentence task goal
+- `context` (string) — expanded context for the worker (up to 8000 characters)
+- `filesToRead` (string array) — files the worker must read before starting
+- `filesToWrite` (string array) — files the worker is expected to create or modify
+- `skills` (string array) — skills the worker must load
+- `executionInstructions` (object array) — ordered steps with `step` and `action`, optionally `verification`
+- `verification` (string array) — top-level checks on the complete deliverable
+- `expectedOutput` (string) — precise description of the deliverable
+- `dependencies` (string array, optional) — task IDs that must complete before this one begins
 ```
 
 ## Output
