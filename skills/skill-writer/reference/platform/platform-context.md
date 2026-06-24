@@ -3,7 +3,6 @@
 - **Skill root**: `./` (the skill's base directory)
 - **Entry point**: `SKILL.md` — the file the agent loads
 - **Support files**: `reference/*.md`, `templates/`, `schemas/`, `snippets/`
-- **Archived versions**: `<archive>/<name>/SKILL.md` — read for shape only, never prose
 
 ## Skill Classes
 

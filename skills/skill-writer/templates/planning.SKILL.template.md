@@ -41,3 +41,7 @@ This is for quick reference during planning.
 - `./common-workflow.md` — Workflow file template used by the Common Workflows section.
 - `./reference/authoring/authoring-style.md` — Authoring conventions and cross-reference guidelines.
 - `./orchestration/orchestrated-usage.md` — Orchestration patterns relevant to planning multi-step workflows.
+
+## Docs
+
+See `./reference/README.md` for documentation of supporting files.

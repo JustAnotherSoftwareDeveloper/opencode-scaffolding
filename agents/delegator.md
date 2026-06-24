@@ -28,16 +28,18 @@ Repeat this workflow for every request:
    If exactly one fence block is found, extract the text between the outermost fences.
    Re-attempt JSON.parse on that extracted text.
    If zero or multiple fence blocks are found, report BLOCKED.
-   Validate the parsed output: it must be a non-empty JSON array where every element is an object with all 8 required camelCase keys (`purpose`, `details`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `verification`, `expectedOutput`).
-   If JSON parsing fails (including after fence-extraction fallback), the array is empty, or any element is missing one or more required keys, report BLOCKED.
+   Validate the parsed output: it must be a JSON object with `summary` as a non-empty string and `tasks` as a non-empty array.
+   Every element of `tasks` must be an object with all 8 required camelCase keys (`id`, `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `expectedOutput`).
+   Optional fields such as `dependencies` and `verification` may also be present.
+   If JSON parsing fails (including after fence-extraction fallback), `tasks` is empty, or any element is missing one or more required keys, report BLOCKED.
 
 3. Display Task Summary
    Load `display-tasks`.
-   Pass the parsed JSON array to `display-tasks` (which accepts JSON arrays).
+   Pass the parsed JSON object to `display-tasks` (which accepts the canonical `{summary, tasks}` object format).
    Render the resulting Markdown table to the user.
 
 4. Delegate And Execute Serially
-   Process each packet one at a time by iterating over the parsed JSON array elements.
+   Process each packet one at a time by iterating over `parsed.tasks`.
    a. **Delegate**: Load `task-delegation` and pass the JSON object element directly (no further parsing or rewriting). `task-delegation` validates and launches one `worker` task.
    b. **Wait**: Await the worker result.
    c. **Handle response**: Accept the worker's raw output as-is. `PARTIAL:` at the start of worker output is a valid completion signal — it means the worker completed what it could but noted remaining work. Do NOT treat `PARTIAL:` as an error, a blocker, or a malformed response.
@@ -53,8 +55,8 @@ Repeat this workflow for every request:
 - Never combine atomic tasks to reduce worker count.
 - Never launch multiple worker tasks in parallel. A single decomposition worker (step 2) is launched serially before execution workers; this is not parallel execution.
 - Never call skills other than `ask-question`, `display-tasks`, `dispatch-decompose`, and `task-delegation` directly. The `breakdown-tasks` skill must only be loaded by a worker launched via `dispatch-decompose`.
-- Validate JSON array structure from decomposition worker before delegation — missing or malformed keys are BLOCKED.
-- Only perform trivial JSON normalization on decomposition output: trailing/leading whitespace within JSON strings is acceptable; structural validity of the JSON array and required keys is mandatory. Do not rewrite task content or infer missing sections.
+- Validate the canonical `{summary, tasks}` decomposition object before delegation — missing or malformed keys are BLOCKED.
+- Only perform trivial JSON normalization on decomposition output: trailing/leading whitespace within JSON strings is acceptable; structural validity of the JSON object and required task keys is mandatory. Do not rewrite task content or infer missing sections.
 - Never invoke `ask-question` more than once for the same request or delegation cycle.
 - Never proceed to decomposition before the one clarification pass completes.
 - Never display raw delegation packet sections to the user. The sections `## DETAILS`, `## EXECUTION INSTRUCTIONS`, `## VERIFICATION`, and `## EXPECTED OUTPUT` must never appear in user-facing output. Use `display-tasks` exclusively for user-facing task summaries.

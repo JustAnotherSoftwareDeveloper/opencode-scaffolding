@@ -85,30 +85,46 @@ All rules in this section apply to all body text.
 - Inline authoring hints are permitted when they improve readability without bloating SKILL.md.
   The rule against inlining reference detail still applies to substantial content, but brief inline guidance (1-2 sentences) may remain in SKILL.md.
 - If the same rule appears in multiple skill files, extract it into a `./reference/<module>/*.md` file.
-- Do not copy archived versions — read for shape only, then write original prose.
 - Avoid redundant instructions.
   Do not repeat the same instruction across multiple sections.
   Do not restate one rule with slightly different wording as if it were a new rule.
 
 ## Enforcement Checklist
 
-Before declaring any skill-writer markdown file complete, verify:
+Before declaring any skill-writer markdown file complete, verify these checks.
 
-- [ ] All headings use Title Case (no Sentence case, no ALL CAPS).
-- [ ] Body uses imperative, active voice throughout (except factual definitions in reference files, which may use declarative voice).
-- [ ] No fluff words, no hedging, no tutorial language.
-- [ ] One `H1` per file; all subsections are `H2` or deeper.
-- [ ] YAML frontmatter has exactly `name`, `description`, `class`.
-- [ ] `description` starts with `"Use when"` (or `"Use as planning reference"` for the planning class).
-- [ ] File is under 200 lines.
-- [ ] No Examples section present.
-- [ ] Reference detail is not inlined — cross-references via `./reference/<module>/*.md` instead.
-- [ ] No prose copied from archived versions or templates.
-- [ ] No redundant instructions — each rule appears once with consistent wording; no restating as new.
-- [ ] Relative paths used for cross-file links.
-- [ ] Uses plain, LLM-readable Markdown — no tables for simple rule mappings, nesting limited to two levels, minimal inline formatting.
-- [ ] One sentence per line; no trailing whitespace.
-- [ ] This guide (`./reference/authoring/authoring-style.md`) was consulted.
+For shared structural and content checks (name match, description prefix, class validity, original prose, no examples, valid YAML, body is procedural, no general breakdown instructions), apply `./reference/maintenance/validation-checklist.md` first.
+
+**Headings:**
+- [ ] All headings use Title Case (no Sentence case, no ALL CAPS)
+- [ ] One `H1` per file; all subsections are `H2` or deeper
+
+**Voice:**
+- [ ] Step descriptions begin with an imperative verb
+- [ ] No passive-voice constructions in step bodies ("is used", "should be", "must be done")
+- [ ] Sentences are commands, not observations (except factual definitions in reference files, which may use declarative voice)
+
+**Word choice:**
+- [ ] No hedging words ("should", "may", "could", "might", "try", "best", "recommend") in instructions — use "must" or omit the qualifier
+- [ ] No fluff words ("please", "simply", "just", "obviously", "essentially", "basically")
+- [ ] No tutorial language — no concept explanations, no background justifications, no choice rationales
+
+**Reference discipline:**
+- [ ] Reference detail is not inlined — cross-references via `./reference/<module>/*.md` instead
+- [ ] Relative paths used for cross-file links
+
+**Formatting:**
+- [ ] One sentence per line
+- [ ] No trailing whitespace
+- [ ] No tables for simple rule-to-scope mappings (use bullet lists)
+- [ ] List nesting limited to two levels
+- [ ] Minimal inline formatting — no bold entire sentences, no combined inline styles on one line
+
+**Conciseness:**
+- [ ] File is under 200 lines
+
+**Cross-reference:**
+- [ ] This guide (`./reference/authoring/authoring-style.md`) was consulted
 
 ## Generated Skill Docs Section
 

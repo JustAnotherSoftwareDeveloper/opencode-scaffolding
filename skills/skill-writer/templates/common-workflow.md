@@ -24,3 +24,7 @@ Use bullet points.>>
 
 <<Assumptions, prerequisites, failure modes, or gotchas specific to this workflow.
 Use bullet points.>>
+
+## Docs
+
+See `./reference/README.md` for documentation of supporting files.

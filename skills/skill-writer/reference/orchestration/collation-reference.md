@@ -41,10 +41,10 @@ Examples:
 
 ## Usage
 
-Orchestrated skills use this structure when collating worker results.
-The orchestrator sets `status` based on worker outcomes.
-It populates `source_tags` from worker or deployment tags.
-It collects worker outputs into `items`.
+Use this structure when collating worker results.
+Set `status` based on worker outcomes.
+Populate `source_tags` from worker or deployment tags.
+Collect worker outputs into `items`.
 
 ## Cross-References
 

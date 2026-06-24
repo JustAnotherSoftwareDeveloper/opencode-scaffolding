@@ -35,7 +35,8 @@ Concrete description of what this skill produces and in what format.
 2. <<Step 2>> — see [<<Section Reference>>](#<<section-reference>>).
 3. <<Step 3>> — produce output per [Output](#output).
 
-This is a single-pass process. Do not delegate, loop, or perform multi-phase orchestration.
+This is a single-pass process.
+Do not delegate, loop, or perform multi-phase orchestration.
 
 ## Guardrails
 

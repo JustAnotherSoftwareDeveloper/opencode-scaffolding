@@ -5,7 +5,7 @@ Every authored skill must be verified against this checklist before declaring do
 - **Name match**: `name` in frontmatter matches directory under `skills/`.
 - **Description prefix**: Starts with `"Use when"`, is specific, and captures trigger intent.
 - **Class validity**: One of the six allowed values.
-- **Original prose**: No text copied from archived versions, templates, or reference files.
+- **Original prose**: No text copied from templates or reference files.
 - **Body is procedural**: Steps, conditions, decisions.
   Not a tutorial, not a reference.
 - **No examples**: Do not add an examples section or inline example commands.
@@ -19,6 +19,9 @@ Every authored skill must be verified against this checklist before declaring do
   Orchestrated skills must not contain an Exit Criteria section.
 - **No general breakdown instructions**: Breakdown logic belongs only in `Decompose` step types.
   Do not add free-standing breakdown instructions elsewhere.
+- **Operation class**: If class is `operation`, "Normalize Input" is the first procedural step after the H1 intro.
+- **Documentation class**: If class is `documentation`, no execution steps or side effects; body is structured reference data only.
+- **Docs section**: Generated skill includes a `## Docs` section as the last section, referencing `./reference/README.md`.
 
 ### Planning-Specific Checks
 

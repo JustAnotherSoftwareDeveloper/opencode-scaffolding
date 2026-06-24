@@ -1,13 +1,13 @@
 ---
 name: skill-writer
-description: "Use when creating or updating all OpenCode skill files under skills/<name>/ (SKILL.md, reference/authoring/authoring-style.md, templates/, reference/, schemas/, and snippets/) from user requirements, source material, or an archived version."
+description: "Use when creating or updating all OpenCode skill files under skills/<name>/ (SKILL.md, reference/authoring/authoring-style.md, templates/, reference/, schemas/, and snippets/) from user requirements, source material."
 class: operation
 ---
 
 # Skill Writer
 
 Write or update skill files under `skills/<name>/`.
-Consume user requirements, archived versions, and support files.
+Consume user requirements and support files.
 Produce a validated skill artifact.
 
 ## Normalize Input
@@ -18,8 +18,7 @@ Produce a validated skill artifact.
    - **Exists** → mode is UPDATE.
 3. Gather source material: requirements, reference content, class guidance, template path.
    See `./reference/authoring/frontmatter-rules.md` for class definitions and `./reference/platform/platform-context.md` for platform rules.
-4. If an archived version exists under `archive/<name>/SKILL.md`, read for shape only (never prose).
-5. Locate the matching template under `./templates/<class>.SKILL.template.md`.
+4. Locate the matching template under `./templates/<class>.SKILL.template.md`.
 
 ## Procedure
 
@@ -54,19 +53,10 @@ Edit one or more files in an existing skill directory.
 
 **Shared checks (CREATE + UPDATE):**
 
-- `name` in frontmatter matches the directory name under `skills/`
-- `description` starts with "Use when" (or "Use as planning reference" for planning class)
-- `class` is one of operation, delegated, inline, orchestrated, planning, documentation (see `./reference/authoring/frontmatter-rules.md`)
-- If class is `operation`: "Normalize Input" is the first procedural step
-- If class is `documentation`: no execution steps or side effects; body is structured reference data only
-- No general breakdown instructions outside Decompose steps
-- Body references `./reference/` and/or `./templates/` if applicable, without inlining their content
-- No prose copied from archive or templates — original writing
-- No examples section present
-- All steps are actionable, not descriptive
-- Body conforms to `./reference/authoring/authoring-style.md` (wording, formatting, conciseness, DRY rules)
-- Valid YAML frontmatter
-- Generated skill includes a `## Docs` section at the bottom referencing its reference/README.md.
+Apply the canonical shared checks in `./reference/maintenance/validation-checklist.md`.
+Apply wording, formatting, and voice checks from `./reference/authoring/authoring-style.md#enforcement-checklist`.
+
+- Body conforms to `./reference/authoring/authoring-style.md` — run its Enforcement Checklist
 
 **UPDATE-specific checks:**
 

@@ -10,8 +10,7 @@
   Fix: Strip all explanation; keep only imperative steps.
 - **Examples inline** — Violates convention, adds noise.
   Fix: Remove.
-- **Prose copied from archive** — Redundant, stale, or incorrect.
-  Fix: Rewrite from scratch using only shape inspiration.
+
 - **Class selected by habit** — Mismatch between class contract and actual behavior.
   Fix: Consult the class list and the decision prompts below.
 - **Assumes templates exist** — A reference file references nonexistent files.

@@ -6,11 +6,13 @@ class: operation
 
 ## Normalize Input
 
-Map invocation context to one internal input object. Define required fields, defaults, and `BLOCKED: <reason>` conditions for missing required input.
+Map invocation context to one internal input object.
+Define required fields, defaults, and `BLOCKED: <reason>` conditions for missing required input.
 
 ## Procedure
 
-Each step is one imperative action. Do not delegate sub-tasks.
+Each step is one imperative action.
+Do not delegate sub-tasks.
 
 1. <<step>>.
 2. <<step>>.

@@ -8,20 +8,30 @@ class: delegated
 
 One-line summary of what this worker accomplishes.
 
-*(Skill directory name must be lowercase with hyphens, matching `name` field. The description captures the orchestrator's trigger perspective.)*
+*(Skill directory name must be lowercase with hyphens, matching `name` field.
+The description captures the orchestrator's trigger perspective.)*
 
 ## Input Contract (from Delegation Packet)
 
-The delegation packet is the authoritative source of truth for a worker invocation. Each header defines a specific dimension of the task:
+The delegation packet is the authoritative source of truth for a worker invocation.
+Each header defines a specific dimension of the task:
 
-- **`## PURPOSE`** — One-sentence task summary. The worker reads this first to understand what must be done.
-- **`## DETAILS`** — Primary context, constraints, and background. The worker must not invent facts beyond what is here.
-- **`## FILES TO READ`** — Every file listed must be read before producing output. Missing or inaccessible files are blockers.
-- **`## FILES TO WRITE`** — Only files in this list may be modified or created. All listed files must be written unless blocked.
-- **`## SKILLS`** — Skill names to load for specialized instructions. Unknown or missing skills are blockers.
-- **`## EXECUTION INSTRUCTIONS`** — Step-by-step instructions the worker must follow in order. A failure at any step blocks the task.
-- **`## VERIFICATION`** — Checks the worker must run against its own output before finishing. Fix issues if possible.
-- **`## EXPECTED OUTPUT`** — Defines the deliverable format and content. The worker must produce exactly this and nothing more.
+- **`## PURPOSE`** — One-sentence task summary.
+  The worker reads this first to understand what must be done.
+- **`## DETAILS`** — Primary context, constraints, and background.
+  The worker must not invent facts beyond what is here.
+- **`## FILES TO READ`** — Every file listed must be read before producing output.
+  Missing or inaccessible files are blockers.
+- **`## FILES TO WRITE`** — Only files in this list may be modified or created.
+  All listed files must be written unless blocked.
+- **`## SKILLS`** — Skill names to load for specialized instructions.
+  Unknown or missing skills are blockers.
+- **`## EXECUTION INSTRUCTIONS`** — Step-by-step instructions the worker must follow in order.
+  A failure at any step blocks the task.
+- **`## VERIFICATION`** — Checks the worker must run against its own output before finishing.
+  Fix issues if possible.
+- **`## EXPECTED OUTPUT`** — Defines the deliverable format and content.
+  The worker must produce exactly this and nothing more.
 
 ## Execution Steps
 
@@ -33,13 +43,19 @@ The delegation packet is the authoritative source of truth for a worker invocati
 
 ## Output Contract
 
-The delegation packet's `## EXPECTED OUTPUT` is the sole authority for what the worker returns. The worker must produce exactly what that section specifies, in the format it specifies, without wrapping the result in extra sections, metadata, status markers, or explanatory framing.
+The delegation packet's `## EXPECTED OUTPUT` is the sole authority for what the worker returns.
+The worker must produce exactly what that section specifies, in the format it specifies, without wrapping the result in extra sections, metadata, status markers, or explanatory framing.
 
 **Format rules:**
-- **Default format is plaintext.** If `## EXPECTED OUTPUT` does not explicitly request a specific format (e.g., JSON, structured sections), the worker returns plaintext and nothing more.
-- **No wrapping.** Do not add a `Summary`, `Deliverables`, `Status`, or any other wrapper section unless `## EXPECTED OUTPUT` itself calls for them.
-- **Missing or ambiguous `## EXPECTED OUTPUT`.** If the section is absent or its intent cannot be determined, the worker must use CLARIFY rather than inventing a format or guessing the deliverable.
-- **Silence is success.** A clean return of the requested deliverable signals completion. Do not append a status message unless the packet explicitly asks for one.
+- **Default format is plaintext.**
+  If `## EXPECTED OUTPUT` does not explicitly request a specific format (e.g., JSON, structured sections), the worker returns plaintext and nothing more.
+- **No wrapping.**
+  Do not add a `Summary`, `Deliverables`, `Status`, or any other wrapper section unless `## EXPECTED OUTPUT` itself calls for them.
+- **Missing or ambiguous `## EXPECTED OUTPUT`.**
+  If the section is absent or its intent cannot be determined, the worker must use CLARIFY rather than inventing a format or guessing the deliverable.
+- **Silence is success.**
+  A clean return of the requested deliverable signals completion.
+  Do not append a status message unless the packet explicitly asks for one.
 
 ## Verification
 
@@ -50,7 +66,8 @@ The delegation packet's `## EXPECTED OUTPUT` is the sole authority for what the 
 
 ## Guardrails
 
-- Do not invent facts. If information is missing, state it as an assumption; if the assumption is critical to correctness, use CLARIFY.
+- Do not invent facts.
+  If information is missing, state it as an assumption; if the assumption is critical to correctness, use CLARIFY.
 - Work only within supplied files and instructions.
 - Do not edit files outside `## FILES TO WRITE`.
 - Prefer the simplest sufficient approach.
