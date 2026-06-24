@@ -22,9 +22,8 @@ Files related to dependency mapping, task graphs, and validation of the task gra
 
 ## Maintenance
 
-Files related to schema migrations and verification best practices.
+Files related to verification best practices.
 
-- [migration-guide.md](./maintenance/migration-guide.md) — How to update decompositions from the old implicit schema to v2.0.0.
 - [verification-best-practices.md](./maintenance/verification-best-practices.md) — Recommended verification checks by task type.
 
 ## Schema

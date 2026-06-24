@@ -3,6 +3,7 @@
   "title": "BreakdownTasksOutput",
   "description": "Output of the breakdown-tasks skill: a list of atomic delegation packets that together fulfill a user request.",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "summary": {
       "description": "One-paragraph summary of the overall user request, capturing its goal, scope, and constraints. This gives downstream workers context without requiring them to re-read the full prompt.",
@@ -16,20 +17,13 @@
         "$ref": "#/definitions/TaskPacket"
       },
       "minItems": 1
-    },
-    "dependencies": {
-      "description": "Optional directed dependency map. Keys are task IDs; values are arrays of task IDs that must complete before the key task can begin. Useful for complex multi-stage workflows.",
-      "type": "object",
-      "additionalProperties": {
-        "type": "array",
-        "items": { "type": "string" }
-      }
     }
   },
   "required": ["summary", "tasks"],
   "definitions": {
     "TaskPacket": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "id": {
           "description": "UUID v4 unique identifier for the task. Used for dependency references, progress tracking, and cross-task traceability.",

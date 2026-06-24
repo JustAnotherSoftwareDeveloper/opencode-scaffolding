@@ -39,7 +39,7 @@ Return only the decomposition result.
 
 ## VERIFICATION
 The output must be valid JSON parseable as an object with a required `summary` field (string, maxLength 2000) and a required `tasks` array (non-empty).
-Every task in the `tasks` array must be an object containing all required fields: id, purpose, context, filesToRead, filesToWrite, skills, executionInstructions, verification, expectedOutput.
+Every task in the `tasks` array must be an object containing all required fields: id, purpose, context, filesToRead, filesToWrite, skills, executionInstructions, expectedOutput.
 Each `id` must be a valid UUID v4 string.
 If a task has a `dependencies` array, each entry must reference a valid task `id` within the same decomposition.
 Each `executionInstructions` array must be non-empty, with items containing at minimum `step` (integer ≥1) and `action` (string).
@@ -55,7 +55,7 @@ Each task in `tasks` is a delegation packet object with the following fields:
 - `filesToWrite` (string array) — files the worker is expected to create or modify
 - `skills` (string array) — skills the worker must load
 - `executionInstructions` (object array) — ordered steps with `step` and `action`, optionally `verification`
-- `verification` (string array) — top-level checks on the complete deliverable
+- `verification` (string array, optional) — top-level checks on the complete deliverable
 - `expectedOutput` (string) — precise description of the deliverable
 - `dependencies` (string array, optional) — task IDs that must complete before this one begins
 ```

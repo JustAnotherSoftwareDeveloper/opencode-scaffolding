@@ -1,16 +1,18 @@
 ---
 name: task-delegation
-description: Use when validating a delegation packet and forwarding it to a worker via the task tool.
+description: Use when adapting loose task information into one worker packet and forwarding it via the task tool.
 class: inline
 ---
 
 # Task Delegation
 
-Validate a delegation packet and forward it to a worker via the task tool.
+Adapt loose task information into one worker packet and forward it via the task tool.
 
 ## Input
 
-The skill accepts any and all input formats with no preference — including plaintext, freeform natural language, JSON, YAML, key-value lists, or any other format. No particular input format is required, formalized, or preferred.
+Accept any input format, including plaintext, freeform natural language, JSON, YAML, key-value lists, or mixed notes.
+Use loose field mapping to produce exactly one plaintext worker packet.
+Reject a full `breakdown-tasks` JSON output object unless one task is clearly selected.
 
 ### Plaintext Packet Format (produced for worker)
 
@@ -46,20 +48,27 @@ The result returned by the worker matching the packet's `## EXPECTED OUTPUT`.
 
 ## Execution Plan
 
-1. **Accept arbitrary input** — Accept input in any format (plaintext, JSON, YAML, freeform natural language, key-value lists, etc.). Do not validate or reject for any specific format.
-2. **Infer the 8 standard packet fields** — Analyze the input and infer content for each of the 8 standard fields (PURPOSE, DETAILS, FILES TO READ, FILES TO WRITE, SKILLS, EXECUTION INSTRUCTIONS, VERIFICATION, EXPECTED OUTPUT). Use simple heuristics such as:
-   - Matching `## HEADER` patterns in plaintext input.
-   - Extracting key-value pairs from structured input (JSON, YAML).
-   - Matching known aliases (e.g., `instructions` → EXECUTION INSTRUCTIONS, `context` → DETAILS).
-   - Extracting best-guess content from freeform text.
-     Do not formalize or prefer any single inference strategy.
-3. **Mark uninferable fields** — For any of the 8 fields that cannot be inferred from the input, set its value to the explicit marker: `UNKNOWN — not provided in input`.
-4. **Construct complete plaintext packet** — Build a well-formed plaintext delegation packet with all 8 sections present using the Packet Template. Every section header (`## PURPOSE`, `## DETAILS`, etc.) must appear, even if its content is the UNKNOWN marker.
+1. **Accept arbitrary input** — Accept plaintext, JSON, YAML, freeform natural language, key-value lists, or mixed notes.
+2. **Reject ambiguous multi-task input** — If input is an object with `summary` and `tasks` and no single task is clearly selected, return `BLOCKED: task-delegation requires exactly one selected task.`
+3. **Infer the 8 standard packet fields** — Analyze the input and infer content for PURPOSE, DETAILS, FILES TO READ, FILES TO WRITE, SKILLS, EXECUTION INSTRUCTIONS, VERIFICATION, and EXPECTED OUTPUT.
+   Use loose aliases:
+   - `purpose`, `goal`, `task`, `title` map to `## PURPOSE`.
+   - `context`, `details`, `background`, `description` map to `## DETAILS`.
+   - `filesToRead`, `read`, `sources` map to `## FILES TO READ`.
+   - `filesToWrite`, `write`, `outputs` map to `## FILES TO WRITE`.
+   - `skills`, `skill` map to `## SKILLS`.
+   - `executionInstructions`, `instructions`, `steps` map to `## EXECUTION INSTRUCTIONS`.
+   - `verification`, `checks` map to `## VERIFICATION`.
+   - `expectedOutput`, `deliverable`, `output` map to `## EXPECTED OUTPUT`.
+4. **Mark uninferable fields** — For any of the 8 fields that cannot be inferred from the input, set its value to the explicit marker: `UNKNOWN — not provided in input`.
+5. **Construct complete plaintext packet** — Build a well-formed plaintext delegation packet with all 8 sections present using the Packet Template.
+   Every section header (`## PURPOSE`, `## DETAILS`, etc.) must appear, even if its content is the UNKNOWN marker.
    - **FILES TO READ: enforce explicit-only scope.** Only include files the worker is authorized to access. Do not add files from implicit discovery — FILES TO READ is the exclusive source of file access for the worker. The worker must not discover or read files beyond this list unless EXECUTION INSTRUCTIONS explicitly authorizes it.
    - **EXECUTION INSTRUCTIONS: embed balanced productivity and pre-tool checklist.** Include the directive "Balance cost and capability — use the simplest sufficient approach" and the pre-tool checklist from worker.md (5-question internal review before each tool call: Is this call strictly necessary? Is there a simpler alternative? Have I read all FILES TO READ? Am I respecting explicit-only scope? Is the simplest sufficient tool chosen?).
-5. **Validate all sections present** — Confirm the constructed packet has exactly 8 sections and none are missing. If sections are absent, report a clear error describing which sections are missing and stop.
-6. **Invoke the worker** — Invoke the `task` tool with `subagent_type: "worker"`, `description` set to the inferred PURPOSE content, `prompt` set to the full plaintext packet, and `command` set to the inferred PURPOSE content.
-7. **Return the worker result unchanged** — Return the result from the worker exactly as received.
+6. **Validate all sections present** — Confirm the constructed packet has exactly 8 sections and none are missing.
+   If sections are absent, report a clear error describing which sections are missing and stop.
+7. **Invoke the worker** — Invoke the `task` tool with `subagent_type: "worker"`, `description` set to the inferred PURPOSE content, `prompt` set to the full plaintext packet, and `command` set to the inferred PURPOSE content.
+8. **Return the worker result unchanged** — Return the result from the worker exactly as received.
    - **Preserve PARTIAL: as a valid success signal.** If the worker returns `PARTIAL:`, do not treat it as an error or a blocker. Accept it as a valid response and pass it through to the caller. The delegator will forward the partial output to subsequent steps as appropriate. Do not rewrap, prefix, or modify the PARTIAL: response.
 
 This is a single-pass process.
@@ -67,9 +76,10 @@ Launch exactly one worker task per invocation.
 
 ## Guardrails
 
-- Accept any input format without rejection — do not require, prefer, or validate for any specific format (JSON, YAML, plaintext, etc.).
+- Accept any single-task input format without rejecting a format category.
+- Reject unresolved multi-task input.
 - Always produce exactly 8 sections in the output packet — no more, no less.
 - Mark any uninferable field with the explicit marker `UNKNOWN — not provided in input`; do not fill with default values, placeholder text, or guesses.
-- Do not formalize or prefer any input format in the inference heuristics.
+- Use loose mapping; do not require exact field names.
 - After construction, do not modify, re-encode, or further transform the plaintext packet.
 - If the constructed packet is missing sections, report a clear error describing which sections are absent and do not invoke the worker.

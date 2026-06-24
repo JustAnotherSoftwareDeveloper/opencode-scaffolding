@@ -1,6 +1,6 @@
 ---
 name: todo-writer
-description: "Use when writing or replacing todo entries via the todowrite tool, typically to track progress across delegation packets."
+description: "Use when writing or replacing todo entries from canonical breakdown-tasks output via the todowrite tool."
 class: inline
 ---
 
@@ -12,10 +12,12 @@ Send the complete todo array in every call.
 
 ## Input
 
-A set of delegation packets, one per todo item, or a structured description of work items to track.
-
-- **Packet set**: One or more delegation packets (`## PURPOSE`, `## DETAILS`, etc.) where the packet `## PURPOSE` maps to the todo `content` field.
-- **Array position**: The position of each packet in the input array determines its mapping to the corresponding todo entry in the output array.
+Canonical `breakdown-tasks` JSON output plus caller-provided `status` and `priority`.
+The root object must contain only `summary` and `tasks`.
+The `tasks` array must contain task objects with `id`, `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, and `expectedOutput`.
+Task objects may also contain `dependencies` and `verification`.
+Each item in `tasks` becomes one todo item.
+The `tasks[*].purpose` field maps to todo `content`.
 
 ## Output
 
@@ -40,7 +42,7 @@ No structured output is returned to the caller.
           "content": {
             "type": "string",
             "minLength": 1,
-            "description": "Todo description text; maps from the ## PURPOSE of a delegation packet"
+            "description": "Todo description text; maps from tasks[*].purpose"
           },
           "status": {
             "type": "string",
@@ -63,12 +65,14 @@ No structured output is returned to the caller.
 
 ## Execution Plan
 
-1. Read all delegation packets from the input.
-2. For each packet, extract `## PURPOSE` as todo `content`, preserving array order.
-3. Apply caller-specified `status` and `priority` to each entry.
-4. Collect all entries into a single `todos` array.
-5. Invoke the `todowrite` tool once with the complete array.
-6. Report completion.
+1. Read canonical `breakdown-tasks` JSON output from the input.
+2. Verify the root object contains only `summary` and `tasks`.
+3. Verify the object contains a non-empty `tasks` array.
+4. For each task, extract `purpose` as todo `content`, preserving array order.
+5. Apply caller-specified `status` and `priority` to each entry.
+6. Collect all entries into a single `todos` array.
+7. Invoke the `todowrite` tool once with the complete array.
+8. Report completion.
 
 This is a single-pass process.
 Invoke `todowrite` exactly once per call.
@@ -79,8 +83,9 @@ Invoke `todowrite` exactly once per call.
   Use only caller-provided values.
 - Array order is significant.
   Position in input maps to position in output.
-- `content` must be non-empty and drawn verbatim from the packet `## PURPOSE`.
+- `content` must be non-empty and drawn verbatim from `tasks[*].purpose`.
   Do not rewrite, summarize, or embellish.
+- Reject plaintext packets, bare arrays, single task objects, and non-canonical fields.
 - Always send the full `todos` array.
   Partial updates are not supported.
 - Validate each entry:

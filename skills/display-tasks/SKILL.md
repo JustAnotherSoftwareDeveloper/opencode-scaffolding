@@ -1,21 +1,20 @@
 ---
 name: display-tasks
-description: "Use when rendering task delegation packets as a concise Markdown summary table."
+description: "Use when rendering canonical breakdown-tasks output as a concise Markdown summary table."
 class: inline
 ---
 
 # Display Tasks
 
-Render one or more delegation packets into a Markdown table with only safe user-facing fields.
+Render canonical `breakdown-tasks` output into a Markdown table with only safe user-facing fields.
 
 ## Input
 
-Accepts full delegation packet text. Input is in either of two formats:
-
-- **Plaintext packets** — One or more delegation packets delimited by `---` containing standard headers (`## PURPOSE`, `## FILES TO READ`, `## FILES TO WRITE`, `## SKILLS`, etc.).
-- **JSON array** — A JSON array of objects, each object conforming to the expanded camelCase schema produced by the breakdown-tasks skill (fields: `id` (UUID v4), `purpose`, `context` (long-form string, replaces `details`), `filesToRead`, `filesToWrite`, `skills`, `dependencies` (task-local array of UUID strings for serial ordering), `executionInstructions` (array of `{step, action, verification}` step objects), `verification` (string array), `expectedOutput`).
-  The parser tolerates unknown keys, so no code change is required.
-  A single JSON object (not wrapped in an array) is also accepted and treated as a one-element array.
+Accept exactly one canonical `breakdown-tasks` JSON object.
+The root object must contain only `summary` and `tasks`.
+The `tasks` array must contain task objects with `id`, `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, and `expectedOutput`.
+Task objects may also contain `dependencies` and `verification`.
+Reject plaintext packets, bare JSON arrays, single task objects, and non-canonical fields.
 
 ## Output
 
@@ -29,36 +28,25 @@ A single Markdown table with no surrounding commentary.
 | ...     | ...   | ...   |
 ```
 
-One row per input packet.
+One row per item in `tasks`.
 
 ## Extraction Rules
 
-### For plaintext (`---`-delimited) packets
-
-1. **Purpose** — Extract the text after `## PURPOSE` on the next non-blank line.
+1. **Purpose** — Extract from `tasks[*].purpose`.
    Truncate to 80 characters if longer.
-2. **Files** — Combine `## FILES TO READ` and `## FILES TO WRITE` into a compact, comma-separated list.
+2. **Files** — Combine `tasks[*].filesToRead` and `tasks[*].filesToWrite` into a compact, comma-separated list of basenames.
    Strip paths to basenames when they share a common prefix.
-3. **Skill** — Extract the text after `## SKILLS` on the next non-blank line.
-   If empty or absent, render `none`.
-
-### For JSON-origin packets
-
-1. **Purpose** — Extract from the `purpose` field text. Truncate to 80 characters if longer.
-2. **Files** — Combine `filesToRead` and `filesToWrite` arrays into a compact, comma-separated list of basenames.
-   Strip paths to basenames when they share a common prefix.
-3. **Skill** — Extract from the `skills` array and join elements with ", ".
+3. **Skill** — Extract from `tasks[*].skills` and join elements with `, `.
    If empty or absent, render `none`.
 
 ## Execution Plan
 
-1. Normalize input —
-   a. Detect whether input is valid JSON: if the trimmed input starts with `[` or `{`, attempt JSON parse.
-      - If it parses as a JSON array, use each element as a packet object.
-      - If it parses as a single JSON object, wrap it in an array (single packet).
-   b. Otherwise, split on `---` delimiters to isolate each plaintext delegation packet.
-2. Extract fields per [Extraction Rules](#extraction-rules) for each packet.
-3. Produce output per [Output Format](#output-format).
+1. Parse input as JSON.
+2. Verify the parsed value is an object with `summary` and `tasks`.
+3. Verify `tasks` is a non-empty array.
+4. Reject the input with `BLOCKED: display-tasks requires canonical breakdown-tasks JSON output.` if any check fails.
+5. Extract fields per [Extraction Rules](#extraction-rules) for each task.
+6. Produce output per [Output Format](#output-format).
 
 ## Guardrails
 
@@ -67,6 +55,7 @@ One row per input packet.
 - Never add commentary, summaries, or explanations outside the table.
 - Do not own workflow decisions, task state, or delegation logic.
   The delegator decides when to call this skill.
-- Do not modify, validate, or execute the packet contents.
+- Do not modify or execute the packet contents.
   This is a rendering helper only.
-- JSON input is parsed as part of input normalization; do not validate or execute packet contents beyond rendering.
+- Do not accept non-canonical packet shapes.
+- Do not normalize arrays, single task objects, or plaintext packets.
