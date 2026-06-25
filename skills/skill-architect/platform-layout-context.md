@@ -60,3 +60,53 @@ Their entry point defines a procedural workflow instead.
 Cross-skill interaction is represented exclusively through skill loading (using the skill tool or equivalent mechanism).
 No skill file may contain a literal path to a file in another skill's directory.
 Scripts are the sole exception — they may reference files in other directories since they are executed rather than read as skill content.
+
+## Scripts Directory
+
+Scripts live outside skill directories at `scripts/<lang>/`.
+The OpenCode platform recognizes three script runtimes:
+
+- `scripts/python/` — Python scripts managed by uv.
+  Entry points registered in `pyproject.toml [project.scripts]`.
+  Invoked via `uv run --directory <path> <entry-point> [args]`.
+- `scripts/node/` — Node.js scripts managed by Bun.
+  Invoked via `bun run --cwd <path> <script>`.
+- `scripts/` (root) — Shell scripts and Makefiles.
+  Invoked via `make -C <path> <target>`.
+
+### Global vs Project-Local Resolution Order
+
+Scripts are resolved from two mandatory roots with an optional explicit override.
+This is an **architecture constraint**, not a future option — every script invocation must use this resolution order:
+
+1. `$OPENCODE_SCRIPTS_PYTHON` — Environment variable explicit override (optional, highest priority).
+2. `<project-root>/.opencode/scripts/python` — Project-local root (mandatory default, checked second).
+3. `~/.config/opencode/scripts/python` — Global root (mandatory default, fallback).
+
+**How skill origin determines root selection:**
+
+- If the skill is loaded from a **project-local** skills directory (e.g., `<project>/.opencode/skills/<name>/`), use `<project-root>/.opencode/scripts/python` as the primary root.
+  Resolution falls through to the global root if a script or shared lib module is not found locally.
+- If the skill is loaded from the **global** skills directory (`~/.config/opencode/skills/<name>/`), use `~/.config/opencode/scripts/python` as the primary root.
+- Project-local scripts may override or augment global scripts: when resolving a reusable script or a shared lib module (`lib.shared.*`), the project-local root is checked first, and only if absent does resolution fall through to the global root.
+
+**Resolution mechanism in skill invocation steps:**
+
+```shell
+# Resolve scripts directory (see platform-layout-context.md for full rules)
+SCRIPTS_PYTHON="${OPENCODE_SCRIPTS_PYTHON:-$PWD/.opencode/scripts/python}"
+SCRIPTS_PYTHON="${SCRIPTS_PYTHON:-$HOME/.config/opencode/scripts/python}"
+uv run --directory "$SCRIPTS_PYTHON" <entry-point> [args]
+```
+
+If a project has no `.opencode/scripts/python/` directory, resolution falls through silently to the global root.
+
+Python scripts follow these conventions:
+- CLI entry points in `src/cli/`, using click decorators.
+- Library logic in `src/lib/`, organized by domain.
+- Tests in `tests/`, using pytest with CliRunner for CLI integration tests.
+- Coverage target: 100% (`fail_under = 100` in pyproject.toml).
+- Non-interactive, exit non-zero on failure, errors to stderr.
+
+Skills invoke scripts via the canonical pattern:
+`uv run --directory <scripts-python-path> <entry-point> [args]`

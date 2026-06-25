@@ -32,14 +32,34 @@ Concrete description of what this skill produces and in what format.
 ## Execution Plan
 
 1. <<Step 1>> — see [Input](#input).
-2. <<Step 2>> — see [<<Section Reference>>](#<<section-reference>>).
-3. <<Step 3>> — produce output per [Output](#output).
+2. If the step involves deterministic data processing, delegate to a Python script:
+   Resolve `<scripts-python-dir>` per the global/project-local resolution order (see [./platform-layout-context.md]).
+   Run `uv run --directory <scripts-python-dir> <entry-point> <args>`.
+   Incorporate script output into the reasoning context.
+3. <<Step 2>> — see [<<Section Reference>>](#<<section-reference>>).
+4. <<Step 3>> — produce output per [Output](#output).
 
 This is a single-pass process.
-Do not delegate, loop, or perform multi-phase orchestration.
+Do not loop or perform multi-phase orchestration.
 
 ## Guardrails
 
 - <<guardrail 1>>
 - <<guardrail 2>>
 - <<guardrail 3>>
+
+## Cross-References
+
+- `./platform-layout-context.md` — Path resolution rules for script invocations within this skill.
+
+## Self-Validation
+
+- Name matches directory name.
+- Description starts with "Use when".
+- Class is `inline`.
+- All `<<placeholders>>` are replaced.
+- No remaining old-template sections.
+
+## Docs
+
+See the [Skill Template Library](../../skill-template-library/) for the canonical template set and its documentation.

@@ -28,7 +28,7 @@ class TestCollectSkillsMain:
     """Tests for the main() entry point in cli/collect_skills.py."""
 
     def test_main_success_empty(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """main() returns 0 when discovery succeeds with no skills."""
+        """main() returns 0 when discovery succeeds with no skills and produces empty JSON array."""
         monkeypatch.setattr(
             "lib.collect_skills.discovery.discover_all_skills",
             lambda index, **kwargs: None,
@@ -37,6 +37,7 @@ class TestCollectSkillsMain:
         runner = CliRunner()
         result = runner.invoke(main, [])
         assert result.exit_code == 0
+        assert result.output.strip() == "[]"
 
     def test_main_with_output_file(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch

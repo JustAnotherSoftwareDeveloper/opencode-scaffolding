@@ -28,12 +28,6 @@ Choose the relevant files based on what you need to learn or reference.
 Read only those files.
 Do not read every file — read as needed.
 
-## Contents
-
-- `templates/` — Canonical SKILL.md templates for all six skill classes plus a common workflow template.
-- `schemas/` — Index referencing class-contract schemas for seeding new skill directories.
-- `snippets/` — Index of reusable code snippets for skill authoring.
-
 ## Docs
 
 See the [Documentation Files](#documentation-files) listing above for template descriptions.

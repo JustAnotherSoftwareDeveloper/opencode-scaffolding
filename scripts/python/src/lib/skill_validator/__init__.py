@@ -22,6 +22,9 @@ from .helpers import (
     _is_in_skip_directory,
     _parse_frontmatter,
     _read_skill_md,
+    # These private helpers are intentionally re-exported so that validators
+    # in checks.py and external consumers (e.g., tests) have a single import
+    # target through the package public API instead of reaching into .helpers.
 )
 from .registry import ALL_CHECKS, run_all
 

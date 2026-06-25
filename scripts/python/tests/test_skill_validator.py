@@ -385,7 +385,6 @@ class TestCheckNoExamplesSection:
 
 class TestCheckOneSentencePerLine:
     def test_all_ok(self, skill_dir: Path) -> None:
-        d = tmp_path_factory = skill_dir  # use the fixture directly
         # Make a clean dir with proper one-sentence-per-line
         d = skill_dir.parent / "sentence-ok"
         d.mkdir()

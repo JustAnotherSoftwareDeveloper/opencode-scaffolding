@@ -39,11 +39,9 @@ def cli(skill_path: str) -> None:
     click.echo(json.dumps(result, indent=2))
 
     # Exit 0 if all checks pass, 1 if any fail
-    if all(check.get("passed", False) for check in result["checks"]):
-        raise SystemExit(0)
-    else:
-        raise SystemExit(1)
+    passed = all(check.get("passed", False) for check in result["checks"])
+    raise SystemExit(0 if passed else 1)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     cli()

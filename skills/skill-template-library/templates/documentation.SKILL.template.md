@@ -28,3 +28,9 @@ Do not read every file — read as needed.
 - `docs/` — <<description of shared documentation>>
 - `schemas/` — <<description of shared schemas, if present>>
 - `templates/` — <<description of shared templates, if present>>
+- `scripts/` — <<description of script interface documentation, if present>>
+
+## Docs
+
+See the [Documentation Files](#documentation-files) listing above for file descriptions.
+Base directory for this skill: `file:///<<path-to-skill-directory>>`

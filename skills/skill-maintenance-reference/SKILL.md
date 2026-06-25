@@ -23,13 +23,6 @@ Choose the relevant files based on what you need to learn or reference.
 Read only those files.
 Do not read every file — read as needed.
 
-## Contents
-
-- `update-workflow.md` — Update workflow reference.
-- `migration-guide.md` — Migration guide for old-to-new structure.
-- `validation-checklist.md` — Validation checklist for skill authoring.
-- `gotchas.md` — Common pitfalls and gotchas.
-
 ## Docs
 
 See `./update-workflow.md`, `./migration-guide.md`, `./validation-checklist.md`, and `./gotchas.md` for the full reference documentation.

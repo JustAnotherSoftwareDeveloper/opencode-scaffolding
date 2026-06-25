@@ -54,13 +54,26 @@ Choose `planning` when the skill:
 - Must not produce side effects, modify files, invoke tools, or define execution steps.
 - Example: a service-architecture skill that documents module boundaries, data flow, and deployment topology.
 
-## Summary Decision Table
+## Summary Decision List
 
-| Condition | Class |
-|---|---|
-| Single bounded procedure, independent, self-validating | `operation` |
-| Receives delegation packet, returns structured output | `delegated` |
-| Single-pass reasoning-heavy, main agent executes | `inline` |
-| Coordinates phases, workers, sub-skills | `orchestrated` |
-| Passive data store for shared reference content | `documentation` |
-| Structural knowledge for planning activities | `planning` |
+- Single bounded procedure, independent, self-validating → `operation`
+- Receives delegation packet, returns structured output → `delegated`
+- Single-pass reasoning-heavy, main agent executes → `inline`
+- Coordinates phases, workers, sub-skills → `orchestrated`
+- Passive data store for shared reference content → `documentation`
+- Structural knowledge for planning activities → `planning`
+
+## Task Involves Deterministic, Repeatable, or Token-Heavy Processing
+
+Before selecting a class, evaluate whether the task qualifies for script delegation.
+A task qualifies when ALL of these hold:
+
+- Deterministic output for identical input.
+- Well-defined I/O contract.
+- Token cost exceeds script execution cost.
+- Task appears in more than one skill or is used repeatedly.
+
+When the task qualifies, the skill class remains the same (operation, delegated, etc.)
+but must include a script invocation step in its Procedure or Execution Steps.
+The script handles the deterministic portion; the LLM handles orchestration, validation,
+and non-deterministic decisions around it.

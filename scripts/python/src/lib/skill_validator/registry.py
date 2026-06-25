@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -24,7 +25,7 @@ from .checks import (
 # Check registry
 # ---------------------------------------------------------------------------
 
-ALL_CHECKS: list[tuple[str, Any]] = [
+ALL_CHECKS: list[tuple[str, Callable[..., CheckResult]]] = [
     ("frontmatter-valid", check_frontmatter_valid),
     ("name-matches-dir", check_name_matches_dir),
     ("description-prefix", check_description_prefix),

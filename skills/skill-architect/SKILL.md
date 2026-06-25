@@ -42,8 +42,7 @@ It answers "what skill classes exist, how to choose one, what boundaries separat
 
 ## Related Skills
 
-- skill-writer: Use when creating or updating all OpenCode skill files under `skills/<name>/` from user requirements and source material.
-- skill-factory: Use when executing the actual CREATE/UPDATE workflow for skill directories.
+- skill-factory: Use when creating or updating all OpenCode skill files under `skills/<name>/` (SKILL.md, reference/, templates/, schemas/, and snippets/) from user requirements and source material, including executing the CREATE/UPDATE workflow.
 - skill-authoring-guide: Use as documentation reference for authoring style, frontmatter field rules, and progressive disclosure.
 - skill-orchestration-reference: Use as documentation reference for orchestrated and delegated worker patterns, collation format, and orchestration usage.
 - skill-maintenance-reference: Use as documentation reference for update workflows, migration guides, and validation checklists.

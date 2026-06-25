@@ -17,6 +17,11 @@ A Normalize Input step absorbs free-form input, structured packets, files, or to
 - **Delegation**: Does not sub-delegate.
 - **Execution steps**: Yes — numbered prefixes define the workflow.
 
+Script invocation: Operation skills are the natural home for script-calling procedures.
+When a step involves deterministic, repeatable, or token-intensive work, replace or augment the LLM step with a script invocation step.
+The skill's procedure defines the orchestration around the script call — input preparation, invocation, output parsing, and validation.
+Script invocation does not change the skill class.
+
 ## delegated
 
 **Template**: `./templates/delegated.SKILL.template.md`

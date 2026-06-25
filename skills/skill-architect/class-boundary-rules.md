@@ -57,3 +57,31 @@ The answers to these three questions map to exactly one class.
 Cross-skill interaction is represented exclusively through skill loading.
 No skill file may contain a literal path to a file in another skill's directory.
 Scripts are the sole exception to this rule — they may reference files in other directories since they are executed rather than read as skill content.
+
+## Script Delegation Rule
+
+Scripts are the sole exception to directory confinement.
+They may reference files in other directories since they are executed rather than read as skill content.
+A skill may invoke a Python script when the work:
+
+1. Is **deterministic** — produces identical output for identical input.
+   Example: parsing YAML, validating JSON schema, computing diffs.
+2. Is **repeatable** — the same operation runs many times with different inputs.
+   Example: collecting metadata across many skill directories, transforming batch data.
+3. Is **token-intensive** — the LLM reasoning cost exceeds the script's execution cost.
+   Example: iterating over hundreds of files, performing regex transformations at scale.
+4. Has **well-defined I/O** — inputs and outputs map cleanly to CLI arguments, stdin, stdout, or files.
+   Example: a click CLI that reads a file path and writes a processed file.
+5. Benefits from **library dependencies** — PyYAML, jsonschema, lxml, or other Python packages provide reliable functionality.
+   Example: validating a YAML file against a JSON Schema.
+
+**Anti-triggers** — do NOT delegate to a script when:
+
+1. The work requires **judgment or creativity** — LLM reasoning is the correct tool.
+   Example: determining whether a design document is complete.
+2. The work involves **ambiguous or variable inputs** — the I/O shape changes per invocation.
+   Example: interpreting a user's freeform request.
+3. The work is a **one-off with no reuse** — the overhead of creating a script exceeds the tokens it saves.
+   Example: a single ad-hoc grep across one file.
+4. The work requires **adaptive decision-making** — the LLM must decide the next step based on partial results.
+   Example: debugging an unknown error where the next diagnostic step depends on prior output.

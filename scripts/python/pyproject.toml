@@ -16,6 +16,8 @@ dependencies = [
 
 [project.scripts]
 collect-skills = "cli.collect_skills:main"
+resolve-script-root = "cli.resolve_script_root:main"
+validate-skill-meta = "cli.validate_skill_meta:main"
 
 [dependency-groups]
 dev = [
@@ -26,7 +28,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/cli", "src/lib"]
+packages = ["src/cli", "src/lib", "src/lib/shared"]
 
 [tool.uv]
 package = true

@@ -27,27 +27,29 @@ class TestCli:
     """Tests for the Click CLI command via CliRunner."""
 
     def test_default_invocation(self) -> None:
-        """Running with no arguments succeeds (empty pass-through)."""
+        """Running with no arguments succeeds and produces JSON output."""
         runner = CliRunner()
         result = runner.invoke(main, [])
-        # The CLI is a pass-through (body is empty);
-        # currently it just returns None (exit 0).
         assert result.exit_code == 0
+        assert result.output.startswith("[")
 
     def test_with_project_root(self) -> None:
         runner = CliRunner()
         result = runner.invoke(main, ["--project-root", "/tmp"])
         assert result.exit_code == 0
+        assert result.output.startswith("[")
 
     def test_with_extra_paths(self) -> None:
         runner = CliRunner()
         result = runner.invoke(main, ["--extra-paths", "/tmp/a", "--extra-paths", "/tmp/b"])
         assert result.exit_code == 0
+        assert result.output.startswith("[")
 
     def test_with_include_archive(self) -> None:
         runner = CliRunner()
         result = runner.invoke(main, ["--include-archive"])
         assert result.exit_code == 0
+        assert result.output.startswith("[")
 
     def test_with_all_options(self, tmp_path: Path) -> None:
         manifest = tmp_path / "manifest.json"

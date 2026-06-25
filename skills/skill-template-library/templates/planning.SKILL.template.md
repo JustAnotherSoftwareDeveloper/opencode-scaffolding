@@ -27,6 +27,8 @@ For each common planning workflow in this domain, create a workflow file using t
 - <<workflow-name>> - <<optional skill>> - <<quick description>>
 - <<workflow-name>> - <<optional skill>> - <<quick description>>
 - <<workflow-name>> - <<optional skill>> - <<quick description>>
+  When the workflow involves deterministic processing, note the Python script that handles it:
+  `scripts/python/<entry-point>`.
 
 ## Related Skills
 
@@ -37,3 +39,9 @@ This is for quick reference during planning.
 ## Cross-References
 
 - `./common-workflow.md` — Workflow file template used by the Common Workflows section.
+
+## Docs
+
+See the [Common Workflows](#common-workflows) section for workflow definitions.
+See `../../skill-template-library/templates/` for the canonical template set.
+Base directory for this skill: `file:///<<path-to-skill-directory>>`

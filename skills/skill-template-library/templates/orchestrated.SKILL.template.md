@@ -11,10 +11,14 @@ class: orchestrated
 ## Execution Steps
 
 1. **Delegated: <<Worker Skill A>>** — <<purpose of delegation>>.
-2. **Inline: <<Inline Skill Name>>** — <<what this inline step does in a single pass>>.
-3. **Decompose** — <<what to decompose into sub-packets>>.
-4. **Delegated: <<Worker Skill B>>** — <<purpose of delegation>>.
-5. **Verify** — <<what to verify>>.
+2. **Script: <<entry-point>>** — <<what the script computes>>.
+   Resolve `<scripts-python-dir>` per the global/project-local resolution order (see platform-layout-context.md).
+   Run `uv run --directory <scripts-python-dir> <entry-point> [args]`.
+   Validate structured output before proceeding.
+3. **Inline: <<Inline Skill Name>>** — <<what this inline step does in a single pass>>.
+4. **Decompose** — <<what to decompose into sub-packets>>.
+5. **Delegated: <<Worker Skill B>>** — <<purpose of delegation>>.
+6. **Verify** — <<what to verify>>.
 
 ## Worker Strategy
 

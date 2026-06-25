@@ -4,6 +4,8 @@ description: "Use when <<trigger-condition>>."
 class: operation
 ---
 
+# <<Skill Name>>
+
 ## Normalize Input
 
 Map invocation context to one internal input object.
@@ -15,9 +17,15 @@ Each step is one imperative action.
 Do not delegate sub-tasks.
 
 1. <<step>>.
-2. <<step>>.
+2. **Run script: `<script-entry-point>`** —
+   Resolve `<scripts-python-dir>` per the global/project-local resolution order (see platform-layout-context.md).
+   Invoke via `uv run --directory <scripts-python-dir> <entry-point> <args>`.
+   Capture stdout as structured output.
+   Parse output and validate against expected schema.
+   On non-zero exit, report `BLOCKED: Script failed — <stderr summary>`.
 3. <<step>>.
 4. <<step>>.
+5. <<step>>.
 
 ## Self-Validation
 

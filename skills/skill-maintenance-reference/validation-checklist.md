@@ -22,7 +22,7 @@ Every authored skill must be verified against this checklist before declaring do
 - **Operation class**: If class is `operation`, "Normalize Input" is the first procedural step after the H1 intro.
 - **Documentation class**: If class is `documentation`, no execution steps or side effects; body is structured reference data only.
 
-### Planning-Specific Checks
+## Planning-Specific Checks
 
 Apply these additional checks when the skill class is `planning`:
 

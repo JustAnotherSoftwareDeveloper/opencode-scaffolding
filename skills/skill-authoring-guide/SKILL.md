@@ -25,4 +25,5 @@ Do not read every file — read as needed.
 
 ## Docs
 
-See `./reference/README.md` for documentation of supporting files.
+All reference files are listed in the Documentation Files section above and reside directly under `skills/skill-authoring-guide/`.
+No separate `reference/` subdirectory exists.

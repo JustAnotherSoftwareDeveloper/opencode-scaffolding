@@ -37,6 +37,11 @@ Each header defines a specific dimension of the task:
 
 1. Parse input contract from delegation packet.
 2. Perform bounded work.
+   If the work includes a deterministic subtask:
+   a. Prepare input for the script (file path, CLI arguments, or stdin).
+   b. Resolve `<scripts-python-dir>` per `platform-layout-context.md` and invoke `uv run --directory <scripts-python-dir> <entry-point> <args>`.
+   c. Capture and validate stdout output.
+   d. On non-zero exit, return `BLOCKED: <script-name> failed — <stderr>`.
 3. Produce output per Output Contract below.
 4. Self-validate using the packet's `## VERIFICATION` instructions and the template's `## Verification` section.
 5. Return exactly what the packet's `## EXPECTED OUTPUT` requests, following the template's `## Output Contract`.
@@ -71,3 +76,9 @@ The worker must produce exactly what that section specifies, in the format it sp
 - Do not edit files outside `## FILES TO WRITE`.
 - Prefer the simplest sufficient approach.
 - Report blockers as `BLOCKED: <reason>` when contradictions or missing dependencies prevent completion.
+
+## Cross-References
+
+- `./platform-layout-context.md` — Path resolution rules for script invocations.
+- `../../skill-template-library/templates/inline.SKILL.template.md` — Inline skill template for single-pass steps.
+- `../../skill-template-library/templates/orchestrated.SKILL.template.md` — Orchestrated skill template for multi-step coordination.

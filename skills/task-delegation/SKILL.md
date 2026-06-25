@@ -1,6 +1,6 @@
 ---
 name: task-delegation
-description: Use when adapting loose task information into one worker packet and forwarding it via the task tool.
+description: "Use when adapting loose task information into one worker packet and forwarding it via the task tool."
 class: inline
 ---
 

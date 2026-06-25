@@ -2,21 +2,21 @@
 
 Reference material for the UPDATE path when editing existing skill directories.
 
-### Mode Determination
+## Mode Determination
 
 - **CREATE**: `skills/<name>/` does not exist.
   Produce a new skill directory from scratch.
 - **UPDATE**: `skills/<name>/` exists.
   Edit one or more files in the existing directory.
 
-### Determining What Changed
+## Determining What Changed
 
 - Compare the user request against the current state of every file under `skills/<name>/`.
 - Read full current content of each targeted file before applying edits — never assume content.
 - Identify the minimal set of sections, paragraphs, or lines that the request affects.
 - If the request is open-ended ("update to match new conventions"), audit every section against the latest SKILL.md structure and any applicable reference files before editing.
 
-### Preserving Existing Content During Targeted Edits
+## Preserving Existing Content During Targeted Edits
 
 - Keep frontmatter, structure, and prose outside the edit scope intact.
 - Only modify sections that the request explicitly targets.
@@ -24,7 +24,7 @@ Reference material for the UPDATE path when editing existing skill directories.
 - Preserve user additions to reference files (gotchas, custom conventions) when updating core files.
 - If a request targets a single file, leave all other files untouched.
 
-### Partial Update Scope Boundaries
+## Partial Update Scope Boundaries
 
 A request can target only a subset of the skill directory:
 
@@ -37,7 +37,7 @@ A request can target only a subset of the skill directory:
 
 When scope is ambiguous, ask: "Update only SKILL.md? Only reference files? Entire skill directory?"
 
-### Content Integrity Rules
+## Content Integrity Rules
 
 - Never silently delete content — every removal must be intentional and justified by the request.
 - Preserve user customizations in reference files when updating SKILL.md.
@@ -45,7 +45,7 @@ When scope is ambiguous, ask: "Update only SKILL.md? Only reference files? Entir
 - If the request requires removing content, state the removal explicitly in the edit.
 - Verify after each edit that unchanged sections still render as expected.
 
-### Update-Mode Decision Prompts
+## Update-Mode Decision Prompts
 
 When in UPDATE mode, decide scope before editing:
 

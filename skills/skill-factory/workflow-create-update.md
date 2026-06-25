@@ -16,6 +16,8 @@ Produce a new skill directory from scratch.
    - Use Title Case for H1 and H2 headings.
 4. Write a thin procedural body with: trigger guidance, step-by-step workflow, quality rules, validation checklist, expected output.
    - Reference the loaded documentation skills by name for depth — never by file path.
+4a. If the skill requires a deterministic helper, load `skill-script-python-writer` to generate the Python script.
+    Pass the script requirements derived from steps 1-3.
 5. For operation-class skills: include "Normalize Input" as the first procedural step after the H1 intro.
 6. For documentation-class skills: the body contains structured reference data (schema, field definitions, conventions) with no execution steps, no tool invocations.
 7. For planning-class skills: the body contains decision frameworks, taxonomy rules, and boundary definitions.

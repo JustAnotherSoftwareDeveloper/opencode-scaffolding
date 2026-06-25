@@ -1,34 +1,33 @@
 # Migration Guide: Old Monolithic skill-writer to Decomposed Structure
 
+> **Migration complete.** The monolithic `skill-writer` has been fully removed and decomposed into the six focused skills listed below. All references to `skill-writer/` directory paths are historical; the directory no longer exists. This guide is retained for historical context and reference only.
+
 Reference for migrating skills from the old monolithic `skill-writer` structure to the new decomposed skill layout with separate planning, documentation, and operation skills.
 
 ## Background
 
-The `skill-writer` skill was originally a single monolithic skill handling architectural planning, authoring-style guidance, orchestration-pattern documentation, maintenance workflows, template management, and file-level create/update operations. It has been decomposed into six focused skills:
+The `skill-writer` skill was originally a single monolithic skill handling architectural planning, authoring-style guidance, orchestration-pattern documentation, maintenance workflows, template management, and file-level create/update operations.
+It has been decomposed into six focused skills:
 
-| # | Skill | Class | Purpose |
-|---|-------|-------|---------|
-| 1 | **skill-architect** | planning | Class taxonomy, class decision flow, class boundary rules, platform layout/context |
-| 2 | **skill-authoring-guide** | documentation | Authoring style, frontmatter field rules, progressive disclosure, trigger evaluation |
-| 3 | **skill-orchestration-reference** | documentation | Orchestrated/delegated worker patterns, collation format, orchestration usage |
-| 4 | **skill-maintenance-reference** | documentation | Update workflow, migration guide, validation checklist, gotchas |
-| 5 | **skill-template-library** | documentation | All skill templates, common workflow template, schemas/snippets indices |
-| 6 | **skill-factory** | operation | Actual CREATE/UPDATE workflow for skills |
+- **skill-architect** (planning) — Class taxonomy, class decision flow, class boundary rules, platform layout/context.
+- **skill-authoring-guide** (documentation) — Authoring style, frontmatter field rules, progressive disclosure, trigger evaluation.
+- **skill-orchestration-reference** (documentation) — Orchestrated/delegated worker patterns, collation format, orchestration usage.
+- **skill-maintenance-reference** (documentation) — Update workflow, migration guide, validation checklist, gotchas.
+- **skill-template-library** (documentation) — All skill templates, common workflow template, schemas/snippets indices.
+- **skill-factory** (operation) — Actual CREATE/UPDATE workflow for skills.
 
 ## Section Mapping: Monolithic to Decomposed
 
-| Old Monolithic Section | New Decomposed Location | Notes |
-|---|---|---|
-| Platform Context | `skill-architect/platform-layout-context.md` | Planning-level content moved to architect skill. |
-| Class Taxonomy & Decision Flow | `skill-architect/class-taxonomy.md`, `skill-architect/class-decision-flow.md` | Class definitions separated into dedicated planning skill. |
-| Authoring Style & Frontmatter Rules | `skill-authoring-guide/authoring-style.md`, `skill-authoring-guide/frontmatter-rules.md` | Editorial conventions in dedicated documentation skill. |
-| Orchestration Patterns | `skill-orchestration-reference/orchestrated-worker-patterns.md` | Orchestration reference in dedicated skill. |
-| Update Workflow | `skill-maintenance-reference/update-workflow.md` | Maintenance reference in this skill. |
-| Migration Procedures | `skill-maintenance-reference/migration-guide.md` | Migration guide in this skill. |
-| Validation Checklist | `skill-maintenance-reference/validation-checklist.md` | Validation checks in this skill. |
-| Gotchas | `skill-maintenance-reference/gotchas.md` | Known pitfalls in this skill. |
-| Templates | `skill-template-library/templates/` | Template library in dedicated skill. |
-| CREATE/UPDATE Operations | `skill-factory/workflow-create-update.md` | Operational workflow in dedicated skill. |
+- **Platform Context**: `skill-architect/platform-layout-context.md` — Planning-level content moved to architect skill.
+- **Class Taxonomy & Decision Flow**: `skill-architect/class-taxonomy.md`, `skill-architect/class-decision-flow.md` — Class definitions separated into dedicated planning skill.
+- **Authoring Style & Frontmatter Rules**: `skill-authoring-guide/authoring-style.md`, `skill-authoring-guide/frontmatter-rules.md` — Editorial conventions in dedicated documentation skill.
+- **Orchestration Patterns**: `skill-orchestration-reference/orchestrated-worker-patterns.md` — Orchestration reference in dedicated skill.
+- **Update Workflow**: `skill-maintenance-reference/update-workflow.md` — Maintenance reference in this skill.
+- **Migration Procedures**: `skill-maintenance-reference/migration-guide.md` — Migration guide in this skill.
+- **Validation Checklist**: `skill-maintenance-reference/validation-checklist.md` — Validation checks in this skill.
+- **Gotchas**: `skill-maintenance-reference/gotchas.md` — Known pitfalls in this skill.
+- **Templates**: `skill-template-library/templates/` — Template library in dedicated skill.
+- **CREATE/UPDATE Operations**: `skill-factory/workflow-create-update.md` — Operational workflow in dedicated skill.
 
 ## Updating a Partially Migrated Skill
 

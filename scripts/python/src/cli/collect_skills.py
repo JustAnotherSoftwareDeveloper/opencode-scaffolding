@@ -107,5 +107,5 @@ def main(
             click.echo(f"[collect-skills] Warning: {warning}", err=True)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

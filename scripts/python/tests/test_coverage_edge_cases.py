@@ -17,7 +17,6 @@ from __future__ import annotations
 import runpy
 import sys
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 
@@ -45,9 +44,8 @@ class TestDiscoveryEdgeCases:
         root.mkdir()
         root.chmod(0o000)
         index = SkillIndex()
-        opts = SimpleNamespace(verbose=True)
         try:
-            discover_skills_from_root(root, "project", index, opts)
+            discover_skills_from_root(root, "project", index, verbose=True)
             captured = capsys.readouterr()
             assert "permission denied" in captured.err
         finally:
@@ -59,9 +57,8 @@ class TestDiscoveryEdgeCases:
         root.mkdir()
         root.chmod(0o000)
         index = SkillIndex()
-        opts = SimpleNamespace(verbose=False)
         try:
-            discover_skills_from_root(root, "project", index, opts)
+            discover_skills_from_root(root, "project", index, verbose=False)
             assert index.resolve() == []
         finally:
             root.chmod(0o755)
@@ -89,8 +86,7 @@ class TestDiscoveryEdgeCases:
         link3.symlink_to(skill_dir, target_is_directory=True)
 
         index = SkillIndex()
-        opts = SimpleNamespace(verbose=False)
-        discover_skills_from_root(root, "project", index, opts)
+        discover_skills_from_root(root, "project", index, verbose=False)
         # We should have exactly 1 skill (valid), and no loops/duplicates
         assert len(index.resolve()) == 1
         assert index.resolve()[0].name == "valid"
@@ -108,8 +104,7 @@ class TestDiscoveryEdgeCases:
             "---\nname: ok-skill\ndescription: Use when testing\nclass: operation\n---\n"
         )
         index = SkillIndex()
-        opts = SimpleNamespace(verbose=True)
-        discover_skills_from_root(root, "project", index, opts)
+        discover_skills_from_root(root, "project", index, verbose=True)
         # The valid skill should still be found
         assert len(index.resolve()) == 1
 
@@ -117,7 +112,7 @@ class TestDiscoveryEdgeCases:
         self, tmp_path: Path
     ) -> None:
         """>5 violations in check_one_sentence_per_line shows truncation."""
-        from cli.skill_validator import check_one_sentence_per_line
+        from lib.skill_validator import check_one_sentence_per_line
 
         d = tmp_path / "many-violations"
         d.mkdir()
@@ -145,7 +140,7 @@ class TestDiscoveryEdgeCases:
         self, tmp_path: Path
     ) -> None:
         """>5 violations in check_no_declarative_voice shows truncation."""
-        from cli.skill_validator import check_no_declarative_voice
+        from lib.skill_validator import check_no_declarative_voice
 
         d = tmp_path / "many-dv"
         d.mkdir()
@@ -173,7 +168,7 @@ class TestDiscoveryEdgeCases:
         self, tmp_path: Path
     ) -> None:
         """>5 violations in check_no_placeholders shows truncation."""
-        from cli.skill_validator import check_no_placeholders
+        from lib.skill_validator import check_no_placeholders
 
         d = tmp_path / "many-ph"
         d.mkdir()
@@ -201,7 +196,7 @@ class TestDiscoveryEdgeCases:
         self, tmp_path: Path
     ) -> None:
         """>5 violations in check_cross_references_exist shows truncation."""
-        from cli.skill_validator import check_cross_references_exist
+        from lib.skill_validator import check_cross_references_exist
 
         d = tmp_path / "many-refs"
         d.mkdir()
@@ -224,7 +219,7 @@ class TestDiscoveryEdgeCases:
         self, tmp_path: Path
     ) -> None:
         """List items (* and -) and numbered lists are skipped in sentence check."""
-        from cli.skill_validator import check_one_sentence_per_line
+        from lib.skill_validator import check_one_sentence_per_line
 
         d = tmp_path / "list-items"
         d.mkdir()
@@ -246,7 +241,7 @@ class TestDiscoveryEdgeCases:
         self, tmp_path: Path
     ) -> None:
         """Code fences (```) are skipped in sentence check."""
-        from cli.skill_validator import check_one_sentence_per_line
+        from lib.skill_validator import check_one_sentence_per_line
 
         d = tmp_path / "code-fence"
         d.mkdir()
@@ -266,7 +261,7 @@ class TestDiscoveryEdgeCases:
         self, tmp_path: Path
     ) -> None:
         """Blockquote lines (>) are skipped in sentence check."""
-        from cli.skill_validator import check_one_sentence_per_line
+        from lib.skill_validator import check_one_sentence_per_line
 
         d = tmp_path / "blockquote"
         d.mkdir()
@@ -285,7 +280,7 @@ class TestDiscoveryEdgeCases:
         self, tmp_path: Path
     ) -> None:
         """check_description_prefix handles None frontmatter."""
-        from cli.skill_validator import check_description_prefix
+        from lib.skill_validator import check_description_prefix
 
         d = tmp_path / "bad-fm-desc"
         d.mkdir()
@@ -298,7 +293,7 @@ class TestDiscoveryEdgeCases:
         self, tmp_path: Path
     ) -> None:
         """check_class_valid handles None frontmatter."""
-        from cli.skill_validator import check_class_valid
+        from lib.skill_validator import check_class_valid
 
         d = tmp_path / "bad-fm-class"
         d.mkdir()
@@ -311,7 +306,7 @@ class TestDiscoveryEdgeCases:
         self, tmp_path: Path
     ) -> None:
         """An exception raised within a check function is caught by run_all."""
-        from cli.skill_validator import ALL_CHECKS, run_all
+        from lib.skill_validator import ALL_CHECKS, run_all
 
         d = tmp_path / "exception-dir"
         d.mkdir()
@@ -332,7 +327,7 @@ class TestDiscoveryEdgeCases:
         self, tmp_path: Path
     ) -> None:
         """check_description_prefix handles SKILL.md with frontmatter that has invalid FM."""
-        from cli.skill_validator import check_description_prefix
+        from lib.skill_validator import check_description_prefix
 
         d = tmp_path / "bad-fm-2"
         d.mkdir()
@@ -347,7 +342,7 @@ class TestDiscoveryEdgeCases:
         self, tmp_path: Path
     ) -> None:
         """check_class_valid handles SKILL.md with invalid frontmatter."""
-        from cli.skill_validator import check_class_valid
+        from lib.skill_validator import check_class_valid
 
         d = tmp_path / "bad-fm-3"
         d.mkdir()
@@ -371,7 +366,7 @@ class TestSkillValidatorRemaining:
         self, tmp_path: Path
     ) -> None:
         """Numbered list lines are skipped in check_no_declarative_voice."""
-        from cli.skill_validator import check_no_declarative_voice
+        from lib.skill_validator import check_no_declarative_voice
 
         d = tmp_path / "num-list"
         d.mkdir()
@@ -391,7 +386,7 @@ class TestSkillValidatorRemaining:
         self, tmp_path: Path
     ) -> None:
         """An exception in a check function is caught by run_all's handler."""
-        from cli.skill_validator import run_all
+        from lib.skill_validator import run_all
 
         d = tmp_path / "exception-check"
         d.mkdir()
@@ -436,8 +431,7 @@ class TestDiscoveryMonkeypatched:
         monkeypatch.setattr(_Path, "iterdir", mock_iterdir)
 
         index = SkillIndex()
-        opts = SimpleNamespace(verbose=True)
-        discover_skills_from_root(root, "project", index, opts)
+        discover_skills_from_root(root, "project", index, verbose=True)
         captured = capsys.readouterr()
         assert "cannot list" in captured.err
 
@@ -460,8 +454,7 @@ class TestDiscoveryMonkeypatched:
         monkeypatch.setattr(_Path, "iterdir", mock_iterdir)
 
         index = SkillIndex()
-        opts = SimpleNamespace(verbose=False)
-        discover_skills_from_root(root, "project", index, opts)
+        discover_skills_from_root(root, "project", index, verbose=False)
         assert index.resolve() == []
 
     def test_permission_error_on_entry_access(
@@ -487,8 +480,7 @@ class TestDiscoveryMonkeypatched:
         monkeypatch.setattr(_Path, "resolve", mock_resolve)
 
         index = SkillIndex()
-        opts = SimpleNamespace(verbose=True)
-        discover_skills_from_root(root, "project", index, opts)
+        discover_skills_from_root(root, "project", index, verbose=True)
         captured = capsys.readouterr()
         assert "cannot access" in captured.err
 
@@ -513,8 +505,7 @@ class TestDiscoveryMonkeypatched:
         monkeypatch.setattr(discovery_mod, "extract_frontmatter", raise_fnf)
 
         index = SkillIndex()
-        opts = SimpleNamespace(verbose=True)
-        discover_skills_from_root(root, "project", index, opts)
+        discover_skills_from_root(root, "project", index, verbose=True)
         captured = capsys.readouterr()
         assert "vanished" in captured.err or "Warning" in captured.err
 
@@ -538,8 +529,7 @@ class TestDiscoveryMonkeypatched:
         monkeypatch.setattr(discovery_mod, "extract_frontmatter", raise_general)
 
         index = SkillIndex()
-        opts = SimpleNamespace(verbose=True)
-        discover_skills_from_root(root, "project", index, opts)
+        discover_skills_from_root(root, "project", index, verbose=True)
         captured = capsys.readouterr()
         assert "error reading" in captured.err
 
@@ -568,43 +558,19 @@ class TestModuleMainGuards:
     def test_collect_skills_module(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Running cli.collect_skills as __main__ executes the guard block."""
         import runpy
+        import sys
 
-        # Monkeypatch the lib functions that main() calls internally
-        monkeypatch.setattr(
-            "lib.collect_skills.cli.parse_args",
-            lambda: SimpleNamespace(
-                project_root=Path.cwd(),
-                config_dir=Path.home() / ".config" / "opencode",
-                extra_paths=[],
-                include_archive=False,
-                builtins_manifest=None,
-                verbose=False,
-                output=None,
-            ),
-        )
-
-        def fake_discover(index, options):
-            pass
-
+        # Stub discovery so the command runs without scanning the filesystem
         monkeypatch.setattr(
             "lib.collect_skills.discovery.discover_all_skills",
-            fake_discover,
+            lambda index, **kwargs: None,
         )
-
-        with pytest.raises(SystemExit) as exc_info:
-            runpy.run_module("cli.collect_skills", run_name="__main__")
-        assert exc_info.value.code == 0
-
-    def test_collect_skills_cli_module(self) -> None:
-        """Running lib.collect_skills.cli as __main__ executes the guard block."""
-        import runpy
-        import sys
 
         saved_argv = sys.argv
         sys.argv = ["collect-skills"]
         try:
             with pytest.raises(SystemExit) as exc_info:
-                runpy.run_module("lib.collect_skills.cli", run_name="__main__")
+                runpy.run_module("cli.collect_skills", run_name="__main__")
             assert exc_info.value.code == 0
         finally:
             sys.argv = saved_argv
