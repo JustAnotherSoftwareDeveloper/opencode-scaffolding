@@ -21,6 +21,7 @@ Every authored skill must be verified against this checklist before declaring do
   Do not add free-standing breakdown instructions elsewhere.
 - **Operation class**: If class is `operation`, "Normalize Input" is the first procedural step after the H1 intro.
 - **Documentation class**: If class is `documentation`, no execution steps or side effects; body is structured reference data only.
+- **No Markdown tables in supporting documentation files** (reference/ docs, guides, examples). Tables are only permitted in SKILL.md Output Format sections when the skill's deliverable is a table.
 
 ## Planning-Specific Checks
 

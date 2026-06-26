@@ -4,6 +4,8 @@ description: "Use as planning reference for <<domain>>."
 class: planning
 ---
 
+> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
+
 # <<Skill Name>> — Domain Planning Reference
 
 Replace all `<<placeholder>>` items below.
@@ -35,6 +37,10 @@ For each common planning workflow in this domain, create a workflow file using t
 - <<skill-name>>: <<one-sentence description of when to use this skill>>
 - <<skill-name>>: <<one-sentence description of when to use this skill>>
 This is for quick reference during planning.
+
+## Self-Validation
+
+- [ ] No Markdown tables in filled content (use bullet lists instead).
 
 ## Cross-References
 

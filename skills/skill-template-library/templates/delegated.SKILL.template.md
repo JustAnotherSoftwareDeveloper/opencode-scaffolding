@@ -4,6 +4,8 @@ description: "Use when <<trigger condition>>."
 class: delegated
 ---
 
+> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
+
 # <<Skill Name>> — Delegated Worker
 
 One-line summary of what this worker accomplishes.
@@ -67,6 +69,7 @@ The worker must produce exactly what that section specifies, in the format it sp
 - Artifact exists at expected path.
 - Content contains required elements.
 - No failure markers.
+- [ ] No Markdown tables in filled content (use bullet lists instead).
 
 ## Guardrails
 

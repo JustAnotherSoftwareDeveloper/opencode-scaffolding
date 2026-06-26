@@ -4,6 +4,8 @@ description: "Use when <<trigger-condition>>."
 class: operation
 ---
 
+> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
+
 # <<Skill Name>>
 
 ## Normalize Input
@@ -34,6 +36,7 @@ Each check is a yes/no assertion.
 - <<yes/no check>>.
 - <<yes/no check>>.
 - <<yes/no check>>.
+- [ ] No Markdown tables in filled content (use bullet lists instead).
 
 ## Expected Output
 

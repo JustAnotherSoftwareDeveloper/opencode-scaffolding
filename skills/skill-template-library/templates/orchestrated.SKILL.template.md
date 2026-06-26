@@ -4,6 +4,8 @@ description: "Use when <<trigger description for multi-phase coordination>>."
 class: orchestrated
 ---
 
+> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
+
 # <<Skill Name>>
 
 <<One-line description of the workflow this orchestrator coordinates.>>
@@ -38,3 +40,4 @@ class: orchestrated
 - All `<<placeholders>>` are replaced.
 - No remaining old-template sections.
 - One H1 only; all headings use Title Case.
+- [ ] No Markdown tables in filled content (use bullet lists instead).

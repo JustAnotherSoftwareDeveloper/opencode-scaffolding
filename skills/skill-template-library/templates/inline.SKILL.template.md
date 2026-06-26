@@ -4,6 +4,8 @@ description: "Use when <<trigger condition>>."
 class: inline
 ---
 
+> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
+
 # <<Skill Name>>
 
 One-line summary of what this inline skill accomplishes in a single pass.
@@ -59,6 +61,7 @@ Do not loop or perform multi-phase orchestration.
 - Class is `inline`.
 - All `<<placeholders>>` are replaced.
 - No remaining old-template sections.
+- [ ] No Markdown tables in filled content (use bullet lists instead).
 
 ## Docs
 

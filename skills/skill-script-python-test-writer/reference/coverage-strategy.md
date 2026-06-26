@@ -38,14 +38,38 @@ addopts = "--cov=cli --cov=lib --cov-report=term-missing --cov-fail-under=100"
 
 To achieve 100% coverage, every test suite must include tests for the following edge cases:
 
-| Category | Edge Cases |
-|---|---|
-| **Input** | Empty input (empty file, empty string, empty list), whitespace-only input, maximum-size input, single-element input |
-| **File I/O** | Nonexistent file path, directory passed where file expected, unreadable file (permission denied), file with unusual encoding, symlink to file, file with BOM |
-| **CLI arguments** | Missing required argument, invalid option value (`--format bogus`), extra positional arguments, `--help` flag |
-| **Error handling** | Exception raised in lib module, malformed input data, dependency failure (e.g., YAML parse error), timeout or resource exhaustion |
-| **Output** | Zero-result output, single-result output, multi-result output, output with special characters, output exceeding typical size |
-| **Boundary values** | Minimum integer (0, empty), maximum values (large file, many items), type boundaries (None vs empty string vs blank string) |
+- **Input**
+  - Empty input (empty file, empty string, empty list)
+  - Whitespace-only input
+  - Maximum-size input
+  - Single-element input
+- **File I/O**
+  - Nonexistent file path
+  - Directory passed where file expected
+  - Unreadable file (permission denied)
+  - File with unusual encoding
+  - Symlink to file
+  - File with BOM
+- **CLI arguments**
+  - Missing required argument
+  - Invalid option value (`--format bogus`)
+  - Extra positional arguments
+  - `--help` flag
+- **Error handling**
+  - Exception raised in lib module
+  - Malformed input data
+  - Dependency failure (e.g., YAML parse error)
+  - Timeout or resource exhaustion
+- **Output**
+  - Zero-result output
+  - Single-result output
+  - Multi-result output
+  - Output with special characters
+  - Output exceeding typical size
+- **Boundary values**
+  - Minimum integer (0, empty)
+  - Maximum values (large file, many items)
+  - Type boundaries (None vs empty string vs blank string)
 
 ## Error Path Testing
 

@@ -4,6 +4,8 @@ description: "Use when referencing <<domain-context>>."
 class: documentation
 ---
 
+> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
+
 # <<Skill Name>> — Documentation Store
 
 This skill is a passive data store for <<domain>> shared reference content.
@@ -29,6 +31,10 @@ Do not read every file — read as needed.
 - `schemas/` — <<description of shared schemas, if present>>
 - `templates/` — <<description of shared templates, if present>>
 - `scripts/` — <<description of script interface documentation, if present>>
+
+## Self-Validation
+
+- [ ] No Markdown tables in filled content (use bullet lists instead).
 
 ## Docs
 

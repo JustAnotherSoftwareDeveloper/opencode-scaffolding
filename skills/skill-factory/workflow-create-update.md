@@ -70,9 +70,13 @@ Edit one or more files in an existing skill directory.
 **Formatting:**
 - One sentence per line.
 - No trailing whitespace.
-- No tables for simple rule-to-scope mappings (use bullet lists).
+- Do not use Markdown tables in supporting documentation — only permitted in SKILL.md Output Format sections where deliverable is a table.
 - List nesting limited to two levels.
 - Minimal inline formatting — no bold entire sentences, no combined inline styles on one line.
+
+**Automated checks:**
+- [ ] **Automated lint check:** Run `bun run --cwd ~/.config/opencode/scripts/node lint:md -- <path-to-created-or-modified-file>` on all created or modified `.md` files. Address all violations before proceeding.
+- [ ] **Automated table detection:** Run `grep -rPn '^\|.*\|.*\|$' <created-or-modified-files>` on all created/modified `.md` files. If matches are found and the file is not an exempt SKILL.md Output Format section, flag as a blocker.
 
 **UPDATE-specific checks:**
 - Existing content not silently deleted — every edit preserves surrounding context.

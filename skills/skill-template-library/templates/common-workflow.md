@@ -1,3 +1,5 @@
+> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
+
 # <<Workflow Name>>
 <<Workflow Name>> - <<optional skill>> - <<Description>>
 
@@ -19,6 +21,10 @@ This workflow is reference documentation — it describes existing practices, no
 
 <<List of files, config entries, or state changes produced or consumed by this workflow.
 Use bullet points.>>
+
+## Self-Validation
+
+- [ ] No Markdown tables in filled content (use bullet lists instead).
 
 ## Notes
 

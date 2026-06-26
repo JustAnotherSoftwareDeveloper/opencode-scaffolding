@@ -44,9 +44,10 @@ All rules in this section apply to all body text.
   See `./frontmatter-rules.md` for field rules.
 - **Ordered lists for sequential steps** — use `1. 2. 3.`.
 - **Bullet lists for unordered items** — use `- `.
-- **Flat Markdown** — prefer flat Markdown over tables or complex structures.
-  Use tables only for reference data that genuinely needs row/column alignment.
-  Simple rule-to-scope mappings belong in bullet lists.
+- **Flat Markdown** — Do not use Markdown tables in skill supporting documentation (reference files, READMEs, guides, examples).
+  Use bullet lists, definition lists, or subsection headings instead.
+  **Exception:** Tables are permitted only in SKILL.md Output Format sections where the skill's deliverable is itself a table (e.g., display-tasks).
+  Tables in reference/ and other supporting docs are never permitted.
 - **LLM-readable formatting** — keep Markdown simple so LLMs can parse it reliably.
   Limit list nesting to two levels.
   Use short paragraphs (under three sentences).
@@ -114,7 +115,7 @@ Before declaring any skill-authoring-guide markdown file complete, verify these 
 **Formatting:**
 - [ ] One sentence per line
 - [ ] No trailing whitespace
-- [ ] No tables for simple rule-to-scope mappings (use bullet lists)
+- [ ] Do not use Markdown tables in supporting documentation — only permitted in SKILL.md Output Format sections where deliverable is a table
 - [ ] List nesting limited to two levels
 - [ ] Minimal inline formatting — no bold entire sentences, no combined inline styles on one line
 
