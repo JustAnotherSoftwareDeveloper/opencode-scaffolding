@@ -20,8 +20,9 @@ Do not delegate sub-tasks.
 
 1. <<step>>.
 2. **Run script: `<script-entry-point>`** —
-   Resolve `<scripts-python-dir>` per the global/project-local resolution order (see platform-layout-context.md).
-   Invoke via `uv run --directory <scripts-python-dir> <entry-point> <args>`.
+   Resolve `<scripts-python-dir>` or `<scripts-node-dir>` per the global/project-local resolution order (see platform-layout-context.md).
+   - **Python script:** `uv run --directory <scripts-python-dir> <entry-point> <args>`
+   - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
    Capture stdout as structured output.
    Parse output and validate against expected schema.
    On non-zero exit, report `BLOCKED: Script failed — <stderr summary>`.

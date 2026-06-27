@@ -8,6 +8,8 @@ Include example entries such as:
 - Delegation packet template
 - `snippet-script-invocation.md` — Reusable Markdown block for invoking a Python script from a skill.
   Usage: a skill procedure references this snippet when it needs to call a script step.
+- `snippet-node-script-invocation.md` — Reusable Markdown block for invoking a Node script (bun run --cwd) from a skill.
+  Usage: a skill procedure references this snippet when it needs to call a Node script step.
 
 No external links.
 Entries are plain text or code blocks.

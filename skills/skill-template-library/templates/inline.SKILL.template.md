@@ -34,9 +34,10 @@ Concrete description of what this skill produces and in what format.
 ## Execution Plan
 
 1. <<Step 1>> — see [Input](#input).
-2. If the step involves deterministic data processing, delegate to a Python script:
-   Resolve `<scripts-python-dir>` per the global/project-local resolution order (see [./platform-layout-context.md]).
-   Run `uv run --directory <scripts-python-dir> <entry-point> <args>`.
+2. If the step involves deterministic data processing, delegate to a script:
+   Resolve `<scripts-python-dir>` or `<scripts-node-dir>` per the global/project-local resolution order (see [./platform-layout-context.md]).
+   - **Python script:** `uv run --directory <scripts-python-dir> <entry-point> <args>`
+   - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
    Incorporate script output into the reasoning context.
 3. <<Step 2>> — see [<<Section Reference>>](#<<section-reference>>).
 4. <<Step 3>> — produce output per [Output](#output).

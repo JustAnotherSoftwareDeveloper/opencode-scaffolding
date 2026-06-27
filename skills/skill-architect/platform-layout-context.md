@@ -110,3 +110,18 @@ Python scripts follow these conventions:
 
 Skills invoke scripts via the canonical pattern:
 `uv run --directory <scripts-python-path> <entry-point> [args]`
+
+### Node Script Resolution
+
+Scripts written in TypeScript for Node/Bun follow their own resolution order and conventions.
+This subsection documents how Node scripts are resolved, laid out, invoked, and tooled.
+
+**Resolution order** (checked in sequence):
+
+1. `$OPENCODE_SCRIPTS_NODE` — Environment variable explicit override (optional, highest priority).
+2. `<project-root>/.opencode/scripts/node` — Project-local root (mandatory default, checked second).
+3. `~/.config/opencode/scripts/node` — Global root (mandatory default, fallback).
+
+For detailed Node script conventions — including directory layout, canonical invocation, tooling, testing, and coverage — see the shared conventions skill at `skills/skill-node-script-conventions/`.
+
+For the decision framework that determines whether a Node script is appropriate, see the class-decision-flow.md `Task Involves Deterministic, Repeatable, or Token-Heavy Processing` section.

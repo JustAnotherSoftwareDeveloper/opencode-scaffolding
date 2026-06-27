@@ -65,6 +65,8 @@ Choose `planning` when the skill:
 
 ## Task Involves Deterministic, Repeatable, or Token-Heavy Processing
 
+For deterministic processing, use Python by default. If the core logic requires a Node-specific library (remark, mdast, babel, typescript) and no mature Python equivalent exists, route to a Node/Bun script.
+
 Before selecting a class, evaluate whether the task qualifies for script delegation.
 A task qualifies when ALL of these hold:
 

@@ -34,3 +34,14 @@ Apply these additional checks when the skill class is `planning`:
 - **No tool invocation instructions** — Planning skills are read-only references; they must not invoke tools.
 - **Domain-specific content** — Every section contains domain-specific content, not template scaffolding or placeholder text.
 - **Cross-references exist** — If internal reference files are referenced, those files must exist.
+
+## Node Script-Specific Checks
+
+Apply these additional checks when the skill includes Node scripts under `scripts/node/`:
+
+- **tsconfig.json exists with noEmit and strict** — `scripts/node/tsconfig.json` must set `compilerOptions.noEmit: true` and `compilerOptions.strict: true`.
+- **biome.json exists with lint and format rules** — `scripts/node/biome.json` must define both `linter` and `formatter` rule configurations.
+- **package.json has all required scripts** — `scripts/node/package.json` must define `test`, `lint`, and `typecheck` scripts.
+- **Scripts pass bun test and tsc --noEmit** — Running `bun test` and `tsc --noEmit` in `scripts/node/` must exit successfully.
+- **No bin entries in package.json** — `scripts/node/package.json` must not contain a `bin` field.
+- **All direct imports declared in dependencies** — Every direct import (e.g., `unist-util-visit`, `hast-util-raw`) in source files under `scripts/node/` must be listed in `scripts/node/package.json` `dependencies` or `devDependencies`.

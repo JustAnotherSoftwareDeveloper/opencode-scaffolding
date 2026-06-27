@@ -14,8 +14,9 @@ class: orchestrated
 
 1. **Delegated: <<Worker Skill A>>** — <<purpose of delegation>>.
 2. **Script: <<entry-point>>** — <<what the script computes>>.
-   Resolve `<scripts-python-dir>` per the global/project-local resolution order (see platform-layout-context.md).
-   Run `uv run --directory <scripts-python-dir> <entry-point> [args]`.
+   Resolve `<scripts-python-dir>` or `<scripts-node-dir>` per the global/project-local resolution order (see platform-layout-context.md).
+   - **Python script:** `uv run --directory <scripts-python-dir> <entry-point> [args]`
+   - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
    Validate structured output before proceeding.
 3. **Inline: <<Inline Skill Name>>** — <<what this inline step does in a single pass>>.
 4. **Decompose** — <<what to decompose into sub-packets>>.

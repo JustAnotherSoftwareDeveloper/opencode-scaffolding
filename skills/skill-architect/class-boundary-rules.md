@@ -58,10 +58,10 @@ Cross-skill interaction is represented exclusively through skill loading.
 No skill file may contain a literal path to a file in another skill's directory.
 Scripts are the sole exception to this rule — they may reference files in other directories since they are executed rather than read as skill content.
 
-## Script Delegation Rule
+## Script Delegation and Platform Selection Rule
 
-Scripts are the sole exception to directory confinement.
-They may reference files in other directories since they are executed rather than read as skill content.
+Scripts are the sole exception to directory confinement. They may reference files in other directories since they are executed rather than read as skill content. A skill may invoke a script when the work is deterministic, repeatable, token-intensive, or has well-defined I/O. Python is the default platform for all scripts. Select Node (TypeScript/Bun) only when the core logic requires a Node-specific library (remark, mdast, babel, typescript) and no mature Python equivalent exists. Follow the decision framework in the Node Script Support proposal.
+
 A skill may invoke a Python script when the work:
 
 1. Is **deterministic** — produces identical output for identical input.

@@ -34,6 +34,11 @@ Produce a validated skill artifact.
 3. Validate all created or modified files against the validation checks in `./workflow-create-update.md#validation`.
  4. **Run automated lint check** — Invoke `bun run --cwd ~/.config/opencode/scripts/node lint:md -- <path-to-created-or-modified-file>` on all created or modified `.md` files. Address any violations before proceeding.
 
+## Guardrails
+
+- **Consumer-contract protection for shared convention files** — Shared convention files under `skills/<name>/reference/` (e.g., `skill-node-script-conventions`) may be referenced by consumer skills (e.g., `node-writer`, `node-test-writer`). The factory MUST NOT overwrite or delete these files without also updating all referring consumers.
+- When updating or deleting any file under `skills/<name>/reference/`, cross-reference consumers by searching for references in sibling skill directories before making changes.
+
 ## Self-Validation
 
 - All required documentation skills were loaded by name — no external file paths appear in SKILL.md or workflow-create-update.md.
