@@ -47,6 +47,7 @@ Edit one or more files in an existing skill directory.
 ## Validation
 
 **Shape checks:**
+
 - YAML frontmatter is valid and contains exactly `name`, `description`, `class`.
 - `name` matches the skill directory name.
 - `description` begins with "Use when ".
@@ -55,6 +56,7 @@ Edit one or more files in an existing skill directory.
 - All headings use Title Case.
 
 **Voice and wording:**
+
 - Step descriptions begin with an imperative verb.
 - No passive-voice constructions in step bodies.
 - Sentences are commands, not observations (except factual definitions in reference files).
@@ -63,11 +65,13 @@ Edit one or more files in an existing skill directory.
 - No tutorial language — no concept explanations, no background justifications, no choice rationales.
 
 **Reference discipline:**
+
 - Reference detail is not inlined — cross-references via loaded skill names instead.
 - No external file paths to other skill directories appear.
 - Cross-skill interaction uses skill loading only, never file paths.
 
 **Formatting:**
+
 - One sentence per line.
 - No trailing whitespace.
 - Do not use Markdown tables in supporting documentation — only permitted in SKILL.md Output Format sections where deliverable is a table.
@@ -75,10 +79,12 @@ Edit one or more files in an existing skill directory.
 - Minimal inline formatting — no bold entire sentences, no combined inline styles on one line.
 
 **Automated checks:**
+
 - [ ] **Automated lint check:** Run `bun run --cwd ~/.config/opencode/scripts/node lint:md -- <path-to-created-or-modified-file>` on all created or modified `.md` files. Address all violations before proceeding.
 - [ ] **Automated table detection:** Run `grep -rPn '^\|.*\|.*\|$' <created-or-modified-files>` on all created/modified `.md` files. If matches are found and the file is not an exempt SKILL.md Output Format section, flag as a blocker.
 
 **UPDATE-specific checks:**
+
 - Existing content not silently deleted — every edit preserves surrounding context.
 - Update path references current file content, not assumed content.
 - Targeted edits are scoped to the request — no unrelated sections modified.

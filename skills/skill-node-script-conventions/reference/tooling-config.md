@@ -3,7 +3,7 @@
 Every `scripts/node/` root must contain a `package.json`, `biome.json`, and `tsconfig.json`.
 These files are generated or updated alongside each new script.
 
-> **Resolution order** — See `skill-architect/platform-layout-context.md` for script-root resolution precedence (env var → project-local → global).
+> **Resolution order** — See `skill-architect` (platform-layout-context) for script-root resolution precedence (env var → project-local → global).
 > **Path layout** — See `path-layout.md` for directory structure and import conventions.
 
 ## biome.json
@@ -43,6 +43,7 @@ Create or update `biome.json` at the `scripts/node/` root.
 ```
 
 **Key options:**
+
 - `organizeImports` — Auto-sort and merge imports into three groups (built-in, third-party, local).
 - `javascript.formatter.quoteStyle` — Single quotes (`'single'`).
 - `javascript.formatter.semicolons` — `"asNeeded"` (omit semicolons where ASI-safe).
@@ -86,15 +87,13 @@ TypeScript configuration for Bun-compatible compilation.
 
 **Key options:**
 
-| Option | Value | Rationale |
-|--------|-------|-----------|
-| `module` | `"Preserve"` | Bun recommends this over `"ESNext"`; it preserves ESM syntax for Bun's runtime |
-| `moduleResolution` | `"bundler"` | Matches Bun's module resolution semantics |
-| `allowImportingTsExtensions` | `true` | Required to use `.ts` extension in import paths (Bun requirement) |
-| `noEmit` | `true` | Bun handles compilation directly; no `tsc` output needed |
-| `strict` | `true` | Enables the full suite of strict type-checking options |
-| `types` | `["bun"]` | Provides Bun's built-in API types (`Bun` global, `Bun.spawnSync`, etc.) |
-| `verbatimModuleSyntax` | `true` | Forces explicit `type` modifier on type-only imports |
+- `module` set to `"Preserve"` — Bun recommends this over `"ESNext"`; it preserves ESM syntax for Bun's runtime
+- `moduleResolution` set to `"bundler"` — Matches Bun's module resolution semantics
+- `allowImportingTsExtensions` set to `true` — Required to use `.ts` extension in import paths (Bun requirement)
+- `noEmit` set to `true` — Bun handles compilation directly; no `tsc` output needed
+- `strict` set to `true` — Enables the full suite of strict type-checking options
+- `types` set to `["bun"]` — Provides Bun's built-in API types (`Bun` global, `Bun.spawnSync`, etc.)
+- `verbatimModuleSyntax` set to `true` — Forces explicit `type` modifier on type-only imports
 
 **Run type checking:** `bun run --cwd <scripts-node-dir> tsc --noEmit`.
 
@@ -144,6 +143,7 @@ Script names use kebab-case matching the entry point file name.
 The script name becomes both the directory name under `src/lib/` and the `package.json` key.
 
 Example: A script named `lint-md` produces:
+
 - `"scripts": { "lint:md": "bun src/cli/lint-md.ts" }`
 - `src/lib/lint-md/core.ts`
 

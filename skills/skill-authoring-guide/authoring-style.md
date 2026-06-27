@@ -43,7 +43,7 @@ All rules in this section apply to all body text.
   No extra top-level keys.
   See `./frontmatter-rules.md` for field rules.
 - **Ordered lists for sequential steps** — use `1. 2. 3.`.
-- **Bullet lists for unordered items** — use `- `.
+- **Bullet lists for unordered items** — use `-`.
 - **Flat Markdown** — Do not use Markdown tables in skill supporting documentation (reference files, READMEs, guides, examples).
   Use bullet lists, definition lists, or subsection headings instead.
   **Exception:** Tables are permitted only in SKILL.md Output Format sections where the skill's deliverable is itself a table (e.g., display-tasks).
@@ -95,24 +95,29 @@ All rules in this section apply to all body text.
 Before declaring any skill-authoring-guide markdown file complete, verify these checks.
 
 **Headings:**
+
 - [ ] All headings use Title Case (no Sentence case, no ALL CAPS)
 - [ ] One `H1` per file; all subsections are `H2` or deeper
 
 **Voice:**
+
 - [ ] Step descriptions begin with an imperative verb
 - [ ] No passive-voice constructions in step bodies ("is used", "should be", "must be done")
 - [ ] Sentences are commands, not observations (except factual definitions in reference files, which may use declarative voice)
 
 **Word choice:**
+
 - [ ] No hedging words ("should", "may", "could", "might", "try", "best", "recommend") in instructions — use "must" or omit the qualifier
 - [ ] No fluff words ("please", "simply", "just", "obviously", "essentially", "basically")
 - [ ] No tutorial language — no concept explanations, no background justifications, no choice rationales
 
 **Reference discipline:**
+
 - [ ] Reference detail is not inlined — cross-references via `./<file>.md` instead
 - [ ] Relative paths used for cross-file links
 
 **Formatting:**
+
 - [ ] One sentence per line
 - [ ] No trailing whitespace
 - [ ] Do not use Markdown tables in supporting documentation — only permitted in SKILL.md Output Format sections where deliverable is a table
@@ -120,7 +125,9 @@ Before declaring any skill-authoring-guide markdown file complete, verify these 
 - [ ] Minimal inline formatting — no bold entire sentences, no combined inline styles on one line
 
 **Conciseness:**
+
 - [ ] File is under 200 lines
 
 **Cross-reference:**
+
 - [ ] This guide (`./authoring-style.md`) was consulted

@@ -22,7 +22,7 @@ A single Markdown table with no surrounding commentary.
 
 ### Output Format
 
-```
+```markdown
 | Purpose | Files | Skill |
 | ------- | ----- | ----- |
 | ...     | ...   | ...   |
@@ -36,7 +36,7 @@ One row per item in `tasks`.
    Truncate to 80 characters if longer.
 2. **Files** — Combine `tasks[*].filesToRead` and `tasks[*].filesToWrite` into a compact, comma-separated list of basenames.
    Strip paths to basenames when they share a common prefix.
-3. **Skill** — Extract from `tasks[*].skills` and join elements with `, `.
+3. **Skill** — Extract from `tasks[*].skills` and join elements with `,`.
    If empty or absent, render `none`.
 
 ## Execution Plan

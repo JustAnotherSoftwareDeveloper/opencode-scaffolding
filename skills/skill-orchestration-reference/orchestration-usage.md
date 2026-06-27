@@ -43,6 +43,7 @@ Within an orchestrated skill, inline work is expressed as a step type, not a sep
 
 Standard YAML with `name`, `description` (starts `"Use when"`), and `class: orchestrated`.
 **Pitfall**: `name` must match the directory under `skills/`.
+
 ```yaml
 name: code-review-pipeline
 description: "Use when orchestrating multi-phase code review."
@@ -59,9 +60,10 @@ One sentence describing the orchestrated workflow.
 
 Ordered list of steps, each prefixed with a step type in bold.
 **Pitfall**: Mixing step types without clear boundaries or omitting the prefix.
-1. **Delegated: <<Static Analysis Worker>>** — <<runs linters and reports violations.>>
-2. **Decompose** — <<splits changed files into parallel test batches.>>
-3. **Verify** — <<checks all test batches completed.>>
+
+1. **Delegated: `<<Static Analysis Worker>>`** — `<<runs linters and reports violations>>`
+2. **Decompose** — `<<splits changed files into parallel test batches>>`
+3. **Verify** — `<<checks all test batches completed>>`
 
 ### Worker Strategy
 
@@ -74,6 +76,7 @@ Dispatch model, concurrency limits, and data flow.
 
 Assertions the orchestrator run must satisfy.
 **Pitfall**: Listing skill-authoring rules instead of run-time gates.
+
 - All delegated workers returned `"success"` status.
 - No critical violations in static analysis output.
 
@@ -81,6 +84,7 @@ Assertions the orchestrator run must satisfy.
 
 Structural checks on the SKILL.md file itself.
 **Pitfall**: Copying from template without reviewing placeholders.
+
 - Name matches directory name.
 - All `<<placeholders>>` are replaced.
 - No old-template sections remain.
@@ -89,6 +93,7 @@ Structural checks on the SKILL.md file itself.
 
 Relative links to support files the orchestrator depends on.
 **Pitfall**: Absolute paths or omitting links to referenced files.
+
 - `./orchestrated-worker-patterns.md`
 - `./collation-format.md`
 
@@ -97,17 +102,17 @@ Relative links to support files the orchestrator depends on.
 Each Execution Step uses a bold type prefix.
 Choose the type that matches work granularity.
 
-- **Delegated: <<skill-name>>** — <<purpose>>.
+- **Delegated: `<<skill-name>>`** — `<<purpose>>`.
   Sends a delegation packet to a worker skill.
   Use for multi-step sub-work that merits a separate skill context.
   Format: `**Delegated: <<skill-name>>** — <<one-line purpose>>. Input: <<input>>. Output: <<output>>.`
-- **Inline: <<inline-skill-name>>** — <<description>>.
+- **Inline: `<<inline-skill-name>>`** — `<<description>>`.
   Single-pass reasoning step executed directly within the orchestrator.
   Use for focused logical or transform work that runs in one pass.
-- **Decompose** — <<what to decompose>>.
+- **Decompose** — `<<what to decompose>>`.
   Breaks complex input into multiple sub-packets, typically for parallel fan-out.
   No worker name follows the prefix; describe the decomposition strategy.
-- **Verify** — <<what to check>>.
+- **Verify** — `<<what to check>>`.
   Runs verification against prior step outputs.
   No worker name follows the prefix; describe what to verify and how.
 

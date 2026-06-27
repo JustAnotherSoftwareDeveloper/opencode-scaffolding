@@ -4,9 +4,9 @@ description: "Use as planning reference for <<domain>>."
 class: planning
 ---
 
-> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
+# `<<Skill Name>>` — Domain Planning Reference
 
-# <<Skill Name>> — Domain Planning Reference
+> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
 
 Replace all `<<placeholder>>` items below.
 This template captures planning context for a single domain.
@@ -20,22 +20,22 @@ Planning skills must not produce side effects, modify files, invoke tools, or de
 ## Key Considerations
 
 <<Capture domain-specific constraints, assumptions, trade-offs, non-goals, and known limitations. Use 2-5 bullet points.>>
-<<Explain what the domain boundary does not include and why.>>
+`<<Explain what the domain boundary does not include and why.>>`
 
 ## Common Workflows
 
 For each common planning workflow in this domain, create a workflow file using the common-workflow template, then list it below using the format: name - optional skill - description:
 
-- <<workflow-name>> - <<optional skill>> - <<quick description>>
-- <<workflow-name>> - <<optional skill>> - <<quick description>>
-- <<workflow-name>> - <<optional skill>> - <<quick description>>
+- `<<workflow-name>>` - `<<optional skill>>` - `<<quick description>>`
+- `<<workflow-name>>` - `<<optional skill>>` - `<<quick description>>`
+- `<<workflow-name>>` - `<<optional skill>>` - `<<quick description>>`
   When the workflow involves deterministic processing, note the Python script that handles it:
   `scripts/python/<entry-point>`.
 
 ## Related Skills
 
-- <<skill-name>>: <<one-sentence description of when to use this skill>>
-- <<skill-name>>: <<one-sentence description of when to use this skill>>
+- `<<skill-name>>`: `<<one-sentence description of when to use this skill>>`
+- `<<skill-name>>`: `<<one-sentence description of when to use this skill>>`
 This is for quick reference during planning.
 
 ## Self-Validation

@@ -7,6 +7,7 @@ Only choose another class when a specific condition clearly applies.
 ## Default — Single Bounded, Independent, Self-Validating, No Sub-Delegation
 
 Choose `operation` when the skill:
+
 - Performs one bounded procedure.
 - Is independent — no dependency on external orchestration.
 - Is self-validating — verifies its own output.
@@ -16,6 +17,7 @@ Choose `operation` when the skill:
 ## Receives a Delegation Packet
 
 Choose `delegated` when the skill:
+
 - Receives a well-formed delegation packet from a delegator.
 - Performs a bounded subtask within a pipeline or orchestration.
 - Returns structured output to the delegator.
@@ -24,6 +26,7 @@ Choose `delegated` when the skill:
 ## Single-Pass Reasoning-Heavy, Main Agent Executes Directly
 
 Choose `inline` when the skill:
+
 - Requires heavy reasoning in a single pass.
 - Is executed directly by the main agent, not via delegation.
 - May make optional direct tool calls.
@@ -33,6 +36,7 @@ Choose `inline` when the skill:
 ## Coordinates Phases, Workers, or Sub-Skills
 
 Choose `orchestrated` when the skill:
+
 - Coordinates sub-skills, workers, phases, or quality gates.
 - Owns sub-delegation and result collation.
 - Uses the 7-section canonical layout.
@@ -41,6 +45,7 @@ Choose `orchestrated` when the skill:
 ## Passive Data Store for Shared Docs/Schemas/Templates
 
 Choose `documentation` when the skill:
+
 - Is a passive data store consumed by other skills.
 - Contains reference content (docs, schemas, templates) for domain-shared use.
 - Defines no execution steps and produces no side effects.
@@ -49,6 +54,7 @@ Choose `documentation` when the skill:
 ## Planning Reference for Structural Knowledge
 
 Choose `planning` when the skill:
+
 - Documents structural knowledge about the codebase.
 - Is loaded during planning or architecting activities.
 - Must not produce side effects, modify files, invoke tools, or define execution steps.

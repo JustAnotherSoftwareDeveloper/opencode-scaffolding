@@ -15,6 +15,7 @@ Every shared module must follow these conventions:
    Tests live in `tests/test_shared_<module>.py`.
 
 3. **Consumer documentation** — Each shared module must declare its consumer scripts in a module-level docstring:
+
    ```python
    """File/path utilities shared by: collect-skills, count-tokens, validate-skill."""
    ```
@@ -28,7 +29,7 @@ Every shared module must follow these conventions:
 
 ## File Layout
 
-```
+```text
 scripts/python/
   src/
     cli/                          # CLI entry points (click)
@@ -62,6 +63,7 @@ from lib.shared.schema import validate_json_schema
 This convention works identically in CLI entry points, per-script lib modules, and tests because the existing `sys.path.insert(0, WORKSPACE_ROOT)` pattern (where `WORKSPACE_ROOT = src/`) resolves `lib.shared.<module>` regardless of which script or test imports it.
 
 **Import from a CLI entry point** (`src/cli/<script_name>.py`):
+
 ```python
 import click
 from lib.shared.files import resolve_path
@@ -69,6 +71,7 @@ from lib.<script_name>.core import compute
 ```
 
 **Import from a per-script lib module** (`src/lib/<script_name>/core.py`):
+
 ```python
 from lib.shared.schema import validate_json_schema
 ```

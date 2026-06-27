@@ -16,7 +16,7 @@ Reject a full `breakdown-tasks` JSON output object unless one task is clearly se
 
 ### Plaintext Packet Format (produced for worker)
 
-```
+```text
 ## PURPOSE
 <single sentence: what must be done>
 

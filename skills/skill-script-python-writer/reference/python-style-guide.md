@@ -26,6 +26,7 @@ The project enforces these ruff rule categories:
 Pyright is configured with `typeCheckingMode: "standard"` and `include: ["src", "tests"]`.
 
 **Key implications:**
+
 - Requires type annotations on all function signatures.
 - Both source and test files are type-checked.
 - Uses `.venv` relative to the config file for third-party type resolution.

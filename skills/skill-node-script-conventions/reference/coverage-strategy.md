@@ -5,17 +5,17 @@
 Coverage is measured via Bun's built-in coverage tooling.
 
 **Run coverage:**
+
 ```bash
 bun test --coverage
 ```
 
 **Options:**
-| Flag | Purpose |
-|------|---------|
-| `--coverage` | Enable coverage measurement |
-| `--coverage-reporter text` | Console output (default) |
-| `--coverage-reporter lcov` | LCOV format for CI integration |
-| `--coverage-dir <path>` | Output directory (default: `coverage/`) |
+
+- `--coverage` — Enable coverage measurement
+- `--coverage-reporter text` — Console output (default)
+- `--coverage-reporter lcov` — LCOV format for CI integration
+- `--coverage-dir <path>` — Output directory (default: `coverage/`)
 
 Coverage is measured at the **line level** via c8 (Bun's integrated coverage engine).
 The `text` reporter prints specific uncovered lines on failure.
@@ -24,11 +24,9 @@ The `text` reporter prints specific uncovered lines on failure.
 
 Coverage is measured against these source paths:
 
-| Source Path | Tested By |
-|-------------|-----------|
-| `src/cli/*.ts` | CLI entry points tested via `Bun.spawnSync` in `<name>.cli.test.ts` files |
-| `src/lib/<script-name>/*.ts` | Per-script library modules tested via direct function calls in `<name>.test.ts` files |
-| `src/lib/shared/*.ts` | Shared library modules tested via `<module>.test.ts` files |
+- `src/cli/*.ts` — CLI entry points tested via `Bun.spawnSync` in `<name>.cli.test.ts` files
+- `src/lib/<script-name>/*.ts` — Per-script library modules tested via direct function calls in `<name>.test.ts` files
+- `src/lib/shared/*.ts` — Shared library modules tested via `<module>.test.ts` files
 
 Only `src/` is measured. The `tests/` directory and `node_modules/` are excluded by convention.
 
@@ -43,6 +41,7 @@ On second failure, return `PARTIAL` with the failing test names and specific cov
 ### Execution
 
 Without a `bunfig.toml` threshold config, coverage is run with:
+
 ```bash
 bun test --coverage --coverage-reporter text
 ```
@@ -62,6 +61,7 @@ coverageDir = "coverage"
 To achieve 100% coverage, every test suite must include tests for the following edge cases:
 
 ### 1. Input
+
 - Empty input (empty file, empty string, empty list)
 - Whitespace-only input
 - Maximum-size input / large input
@@ -69,6 +69,7 @@ To achieve 100% coverage, every test suite must include tests for the following 
 - Null / undefined values (where applicable)
 
 ### 2. File I/O
+
 - Nonexistent file path
 - Directory passed where file expected
 - Unreadable file (permission denied)
@@ -77,6 +78,7 @@ To achieve 100% coverage, every test suite must include tests for the following 
 - File with trailing newline or no trailing newline
 
 ### 3. CLI Arguments
+
 - Missing required argument
 - Invalid option value (`--format bogus`)
 - Extra positional arguments
@@ -84,6 +86,7 @@ To achieve 100% coverage, every test suite must include tests for the following 
 - `--` separator before file path
 
 ### 4. Error Handling
+
 - Exception thrown in lib module
 - Malformed input data
 - Dependency failure (e.g., YAML parse error, JSON parse error)
@@ -91,6 +94,7 @@ To achieve 100% coverage, every test suite must include tests for the following 
 - `process.exit()` called with each `ExitCode` value
 
 ### 5. Output
+
 - Zero-result output
 - Single-result output
 - Multi-result output
@@ -98,6 +102,7 @@ To achieve 100% coverage, every test suite must include tests for the following 
 - Output exceeding typical size
 
 ### 6. Boundary Values
+
 - Minimum input (0, empty)
 - Maximum values (large file, many items)
 - Type boundaries (`undefined` vs empty string vs blank string)
@@ -128,12 +133,10 @@ describe.each(errorCases)('error path: $args', ({ args, exitCode, stderrContains
 
 ### Exit Code Mapping
 
-| Exit Code | Constant | When Used |
-|-----------|----------|-----------|
-| `0` | `ExitCode.CLEAN` | Normal completion |
-| `1` | `ExitCode.VIOLATIONS` | Unacceptable condition found |
-| `2` | `ExitCode.CONFIG_ERROR` | Configuration or environment issue |
-| `3` | `ExitCode.INVALID_INPUT` | Invalid arguments or input |
+- `0` — `ExitCode.CLEAN` — Normal completion
+- `1` — `ExitCode.VIOLATIONS` — Unacceptable condition found
+- `2` — `ExitCode.CONFIG_ERROR` — Configuration or environment issue
+- `3` — `ExitCode.INVALID_INPUT` — Invalid arguments or input
 
 ## Coverage Exemption Conventions
 
@@ -177,14 +180,12 @@ await main()
 
 ### Exemption Syntax Reference
 
-| Syntax | Tool | Purpose |
-|--------|------|---------|
-| `/* c8 ignore next */` | c8 (Bun coverage) | Suppress coverage for the next line |
-| `/* c8 ignore next <N> */` | c8 (Bun coverage) | Suppress coverage for the next N lines |
-| `/* c8 ignore start` / `/* c8 ignore stop */` | c8 | Suppress coverage for a block |
-| `@ts-expect-error` | TypeScript | Suppress the next TypeScript error |
-| `// biome-ignore lint: <reason>` | Biome | Suppress a specific Biome lint rule |
-| `// istanbul ignore next` | Istanbul (legacy) | Legacy syntax; prefer `/* c8 ignore */` |
+- `` `/* c8 ignore next */` `` — c8 (Bun coverage) — Suppress coverage for the next line
+- `` `/* c8 ignore next <N> */` `` — c8 (Bun coverage) — Suppress coverage for the next N lines
+- `` `/* c8 ignore start` / `/* c8 ignore stop */` `` — c8 — Suppress coverage for a block
+- `` `@ts-expect-error` `` — TypeScript — Suppress the next TypeScript error
+- `` `// biome-ignore lint: <reason>` `` — Biome — Suppress a specific Biome lint rule
+- `` `// istanbul ignore next` `` — Istanbul (legacy) — Legacy syntax; prefer `/* c8 ignore */`
 
 ### When NOT to Exempt
 
@@ -192,6 +193,7 @@ All other branches, error paths, and edge cases must be covered by tests.
 If a coverage exemption appears outside the three categories above, re-examine the test generation rather than exempting coverage.
 
 **Do not exempt:**
+
 - `process.exit()` calls — must have corresponding `Bun.spawnSync` tests.
 - Error-handling branches — must be tested with invalid input.
 - Default values in parameter destructuring — test the fallback path.

@@ -32,7 +32,7 @@ Produce a validated skill artifact.
    - Follow the CREATE path when mode is CREATE.
    - Follow the UPDATE path when mode is UPDATE.
 3. Validate all created or modified files against the validation checks in `./workflow-create-update.md#validation`.
- 4. **Run automated lint check** — Invoke `bun run --cwd ~/.config/opencode/scripts/node lint:md -- <path-to-created-or-modified-file>` on all created or modified `.md` files. Address any violations before proceeding.
+4. **Run automated lint check** — Invoke `bun run --cwd ~/.config/opencode/scripts/node lint:md -- <path-to-created-or-modified-file>` on all created or modified `.md` files. Address any violations before proceeding.
 
 ## Guardrails
 

@@ -48,7 +48,7 @@ Premature extraction is discouraged — a single consumer does not justify share
 
 ## File Layout
 
-```
+```text
 scripts/node/
   src/
     cli/                          # CLI entry points (cleye)

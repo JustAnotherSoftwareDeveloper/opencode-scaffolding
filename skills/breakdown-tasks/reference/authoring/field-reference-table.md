@@ -2,7 +2,7 @@
 
 All fields defined in the JSON Schema for `TaskPacket` and the root-level object.
 
-### `summary`
+## `summary`
 
 **Type:** string  
 **Required:** required (root)  
@@ -10,7 +10,7 @@ All fields defined in the JSON Schema for `TaskPacket` and the root-level object
 **Description:** One-paragraph summary of the overall user request.  
 **Example:** "Refactor the checkout module to use a dedicated middleware layer, add input validation, and update existing tests."
 
-### `id`
+## `id`
 
 **Type:** string (UUID v4)  
 **Required:** required  
@@ -18,7 +18,7 @@ All fields defined in the JSON Schema for `TaskPacket` and the root-level object
 **Description:** Unique identifier for the task. Used for dependency references and traceability.  
 **Example:** `"a1b2c3d4-e5f6-7890-abcd-ef1234567890"`
 
-### `dependencies`
+## `dependencies`
 
 **Type:** string array  
 **Required:** optional  
@@ -26,7 +26,7 @@ All fields defined in the JSON Schema for `TaskPacket` and the root-level object
 **Description:** List of task IDs that must complete before this task can begin. Empty or absent means no prerequisites.  
 **Example:** `["a1b2c3d4-e5f6-7890-abcd-ef1234567890"]`
 
-### `purpose`
+## `purpose`
 
 **Type:** string  
 **Required:** required  
@@ -34,7 +34,7 @@ All fields defined in the JSON Schema for `TaskPacket` and the root-level object
 **Description:** Single sentence describing what this task accomplishes. Must be actionable and self-contained.  
 **Example:** "Extract error-handling middleware from routes/ into a dedicated middleware/ directory."
 
-### `context`
+## `context`
 
 **Type:** string  
 **Required:** required  
@@ -42,7 +42,7 @@ All fields defined in the JSON Schema for `TaskPacket` and the root-level object
 **Description:** Expanded context for the worker. Includes the relevant subset of the user prompt, background, and constraints.  
 **Example:** "The checkout module currently has inline error handling in every route handler."
 
-### `filesToRead`
+## `filesToRead`
 
 **Type:** string array  
 **Required:** required  
@@ -50,7 +50,7 @@ All fields defined in the JSON Schema for `TaskPacket` and the root-level object
 **Description:** Explicit list of file paths the worker must read before starting.  
 **Example:** `["src/routes/checkout.js"]`
 
-### `filesToWrite`
+## `filesToWrite`
 
 **Type:** string array  
 **Required:** required  
@@ -58,7 +58,7 @@ All fields defined in the JSON Schema for `TaskPacket` and the root-level object
 **Description:** Explicit list of file paths the worker is expected to create or modify.  
 **Example:** `["src/middleware/error-handler.js"]`
 
-### `skills`
+## `skills`
 
 **Type:** string array  
 **Required:** required  
@@ -66,7 +66,7 @@ All fields defined in the JSON Schema for `TaskPacket` and the root-level object
 **Description:** Skills the worker must load before executing. Each entry must match an available skill name exactly.  
 **Example:** `["skill-writer"]`
 
-### `executionInstructions`
+## `executionInstructions`
 
 **Type:** object array  
 **Required:** required  
@@ -74,7 +74,7 @@ All fields defined in the JSON Schema for `TaskPacket` and the root-level object
 **Description:** Step-by-step instructions for the worker. Each step has a step number, action, and optional verification.  
 **Example:** `[{"step":1,"action":"Create file.","verification":"File exists."}]`
 
-### `verification`
+## `verification`
 
 **Type:** string array  
 **Required:** optional  
@@ -82,7 +82,7 @@ All fields defined in the JSON Schema for `TaskPacket` and the root-level object
 **Description:** Top-level verification checks against the complete deliverable.  
 **Example:** `["New middleware file exists.", "All tests pass."]`
 
-### `expectedOutput`
+## `expectedOutput`
 
 **Type:** string  
 **Required:** required  

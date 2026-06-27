@@ -2,31 +2,31 @@
 
 - **Skill root**: `./` (the skill's base directory).
 - **Entry point**: `SKILL.md` — the file the agent loads.
-- **Support files**: `reference/*.md`, `templates/`, `schemas/`, `snippets/`.
+- **Support files**: Varies by skill class and purpose. Documentation skills commonly use `reference/*.md`, `templates/`, `schemas/`, `snippets/`. Planning skills (e.g., skill-architect) place reference `.md` files at the skill root.
+- **Templates**: Maintained in `skill-template-library` — see that skill for template files.
 
 ## Skill Classes
 
 Each skill has a `class` field in its frontmatter.
 The six valid classes are:
 
-- `operation` — `./templates/operation.SKILL.template.md`
+- `operation` — See skill-template-library for the class template skeleton.
   Broad/default class for single bounded procedures that are independent and self-validating.
-- `delegated` — `./templates/delegated.SKILL.template.md`
+- `delegated` — See skill-template-library for the class template skeleton.
   Receives delegation packets and performs bounded subtasks within a pipeline or orchestration.
-- `inline` — `./templates/inline.SKILL.template.md`
+- `inline` — See skill-template-library for the class template skeleton.
   Single-pass reasoning-heavy skill executed directly by the main agent.
-- `orchestrated` — `./templates/orchestrated.SKILL.template.md`
+- `orchestrated` — See skill-template-library for the class template skeleton.
   Coordinates sub-skills, workers, phases, or quality gates.
-- `planning` — `./templates/planning.SKILL.template.md`
+- `planning` — See skill-template-library for the class template skeleton.
   Reference sources loaded during planning or architecting activities.
   No side effects.
-- `documentation` — `./templates/documentation.SKILL.template.md`
+- `documentation` — See skill-template-library for the class template skeleton.
   Passive data store for domain-shared reference content.
   No side effects, no execution steps.
   Other skills consume its content via relative-path references.
 
-Each template lives at `./templates/<class>.SKILL.template.md`.
-It provides the canonical skeleton for that class.
+Template skeletons for each class are maintained in `skill-template-library`.
 
 ## Platform Rules by Class
 
@@ -102,6 +102,7 @@ uv run --directory "$SCRIPTS_PYTHON" <entry-point> [args]
 If a project has no `.opencode/scripts/python/` directory, resolution falls through silently to the global root.
 
 Python scripts follow these conventions:
+
 - CLI entry points in `src/cli/`, using click decorators.
 - Library logic in `src/lib/`, organized by domain.
 - Tests in `tests/`, using pytest with CliRunner for CLI integration tests.
@@ -122,6 +123,6 @@ This subsection documents how Node scripts are resolved, laid out, invoked, and 
 2. `<project-root>/.opencode/scripts/node` — Project-local root (mandatory default, checked second).
 3. `~/.config/opencode/scripts/node` — Global root (mandatory default, fallback).
 
-For detailed Node script conventions — including directory layout, canonical invocation, tooling, testing, and coverage — see the shared conventions skill at `skills/skill-node-script-conventions/`.
+For detailed Node script conventions — including directory layout, canonical invocation, tooling, testing, and coverage — see the shared conventions skill `skill-node-script-conventions`.
 
 For the decision framework that determines whether a Node script is appropriate, see the class-decision-flow.md `Task Involves Deterministic, Repeatable, or Token-Heavy Processing` section.

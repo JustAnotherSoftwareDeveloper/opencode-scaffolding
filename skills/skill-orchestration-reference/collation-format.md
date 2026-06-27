@@ -35,6 +35,7 @@ Each collation unit defines its own item structure.
 Items are heterogeneous within a single collation.
 
 Examples:
+
 - Finding items: `{file, line, severity, message}`
 - Verification items: `{check, passed, detail}`
 - Task items: `{id, purpose, status, output}`

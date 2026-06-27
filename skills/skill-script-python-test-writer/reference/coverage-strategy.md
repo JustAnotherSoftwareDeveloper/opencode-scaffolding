@@ -77,6 +77,7 @@ Every non-zero exit code path must have a corresponding test.
 Use `pytest.mark.parametrize` to cover multiple error conditions compactly.
 
 Example:
+
 ```python
 @pytest.mark.parametrize(
     "args, expected_exit_code, expected_substring",
@@ -103,12 +104,14 @@ def test_cli_error_paths(args, expected_exit_code, expected_substring):
 Use `# pragma: no cover` sparingly and only for these three categories:
 
 1. **`__main__` guard** — The `if __name__ == "__main__": main()` block is exempted by convention:
+
    ```python
    if __name__ == "__main__":
        main()  # pragma: no cover
    ```
 
 2. **Unreachable defensive code** — Branches that exist only for type narrowing and cannot be triggered in practice:
+
    ```python
    if result is None:  # pragma: no cover
        raise RuntimeError("unreachable")

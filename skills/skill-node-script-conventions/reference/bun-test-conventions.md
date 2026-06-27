@@ -4,11 +4,9 @@
 
 ### Test Files
 
-| Pattern | File | Purpose |
-|---------|------|---------|
-| `tests/<script-name>.test.ts` | Unit tests | Test `lib/` modules with direct imports |
-| `tests/<script-name>.cli.test.ts` | CLI integration | Test CLI with `Bun.spawnSync` |
-| `tests/<shared-module>.test.ts` | Shared lib tests | Test `src/lib/shared/` modules |
+- **Unit tests** — `tests/<script-name>.test.ts` — Test `lib/` modules with direct imports
+- **CLI integration** — `tests/<script-name>.cli.test.ts` — Test CLI with `Bun.spawnSync`
+- **Shared lib tests** — `tests/<shared-module>.test.ts` — Test `src/lib/shared/` modules
 
 ### Test Structure
 
@@ -37,17 +35,15 @@ import {
 
 ### Core Functions
 
-| Function | Purpose |
-|----------|---------|
-| `describe(name, fn)` | Group related tests |
-| `test(name, fn)` / `it(name, fn)` | Define a test case |
-| `expect(value)` | Assertion entry point |
-| `beforeAll(fn)` | Run once before all tests in describe block |
-| `afterAll(fn)` | Run once after all tests in describe block |
-| `beforeEach(fn)` | Run before each test in describe block |
-| `afterEach(fn)` | Run after each test in describe block |
-| `mock(fn?)` | Create a mock function |
-| `spyOn(obj, method)` | Wrap a method to track calls |
+- **`describe(name, fn)`** — Group related tests
+- **`test(name, fn)` / `it(name, fn)`** — Define a test case
+- **`expect(value)`** — Assertion entry point
+- **`beforeAll(fn)`** — Run once before all tests in describe block
+- **`afterAll(fn)`** — Run once after all tests in describe block
+- **`beforeEach(fn)`** — Run before each test in describe block
+- **`afterEach(fn)`** — Run after each test in describe block
+- **`mock(fn?)`** — Create a mock function
+- **`spyOn(obj, method)`** — Wrap a method to track calls
 
 ### Test Modifiers
 
@@ -87,12 +83,10 @@ describe('CLI integration', () => {
 
 ### SyncSubprocess Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `exitCode` | `number` | The process exit code |
-| `success` | `boolean` | Shorthand for `exitCode === 0` |
-| `stdout` | `Buffer` | Stdout contents (call `.toString()`) |
-| `stderr` | `Buffer` | Stderr contents |
+- **`exitCode`** — `number` — The process exit code
+- **`success`** — `boolean` — Shorthand for `exitCode === 0`
+- **`stdout`** — `Buffer` — Stdout contents (call `.toString()`)
+- **`stderr`** — `Buffer` — Stderr contents
 
 ## Fixture Setup Pattern (mkdtempSync / rmSync)
 
@@ -183,12 +177,10 @@ afterEach(() => {
 
 The test writer reads generated source files to determine module structure and generates corresponding tests.
 
-| Source File | Test File |
-|-------------|-----------|
-| `src/cli/<name>.ts` | `tests/<name>.cli.test.ts` |
-| `src/lib/<name>/core.ts` | `tests/<name>.test.ts` |
-| `src/lib/<name>/rules.ts` | Coverage included in `tests/<name>.test.ts` |
-| `src/lib/shared/<module>.ts` | `tests/<module>.test.ts` |
+- `src/cli/<name>.ts` → `tests/<name>.cli.test.ts`
+- `src/lib/<name>/core.ts` → `tests/<name>.test.ts`
+- `src/lib/<name>/rules.ts` → Coverage included in `tests/<name>.test.ts`
+- `src/lib/shared/<module>.ts` → `tests/<module>.test.ts` |
 
 ### Unit Test Imports (Direct)
 

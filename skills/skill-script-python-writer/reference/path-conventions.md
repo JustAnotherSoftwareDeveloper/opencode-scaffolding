@@ -3,13 +3,13 @@
 Generated scripts live under `scripts/python/` within either the global or project-local root.
 Both roots follow the same directory layout; the difference is their filesystem location and resolution priority.
 
-> **Path resolution rules are authoritative in [`skill-architect/platform-layout-context.md`](../../skill-architect/platform-layout-context.md).**  
+> **Path resolution rules are authoritative in `skill-architect` (platform-layout-context).**  
 > This file provides only script-python-writer-specific conventions (directory layout, pyproject.toml).  
 > See the platform-layout-context document for: Global/Project-Local resolution order, environment variable override (`$OPENCODE_SCRIPTS_PYTHON`), skill-origin-based root selection, resolution shell snippet, and shared-lib precedence rules.
 
 ## Directory Layout (Both Roots)
 
-```
+```text
 scripts/python/
   src/
     cli/<script_name>.py        # click CLI (main entry point)

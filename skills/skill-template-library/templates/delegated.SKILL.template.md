@@ -4,9 +4,9 @@ description: "Use when <<trigger condition>>."
 class: delegated
 ---
 
-> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
+# `<<Skill Name>>` — Delegated Worker
 
-# <<Skill Name>> — Delegated Worker
+> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
 
 One-line summary of what this worker accomplishes.
 
@@ -56,6 +56,7 @@ The delegation packet's `## EXPECTED OUTPUT` is the sole authority for what the 
 The worker must produce exactly what that section specifies, in the format it specifies, without wrapping the result in extra sections, metadata, status markers, or explanatory framing.
 
 **Format rules:**
+
 - **Default format is plaintext.**
   If `## EXPECTED OUTPUT` does not explicitly request a specific format (e.g., JSON, structured sections), the worker returns plaintext and nothing more.
 - **No wrapping.**

@@ -17,7 +17,7 @@ The clarification context preserves question text and answers when available.
 
 ### Plaintext Packet Format Sent To Worker
 
-```
+```text
 ## PURPOSE
 Decompose the request into atomic task-delegation work items.
 

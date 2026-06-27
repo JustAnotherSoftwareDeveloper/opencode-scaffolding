@@ -18,16 +18,16 @@ It has been decomposed into six focused skills:
 
 ## Section Mapping: Monolithic to Decomposed
 
-- **Platform Context**: `skill-architect/platform-layout-context.md` — Planning-level content moved to architect skill.
-- **Class Taxonomy & Decision Flow**: `skill-architect/class-taxonomy.md`, `skill-architect/class-decision-flow.md` — Class definitions separated into dedicated planning skill.
-- **Authoring Style & Frontmatter Rules**: `skill-authoring-guide/authoring-style.md`, `skill-authoring-guide/frontmatter-rules.md` — Editorial conventions in dedicated documentation skill.
-- **Orchestration Patterns**: `skill-orchestration-reference/orchestrated-worker-patterns.md` — Orchestration reference in dedicated skill.
+- **Platform Context**: `skill-architect` (platform-layout-context) — Planning-level content moved to architect skill.
+- **Class Taxonomy & Decision Flow**: `skill-architect` (class-taxonomy, class-decision-flow) — Class definitions separated into dedicated planning skill.
+- **Authoring Style & Frontmatter Rules**: `skill-authoring-guide` (authoring-style, frontmatter-rules) — Editorial conventions in dedicated documentation skill.
+- **Orchestration Patterns**: `skill-orchestration-reference` — Orchestration reference in dedicated skill.
 - **Update Workflow**: `skill-maintenance-reference/update-workflow.md` — Maintenance reference in this skill.
 - **Migration Procedures**: `skill-maintenance-reference/migration-guide.md` — Migration guide in this skill.
 - **Validation Checklist**: `skill-maintenance-reference/validation-checklist.md` — Validation checks in this skill.
 - **Gotchas**: `skill-maintenance-reference/gotchas.md` — Known pitfalls in this skill.
-- **Templates**: `skill-template-library/templates/` — Template library in dedicated skill.
-- **CREATE/UPDATE Operations**: `skill-factory/workflow-create-update.md` — Operational workflow in dedicated skill.
+- **Templates**: `skill-template-library` — Template library in dedicated skill.
+- **CREATE/UPDATE Operations**: `skill-factory` — Operational workflow in dedicated skill.
 
 ## Updating a Partially Migrated Skill
 

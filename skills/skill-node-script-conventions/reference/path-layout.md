@@ -3,14 +3,14 @@
 Generated Node scripts live under `scripts/node/` within either the global or project-local root.
 Both roots follow the same directory layout; the difference is their filesystem location and resolution priority.
 
-> **Platform selection guidance** — See `skill-architect/class-decision-flow.md` for the formal decision framework on choosing Node vs Python.
-> **Resolution order** — See `skill-architect/platform-layout-context.md` for script-root resolution precedence (env var → project-local → global).
+> **Platform selection guidance** — See `skill-architect` (class-decision-flow) for the formal decision framework on choosing Node vs Python.
+> **Resolution order** — See `skill-architect` (platform-layout-context) for script-root resolution precedence (env var → project-local → global).
 > **Shared lib rules** — See `shared-lib-rules.md` for shared module conventions.
 > **Tooling configuration** — See `tooling-config.md` for biome, tsc, and package.json config.
 
 ## Directory Layout (Both Roots)
 
-```
+```text
 scripts/node/
   src/
     cli/<script-name>.ts          # cleye CLI entry point

@@ -1,9 +1,10 @@
+# `<<Workflow Name>>`
+
 > **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
 
-# <<Workflow Name>>
-<<Workflow Name>> - <<optional skill>> - <<Description>>
+`<<Workflow Name>>` - `<<optional skill>>` - `<<Description>>`
 
-**Use when:** <<one-sentence trigger condition>>
+**Use when:** `<<one-sentence trigger condition>>`
 
 ## Purpose
 

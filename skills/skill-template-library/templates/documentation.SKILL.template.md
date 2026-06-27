@@ -4,11 +4,11 @@ description: "Use when referencing <<domain-context>>."
 class: documentation
 ---
 
+# `<<Skill Name>>` — Documentation Store
+
 > **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
 
-# <<Skill Name>> — Documentation Store
-
-This skill is a passive data store for <<domain>> shared reference content.
+This skill is a passive data store for `<<domain>>` shared reference content.
 It does not auto-read any files when loaded.
 
 ## Documentation Files

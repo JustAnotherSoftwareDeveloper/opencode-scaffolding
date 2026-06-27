@@ -4,9 +4,9 @@ description: "Use when <<trigger condition>>."
 class: inline
 ---
 
-> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
+# `<<Skill Name>>`
 
-# <<Skill Name>>
+> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
 
 One-line summary of what this inline skill accomplishes in a single pass.
 
@@ -14,8 +14,8 @@ One-line summary of what this inline skill accomplishes in a single pass.
 
 Free-form prompt or structured input expected by this skill.
 
-- **<<field>>**: <<description>>
-- **<<field>>**: <<description>>
+- **`<<field>>`**: `<<description>>`
+- **`<<field>>`**: `<<description>>`
 
 ## Output
 
@@ -25,7 +25,7 @@ Concrete description of what this skill produces and in what format.
 
 <<Format description with inline code, bullet lists, or schema references as appropriate.>>
 
-```
+```text
 <<template or example of output>>
 ```
 
@@ -39,7 +39,7 @@ Concrete description of what this skill produces and in what format.
    - **Python script:** `uv run --directory <scripts-python-dir> <entry-point> <args>`
    - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
    Incorporate script output into the reasoning context.
-3. <<Step 2>> — see [<<Section Reference>>](#<<section-reference>>).
+3. <<Step 2>> — see [Output Format](#output-format).
 4. <<Step 3>> — produce output per [Output](#output).
 
 This is a single-pass process.
