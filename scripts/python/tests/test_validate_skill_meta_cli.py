@@ -23,13 +23,7 @@ _VALID_SKILL = (
     "Some content.\n"
 )
 
-_INVALID_SKILL = (
-    "---\n"
-    "name: ''\n"
-    "description: bad prefix\n"
-    "class: unknown-class\n"
-    "---\n"
-)
+_INVALID_SKILL = "---\nname: ''\ndescription: bad prefix\nclass: unknown-class\n---\n"
 
 
 @pytest.fixture

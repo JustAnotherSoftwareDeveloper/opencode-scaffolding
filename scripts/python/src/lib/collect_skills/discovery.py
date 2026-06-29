@@ -321,7 +321,9 @@ def discover_all_skills(
 
     # --- 2. Extra paths ----------------------------------------------------
     for extra_root in extra_paths:
-        extra_path = Path(extra_root) if not isinstance(extra_root, Path) else extra_root
+        extra_path = (
+            Path(extra_root) if not isinstance(extra_root, Path) else extra_root
+        )
         if verbose:
             print(
                 f"[collect-skills] Scanning extra root: {extra_path}",
@@ -349,4 +351,6 @@ def discover_all_skills(
                         f"[collect-skills] Scanning archive root: {archive_root}",
                         file=sys.stderr,
                     )
-                discover_skills_from_root(archive_root, "archive", index, verbose=verbose)
+                discover_skills_from_root(
+                    archive_root, "archive", index, verbose=verbose
+                )

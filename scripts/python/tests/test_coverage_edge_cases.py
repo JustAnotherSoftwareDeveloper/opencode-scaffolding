@@ -6,11 +6,17 @@ Covers:
 - Edge-case branches in discovery.py (permission errors, OSError, symlink loops)
 - Remaining uncovered branches in cli/skill_validator.py
 - Truncation branches in check functions (>5 violations)
+- _path_helper edge cases
+- discover_all_skills None defaults
+
+Long lines in embedded SKILL.md content strings are permitted.
 
 Run from ``scripts/python/``:
 
     uv run pytest tests/test_coverage_edge_cases.py -v
 """
+
+# ruff: noqa: E501  (long lines in embedded SKILL.md content strings)
 
 from __future__ import annotations
 
@@ -21,12 +27,9 @@ from pathlib import Path
 import pytest
 
 from lib.collect_skills.discovery import (
-    _should_exclude_dir,
-    discover_all_skills,
     discover_skills_from_root,
 )
-from lib.collect_skills.models import Skill, SkillIndex
-
+from lib.collect_skills.models import SkillIndex
 
 # ============================================================================
 # Test discovery edge cases
@@ -92,7 +95,7 @@ class TestDiscoveryEdgeCases:
         assert index.resolve()[0].name == "valid"
 
     def test_permission_error_on_entry(
-        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+        self, tmp_path: Path
     ) -> None:
         """PermissionError accessing an entry (symlink) is caught (verbose)."""
         root = tmp_path / "root-entry-perm"
@@ -108,9 +111,7 @@ class TestDiscoveryEdgeCases:
         # The valid skill should still be found
         assert len(index.resolve()) == 1
 
-    def test_violation_truncation_one_sentence(
-        self, tmp_path: Path
-    ) -> None:
+    def test_violation_truncation_one_sentence(self, tmp_path: Path) -> None:
         """>5 violations in check_one_sentence_per_line shows truncation."""
         from lib.skill_validator import check_one_sentence_per_line
 
@@ -136,9 +137,7 @@ class TestDiscoveryEdgeCases:
         assert result.passed is False
         assert "and 1 more" in result.detail or "and 2 more" in result.detail
 
-    def test_violation_truncation_declarative_voice(
-        self, tmp_path: Path
-    ) -> None:
+    def test_violation_truncation_declarative_voice(self, tmp_path: Path) -> None:
         """>5 violations in check_no_declarative_voice shows truncation."""
         from lib.skill_validator import check_no_declarative_voice
 
@@ -164,9 +163,7 @@ class TestDiscoveryEdgeCases:
         assert result.passed is False
         assert "and 1 more" in result.detail or "and 2 more" in result.detail
 
-    def test_violation_truncation_placeholders(
-        self, tmp_path: Path
-    ) -> None:
+    def test_violation_truncation_placeholders(self, tmp_path: Path) -> None:
         """>5 violations in check_no_placeholders shows truncation."""
         from lib.skill_validator import check_no_placeholders
 
@@ -192,18 +189,14 @@ class TestDiscoveryEdgeCases:
         assert result.passed is False
         assert "and 1 more" in result.detail or "and 2 more" in result.detail
 
-    def test_violation_truncation_cross_refs(
-        self, tmp_path: Path
-    ) -> None:
+    def test_violation_truncation_cross_refs(self, tmp_path: Path) -> None:
         """>5 violations in check_cross_references_exist shows truncation."""
         from lib.skill_validator import check_cross_references_exist
 
         d = tmp_path / "many-refs"
         d.mkdir()
         # Create references to 6 missing files
-        refs = "\n".join(
-            f"See [ref{i}](./ref{i}.md) for details." for i in range(6)
-        )
+        refs = "\n".join(f"See [ref{i}](./ref{i}.md) for details." for i in range(6))
         content = (
             "---\nname: test\ndescription: Use when testing\nclass: operation\n---\n\n"
             + "## Docs\n\n"
@@ -215,9 +208,7 @@ class TestDiscoveryEdgeCases:
         assert result.passed is False
         assert "and 1 more" in result.detail or "and 2 more" in result.detail
 
-    def test_covered_list_items(
-        self, tmp_path: Path
-    ) -> None:
+    def test_covered_list_items(self, tmp_path: Path) -> None:
         """List items (* and -) and numbered lists are skipped in sentence check."""
         from lib.skill_validator import check_one_sentence_per_line
 
@@ -237,9 +228,7 @@ class TestDiscoveryEdgeCases:
         # All items should be skipped; only "Some text." is checked, which has 1 sentence
         assert result.passed is True
 
-    def test_covered_code_fence(
-        self, tmp_path: Path
-    ) -> None:
+    def test_covered_code_fence(self, tmp_path: Path) -> None:
         """Code fences (```) are skipped in sentence check."""
         from lib.skill_validator import check_one_sentence_per_line
 
@@ -257,9 +246,7 @@ class TestDiscoveryEdgeCases:
         result = check_one_sentence_per_line(d)
         assert result.passed is True
 
-    def test_covered_blockquote(
-        self, tmp_path: Path
-    ) -> None:
+    def test_covered_blockquote(self, tmp_path: Path) -> None:
         """Blockquote lines (>) are skipped in sentence check."""
         from lib.skill_validator import check_one_sentence_per_line
 
@@ -276,9 +263,7 @@ class TestDiscoveryEdgeCases:
         result = check_one_sentence_per_line(d)
         assert result.passed is True
 
-    def test_no_frontmatter_in_description_check(
-        self, tmp_path: Path
-    ) -> None:
+    def test_no_frontmatter_in_description_check(self, tmp_path: Path) -> None:
         """check_description_prefix handles None frontmatter."""
         from lib.skill_validator import check_description_prefix
 
@@ -289,9 +274,7 @@ class TestDiscoveryEdgeCases:
         assert result.passed is False
         assert "frontmatter invalid" in result.detail
 
-    def test_no_frontmatter_in_class_check(
-        self, tmp_path: Path
-    ) -> None:
+    def test_no_frontmatter_in_class_check(self, tmp_path: Path) -> None:
         """check_class_valid handles None frontmatter."""
         from lib.skill_validator import check_class_valid
 
@@ -302,11 +285,9 @@ class TestDiscoveryEdgeCases:
         assert result.passed is False
         assert "frontmatter invalid" in result.detail
 
-    def test_exception_in_run_all(
-        self, tmp_path: Path
-    ) -> None:
+    def test_exception_in_run_all(self, tmp_path: Path) -> None:
         """An exception raised within a check function is caught by run_all."""
-        from lib.skill_validator import ALL_CHECKS, run_all
+        from lib.skill_validator import run_all
 
         d = tmp_path / "exception-dir"
         d.mkdir()
@@ -323,32 +304,24 @@ class TestDiscoveryEdgeCases:
         # At least some checks should pass
         assert any(c["passed"] for c in result["checks"])
 
-    def test_check_description_prefix_no_frontmatter(
-        self, tmp_path: Path
-    ) -> None:
+    def test_check_description_prefix_no_frontmatter(self, tmp_path: Path) -> None:
         """check_description_prefix handles SKILL.md with frontmatter that has invalid FM."""
         from lib.skill_validator import check_description_prefix
 
         d = tmp_path / "bad-fm-2"
         d.mkdir()
         # Create a file that has --- markers but no valid YAML
-        (d / "SKILL.md").write_text(
-            "---\n  invalid_yaml_here: [broken\n---\n"
-        )
+        (d / "SKILL.md").write_text("---\n  invalid_yaml_here: [broken\n---\n")
         result = check_description_prefix(d)
         assert result.passed is False
 
-    def test_check_class_valid_no_frontmatter(
-        self, tmp_path: Path
-    ) -> None:
+    def test_check_class_valid_no_frontmatter(self, tmp_path: Path) -> None:
         """check_class_valid handles SKILL.md with invalid frontmatter."""
         from lib.skill_validator import check_class_valid
 
         d = tmp_path / "bad-fm-3"
         d.mkdir()
-        (d / "SKILL.md").write_text(
-            "---\n  invalid: [broken\n---\n"
-        )
+        (d / "SKILL.md").write_text("---\n  invalid: [broken\n---\n")
         result = check_class_valid(d)
         assert result.passed is False
         assert "frontmatter invalid" in result.detail
@@ -362,9 +335,7 @@ class TestDiscoveryEdgeCases:
 class TestSkillValidatorRemaining:
     """Remaining uncovered lines in cli/skill_validator.py."""
 
-    def test_numbered_list_in_declarative_voice(
-        self, tmp_path: Path
-    ) -> None:
+    def test_numbered_list_in_declarative_voice(self, tmp_path: Path) -> None:
         """Numbered list lines are skipped in check_no_declarative_voice."""
         from lib.skill_validator import check_no_declarative_voice
 
@@ -382,9 +353,7 @@ class TestSkillValidatorRemaining:
         # Numbered list items are skipped; "Some text." has no passive voice
         assert result.passed is True
 
-    def test_exception_in_check_caught_by_run_all(
-        self, tmp_path: Path
-    ) -> None:
+    def test_exception_in_check_caught_by_run_all(self, tmp_path: Path) -> None:
         """An exception in a check function is caught by run_all's handler."""
         from lib.skill_validator import run_all
 
@@ -412,10 +381,12 @@ class TestDiscoveryMonkeypatched:
     """Discovery branches that require monkeypatching to trigger."""
 
     def test_oserror_on_iterdir(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str],
     ) -> None:
         """OSError when listing a directory is caught (verbose)."""
-        import lib.collect_skills.discovery as discovery_mod
         from pathlib import Path as _Path
 
         root = tmp_path / "oserror-dir"
@@ -458,7 +429,10 @@ class TestDiscoveryMonkeypatched:
         assert index.resolve() == []
 
     def test_permission_error_on_entry_access(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str],
     ) -> None:
         """PermissionError when accessing an entry is caught (verbose)."""
         from pathlib import Path as _Path
@@ -485,7 +459,10 @@ class TestDiscoveryMonkeypatched:
         assert "cannot access" in captured.err
 
     def test_file_not_found_on_parse(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str],
     ) -> None:
         """FileNotFoundError during parse is caught (verbose)."""
         # Patch the reference to extract_frontmatter in the discovery module
@@ -499,7 +476,7 @@ class TestDiscoveryMonkeypatched:
             "---\nname: good-skill\ndescription: Use when testing\nclass: operation\n---\n"
         )
 
-        def raise_fnf(*args, **kwargs):
+        def raise_fnf(*args, **kwargs):  # noqa: ARG001
             raise FileNotFoundError("File vanished")
 
         monkeypatch.setattr(discovery_mod, "extract_frontmatter", raise_fnf)
@@ -510,7 +487,10 @@ class TestDiscoveryMonkeypatched:
         assert "vanished" in captured.err or "Warning" in captured.err
 
     def test_general_exception_on_parse(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str],
     ) -> None:
         """General exception during parse is caught (verbose)."""
         import lib.collect_skills.discovery as discovery_mod
@@ -523,7 +503,7 @@ class TestDiscoveryMonkeypatched:
             "---\nname: erratic-skill\ndescription: test\n---\n"
         )
 
-        def raise_general(*args, **kwargs):
+        def raise_general(*args, **kwargs):  # noqa: ARG001
             raise ValueError("Something unexpected")
 
         monkeypatch.setattr(discovery_mod, "extract_frontmatter", raise_general)
@@ -548,7 +528,6 @@ class TestModuleMainGuards:
 
     def test_example_module(self) -> None:
         """Running cli.example as __main__ executes the guard block."""
-        import runpy
 
         with pytest.raises(SystemExit) as exc_info:
             runpy.run_module("cli.example", run_name="__main__")
@@ -557,13 +536,11 @@ class TestModuleMainGuards:
 
     def test_collect_skills_module(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Running cli.collect_skills as __main__ executes the guard block."""
-        import runpy
-        import sys
 
         # Stub discovery so the command runs without scanning the filesystem
         monkeypatch.setattr(
             "lib.collect_skills.discovery.discover_all_skills",
-            lambda index, **kwargs: None,
+            lambda _index, **kwargs: None,  # noqa: ARG005
         )
 
         saved_argv = sys.argv
@@ -577,8 +554,6 @@ class TestModuleMainGuards:
 
     def test_skill_validator_module(self, tmp_path: Path) -> None:
         """Running cli.skill_validator as __main__ executes the guard block."""
-        import runpy
-        import sys
 
         # Create a valid skill dir
         d = tmp_path / "test-skill"
@@ -595,9 +570,97 @@ class TestModuleMainGuards:
         sys.argv = ["skill_validator", str(d)]
         try:
             with pytest.raises(SystemExit) as exc_info:
-                runpy.run_module(
-                    "cli.skill_validator", run_name="__main__"
-                )
+                runpy.run_module("cli.skill_validator", run_name="__main__")
             assert exc_info.value.code == 0
         finally:
             sys.argv = saved_argv
+
+
+# ============================================================================
+# Test _path_helper coverage
+# ============================================================================
+
+
+class TestPathHelperCoverage:
+    """Cover remaining lines in lib/shared/_path_helper.py."""
+
+    def test_setup_package_path_inserts_src(self) -> None:
+        """When src/ is not on sys.path, setup_package_path inserts it."""
+        from lib.shared._path_helper import setup_package_path
+
+        # Remove src/ from sys.path to force the insert branch
+        saved_paths = [p for p in sys.path]
+        sys.path[:] = [p for p in sys.path if "scripts/python/src" not in p]
+        try:
+            result = setup_package_path()
+            assert result is not None
+            assert "scripts/python/src" in str(result)
+        finally:
+            sys.path[:] = saved_paths
+
+
+# ============================================================================
+# Test discover_all_skills None defaults coverage
+# ============================================================================
+
+
+class TestDiscoverAllSkillsDefaults:
+    """Cover None default parameter handling in discover_all_skills()."""
+
+    def test_discover_all_skills_none_defaults(self, tmp_path: Path) -> None:
+        """Calling discover_all_skills with None config_dir/extra_paths hits default assignment lines."""
+        from lib.collect_skills.discovery import discover_all_skills
+        from lib.collect_skills.models import SkillIndex
+
+        # Create a minimal project root with a skill
+        project = tmp_path / "proj"
+        project.mkdir()
+        skill_root = project / ".opencode" / "skills"
+        skill_root.mkdir(parents=True)
+        skill_dir = skill_root / "my-skill"
+        skill_dir.mkdir()
+        (skill_dir / "SKILL.md").write_text(
+            "---\nname: my-skill\ndescription: Use when testing\nclass: operation\n---\n"
+        )
+
+        index = SkillIndex()
+        # Call with None for config_dir and extra_paths to trigger defaults
+        discover_all_skills(
+            index,
+            verbose=False,
+            project_root=project,
+            config_dir=None,
+            extra_paths=None,
+            include_archive=False,
+        )
+        assert len(index.resolve()) >= 1
+        assert any(s.name == "my-skill" for s in index.resolve())
+
+    def test_discover_all_skills_project_root_none(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Calling discover_all_skills with project_root=None triggers Path.cwd() default."""
+        from lib.collect_skills.discovery import discover_all_skills
+        from lib.collect_skills.models import SkillIndex
+
+        # Change to a known directory with a skill
+        project = tmp_path / "proj"
+        project.mkdir()
+        skill_root = project / ".opencode" / "skills"
+        skill_root.mkdir(parents=True)
+        skill_dir = skill_root / "my-skill"
+        skill_dir.mkdir()
+        (skill_dir / "SKILL.md").write_text(
+            "---\nname: my-skill\ndescription: Use when testing\nclass: operation\n---\n"
+        )
+
+        monkeypatch.setattr("lib.collect_skills.discovery.Path.cwd", lambda: project)
+
+        index = SkillIndex()
+        discover_all_skills(
+            index,
+            verbose=False,
+            project_root=None,
+            config_dir=tmp_path / "config",
+            extra_paths=None,
+            include_archive=False,
+        )
+        assert any(s.name == "my-skill" for s in index.resolve())

@@ -18,7 +18,6 @@ from click.testing import CliRunner
 
 from cli.collect_skills import main
 
-
 # ============================================================================
 # Test main() function via CliRunner
 # ============================================================================
@@ -28,10 +27,10 @@ class TestCollectSkillsMain:
     """Tests for the main() entry point in cli/collect_skills.py."""
 
     def test_main_success_empty(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """main() returns 0 when discovery succeeds with no skills and produces empty JSON array."""
+        """main() returns 0 when discovery succeeds with no skills."""
         monkeypatch.setattr(
-            "lib.collect_skills.discovery.discover_all_skills",
-            lambda index, **kwargs: None,
+            "cli.collect_skills.discover_all_skills",
+            lambda *_, **__: None,  # noqa: ARG005
         )
 
         runner = CliRunner()
@@ -46,8 +45,8 @@ class TestCollectSkillsMain:
         output_path = tmp_path / "skills.json"
 
         monkeypatch.setattr(
-            "lib.collect_skills.discovery.discover_all_skills",
-            lambda index, **kwargs: None,
+            "cli.collect_skills.discover_all_skills",
+            lambda *_, **__: None,  # noqa: ARG005
         )
 
         runner = CliRunner()
@@ -56,19 +55,21 @@ class TestCollectSkillsMain:
         assert output_path.read_text(encoding="utf-8") == "[]"
 
     def test_main_verbose_with_warnings(
-        self, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+        self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Verbose mode prints warnings to stderr."""
-        def fake_discover(index, **kwargs):
+
+        def fake_discover(
+            _index,  # noqa: ARG001
+            **_: object,  # noqa: ARG001
+        ) -> None:
             from lib.collect_skills.models import Skill
 
-            index.add(Skill(name="test", description="test", source="project"))
-            index.add(
-                Skill(name="test", description="override", source="global")
-            )
+            _index.add(Skill(name="test", description="test", source="project"))
+            _index.add(Skill(name="test", description="override", source="global"))
 
         monkeypatch.setattr(
-            "lib.collect_skills.discovery.discover_all_skills", fake_discover
+            "cli.collect_skills.discover_all_skills", fake_discover
         )
 
         runner = CliRunner()
@@ -77,15 +78,17 @@ class TestCollectSkillsMain:
         assert "Warning" in result.stderr
         assert "test" in result.output
 
-    def test_main_discovery_error(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_main_discovery_error(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """An exception during discovery returns 1 and prints to stderr."""
-        def fake_discover(index, **kwargs):
+
+        def _raise_error(
+            _index,  # noqa: ARG001
+            **_: object,  # noqa: ARG001
+        ) -> None:
             raise RuntimeError("Something went wrong")
 
         monkeypatch.setattr(
-            "lib.collect_skills.discovery.discover_all_skills", fake_discover
+            "cli.collect_skills.discover_all_skills", _raise_error
         )
 
         runner = CliRunner()
@@ -100,20 +103,22 @@ class TestCollectSkillsMain:
         output_path = tmp_path / "no-perm" / "skills.json"
 
         monkeypatch.setattr(
-            "lib.collect_skills.discovery.discover_all_skills",
-            lambda index, **kwargs: None,
+            "cli.collect_skills.discover_all_skills",
+            lambda *_, **__: None,  # noqa: ARG005
         )
 
         runner = CliRunner()
         result = runner.invoke(main, ["--output", str(output_path)])
         assert result.exit_code == 1
-        assert "Error writing output" in result.stderr
+        assert "Error: writing output" in result.stderr
 
-    def test_main_prints_to_stdout(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_main_prints_to_stdout(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Without --output, JSON is printed to stdout."""
-        def fake_discover(index, **kwargs):
+
+        def fake_discover(
+            index,  # noqa: ARG001
+            **_: object,  # noqa: ARG001
+        ) -> None:
             from lib.collect_skills.models import Skill
 
             index.add(
@@ -125,7 +130,7 @@ class TestCollectSkillsMain:
             )
 
         monkeypatch.setattr(
-            "lib.collect_skills.discovery.discover_all_skills", fake_discover
+            "cli.collect_skills.discover_all_skills", fake_discover
         )
 
         runner = CliRunner()

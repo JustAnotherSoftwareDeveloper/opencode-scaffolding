@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import sys
-from pathlib import Path
+from lib.shared._path_helper import setup_package_path
 
-WORKSPACE_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(WORKSPACE_ROOT))
+setup_package_path()
 
 
 def main() -> int:

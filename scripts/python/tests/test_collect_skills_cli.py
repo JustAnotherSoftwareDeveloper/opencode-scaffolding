@@ -11,12 +11,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import click
-import pytest
 from click.testing import CliRunner
 
 from cli.collect_skills import main
-
 
 # ============================================================================
 # Test Click CLI via CliRunner
@@ -41,7 +38,9 @@ class TestCli:
 
     def test_with_extra_paths(self) -> None:
         runner = CliRunner()
-        result = runner.invoke(main, ["--extra-paths", "/tmp/a", "--extra-paths", "/tmp/b"])
+        result = runner.invoke(
+            main, ["--extra-paths", "/tmp/a", "--extra-paths", "/tmp/b"]
+        )
         assert result.exit_code == 0
         assert result.output.startswith("[")
 
@@ -58,13 +57,18 @@ class TestCli:
         result = runner.invoke(
             main,
             [
-                "--project-root", str(tmp_path / "proj"),
-                "--config-dir", str(tmp_path / "config"),
-                "--extra-paths", str(tmp_path / "extra1"),
+                "--project-root",
+                str(tmp_path / "proj"),
+                "--config-dir",
+                str(tmp_path / "config"),
+                "--extra-paths",
+                str(tmp_path / "extra1"),
                 "--include-archive",
-                "--builtins-manifest", str(manifest),
+                "--builtins-manifest",
+                str(manifest),
                 "--verbose",
-                "--output", str(tmp_path / "out.json"),
+                "--output",
+                str(tmp_path / "out.json"),
             ],
         )
         assert result.exit_code == 0

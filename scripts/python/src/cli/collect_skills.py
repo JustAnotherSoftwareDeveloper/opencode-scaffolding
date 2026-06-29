@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
+"""CLI entry point for collect-skills — discover OpenCode SKILL.md files.
+
+This script is invoked as:
+  uv run --directory <scripts-python-dir> collect-skills [options]
+
+Exit codes:
+  0 — Success, JSON index written to stdout (or --output file).
+  1 — Runtime error (discovery failure, file write error).
+"""
+
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import click
 
-WORKSPACE_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(WORKSPACE_ROOT))
+from lib.collect_skills.discovery import discover_all_skills
+from lib.collect_skills.models import SkillIndex
 
 
 @click.command(name="collect-skills")
@@ -63,7 +72,7 @@ def main(
     config_dir: str,
     extra_paths: tuple[str, ...],
     include_archive: bool,
-    builtins_manifest: str | None,
+    builtins_manifest: str | None,  # noqa: ARG001
     verbose: bool,
     output: str | None,
 ) -> None:
@@ -72,9 +81,6 @@ def main(
     Discovers SKILL.md files across project roots, global config, archives,
     and extra paths, then produces a deduplicated JSON index.
     """
-    from lib.collect_skills.discovery import discover_all_skills
-    from lib.collect_skills.models import SkillIndex
-
     index = SkillIndex()
 
     try:
@@ -87,8 +93,8 @@ def main(
             include_archive=include_archive,
         )
     except Exception as exc:
-        click.echo(f"[collect-skills] Error during discovery: {exc}", err=True)
-        raise SystemExit(1)
+        click.echo(f"Error: during discovery: {exc}", err=True)
+        raise SystemExit(1) from exc
 
     json_output = index.to_json()
 
@@ -97,14 +103,14 @@ def main(
         try:
             output_path.write_text(json_output, encoding="utf-8")
         except OSError as exc:
-            click.echo(f"[collect-skills] Error writing output: {exc}", err=True)
-            raise SystemExit(1)
+            click.echo(f"Error: writing output: {exc}", err=True)
+            raise SystemExit(1) from exc
     else:
         click.echo(json_output)
 
     if verbose and index.warnings:
         for warning in index.warnings:
-            click.echo(f"[collect-skills] Warning: {warning}", err=True)
+            click.echo(f"Warning: {warning}", err=True)
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -23,6 +23,7 @@ class ValidationResult(TypedDict):
     valid: bool
     errors: list[str]
 
+
 _VALID_CLASSES: set[str] = {
     "operation",
     "delegated",
@@ -87,9 +88,7 @@ def validate_frontmatter(data: object) -> list[str]:
         errors.append("Field 'class' must be a string")
     elif class_val not in _VALID_CLASSES:
         sorted_classes = sorted(_VALID_CLASSES)
-        errors.append(
-            f"Field 'class' must be one of: {', '.join(sorted_classes)}"
-        )
+        errors.append(f"Field 'class' must be one of: {', '.join(sorted_classes)}")
 
     return errors
 

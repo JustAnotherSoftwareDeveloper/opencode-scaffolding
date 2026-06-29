@@ -10,8 +10,12 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from click.testing import CliRunner
 
 _PROJECT_SRC = Path(__file__).resolve().parents[1] / "src"
 if str(_PROJECT_SRC) not in sys.path:
@@ -19,7 +23,7 @@ if str(_PROJECT_SRC) not in sys.path:
 
 
 @pytest.fixture
-def runner() -> "CliRunner":
+def runner() -> CliRunner:
     """Provide a CliRunner instance for CLI integration tests."""
     from click.testing import CliRunner
 

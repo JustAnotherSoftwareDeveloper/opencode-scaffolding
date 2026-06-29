@@ -6,10 +6,14 @@ deduplication, JSON output shape, and CLI argument parsing.
 
 Fixtures are under ``tests/fixtures/``; ephemeral files use ``tmp_path``.
 
+Long lines in embedded SKILL.md content strings are permitted.
+
 Run from ``scripts/python/``:
 
     uv run pytest tests/test_collect_skills.py -v
 """
+
+# ruff: noqa: E501
 
 from __future__ import annotations
 
@@ -528,7 +532,9 @@ class TestParserEdgeCases:
 
         f = tmp_path / "SKILL.md"
         f.write_text("---\nname: 42\n---\n")
-        errors = validate_skill_frontmatter({"name": 42, "description": "Use when test"}, "test", f)
+        errors = validate_skill_frontmatter(
+            {"name": 42, "description": "Use when test"}, "test", f
+        )
         assert any("non-empty string" in e for e in errors)
 
     def test_description_non_string(self, tmp_path: Path) -> None:
@@ -537,7 +543,9 @@ class TestParserEdgeCases:
 
         f = tmp_path / "SKILL.md"
         f.write_text("---\ndescription: 123\n---\n")
-        errors = validate_skill_frontmatter({"name": "test", "description": 123}, "test", f)
+        errors = validate_skill_frontmatter(
+            {"name": "test", "description": 123}, "test", f
+        )
         assert any("non-empty string" in e for e in errors)
 
 
@@ -615,7 +623,14 @@ class TestDiscoverAllSkills:
             "---\nname: my-skill\ndescription: Use when testing\nclass: operation\n---\n"
         )
         index = SkillIndex()
-        discover_all_skills(index, verbose=False, project_root=project, config_dir=tmp_path / "config", extra_paths=[], include_archive=False)
+        discover_all_skills(
+            index,
+            verbose=False,
+            project_root=project,
+            config_dir=tmp_path / "config",
+            extra_paths=[],
+            include_archive=False,
+        )
         assert len(index.resolve()) == 1
         assert index.resolve()[0].name == "my-skill"
 
@@ -629,7 +644,14 @@ class TestDiscoverAllSkills:
             "---\nname: extra-skill\ndescription: Use when testing\nclass: operation\n---\n"
         )
         index = SkillIndex()
-        discover_all_skills(index, verbose=False, project_root=tmp_path / "proj", config_dir=tmp_path / "config", extra_paths=[extra_root], include_archive=False)
+        discover_all_skills(
+            index,
+            verbose=False,
+            project_root=tmp_path / "proj",
+            config_dir=tmp_path / "config",
+            extra_paths=[extra_root],
+            include_archive=False,
+        )
         names = {s.name for s in index.resolve()}
         assert "extra-skill" in names
 
@@ -645,45 +667,81 @@ class TestDiscoverAllSkills:
             "---\nname: archived-skill\ndescription: Use when testing\nclass: operation\n---\n"
         )
         index = SkillIndex()
-        discover_all_skills(index, verbose=False, project_root=project, config_dir=tmp_path / "config", extra_paths=[], include_archive=True)
+        discover_all_skills(
+            index,
+            verbose=False,
+            project_root=project,
+            config_dir=tmp_path / "config",
+            extra_paths=[],
+            include_archive=True,
+        )
         names = {s.name for s in index.resolve()}
         assert "archived-skill" in names
 
-    def test_verbose_mode(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_verbose_mode(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """Verbose mode prints progress messages to stderr."""
         project = tmp_path / "proj-verbose"
         project.mkdir()
         index = SkillIndex()
-        discover_all_skills(index, verbose=True, project_root=project, config_dir=tmp_path / "config", extra_paths=[], include_archive=False)
+        discover_all_skills(
+            index,
+            verbose=True,
+            project_root=project,
+            config_dir=tmp_path / "config",
+            extra_paths=[],
+            include_archive=False,
+        )
         captured = capsys.readouterr()
         # No standard roots exist, so no scanning messages
         # but verbose mode should not crash
         assert captured.err == ""
 
-    def test_verbose_with_standard_roots(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_verbose_with_standard_roots(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """Verbose mode prints when standard roots are scanned."""
         project = tmp_path / "proj-verbose2"
         project.mkdir()
         skill_root = project / ".opencode" / "skills"
         skill_root.mkdir(parents=True)
         index = SkillIndex()
-        discover_all_skills(index, verbose=True, project_root=project, config_dir=tmp_path / "config", extra_paths=[], include_archive=False)
+        discover_all_skills(
+            index,
+            verbose=True,
+            project_root=project,
+            config_dir=tmp_path / "config",
+            extra_paths=[],
+            include_archive=False,
+        )
         captured = capsys.readouterr()
         assert "Scanning" in captured.err
         assert "project" in captured.err
 
-    def test_verbose_with_extra_paths(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_verbose_with_extra_paths(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """Verbose mode prints when extra paths are scanned."""
         project = tmp_path / "proj-extra-verbose"
         project.mkdir()
         extra = tmp_path / "extra-verbose"
         extra.mkdir()
         index = SkillIndex()
-        discover_all_skills(index, verbose=True, project_root=project, config_dir=tmp_path / "config", extra_paths=[extra], include_archive=False)
+        discover_all_skills(
+            index,
+            verbose=True,
+            project_root=project,
+            config_dir=tmp_path / "config",
+            extra_paths=[extra],
+            include_archive=False,
+        )
         captured = capsys.readouterr()
         assert "Scanning extra root" in captured.err
 
-    def test_verbose_with_archive(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_verbose_with_archive(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """Verbose mode prints when archive paths are scanned."""
         project = tmp_path / "proj-archive-verbose"
         project.mkdir()
@@ -695,7 +753,14 @@ class TestDiscoverAllSkills:
             "---\nname: archive-skill\ndescription: Use when testing\nclass: operation\n---\n"
         )
         index = SkillIndex()
-        discover_all_skills(index, verbose=True, project_root=project, config_dir=tmp_path / "config", extra_paths=[], include_archive=True)
+        discover_all_skills(
+            index,
+            verbose=True,
+            project_root=project,
+            config_dir=tmp_path / "config",
+            extra_paths=[],
+            include_archive=True,
+        )
         captured = capsys.readouterr()
         assert "Scanning archive root" in captured.err
 
@@ -709,7 +774,14 @@ class TestDiscoverAllSkills:
             "---\nname: path-skill\ndescription: Use when testing\nclass: operation\n---\n"
         )
         index = SkillIndex()
-        discover_all_skills(index, verbose=False, project_root=tmp_path / "proj", config_dir=tmp_path / "config", extra_paths=[str(extra_root)], include_archive=False)
+        discover_all_skills(
+            index,
+            verbose=False,
+            project_root=tmp_path / "proj",
+            config_dir=tmp_path / "config",
+            extra_paths=[extra_root],
+            include_archive=False,
+        )
         names = {s.name for s in index.resolve()}
         assert "path-skill" in names
 
@@ -722,7 +794,9 @@ class TestDiscoverAllSkills:
 class TestDiscoverSkillsFromRootEdgeCases:
     """Edge cases for ``discover_skills_from_root()``."""
 
-    def test_non_existent_root_verbose(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_non_existent_root_verbose(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """Non-existent root with verbose prints a warning."""
         index = SkillIndex()
         discover_skills_from_root(tmp_path / "nope", "project", index, verbose=True)
@@ -736,7 +810,9 @@ class TestDiscoverSkillsFromRootEdgeCases:
         # Should not crash, no skills added
         assert index.resolve() == []
 
-    def test_non_directory_root_verbose(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_non_directory_root_verbose(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """A file as root with verbose prints a warning."""
         f = tmp_path / "not-a-dir"
         f.write_text("I am a file")
@@ -753,7 +829,9 @@ class TestDiscoverSkillsFromRootEdgeCases:
         discover_skills_from_root(f, "project", index, verbose=False)
         assert index.resolve() == []
 
-    def test_permission_error_on_directory(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_permission_error_on_directory(
+        self, tmp_path: Path
+    ) -> None:
         """PermissionError when listing directory is caught."""
         root = tmp_path / "no-list"
         root.mkdir()
@@ -794,9 +872,7 @@ class TestDiscoverSkillsFromRootEdgeCases:
         skill_dir = root / "no-read"
         skill_dir.mkdir()
         skill_file = skill_dir / "SKILL.md"
-        skill_file.write_text(
-            "---\nname: no-read\ndescription: test\n---\n"
-        )
+        skill_file.write_text("---\nname: no-read\ndescription: test\n---\n")
         skill_file.chmod(0o000)
         index = SkillIndex()
         try:
@@ -817,7 +893,9 @@ class TestDiscoverSkillsFromRootEdgeCases:
         # Broken symlink is skipped (resolve() finds target, is_dir() is False)
         assert index.resolve() == []
 
-    def test_no_frontmatter_verbose(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_no_frontmatter_verbose(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """SKILL.md with no frontmatter triggers verbose warning."""
         root = tmp_path / "root-no-fm"
         root.mkdir()
@@ -829,7 +907,9 @@ class TestDiscoverSkillsFromRootEdgeCases:
         captured = capsys.readouterr()
         assert "no frontmatter" in captured.err
 
-    def test_validation_errors_verbose(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_validation_errors_verbose(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """Validation errors trigger verbose warnings."""
         root = tmp_path / "root-valid-err"
         root.mkdir()
@@ -852,11 +932,25 @@ class TestDiscoverSkillsFromRootEdgeCases:
 class TestModelEdgeCases:
     """Edge cases for models.py."""
 
-    def test_equal_priority_same_location(self, tmp_path: Path) -> None:
+    def test_equal_priority_same_location(self) -> None:
         """Equal priority entries keep the existing one silently."""
         index = SkillIndex()
-        index.add(Skill(name="same", description="first", source="project", location="/tmp/.opencode/skills/same"))
-        index.add(Skill(name="same", description="second", source="project", location="/tmp/.opencode/skills/same"))
+        index.add(
+            Skill(
+                name="same",
+                description="first",
+                source="project",
+                location="/tmp/.opencode/skills/same",
+            )
+        )
+        index.add(
+            Skill(
+                name="same",
+                description="second",
+                source="project",
+                location="/tmp/.opencode/skills/same",
+            )
+        )
         assert len(index.resolve()) == 1
         assert index.resolve()[0].description == "first"
         # No warning for equal priority
@@ -874,8 +968,16 @@ class TestModelEdgeCases:
         skill = Skill(name="test")
         d = skill.to_dict()
         assert set(d.keys()) == {
-            "name", "description", "class", "version", "license",
-            "compatibility", "metadata", "location", "source", "permission",
+            "name",
+            "description",
+            "class",
+            "version",
+            "license",
+            "compatibility",
+            "metadata",
+            "location",
+            "source",
+            "permission",
         }
 
     def test_warnings_property_returns_copy(self) -> None:
@@ -890,9 +992,21 @@ class TestModelEdgeCases:
         """Different location priorities within same source."""
         index = SkillIndex()
         # .opencode has highest location priority (3)
-        index.add(Skill(name="tool", source="project", location="/a/.opencode/skills/tool/SKILL.md"))
+        index.add(
+            Skill(
+                name="tool",
+                source="project",
+                location="/a/.opencode/skills/tool/SKILL.md",
+            )
+        )
         # .agents has lowest location priority (1)
-        index.add(Skill(name="tool", source="project", location="/a/.agents/skills/tool/SKILL.md"))
+        index.add(
+            Skill(
+                name="tool",
+                source="project",
+                location="/a/.agents/skills/tool/SKILL.md",
+            )
+        )
         assert len(index.resolve()) == 1
         # The higher location priority (.opencode) should win
         assert ".opencode" in index.resolve()[0].location

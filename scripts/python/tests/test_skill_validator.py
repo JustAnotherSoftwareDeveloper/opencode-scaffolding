@@ -3,27 +3,29 @@
 Covers all 11 validation checks, helper functions, run_all(), and the
 Click CLI entry point.
 
+Long lines in embedded SKILL.md content strings are permitted.
+
 Run from ``scripts/python/``:
 
     uv run pytest tests/test_skill_validator.py -v
 """
 
+# ruff: noqa: E501
+
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
-from typing import Any
 
-import click
 import pytest
-import yaml
 from click.testing import CliRunner
+
+# Import the CLI entry point separately (only available in cli package)
+from cli.skill_validator import cli
 
 # Import validation logic from the canonical lib package
 from lib.skill_validator import (
     ALL_CHECKS,
-    CheckResult,
     _is_in_skip_directory,
     _parse_frontmatter,
     _read_skill_md,
@@ -40,8 +42,6 @@ from lib.skill_validator import (
     check_reference_readme_exists,
     run_all,
 )
-# Import the CLI entry point separately (only available in cli package)
-from cli.skill_validator import cli
 
 # ============================================================================
 # Helper fixtures
@@ -123,7 +123,9 @@ class TestIsInSkipDirectory:
         skill_dir.mkdir()
         outside = tmp_path / "outside.md"
         outside.write_text("# hi")
-        assert _is_in_skip_directory(outside, skill_dir, frozenset({"schemas"})) is False
+        assert (
+            _is_in_skip_directory(outside, skill_dir, frozenset({"schemas"})) is False
+        )
 
 
 class TestReadSkillMd:
@@ -394,7 +396,9 @@ class TestCheckOneSentencePerLine:
         # Explicitly create reference/ subdir with multi-sentence lines (should be skipped)
         ref = d / "reference"
         ref.mkdir()
-        (ref / "README.md").write_text("This is a reference doc. It has multiple sentences on one line. But it should be skipped.\n")
+        (ref / "README.md").write_text(
+            "This is a reference doc. It has multiple sentences on one line. But it should be skipped.\n"
+        )
         result = check_one_sentence_per_line(d)
         assert result.passed is True
 

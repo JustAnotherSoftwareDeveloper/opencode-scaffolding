@@ -7,10 +7,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .helpers import (
-    PLACEHOLDER_PATTERN,
-    PLANNING_DESCRIPTION_PREFIX,
     DEFAULT_DESCRIPTION_PREFIX,
     PASSIVE_VOICE_PATTERNS,
+    PLACEHOLDER_PATTERN,
+    PLANNING_DESCRIPTION_PREFIX,
     RELATIVE_LINK_PATTERN,
     SENTENCE_END_PATTERN,
     VALID_CLASSES,
@@ -56,9 +56,7 @@ def check_frontmatter_valid(skill_dir: Path) -> CheckResult:
             parts.append(f"unexpected keys: {', '.join(sorted(extra))}")
         if missing:
             parts.append(f"missing keys: {', '.join(sorted(missing))}")
-        return CheckResult(
-            "frontmatter-valid", False, "; ".join(parts)
-        )
+        return CheckResult("frontmatter-valid", False, "; ".join(parts))
 
     # Verify each value is non-empty string
     for key in expected_keys:
@@ -70,7 +68,9 @@ def check_frontmatter_valid(skill_dir: Path) -> CheckResult:
                 f"Field '{key}' is missing or empty",
             )
 
-    return CheckResult("frontmatter-valid", True, "Valid frontmatter with name, description, class")
+    return CheckResult(
+        "frontmatter-valid", True, "Valid frontmatter with name, description, class"
+    )
 
 
 def check_name_matches_dir(skill_dir: Path) -> CheckResult:
@@ -81,13 +81,19 @@ def check_name_matches_dir(skill_dir: Path) -> CheckResult:
 
     fm = _parse_frontmatter(content)
     if fm is None:
-        return CheckResult("name-matches-dir", False, "Cannot check name: frontmatter invalid")
+        return CheckResult(
+            "name-matches-dir", False, "Cannot check name: frontmatter invalid"
+        )
 
     skill_name = fm.get("name", "")
     dir_name = skill_dir.name
 
     if skill_name == dir_name:
-        return CheckResult("name-matches-dir", True, f"name '{skill_name}' matches directory '{dir_name}'")
+        return CheckResult(
+            "name-matches-dir",
+            True,
+            f"name '{skill_name}' matches directory '{dir_name}'",
+        )
     return CheckResult(
         "name-matches-dir",
         False,
@@ -103,7 +109,9 @@ def check_description_prefix(skill_dir: Path) -> CheckResult:
 
     fm = _parse_frontmatter(content)
     if fm is None:
-        return CheckResult("description-prefix", False, "Cannot check description: frontmatter invalid")
+        return CheckResult(
+            "description-prefix", False, "Cannot check description: frontmatter invalid"
+        )
 
     desc = fm.get("description", "")
     skill_class = fm.get("class", "")
@@ -142,7 +150,9 @@ def check_class_valid(skill_dir: Path) -> CheckResult:
 
     fm = _parse_frontmatter(content)
     if fm is None:
-        return CheckResult("class-valid", False, "Cannot check class: frontmatter invalid")
+        return CheckResult(
+            "class-valid", False, "Cannot check class: frontmatter invalid"
+        )
 
     skill_class = fm.get("class", "")
     if skill_class in VALID_CLASSES:
@@ -164,7 +174,9 @@ def check_docs_last_section(skill_dir: Path) -> CheckResult:
     # Find all H2 section headings (## ...)
     headings = re.findall(r"^##\s+(.+)$", content, re.MULTILINE)
     if not headings:
-        return CheckResult("docs-last-section", False, "No H2 sections found in SKILL.md")
+        return CheckResult(
+            "docs-last-section", False, "No H2 sections found in SKILL.md"
+        )
 
     last_heading = headings[-1].strip()
     if last_heading == "Docs":
@@ -180,8 +192,12 @@ def check_reference_readme_exists(skill_dir: Path) -> CheckResult:
     """Check 6: reference/README.md exists."""
     path = skill_dir / "reference" / "README.md"
     if path.is_file():
-        return CheckResult("reference-readme-exists", True, "reference/README.md exists")
-    return CheckResult("reference-readme-exists", False, "reference/README.md not found")
+        return CheckResult(
+            "reference-readme-exists", True, "reference/README.md exists"
+        )
+    return CheckResult(
+        "reference-readme-exists", False, "reference/README.md not found"
+    )
 
 
 def check_no_examples_section(skill_dir: Path) -> CheckResult:
@@ -191,7 +207,9 @@ def check_no_examples_section(skill_dir: Path) -> CheckResult:
         return CheckResult("no-examples-section", False, "SKILL.md not found")
 
     if re.search(r"^##\s+Examples\b", content, re.MULTILINE):
-        return CheckResult("no-examples-section", False, "SKILL.md contains an '## Examples' section")
+        return CheckResult(
+            "no-examples-section", False, "SKILL.md contains an '## Examples' section"
+        )
     return CheckResult("no-examples-section", True, "No examples section found")
 
 
@@ -201,12 +219,16 @@ def check_one_sentence_per_line(skill_dir: Path) -> CheckResult:
     md_files = list(skill_dir.rglob("*.md"))
 
     if not md_files:
-        return CheckResult("one-sentence-per-line", False, "No .md files found in skill directory")
+        return CheckResult(
+            "one-sentence-per-line", False, "No .md files found in skill directory"
+        )
 
     for md_file in md_files:
         # Skip files in schemas/ and templates/ per style guide exceptions.
         # Also skip reference/ — these are documentation with looser conventions.
-        if _is_in_skip_directory(md_file, skill_dir, frozenset({"schemas", "templates", "reference"})):
+        if _is_in_skip_directory(
+            md_file, skill_dir, frozenset({"schemas", "templates", "reference"})
+        ):
             continue
 
         text = md_file.read_text(encoding="utf-8")
@@ -243,7 +265,9 @@ def check_one_sentence_per_line(skill_dir: Path) -> CheckResult:
         if len(violations) > 5:
             detail_lines.append(f"... and {len(violations) - 5} more")
         return CheckResult("one-sentence-per-line", False, "; ".join(detail_lines))
-    return CheckResult("one-sentence-per-line", True, "All .md files use one sentence per line")
+    return CheckResult(
+        "one-sentence-per-line", True, "All .md files use one sentence per line"
+    )
 
 
 def check_no_declarative_voice(skill_dir: Path) -> CheckResult:
@@ -257,7 +281,9 @@ def check_no_declarative_voice(skill_dir: Path) -> CheckResult:
     for md_file in md_files:
         # Skip schemas/, templates/, and reference/ per style guide exceptions
         # reference/*.md has explicit exception for declarative voice in fact definitions
-        if _is_in_skip_directory(md_file, skill_dir, frozenset({"schemas", "templates", "reference"})):
+        if _is_in_skip_directory(
+            md_file, skill_dir, frozenset({"schemas", "templates", "reference"})
+        ):
             continue
 
         text = md_file.read_text(encoding="utf-8")
@@ -265,7 +291,9 @@ def check_no_declarative_voice(skill_dir: Path) -> CheckResult:
         for i, line in enumerate(lines, 1):
             stripped = line.strip()
             # Skip headings, empty, code fences, list markers, frontmatter
-            if not stripped or stripped.startswith(("#", "- ", "* ", "```", "---", ">")):
+            if not stripped or stripped.startswith(
+                ("#", "- ", "* ", "```", "---", ">")
+            ):
                 continue
             if re.match(r"^\d+\.", stripped):
                 continue
@@ -280,7 +308,11 @@ def check_no_declarative_voice(skill_dir: Path) -> CheckResult:
         if len(violations) > 5:
             detail_lines.append(f"... and {len(violations) - 5} more")
         return CheckResult("no-declarative-voice", False, "; ".join(detail_lines))
-    return CheckResult("no-declarative-voice", True, "No declarative voice or passive constructions detected")
+    return CheckResult(
+        "no-declarative-voice",
+        True,
+        "No declarative voice or passive constructions detected",
+    )
 
 
 def check_no_placeholders(skill_dir: Path) -> CheckResult:
@@ -294,7 +326,9 @@ def check_no_placeholders(skill_dir: Path) -> CheckResult:
     for md_file in md_files:
         # Skip templates/ — they intentionally contain <<placeholders>>.
         # Also skip reference/ — contains example code blocks with intentional placeholders.
-        if _is_in_skip_directory(md_file, skill_dir, frozenset({"templates", "reference"})):
+        if _is_in_skip_directory(
+            md_file, skill_dir, frozenset({"templates", "reference"})
+        ):
             continue
         text = md_file.read_text(encoding="utf-8")
         for i, line in enumerate(text.split("\n"), 1):
@@ -341,4 +375,8 @@ def check_cross_references_exist(skill_dir: Path) -> CheckResult:
         if len(broken_refs) > 5:
             detail_lines.append(f"... and {len(broken_refs) - 5} more")
         return CheckResult("cross-references-exist", False, "; ".join(detail_lines))
-    return CheckResult("cross-references-exist", True, "All relative cross-references resolve to existing files")
+    return CheckResult(
+        "cross-references-exist",
+        True,
+        "All relative cross-references resolve to existing files",
+    )

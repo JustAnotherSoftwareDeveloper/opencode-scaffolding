@@ -14,11 +14,9 @@ from pathlib import Path
 
 import click
 
-# Set up path for sibling imports (same pattern as collect_skills.py)
-WORKSPACE_ROOT = Path(__file__).resolve().parents[1]
-import sys
+from lib.shared._path_helper import setup_package_path
 
-sys.path.insert(0, str(WORKSPACE_ROOT))
+setup_package_path()
 
 from lib.skill_validator import run_all
 

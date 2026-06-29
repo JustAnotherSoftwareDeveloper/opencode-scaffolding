@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+"""CLI entry point for validate-task-structure.
+
+Validates task objects against the task-packet JSON Schema.
+
+Invocation:
+  uv run --directory <scripts-python-dir> validate-task-structure \\
+      [file-path | --stdin] --schema PATH
+
+Exit codes:
+  0 — All tasks valid.
+  1 — Validation violations found.
+  2 — Parse/file/schema error (bad input, unreadable file, invalid JSON,
+      bad schema).
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import click
+
+from lib.schema import load_schema
+from lib.validate_task_structure import validate
+
+
+@click.command(name="validate-task-structure")
+@click.argument(
+    "file_path",
+    type=click.Path(exists=True, dir_okay=False, readable=True),
+    required=False,
+)
+@click.option(
+    "--stdin",
+    is_flag=True,
+    default=False,
+    help="Read task input from stdin instead of a file.",
+)
+@click.option(
+    "--schema",
+    type=click.Path(exists=True, dir_okay=False, readable=True),
+    required=True,
+    help="Path to the task-packet JSON Schema file.",
+)
+def main(
+    file_path: str | None,
+    stdin: bool,
+    schema: str,
+) -> None:
+    """Validate task objects from FILE_PATH or stdin against a JSON Schema.
+
+    Reads a JSON array of task objects and validates each one against the
+    task-packet schema. Outputs ``{"valid": true}`` or
+    ``{"valid": false, "errors": [...]}`` to stdout.
+    """
+    # --- Resolve input ---
+    if stdin and file_path:
+        click.echo(
+            "Error: specify either a file path or --stdin, not both.",
+            err=True,
+        )
+        raise SystemExit(2)
+
+    if not stdin and file_path is None:
+        click.echo(
+            "Error: provide a file path or use --stdin to read from stdin.",
+            err=True,
+        )
+        raise SystemExit(2)
+
+    # --- Load schema ---
+    try:
+        schema_dict: dict = load_schema(Path(schema))
+    except Exception as exc:
+        click.echo(f"Error: failed to load schema: {exc}", err=True)
+        raise SystemExit(2) from exc
+
+    # --- Read input ---
+    try:
+        if stdin:
+            raw: str = click.get_text_stream("stdin").read()
+        else:
+            raw = Path(file_path).read_text(encoding="utf-8")  # type: ignore[arg-type]
+    except Exception as exc:
+        click.echo(f"Error: failed to read input: {exc}", err=True)
+        raise SystemExit(2) from exc
+
+    # --- Parse JSON ---
+    try:
+        tasks: list[dict] = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        click.echo(f"Error: invalid JSON input: {exc}", err=True)
+        raise SystemExit(2) from exc
+
+    if not isinstance(tasks, list):
+        click.echo(
+            "Error: input must be a JSON array of task objects.",
+            err=True,
+        )
+        raise SystemExit(2)
+
+    # --- Validate ---
+    try:
+        valid: bool
+        errors: list[str]
+        valid, errors = validate(tasks, schema_dict)
+    except Exception as exc:
+        click.echo(f"Error: validation error: {exc}", err=True)
+        raise SystemExit(2) from exc
+
+    # --- Output ---
+    if valid:
+        click.echo(json.dumps({"valid": True}))
+    else:
+        click.echo(json.dumps({"valid": False, "errors": errors}))
+        raise SystemExit(1)
+
+
+if __name__ == "__main__":  # pragma: no cover
+    main()

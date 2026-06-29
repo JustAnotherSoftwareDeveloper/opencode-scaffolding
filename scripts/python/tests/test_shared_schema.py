@@ -40,9 +40,7 @@ class TestValidateRequiredKeys:
 
     def test_extra_keys_ignored(self) -> None:
         """Keys in data but not in required are ignored."""
-        result = validate_required_keys(
-            {"name": "test", "extra": "ignored"}, ["name"]
-        )
+        result = validate_required_keys({"name": "test", "extra": "ignored"}, ["name"])
         assert result == []
 
 
@@ -128,7 +126,5 @@ class TestValidateJsonSchema:
     ) -> None:
         """Non-list ``required`` in schema returns empty list."""
         monkeypatch.setattr("lib.shared.schema._HAS_JSONSCHEMA", False)
-        errors = validate_json_schema(
-            {"name": "test"}, {"required": "not-a-list"}
-        )
+        errors = validate_json_schema({"name": "test"}, {"required": "not-a-list"})
         assert errors == []
