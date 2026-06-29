@@ -66,6 +66,6 @@ echo '{"summary": "...", "tasks": [...]}' \
 
 ## Integration Point
 
-Use as the final gate after the summary and sorted task list are assembled into the full output object.
+Use as the final gate after the summary and sequentially ordered task list are assembled into the full output object.
 On exit 0, emit stdout verbatim as the final deliverable.
 No preamble, no fences, no commentary.

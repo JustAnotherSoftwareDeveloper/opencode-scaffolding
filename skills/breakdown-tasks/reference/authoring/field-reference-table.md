@@ -17,14 +17,6 @@ All fields defined in the JSON Schema for `TaskPacket` and the root-level object
     Used for dependency references and traceability.
   - **Example:** `"a1b2c3d4-e5f6-7890-abcd-ef1234567890"`
 
-- **`dependencies`**
-  - **Type:** string array
-  - **Required:** optional
-  - **Max Length:** n/a
-  - **Description:** List of task IDs that must complete before this task can begin.
-    Empty or absent means no prerequisites.
-  - **Example:** `["a1b2c3d4-e5f6-7890-abcd-ef1234567890"]`
-
 - **`purpose`**
   - **Type:** string
   - **Required:** required

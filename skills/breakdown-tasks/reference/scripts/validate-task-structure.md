@@ -73,4 +73,4 @@ echo '[...tasks...]' | uv run --directory "$SCRIPTS_PYTHON" validate-task-struct
 ## Integration Point
 
 Use after task fields are populated with UUIDs, purpose, and context.
-Use as an intermediate check before dependency validation.
+Use as the second pipeline step before final output validation.

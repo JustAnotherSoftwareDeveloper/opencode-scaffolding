@@ -1,6 +1,8 @@
 """test_validate_and_format_output.py — Tests for validate-and-format-output.
 
 Covers both the library (validate_and_format) and the Click CLI (main).
+Validates that tasks with a ``dependencies`` field are rejected — the
+schema no longer includes ``dependencies`` as a recognised property.
 Follows the conventions established in test_collect_skills_cli.py.
 
 Run from ``scripts/python/``:
@@ -11,6 +13,7 @@ Run from ``scripts/python/``:
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import jsonschema
@@ -36,7 +39,6 @@ _SCHEMA_PATH = (
 _VALID_TASKS = [
     {
         "id": "00000000-0000-4000-8000-000000000001",
-        "dependencies": [],
         "purpose": "Task one purpose.",
         "context": "Context for task one.",
         "filesToRead": [],
@@ -48,7 +50,6 @@ _VALID_TASKS = [
     },
     {
         "id": "00000000-0000-4000-8000-000000000002",
-        "dependencies": [],
         "purpose": "Task two purpose.",
         "context": "Context for task two.",
         "filesToRead": [],
@@ -60,7 +61,6 @@ _VALID_TASKS = [
     },
     {
         "id": "00000000-0000-4000-8000-000000000003",
-        "dependencies": [],
         "purpose": "Task three purpose.",
         "context": "Context for task three.",
         "filesToRead": [],
@@ -195,6 +195,22 @@ class TestValidateAndFormat:
         parsed = json.loads(result)
         assert parsed["tasks"][0]["id"] == "not-a-valid-uuid"
 
+    # --- tasks with dependencies field (removed from schema) -----------------
+
+    def test_rejects_tasks_with_dependencies_field(
+        self,
+        valid_data: dict,
+        schema_dict: dict,
+    ) -> None:
+        """A task with ``dependencies`` is rejected (no longer in schema)."""
+        task = dict(valid_data["tasks"][0], dependencies=[])
+        data = {**valid_data, "tasks": [task]}
+        valid, errors = validate_and_format(data, schema_dict)
+        assert valid is False
+        error_text = " ".join(str(e) for e in errors)
+        assert "dependencies" in error_text
+        assert "additional properties" in error_text.lower() or "not a valid" in error_text.lower()
+
     # --- empty tasks array --------------------------------------------------
 
     def test_empty_tasks_array(self, valid_data: dict, schema_dict: dict) -> None:
@@ -319,6 +335,18 @@ class TestCli:
         result = runner.invoke(main, [str(input_file), "--schema", str(_SCHEMA_PATH)])
         assert result.exit_code == 1
 
+    def test_cli_rejects_dependencies_field(
+        self, valid_data: dict, tmp_path: Path
+    ) -> None:
+        """A task with ``dependencies`` exits with code 1."""
+        runner = CliRunner()
+        task = dict(valid_data["tasks"][0], dependencies=[])
+        data = {**valid_data, "tasks": [task]}
+        input_file = tmp_path / "input.json"
+        input_file.write_text(json.dumps(data))
+        result = runner.invoke(main, [str(input_file), "--schema", str(_SCHEMA_PATH)])
+        assert result.exit_code == 1
+
     # --- schema path errors -------------------------------------------------
 
     def test_invalid_schema_path(self, valid_data: dict, tmp_path: Path) -> None:
@@ -392,6 +420,35 @@ class TestCli:
         result = runner.invoke(main, ["--schema", str(_SCHEMA_PATH)])
         assert result.exit_code == 2
         assert "provide a file path" in result.output.lower()
+
+    def test_state_file_with_stdin_mutually_exclusive(self, tmp_path: Path) -> None:
+        """``--state-file`` combined with ``--stdin`` exits with code 2."""
+        runner = CliRunner()
+        state_file = tmp_path / "state.json"
+        state_file.write_text("{}")
+        result = runner.invoke(
+            main,
+            ["--state-file", str(state_file), "--stdin", "--schema", str(_SCHEMA_PATH)],
+        )
+        assert result.exit_code == 2
+        assert "mutually exclusive" in result.output.lower()
+
+    def test_atomic_write_cleanup_on_error(self, valid_data: dict, tmp_path: Path, monkeypatch) -> None:
+        """When ``os.replace`` fails in atomic write, the temp file is cleaned up."""
+        runner = CliRunner()
+        state_file = tmp_path / "state.json"
+        state_file.write_text(json.dumps(valid_data))
+
+        def failing_call(*args: object, **kwargs: object) -> None:
+            raise OSError("simulated failure")
+
+        monkeypatch.setattr("cli.validate_and_format_output.os.replace", failing_call)
+        monkeypatch.setattr("cli.validate_and_format_output.os.unlink", failing_call)
+        result = runner.invoke(
+            main,
+            ["--state-file", str(state_file), "--schema", str(_SCHEMA_PATH)],
+        )
+        assert result.exit_code != 0
 
     # --- raw JSON verification ----------------------------------------------
 

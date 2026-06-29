@@ -30,12 +30,6 @@
           "type": "string",
           "format": "uuid"
         },
-        "dependencies": {
-          "description": "List of task IDs (UUID v4) that must complete before this task can begin. Tasks with an empty or absent dependencies array have no prerequisites and may run in parallel.",
-          "type": "array",
-          "items": { "type": "string" },
-          "uniqueItems": true
-        },
         "purpose": {
           "description": "Single sentence describing what this task accomplishes. Must be actionable and self-contained.",
           "type": "string",

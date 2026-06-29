@@ -87,43 +87,10 @@ Hold the list in working memory for the remainder of execution.
 If the command exits non-zero, report `BLOCKED: Unable to discover available skills — collect-skills invocation failed.`
 If the output is an empty array, proceed with an empty skill index.
 
-### 5. Dependency Analysis
-
-For each identified task, determine its prerequisites:
-
-- Which tasks must complete before this task can begin?
-- Which files must exist before this task can read them?
-- Which tasks produce outputs that this task consumes?
-
-Populate each task's `dependencies` array with the UUIDs of prerequisite tasks.
-Tasks with empty `dependencies` arrays have no prerequisites and execute in parallel.
-
-Call `uv run --directory "$SCRIPTS_PYTHON" validate-dependencies --state-file "$STATE_FILE"` with the task list.
-
-- **Exit 0:** Proceed.
-- **Exit 1:** Review cycle or orphan-dependency errors on stderr, fix them, and re-invoke.
-  Repeat until exit code 0.
-- **Exit 2 (internal/parse error):** Surface the issue to the caller.
-  Do not retry.
-
-### 6. Task Ordering
-
-Call `uv run --directory "$SCRIPTS_PYTHON" topological-sort --state-file "$STATE_FILE"` with the task list.
-
-- **Exit 0:** Replace task list with sorted output and proceed.
-- **Exit 1:** Cycle detected (cycle path in stderr).
-  Fix dependencies.
-  Re-run step 5 validation.
-  Retry step 6.
-- **Exit 2 (parse/missing fields):** Surface the issue to the caller.
-  Do not retry.
-
-See `./reference/orchestration/dependency-patterns.md` for common topologies (sequential, parallel, fan-out, fan-in).
-
-### 7. Full Output Assembly
+### 5. Full Output Assembly
 
 Read the current state from `"$STATE_FILE"`.
-Build a JSON object with `summary` (string) and `tasks` (array of packet objects in dependency order from step 6).
+Build a JSON object with `summary` (string) and `tasks` (array of packet objects in sequential order).
 
 Populate `skills` for each task using the following LLM-based matching process:
 
@@ -141,7 +108,7 @@ Populate `skills` for each task using the following LLM-based matching process:
 
 Write the assembled output object back into `"$STATE_FILE"`, overwriting the previous content.
 
-### 8. Final Validation and State Emission
+### 6. Final Validation and State Emission
 
 Call `uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"`.
 
@@ -166,13 +133,6 @@ See `./reference/authoring/core-rules.md` for the five atomicity rules and `./re
 Copy all relevant user context into each task's `context` field so workers never need to re-read the original prompt.
 The `context` field contains the relevant subset of the user request, background information and constraints, and references to prior decisions or artifacts.
 See `./reference/authoring/context-preservation.md` for detailed guidelines.
-
-## Dependency Mapping
-
-Populate each task's `dependencies` array with UUID v4 references to prerequisite tasks.
-This per-task approach enables precise dependency tracking without a separate root-level map.
-See `./reference/orchestration/dependency-patterns.md` for sequential chain, fan-out, fan-in, and parallel patterns.
-See `./reference/orchestration/task-validation.md` for dependency graph validation checks (acyclicity, reference validity).
 
 ## Output Contract
 

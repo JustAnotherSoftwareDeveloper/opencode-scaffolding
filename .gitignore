@@ -10,7 +10,7 @@ __pycache__
 .proposals
 .plans
 .lessons
-.tasks
+.tasks  
 .coverage
 # Coverage artifacts
 *.gcda

@@ -1,6 +1,6 @@
 # Pipeline Overview
 
-Chain all five scripts in a strict sequence.
+Chain all three scripts in a strict sequence.
 Each script reads from and writes to a shared `.tasks` state file rather than piping between stages.
 
 ## Script Order
@@ -9,11 +9,7 @@ Each script reads from and writes to a shared `.tasks` state file rather than pi
    See `./generate-uuids.md`.
 2. **`validate-task-structure`** — Validate required keys, types, lengths, and step numbering.
    See `./validate-task-structure.md`.
-3. **`validate-dependencies`** — Verify all dependency references exist and the graph is acyclic.
-   See `./validate-dependencies.md`.
-4. **`topological-sort`** — Order tasks by dependency depth using Kahn's algorithm.
-   See `./topological-sort.md`.
-5. **`validate-and-format-output`** — Perform final schema validation and emit raw JSON.
+3. **`validate-and-format-output`** — Perform final schema validation and emit raw JSON.
    See `./validate-and-format-output.md`.
 
 ## Uniform CLI Convention
@@ -44,11 +40,9 @@ Each step documents its State File I/O mode:
 | 3 | **Populate task fields** | Write (manual) | Fill in remaining task fields — `title`, `description`, `priority`, `context` — by editing the state file directly |
 | 4 | **Validate task structure** | Read-only | `uv run --directory "$SCRIPTS_PYTHON" validate-task-structure --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"` — loop on exit 1 until valid |
 | 5 | **Populate dependencies** | Write (manual) | Add dependency references between tasks by editing the state file directly |
-| 6 | **Validate dependencies** | Read-only | `uv run --directory "$SCRIPTS_PYTHON" validate-dependencies --state-file "$STATE_FILE"` — loop on exit 1 until valid |
-| 7 | **Topological sort** | Read/Write | `uv run --directory "$SCRIPTS_PYTHON" topological-sort --state-file "$STATE_FILE"` — reads task list, reorders by dependency depth, writes sorted result back |
-| 8 | **Assemble full output** | Read/Write (manual) | Read the current state from `"$STATE_FILE"`, build a JSON object with `summary` and sorted `tasks`, write back |
-| 9 | **Validate and format output** | Read-only | `uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"` — loop on exit 1 until valid |
-| 10 | **Return raw JSON** | Read-only | Read `"$STATE_FILE"` and emit its raw JSON contents verbatim — no preamble, no fences, no commentary |
+| 6 | **Assemble full output** | Read/Write (manual) | Read the current state from `"$STATE_FILE"`, build a JSON object with `summary` and sorted `tasks`, write back |
+| 7 | **Validate and format output** | Read-only | `uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"` — loop on exit 1 until valid |
+| 8 | **Return raw JSON** | Read-only | Read `"$STATE_FILE"` and emit its raw JSON contents verbatim — no preamble, no fences, no commentary |
 
 ## Shell Pipeline Integration
 
@@ -72,21 +66,12 @@ until uv run --directory "$SCRIPTS_PYTHON" validate-task-structure \
   echo "Fix task structure errors, then re-run this step." >&2
 done
 
-# Step 3: Validate dependencies (loop on exit 1)
-until uv run --directory "$SCRIPTS_PYTHON" validate-dependencies \
-  --state-file "$STATE_FILE"; do
-  echo "Fix dependency errors, then re-run this step." >&2
-done
-
-# Step 4: Topological sort (replaces task list in state file with sorted order)
-uv run --directory "$SCRIPTS_PYTHON" topological-sort --state-file "$STATE_FILE"
-
-# Step 5: Validate and format output (loop on exit 1)
+# Step 3: Validate and format output (loop on exit 1)
 until uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output \
   --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"; do
   echo "Fix output validation errors, then re-run this step." >&2
 done
 
-# Step 6: Emit raw JSON from state file
+# Step 4: Emit raw JSON from state file
 cat "$STATE_FILE"
 ```

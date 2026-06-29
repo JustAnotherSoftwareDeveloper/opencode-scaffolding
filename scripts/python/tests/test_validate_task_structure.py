@@ -4,10 +4,13 @@ Covers the Click CLI (via CliRunner) and the lib validation module
 (direct function calls), achieving 100% coverage of both
 ``cli.validate_task_structure`` and ``lib.validate_task_structure``.
 
+Also verifies that a task packet containing a ``dependencies`` field
+is rejected by schema ``additionalProperties: false``.
+
 Run from ``scripts/python/``:
 
-    uv run pytest tests/test_validate_task_structure.py -v \\
-        --cov=cli.validate_task_structure --cov=lib.validate_task_structure \\
+    uv run pytest tests/test_validate_task_structure.py -v \
+        --cov=cli.validate_task_structure --cov=lib.validate_task_structure \
         --cov-report=term-missing
 """
 
@@ -377,6 +380,26 @@ class TestValidateFunction:
         assert any("expected step 1" in e for e in errors)
 
 
+class TestRejectDependencies:
+    """Tests that task packets with a ``dependencies`` field are rejected.
+
+    The task-packet schema uses ``additionalProperties: false``, so any
+    property not explicitly listed (including ``dependencies``) causes a
+    validation error.
+    """
+
+    def test_rejects_task_with_dependencies_field(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        """Adding ``dependencies`` to a valid task yields an invalid result."""
+        task = dict(valid_task_1)
+        task["dependencies"] = []
+        valid, errors = validate([task], schema_dict)
+        assert valid is False
+        assert any("dependencies" in e for e in errors), f"errors={errors}"
+        assert any("Additional properties" in e for e in errors), f"errors={errors}"
+
+
 # ===========================================================================
 # CLI integration tests
 # ===========================================================================
@@ -505,6 +528,21 @@ class TestCliInvalid:
         assert result.exit_code == 1, result.output
         data = json.loads(result.output)
         assert data["valid"] is False
+
+    def test_cli_rejects_dependencies_field(
+        self, valid_task_1, tmp_path: Path
+    ) -> None:
+        """A task with ``dependencies`` field produces validation errors."""
+        task = dict(valid_task_1)
+        task["dependencies"] = []
+        input_file = tmp_path / "bad.json"
+        input_file.write_text(json.dumps([task]))
+        runner = CliRunner()
+        result = runner.invoke(main, [str(input_file), "--schema", str(SCHEMA_PATH)])
+        assert result.exit_code == 1, result.output
+        data = json.loads(result.output)
+        assert data["valid"] is False
+        assert any("dependencies" in e for e in data["errors"]), f"errors={data['errors']}"
 
 class TestCliErrors:
     """Tests for parse/file/schema errors — exit code 2."""
@@ -639,6 +677,30 @@ class TestCliErrors:
             )
             assert result.exit_code == 2
             assert "validation error" in result.output
+
+    def test_state_file_with_stdin_mutually_exclusive(self, tmp_path: Path) -> None:
+        """``--state-file`` combined with ``--stdin`` exits with code 2."""
+        runner = CliRunner()
+        state_file = tmp_path / "state.json"
+        state_file.write_text("{}")
+        result = runner.invoke(
+            main,
+            ["--state-file", str(state_file), "--stdin", "--schema", str(SCHEMA_PATH)],
+        )
+        assert result.exit_code == 2
+        assert "mutually exclusive" in result.output
+
+    def test_state_file_tasks_not_an_array(self, tmp_path: Path) -> None:
+        """State file with ``tasks`` that is not an array exits with code 2."""
+        runner = CliRunner()
+        state_file = tmp_path / "state.json"
+        state_file.write_text(json.dumps({"tasks": "not an array"}))
+        result = runner.invoke(
+            main,
+            ["--state-file", str(state_file), "--schema", str(SCHEMA_PATH)],
+        )
+        assert result.exit_code == 2
+        assert "must be a JSON array" in result.output
 
 
 class TestCliHelp:
