@@ -157,9 +157,9 @@ class TestValidateFileArray:
         assert errors == []
 
     def test_empty_array(self) -> None:
-        """An empty array is rejected."""
+        """An empty array is allowed and returns no errors."""
         errors = _validate_file_array([], "tasks[0]", "filesToRead")
-        assert errors == ["tasks[0].filesToRead: must be a non-empty array"]
+        assert errors == []
 
     def test_non_string_item(self) -> None:
         """A non-string item is rejected with a type error."""
@@ -339,20 +339,20 @@ class TestValidateFunction:
     # --- Custom validation: file arrays ---
 
     def test_empty_files_to_read(self, valid_task_1, schema_dict) -> None:
-        """Empty filesToRead is caught by custom check."""
+        """Empty filesToRead is allowed and produces no errors."""
         task = dict(valid_task_1)
         task["filesToRead"] = []
         valid, errors = validate([task], schema_dict)
-        assert valid is False
-        assert any("non-empty array" in e for e in errors)
+        assert valid is True
+        assert not any("non-empty array" in e for e in errors)
 
     def test_empty_files_to_write(self, valid_task_1, schema_dict) -> None:
-        """Empty filesToWrite is caught by custom check."""
+        """Empty filesToWrite is allowed and produces no errors."""
         task = dict(valid_task_1)
         task["filesToWrite"] = []
         valid, errors = validate([task], schema_dict)
-        assert valid is False
-        assert any("non-empty array" in e for e in errors)
+        assert valid is True
+        assert not any("non-empty array" in e for e in errors)
 
     def test_duplicate_in_files_to_read(self, valid_task_1, schema_dict) -> None:
         """Duplicate entries in filesToRead are caught."""
@@ -411,6 +411,18 @@ class TestCliValid:
         """A single valid task succeeds."""
         input_file = tmp_path / "single.json"
         input_file.write_text(json.dumps([valid_task_1]))
+        runner = CliRunner()
+        result = runner.invoke(main, [str(input_file), "--schema", str(SCHEMA_PATH)])
+        assert result.exit_code == 0, result.output
+        data = json.loads(result.output)
+        assert data["valid"] is True
+
+    def test_empty_files_to_read_passes(self, valid_task_1, tmp_path: Path) -> None:
+        """Empty filesToRead is allowed and passes validation."""
+        task = dict(valid_task_1)
+        task["filesToRead"] = []
+        input_file = tmp_path / "empty_read.json"
+        input_file.write_text(json.dumps([task]))
         runner = CliRunner()
         result = runner.invoke(main, [str(input_file), "--schema", str(SCHEMA_PATH)])
         assert result.exit_code == 0, result.output
@@ -493,22 +505,6 @@ class TestCliInvalid:
         assert result.exit_code == 1, result.output
         data = json.loads(result.output)
         assert data["valid"] is False
-
-    def test_empty_files_to_read_returns_invalid(
-        self, valid_task_1, tmp_path: Path
-    ) -> None:
-        """Empty filesToRead produces validation errors."""
-        task = dict(valid_task_1)
-        task["filesToRead"] = []
-        input_file = tmp_path / "bad.json"
-        input_file.write_text(json.dumps([task]))
-        runner = CliRunner()
-        result = runner.invoke(main, [str(input_file), "--schema", str(SCHEMA_PATH)])
-        assert result.exit_code == 1, result.output
-        data = json.loads(result.output)
-        assert data["valid"] is False
-        assert any("non-empty array" in e for e in data["errors"])
-
 
 class TestCliErrors:
     """Tests for parse/file/schema errors — exit code 2."""

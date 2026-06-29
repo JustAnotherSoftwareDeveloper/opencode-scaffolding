@@ -1,6 +1,7 @@
 ---
 name: skill-template-library
 description: "Use when referencing skill templates, schemas, or snippets for skill authoring."
+tags: [skill-authoring, reference, documentation, opencode]
 class: documentation
 ---
 

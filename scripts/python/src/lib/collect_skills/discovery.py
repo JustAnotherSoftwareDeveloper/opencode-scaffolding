@@ -260,6 +260,7 @@ def discover_skills_from_root(
         compatibility: str = frontmatter.get("compatibility", "")
         metadata: dict[str, Any] = frontmatter.get("metadata", {})
         permission: str = frontmatter.get("permission", "")
+        tags: list[str] = frontmatter.get("tags", [])
 
         # Discovered location overrides any frontmatter `location` key.
         location: str = str(skill_file.resolve())
@@ -267,6 +268,7 @@ def discover_skills_from_root(
         skill = Skill(
             name=name,
             description=description,
+            tags=tags,
             class_=class_,
             version=version,
             license=license_,

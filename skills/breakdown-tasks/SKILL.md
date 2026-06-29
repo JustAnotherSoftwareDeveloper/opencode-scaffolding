@@ -1,6 +1,7 @@
 ---
 name: breakdown-tasks
 description: "Use when decomposing a request into the smallest possible task-delegation work items."
+tags: [task-delegation, create, analysis, opencode]
 class: delegated
 ---
 
@@ -49,20 +50,18 @@ Initialize the file with a JSON object containing the `summary` field (empty str
 Extract the request from `## DETAILS` and produce a one-paragraph summary (max 2000 chars) capturing the goal, scope, and constraints.
 This summary populates the root-level `summary` field in the output.
 
-### 3. Available Skills Discovery
-
-Run `uv run --directory ~/.config/opencode/scripts/python collect-skills`.
-Capture stdout and parse the JSON array into a list of skill objects (`name`, `description`, `class`, `location`, `source`).
-Hold the list in working memory for the remainder of execution.
-If the command exits non-zero, report `BLOCKED: Unable to discover available skills — collect-skills invocation failed.`
-If the output is an empty array, proceed with an empty skill index.
-
-### 4. Atomic Task Identification
+### 3. Atomic Task Identification
 
 Split the request into atomic tasks following the [Atomicity Rule](#atomicity-rule).
 Each task must represent exactly one unit of work with a single `purpose` sentence and one `expectedOutput` paragraph.
 
-#### 4a. UUID Generation
+#### Granularity checklist
+
+- Consult `./reference/authoring/task-granularity.md` to ensure each task has a single action verb and a single expected output.
+- Consult `./reference/authoring/core-rules.md` for the five atomicity rules that define proper task boundaries.
+- Review `./reference/authoring/anti-patterns.md` for common work-boundary mistakes before finalizing task boundaries.
+
+#### 3a. UUID Generation
 
 Call `uv run --directory "$SCRIPTS_PYTHON" generate-uuids --state-file "$STATE_FILE"` with the number of identified tasks.
 The script reads the task list from the state file, appends a UUID to each task's `id` field, and writes the result back to the state file.
@@ -70,7 +69,7 @@ Assign each UUID to one task's `id` field in the same order as the tasks were id
 
 Populate all remaining task fields for each task: `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `expectedOutput`.
 
-#### 4b. Task Structure Validation
+#### 3b. Task Structure Validation
 
 Call `uv run --directory "$SCRIPTS_PYTHON" validate-task-structure --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"`.
 
@@ -79,6 +78,14 @@ Call `uv run --directory "$SCRIPTS_PYTHON" validate-task-structure --state-file 
   Repeat until exit code 0.
 - **Exit 2 (internal/parse error):** Surface the issue to the caller.
   Do not retry.
+
+### 4. Available Skills Discovery
+
+Run `uv run --directory ~/.config/opencode/scripts/python collect-skills`.
+Capture stdout and parse the JSON array into a list of skill objects (`name`, `description`, `class`, `location`, `source`).
+Hold the list in working memory for the remainder of execution.
+If the command exits non-zero, report `BLOCKED: Unable to discover available skills — collect-skills invocation failed.`
+If the output is an empty array, proceed with an empty skill index.
 
 ### 5. Dependency Analysis
 
@@ -118,9 +125,19 @@ See `./reference/orchestration/dependency-patterns.md` for common topologies (se
 Read the current state from `"$STATE_FILE"`.
 Build a JSON object with `summary` (string) and `tasks` (array of packet objects in dependency order from step 6).
 
-Populate `skills` for each task by cross-referencing the task's purpose and context against the discovered skill list.
-Assign the best-matching skill name(s) into the `skills` array based on description alignment.
-If no match exists, set `skills` to an empty array.
+Populate `skills` for each task using the following LLM-based matching process:
+
+1. **Analyze each task independently.** Consider its purpose, context, files to read/write, and execution instructions in isolation. Each task receives its own skill assignment; do not reuse or inherit assignments across tasks.
+
+2. **Identify required domain/expertise.** From the task's purpose and context, determine what domain knowledge, technical skills, or specialized expertise a worker would need to complete it successfully. Consider file types, tooling, languages, frameworks, or conventions referenced in the task.
+
+3. **Cross-reference enriched skill index.** For each task, scan the discovered skill list against the task's required expertise. Use every available metadata field — `name`, `description`, `class`, `location`, and `tags` — to evaluate relevance. The `tags` field (when present) provides quick categorical matching (e.g., "python", "testing", "cli", "documentation", "node").
+
+4. **Select 0-N best-matching skills.** Zero skills is a valid outcome for any task — do not force assignment. When multiple skills match, prefer the most specific over the most general. If a skill's `class` constrains its invocation context (e.g., `delegated`), consider whether the task's execution mode is compatible.
+
+5. **Document rationale.** For each skill assigned to a task, append a one-sentence rationale as a comment or adjacent note explaining why it was matched. This supports auditability and future refinement of the skill index.
+
+**Rule: Per-task independence.** Each task's skill assignment is independent of all others. Zero skills is always valid. Never merge or split tasks to accommodate skill availability.
 
 Write the assembled output object back into `"$STATE_FILE"`, overwriting the previous content.
 
@@ -185,7 +202,8 @@ If any check fails, rework the affected packet(s) before returning.
 - Return BLOCKED for malformed input.
   If `## DETAILS` is missing, empty, or cannot be parsed as a decomposable request, return `BLOCKED: <reason>` immediately.
 - Skill assignment is advisory, not mandatory.
-  Leave `skills` empty when no match exists.
+  The 5-step matching process is guidance; the decomposer exercises judgment.
+  Zero skills per task is always valid.
 - Task atomicity over skill availability.
   Do not merge or split tasks to match skill scope.
 

@@ -1,6 +1,7 @@
 ---
 name: skill-script-node-writer
 description: "Use when generating deterministic TypeScript Node scripts from skill requirements, including cleye CLI entry points, library modules, shared lib modules, and package.json/biome.json/tsconfig registration."
+tags: [code-generation, create, code, node]
 class: operation
 ---
 

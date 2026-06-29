@@ -1,6 +1,7 @@
 ---
 name: skill-architect
 description: "Use as planning reference for skill class taxonomy, class decision flow, class boundary rules, and platform layout/context."
+tags: [skill-authoring, reference, documentation, opencode]
 class: planning
 ---
 

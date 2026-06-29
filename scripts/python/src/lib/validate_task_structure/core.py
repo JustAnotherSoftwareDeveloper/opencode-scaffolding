@@ -26,11 +26,8 @@ def _validate_uuid_v4(value: str, path: str) -> str | None:
 
 
 def _validate_file_array(arr: list[Any], path: str, label: str) -> list[str]:
-    """Validate a file path array is non-empty, all strings, no duplicates."""
+    """Validate a file path array: all strings, no duplicates, no empty strings."""
     errors: list[str] = []
-    if not arr:
-        errors.append(f"{path}.{label}: must be a non-empty array")
-        return errors
 
     seen: set[str] = set()
     for i, item in enumerate(arr):
@@ -72,7 +69,8 @@ def validate(
     * ``expectedOutput`` maxLength 2000
     * ``executionInstructions`` steps are sequential starting at 1
     * ``id`` is a valid UUID v4
-    * ``filesToRead`` / ``filesToWrite`` are non-empty, unique, non-empty strings
+    * ``filesToRead`` / ``filesToWrite`` entries are unique, non-empty strings
+    * (empty arrays are allowed)
     * type correctness via JSON Schema validation
 
     Args:

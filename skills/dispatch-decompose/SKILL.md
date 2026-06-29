@@ -1,6 +1,7 @@
 ---
 name: dispatch-decompose
 description: "Use when the delegator must send the full user request and clarification context to a breakdown-tasks worker and return the worker's JSON decomposition output."
+tags: [task-delegation, create, code, opencode]
 class: inline
 ---
 

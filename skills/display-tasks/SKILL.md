@@ -1,6 +1,7 @@
 ---
 name: display-tasks
 description: "Use when rendering canonical breakdown-tasks output as a concise Markdown summary table."
+tags: [task-delegation, create, documentation, opencode]
 class: inline
 ---
 

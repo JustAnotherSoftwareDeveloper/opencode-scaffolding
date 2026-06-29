@@ -1,6 +1,6 @@
 # Required Frontmatter
 
-Every `SKILL.md` must open with valid YAML frontmatter containing exactly three fields:
+Every `SKILL.md` must open with valid YAML frontmatter containing exactly three required fields (plus one optional field, `tags`):
 
 ```yaml
 ---
@@ -44,3 +44,22 @@ One of exactly six values:
 No other classes are valid.
 If uncertain, lean toward `operation`.
 If the skill is a passive data store consumed by other skills, choose `documentation`.
+
+## `Tags` (optional)
+
+- **Type**: `list[str]`
+- **Status**: Optional. May be omitted entirely.
+- **Controlled vocabulary**: Each tag must belong to one of the following categories, using a `category:value` format:
+  - **`domain`** — the problem domain (e.g., `domain:testing`, `domain:web`, `domain:config`)
+  - **`action`** — the primary action (e.g., `action:create`, `action:validate`, `action:migrate`)
+  - **`output`** — the deliverable type (e.g., `output:documentation`, `output:script`, `output:test`)
+  - **`platform`** — the target platform (e.g., `platform:node`, `platform:python`, `platform:cli`)
+- **Convention**: Tags are lowercase, use colons to separate category from value, and contain no spaces.
+- **Example**:
+  ```yaml
+  tags:
+    - "domain:testing"
+    - "action:create"
+    - "output:test"
+    - "platform:node"
+  ```

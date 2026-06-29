@@ -133,4 +133,17 @@ def validate_skill_frontmatter(
     elif not isinstance(description, str) or not description.strip():
         errors.append(f"{file_path}: 'description' must be a non-empty string")
 
+    # --- tags ----------------------------------------------------------------
+    tags = frontmatter.get("tags")
+
+    if tags is not None:
+        if not isinstance(tags, list):
+            errors.append(f"{file_path}: 'tags' must be a list")
+        else:
+            for i, tag in enumerate(tags):
+                if not isinstance(tag, str):
+                    errors.append(
+                        f"{file_path}: 'tags' element {i} must be a string"
+                    )
+
     return errors

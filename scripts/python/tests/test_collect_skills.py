@@ -970,6 +970,7 @@ class TestModelEdgeCases:
         assert set(d.keys()) == {
             "name",
             "description",
+            "tags",
             "class",
             "version",
             "license",

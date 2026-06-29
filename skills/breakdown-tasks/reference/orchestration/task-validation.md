@@ -18,12 +18,11 @@ If any check fails, rework the affected packet(s) before returning.
 - **executionInstructions step numbering** — Steps must be sequential integers starting at 1 with no gaps or duplicates.
 - **executionInstructions verifiability** — Each step must have a concrete, observable action.
   Steps with vague actions (`"improve"`, `"optimize"`, `"refactor"` without specifics) must be reworded.
-- **filesToRead / filesToWrite non-empty** — These arrays must be non-empty unless the task truly involves no files.
-  A task that reads or writes files must list them explicitly.
+- **filesToRead / filesToWrite — arrays of file paths** — These arrays may be empty when a task has no file inputs or outputs (e.g., an analysis task that operates on context alone, or a review task that produces no files). Each element, if present, must be a non-empty string path.
 - **Type correctness** — Every field must have the correct type:
   `id` must be a string, `dependencies` must be an array of strings, `filesToRead` must be an array of strings, `filesToWrite` must be an array of strings, `skills` must be an array of strings, `executionInstructions` must be an array of `{step, action, verification}` objects, `verification` must be an array of strings, `purpose`, `context`, `expectedOutput` must be strings.
 - **Optional fields** — `dependencies` and `verification` are optional.
   If present, validate them against the schema.
 - **No combined tasks** — Each packet must represent exactly one atomic unit of work.
-  Verify no packet bundles independent or logically separable steps under a single `purpose`.
+  Verify no packet bundles independent or logically separable steps under a single `purpose`. Additionally, ensure each purpose contains exactly one action verb (e.g., "create", "analyze", "fix") — multiple action verbs per purpose indicate a combined task.
 - **Skill-name reasonableness** — Each entry in the `skills` array must be appropriate for the task's purpose and context.

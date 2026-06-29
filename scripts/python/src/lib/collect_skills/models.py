@@ -42,6 +42,7 @@ class Skill:
 
     name: str
     description: str = ""
+    tags: list[str] = field(default_factory=list)
     class_: str = ""
     version: str = ""
     license: str = ""
@@ -63,6 +64,7 @@ class Skill:
         d: dict[str, Any] = {
             "name": self.name,
             "description": self.description,
+            "tags": self.tags,
             "class": self.class_,  # rename for JSON output
             "version": self.version,
             "license": self.license,

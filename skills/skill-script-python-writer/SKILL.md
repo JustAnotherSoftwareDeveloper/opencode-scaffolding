@@ -1,6 +1,7 @@
 ---
 name: skill-script-python-writer
 description: "Use when generating deterministic Python scripts from skill requirements, including CLI entry points, library modules, tests, and pyproject.toml registration."
+tags: [code-generation, create, code, python]
 class: operation
 ---
 
