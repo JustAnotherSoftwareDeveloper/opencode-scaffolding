@@ -85,3 +85,33 @@ When the task qualifies, the skill class remains the same (operation, delegated,
 but must include a script invocation step in its Procedure or Execution Steps.
 The script handles the deterministic portion; the LLM handles orchestration, validation,
 and non-deterministic decisions around it.
+
+## Choose Bash Over Python Based on Workflow Type
+
+When a task qualifies for script delegation (criteria above), evaluate whether
+bash or Python is the better implementation language. Choose **bash** when the
+workflow matches one or more of these patterns:
+
+### CLI Tool Wrapping
+
+- The script's primary job is calling external CLI tools (shellcheck, shfmt, git, jq, curl, docker).
+- Bash is the natural shell for command invocation, exit-code checking, and stdout/stderr capture.
+- No non-trivial in-language data transformation is required.
+
+### Pipeline Orchestration
+
+- The script chains multiple commands where each step feeds into the next via pipes or temp files.
+- Requires managing temporary files (mktemp, cleanup traps).
+- Multi-step workflows where each step is itself a CLI command or script invocation.
+- Example: a linting pipeline that runs shellcheck, then shfmt, then aggregates results.
+
+### Environment Introspection
+
+- The script checks tool availability (which/command -v), tool versions, OS type, or PATH resolution.
+- Bash is the most direct way to query the execution environment.
+- Example: a pre-flight skill that verifies jq, git, and docker are installed before proceeding.
+
+Choose **Python** (or Node/Bun when a platform-specific library is required) for all other
+deterministic scripting needs — string parsing, JSON/YAML transformation, file manipulation,
+and any logic that benefits from structured error handling, type safety, or richer standard
+library support.

@@ -71,13 +71,12 @@ The OpenCode platform recognizes three script runtimes:
   Invoked via `uv run --directory <path> <entry-point> [args]`.
 - `scripts/node/` — Node.js scripts managed by Bun.
   Invoked via `bun run --cwd <path> <script>`.
-- `scripts/` (root) — Shell scripts and Makefiles.
+- `scripts/shell/` — Shell scripts and Makefiles.
   Invoked via `make -C <path> <target>`.
 
-### Global vs Project-Local Resolution Order
+### Python Script Resolution
 
-Scripts are resolved from two mandatory roots with an optional explicit override.
-This is an **architecture constraint**, not a future option — every script invocation must use this resolution order:
+**Resolution order** (checked in sequence):
 
 1. `$OPENCODE_SCRIPTS_PYTHON` — Environment variable explicit override (optional, highest priority).
 2. `<project-root>/.opencode/scripts/python` — Project-local root (mandatory default, checked second).
@@ -101,21 +100,20 @@ uv run --directory "$SCRIPTS_PYTHON" <entry-point> [args]
 
 If a project has no `.opencode/scripts/python/` directory, resolution falls through silently to the global root.
 
-Python scripts follow these conventions:
+**Directory layout conventions:**
 
-- CLI entry points in `src/cli/`, using click decorators.
-- Library logic in `src/lib/`, organized by domain.
-- Tests in `tests/`, using pytest with CliRunner for CLI integration tests.
+- `src/cli/` — CLI entry points, using click decorators.
+- `src/lib/` — Library logic, organized by domain.
+- `tests/` — Tests, using pytest with CliRunner for CLI integration tests.
 - Coverage target: 100% (`fail_under = 100` in pyproject.toml).
-- Non-interactive, exit non-zero on failure, errors to stderr.
+- Non-interactive; exit non-zero on failure; errors to stderr.
 
-Skills invoke scripts via the canonical pattern:
+**Invocation pattern:**
+
+Skills invoke Python scripts via the canonical pattern:
 `uv run --directory <scripts-python-path> <entry-point> [args]`
 
 ### Node Script Resolution
-
-Scripts written in TypeScript for Node/Bun follow their own resolution order and conventions.
-This subsection documents how Node scripts are resolved, laid out, invoked, and tooled.
 
 **Resolution order** (checked in sequence):
 
@@ -123,6 +121,50 @@ This subsection documents how Node scripts are resolved, laid out, invoked, and 
 2. `<project-root>/.opencode/scripts/node` — Project-local root (mandatory default, checked second).
 3. `~/.config/opencode/scripts/node` — Global root (mandatory default, fallback).
 
+**Directory layout conventions:**
+
+- `src/cli/<script-name>.ts` — CLI entry points, using cleye.
+- `src/lib/<script-name>/` — Per-script library packages.
+- `src/lib/shared/` — Shared utilities for cross-script use.
+- `tests/<script-name>.test.ts` — Unit tests.
+- `tests/<script-name>.cli.test.ts` — CLI integration tests.
+- `package.json`, `tsconfig.json`, `biome.json` — Tooling configuration.
+- Non-interactive; exit non-zero on failure; errors to stderr.
+
+**Invocation pattern:**
+
+Skills invoke Node scripts via the canonical pattern:
+`bun run --cwd <scripts-node-path> <script>`
+
+**Cross-references:**
+
 For detailed Node script conventions — including directory layout, canonical invocation, tooling, testing, and coverage — see the shared conventions skill `skill-node-script-conventions`.
 
 For the decision framework that determines whether a Node script is appropriate, see the class-decision-flow.md `Task Involves Deterministic, Repeatable, or Token-Heavy Processing` section.
+
+### Shell Script Resolution
+
+**Resolution order** (checked in sequence):
+
+1. `$OPENCODE_SCRIPTS_SHELL` — Environment variable explicit override (optional, highest priority).
+2. `<project-root>/.opencode/scripts/shell` — Project-local root (mandatory default, checked second).
+3. `~/.config/opencode/scripts/shell` — Global root (mandatory default, fallback).
+
+**Directory layout conventions:**
+
+- `lib/` — Reusable shell libraries (functions sourced by entry-point scripts).
+- `src/` — Executable entry-point scripts (shebang-based, `set -euo pipefail`).
+- `Makefile` — Central Makefile defining targets for all entry-point scripts.
+- Scripts target `/bin/bash` with `set -euo pipefail` for strict error handling.
+- Non-interactive; exit non-zero on failure; errors to stderr.
+
+**Invocation pattern:**
+
+Skills invoke shell scripts via the canonical pattern:
+`make -C <scripts-shell-path> <target>`
+
+This delegates to the Makefile which runs the underlying script with the correct environment and arguments.
+
+**Cross-reference:**
+
+For detailed Bash script conventions — including directory layout, shared library patterns, and testing — see the `skill-bash-conventions` skill.

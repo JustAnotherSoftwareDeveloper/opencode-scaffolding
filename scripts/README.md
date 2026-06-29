@@ -18,12 +18,20 @@ Each runtime workspace uses the same convention:
 
 ## Invocation Patterns
 
-Shell:
+Shell (bash):
 
 ```bash
 make -C scripts/shell help
 make -C scripts/shell run
 ```
+
+All bash helpers are invoked through the `scripts/shell/Makefile` using the `make -C scripts/shell <target>` pattern. This keeps invocation consistent regardless of the working directory.
+
+**Resolution order** — when resolving a bash helper, the following three-tier order is used:
+
+1. `OPENCODE_SCRIPTS_SHELL` environment variable (explicit override, highest priority).
+2. Project-local: `scripts/shell/` within the current project.
+3. Global: `~/.config/opencode/scripts/shell/` fallback.
 
 TypeScript/Node with Bun:
 
@@ -60,3 +68,5 @@ Scripts intended for skills should:
 ## Dependency Policy
 
 Only add dependencies when a helper needs them and the dependency choice has been reviewed. The Python validators intentionally use `PyYAML`, `jsonschema`, `lxml`, and a dev `pyright` dependency; keep `scripts/python/uv.lock` updated when these dependencies change.
+
+**Bash/shell dependencies** must be system packages installed via the platform package manager (`apt` on Debian/Ubuntu, `brew` on macOS). Do not commit project-local vendored binaries. The `scripts/shell/Makefile` should expose a `deps-check` target that verifies required system packages are present and reports missing ones with install instructions.

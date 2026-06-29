@@ -12,3 +12,8 @@ __pycache__
 .lessons
 .tasks
 .coverage
+# Coverage artifacts
+*.gcda
+*.gcno
+*.gcov
+*.gcov.out

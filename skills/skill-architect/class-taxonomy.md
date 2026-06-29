@@ -21,7 +21,10 @@ Script invocation: Operation skills are the natural home for script-calling proc
 When a step involves deterministic, repeatable, or token-intensive work, replace or augment the LLM step with a script invocation step.
 The skill's procedure defines the orchestration around the script call — input preparation, invocation, output parsing, and validation.
 Script invocation does not change the skill class.
-Scripts are implemented in Python by default. For tasks requiring Node-specific libraries (see the Node Script Support decision framework), scripts may be written in TypeScript and executed via Bun. See platform-layout-context.md for Node resolution conventions.
+Scripts are implemented in Python by default.
+For tasks requiring Node-specific libraries (see the Node Script Support decision framework), scripts may be written in TypeScript and executed via Bun.
+See platform-layout-context.md for Node resolution conventions.
+For CLI tools, shell scripting, and Makefile orchestration, scripts may be written in Bash and invoked via Make (see platform-layout-context.md for shell resolution conventions).
 
 ## delegated
 
