@@ -28,7 +28,7 @@ Decompose the request into atomic task-delegation work items.
 None
 
 ## FILES TO WRITE
-None
+.tasks/ state file (~/.config/opencode/.tasks/<unix-epoch-seconds>-<request-summary-slug>.json)
 
 ## SKILLS
 breakdown-tasks
@@ -36,6 +36,7 @@ breakdown-tasks
 ## EXECUTION INSTRUCTIONS
 Load the breakdown-tasks skill and use it to decompose the full request and clarification context into atomic delegation packets.
 Return only the decomposition result.
+Maintain decomposition state in the .tasks/ file declared in ## FILES TO WRITE.
 
 ## VERIFICATION
 The output must be valid JSON parseable as an object with a required `summary` field (string, maxLength 2000) and a required `tasks` array (non-empty).
@@ -101,7 +102,7 @@ Launch exactly one worker task per invocation.
 - Never call any subagent type other than `worker`.
 - Never parse or rewrite the worker result before returning it.
 - Never treat `PARTIAL:` as an error — it is a valid success signal from the worker and must be forwarded unchanged.
-- Never write files.
+- Never write files outside the .tasks/ state file declared in ## FILES TO WRITE.
 
 ## Docs
 

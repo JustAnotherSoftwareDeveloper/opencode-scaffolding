@@ -9,9 +9,20 @@ uv run --directory "$SCRIPTS_PYTHON" generate-uuids <count>
 ```
 
 - `<count>` is a positional integer from 1 to 100.
-  It is required.
+  It is required (unless `--state-file` is used).
 - The script does not read stdin.
   It takes a CLI argument only.
+
+### --state-file
+
+```
+uv run --directory "$SCRIPTS_PYTHON" generate-uuids --state-file <path>
+```
+
+- `<path>` is the path to a `.tasks` JSON state file.
+- The script reads the file, counts entries without an `id` field, generates that many UUIDs, assigns them to the entries, and writes the updated file back in-place.
+- Mutually exclusive with the positional `<count>` argument — provide one or the other, not both.
+- Exit code **0** on success; **1** on invalid input (missing file, malformed JSON); **2** on internal error.
 
 ## Input
 
@@ -47,6 +58,9 @@ UIDS=$(uv run --directory "$SCRIPTS_PYTHON" generate-uuids 3)
 
 # Pipe into jq for assignment
 uv run --directory "$SCRIPTS_PYTHON" generate-uuids 4 | jq -c '.[]'
+
+# Read .tasks state file, assign UUIDs to entries missing an id, write back
+uv run --directory "$SCRIPTS_PYTHON" generate-uuids --state-file .tasks
 ```
 
 ## Integration Point

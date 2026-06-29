@@ -530,7 +530,7 @@ class TestCliErrors:
         runner = CliRunner()
         result = runner.invoke(main, ["--schema", str(SCHEMA_PATH)])
         assert result.exit_code == 2
-        assert "provide a file path or use --stdin" in result.output
+        assert "provide a file path, --stdin, or --state-file" in result.output
 
     def test_nonexistent_schema_path(self, tmp_path: Path) -> None:
         """A nonexistent --schema path raises an error."""

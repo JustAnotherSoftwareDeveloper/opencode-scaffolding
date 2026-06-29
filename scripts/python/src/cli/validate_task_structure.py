@@ -38,6 +38,13 @@ from lib.validate_task_structure import validate
     help="Read task input from stdin instead of a file.",
 )
 @click.option(
+    "--state-file",
+    type=click.Path(exists=True, dir_okay=False, readable=True),
+    required=False,
+    help="Path to a .tasks state file (JSON object with 'tasks' array). "
+    "Mutually exclusive with file_path and --stdin.",
+)
+@click.option(
     "--schema",
     type=click.Path(exists=True, dir_okay=False, readable=True),
     required=True,
@@ -46,15 +53,25 @@ from lib.validate_task_structure import validate
 def main(
     file_path: str | None,
     stdin: bool,
+    state_file: str | None,
     schema: str,
 ) -> None:
-    """Validate task objects from FILE_PATH or stdin against a JSON Schema.
+    """Validate task objects from FILE_PATH, --stdin, or --state-file
+    against a JSON Schema.
 
-    Reads a JSON array of task objects and validates each one against the
-    task-packet schema. Outputs ``{"valid": true}`` or
-    ``{"valid": false, "errors": [...]}`` to stdout.
+    Reads a JSON array of task objects (or extracts them from a .tasks
+    state file) and validates each one against the task-packet schema.
+    Outputs ``{"valid": true}`` or ``{"valid": false, "errors": [...]}``
+    to stdout.
     """
     # --- Resolve input ---
+    if state_file and (stdin or file_path):
+        click.echo(
+            "Error: --state-file is mutually exclusive with file_path and --stdin.",
+            err=True,
+        )
+        raise SystemExit(2)
+
     if stdin and file_path:
         click.echo(
             "Error: specify either a file path or --stdin, not both.",
@@ -62,9 +79,9 @@ def main(
         )
         raise SystemExit(2)
 
-    if not stdin and file_path is None:
+    if not state_file and not stdin and file_path is None:
         click.echo(
-            "Error: provide a file path or use --stdin to read from stdin.",
+            "Error: provide a file path, --stdin, or --state-file.",
             err=True,
         )
         raise SystemExit(2)
@@ -78,8 +95,10 @@ def main(
 
     # --- Read input ---
     try:
-        if stdin:
-            raw: str = click.get_text_stream("stdin").read()
+        if state_file:
+            raw: str = Path(state_file).read_text(encoding="utf-8")
+        elif stdin:
+            raw = click.get_text_stream("stdin").read()
         else:
             raw = Path(file_path).read_text(encoding="utf-8")  # type: ignore[arg-type]
     except Exception as exc:
@@ -88,17 +107,33 @@ def main(
 
     # --- Parse JSON ---
     try:
-        tasks: list[dict] = json.loads(raw)
+        parsed = json.loads(raw)
     except json.JSONDecodeError as exc:
         click.echo(f"Error: invalid JSON input: {exc}", err=True)
         raise SystemExit(2) from exc
 
-    if not isinstance(tasks, list):
-        click.echo(
-            "Error: input must be a JSON array of task objects.",
-            err=True,
-        )
-        raise SystemExit(2)
+    if state_file:
+        if not isinstance(parsed, dict) or "tasks" not in parsed:
+            click.echo(
+                "Error: --state-file must contain a JSON object with a 'tasks' array.",
+                err=True,
+            )
+            raise SystemExit(2)
+        tasks: list[dict] = parsed["tasks"]
+        if not isinstance(tasks, list):
+            click.echo(
+                "Error: 'tasks' in state file must be a JSON array.",
+                err=True,
+            )
+            raise SystemExit(2)
+    else:
+        if not isinstance(parsed, list):
+            click.echo(
+                "Error: input must be a JSON array of task objects.",
+                err=True,
+            )
+            raise SystemExit(2)
+        tasks = parsed
 
     # --- Validate ---
     try:

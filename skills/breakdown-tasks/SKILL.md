@@ -14,9 +14,35 @@ Incoming packet is a standard delegation packet.
 
 ## Execution Steps
 
-### 1. Input Parsing
+### 1. Input Parsing and State File Initialization
+
+#### 1a. Read Delegation Packet
 
 Read the delegation packet's `## PURPOSE` and `## DETAILS` sections to understand the decomposition goal and the request to decompose.
+
+#### 1b. State File Initialization
+
+Derive the state file path using the following rules:
+
+- **Directory:** `~/.config/opencode/.tasks/` (create if missing).
+- **Filename pattern:** `<unix-epoch-seconds>-<request-summary-slug>.json`
+  - `<unix-epoch-seconds>`: Output of `date +%s`.
+  - `<request-summary-slug>`: Derived from the request summary by:
+    1. Lowercasing the entire string.
+    2. Replacing non-alphanumeric characters (except hyphens) with hyphens.
+    3. Collapsing runs of multiple hyphens into one.
+    4. Truncating to 64 characters.
+  - If the slug is empty after sanitization, use `decomposition` as fallback.
+- **Collision behavior:** If the derived filename already exists in `.tasks/`, emit `BLOCKED: State file <path> already exists — remove manually or wait for next epoch second.` and halt.
+- **Retention:** `.tasks/` is ephemeral working state. Files may be cleaned after the workflow completes or retained for debugging at the operator's discretion.
+
+Set `STATE_FILE=~/.config/opencode/.tasks/<derived-filename>.json`.
+
+Initialize the file with a JSON object containing the `summary` field (empty string placeholder) and an empty `tasks` array:
+
+```json
+{"summary": "", "tasks": []}
+```
 
 ### 2. User Request Summary Extraction
 
@@ -38,15 +64,15 @@ Each task must represent exactly one unit of work with a single `purpose` senten
 
 #### 4a. UUID Generation
 
-Call `uv run --directory "$SCRIPTS_PYTHON" generate-uuids <task-count>` with the number of identified tasks.
-The script returns a JSON array of UUID v4 strings.
+Call `uv run --directory "$SCRIPTS_PYTHON" generate-uuids --state-file "$STATE_FILE"` with the number of identified tasks.
+The script reads the task list from the state file, appends a UUID to each task's `id` field, and writes the result back to the state file.
 Assign each UUID to one task's `id` field in the same order as the tasks were identified.
 
 Populate all remaining task fields for each task: `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `expectedOutput`.
 
 #### 4b. Task Structure Validation
 
-Call `uv run --directory "$SCRIPTS_PYTHON" validate-task-structure --stdin --schema "$TASK_SCHEMA_PATH"` with the task list piped to stdin.
+Call `uv run --directory "$SCRIPTS_PYTHON" validate-task-structure --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"`.
 
 - **Exit 0:** Proceed.
 - **Exit 1:** Review errors on stderr, fix violations, and re-invoke.
@@ -65,7 +91,7 @@ For each identified task, determine its prerequisites:
 Populate each task's `dependencies` array with the UUIDs of prerequisite tasks.
 Tasks with empty `dependencies` arrays have no prerequisites and execute in parallel.
 
-Call `uv run --directory "$SCRIPTS_PYTHON" validate-dependencies --stdin` with the task list.
+Call `uv run --directory "$SCRIPTS_PYTHON" validate-dependencies --state-file "$STATE_FILE"` with the task list.
 
 - **Exit 0:** Proceed.
 - **Exit 1:** Review cycle or orphan-dependency errors on stderr, fix them, and re-invoke.
@@ -75,7 +101,7 @@ Call `uv run --directory "$SCRIPTS_PYTHON" validate-dependencies --stdin` with t
 
 ### 6. Task Ordering
 
-Call `uv run --directory "$SCRIPTS_PYTHON" topological-sort --stdin` with the task list.
+Call `uv run --directory "$SCRIPTS_PYTHON" topological-sort --state-file "$STATE_FILE"` with the task list.
 
 - **Exit 0:** Replace task list with sorted output and proceed.
 - **Exit 1:** Cycle detected (cycle path in stderr).
@@ -89,17 +115,21 @@ See `./reference/orchestration/dependency-patterns.md` for common topologies (se
 
 ### 7. Full Output Assembly
 
+Read the current state from `"$STATE_FILE"`.
 Build a JSON object with `summary` (string) and `tasks` (array of packet objects in dependency order from step 6).
 
 Populate `skills` for each task by cross-referencing the task's purpose and context against the discovered skill list.
 Assign the best-matching skill name(s) into the `skills` array based on description alignment.
 If no match exists, set `skills` to an empty array.
 
-### 8. Final Validation and Return
+Write the assembled output object back into `"$STATE_FILE"`, overwriting the previous content.
 
-Call `uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output --stdin --schema "$TASK_SCHEMA_PATH"` with the full output object piped to stdin.
+### 8. Final Validation and State Emission
 
-- **Exit 0:** Emit the raw JSON from stdout as the final output.
+Call `uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"`.
+
+- **Exit 0:** Read `"$STATE_FILE"` and emit its raw JSON contents verbatim.
+  Strip any internal metadata fields (e.g., `_stateVersion`, `_internal`) from the output object before emission if present.
   Do not add preamble, commentary, or markdown fences.
 - **Exit 1:** Review schema validation errors on stderr, fix the input, and re-invoke.
   No fixed retry limit.
@@ -149,7 +179,8 @@ If any check fails, rework the affected packet(s) before returning.
 - Do not bundle dependent changes into a single task.
 - Do not execute the decomposed work.
   This skill produces delegation packets only.
-- Do not write files.
+- Write state to ~/.config/opencode/.tasks/<filename>.json throughout the pipeline.
+  This skill uses the .tasks/ state file as its canonical working state.
   The `filesToWrite` in output JSON objects belongs to the downstream worker, not this skill.
 - Return BLOCKED for malformed input.
   If `## DETAILS` is missing, empty, or cannot be parsed as a decomposable request, return `BLOCKED: <reason>` immediately.
