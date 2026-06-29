@@ -22,7 +22,7 @@ If any check fails, rework the affected packet(s) before returning.
   A task that reads or writes files must list them explicitly.
 - **Type correctness** — Every field must have the correct type:
   `id` must be a string, `dependencies` must be an array of strings, `filesToRead` must be an array of strings, `filesToWrite` must be an array of strings, `skills` must be an array of strings, `executionInstructions` must be an array of `{step, action, verification}` objects, `verification` must be an array of strings, `purpose`, `context`, `expectedOutput` must be strings.
-- **Optional fields** — `dependencies` and `verification` may be absent.
+- **Optional fields** — `dependencies` and `verification` are optional.
   If present, validate them against the schema.
 - **No combined tasks** — Each packet must represent exactly one atomic unit of work.
   Verify no packet bundles independent or logically separable steps under a single `purpose`.

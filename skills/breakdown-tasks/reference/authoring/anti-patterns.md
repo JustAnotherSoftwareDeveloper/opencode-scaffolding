@@ -17,10 +17,10 @@ Work-boundary and skill-assignment mistakes to avoid when decomposing tasks.
 - **"Review checkout flow and suggest improvements"** — Combines analysis and planning in one task.
   Split into document current flow, identify issues, propose improvements.
 - **"Compare all frontend frameworks and pick one"** — Multiple independent comparisons in one task.
-  Split into evaluate framework A, evaluate framework B, compare findings and recommend.
+  Split into evaluate framework A, evaluate framework B, compare findings and select.
 
 ## Skill-Assignment Anti-Patterns
 
 - **Assign no skills when skills are available** — The decomposer has skill data but leaves `## SKILLS` empty despite obvious matches in the discovered skill list.
-- **Force-assign a skill to every packet** — Assigning a skill to purely structural tasks just to avoid empty `## SKILLS` fields.
+- **Force-assign a skill to every packet** — Assigning a skill to purely structural tasks to avoid empty `## SKILLS` fields.
   Leave empty when no match exists.

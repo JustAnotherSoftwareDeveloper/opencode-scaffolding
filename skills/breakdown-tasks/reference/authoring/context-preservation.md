@@ -11,5 +11,5 @@ The `context` field contains:
 - References to prior decisions or artifacts
 
 Context fields are 2000–8000 characters.
-The explicit `maxLength` of 8000 enables longer prompts while keeping each task self-contained.
+The `maxLength` of 8000 supports longer prompts and keeps each task self-contained.
 Do not truncate context to fit shorter limits — workers require full context to execute without ambiguity.

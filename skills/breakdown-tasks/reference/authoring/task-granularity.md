@@ -19,7 +19,7 @@ Do not bundle unrelated changes.
 "Refactor checkout + add error handling" is two tasks.
 "Create component + wire to store + add tests" is three tasks.
 
-## Avoid Compound Verbs
+## Single Action Verbs
 
 Purpose statements must contain exactly one action verb.
 Split "Create and configure" into "Create config file" then "Configure application".

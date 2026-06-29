@@ -1,6 +1,6 @@
-# Verification Best Practices
+# Verification Practices
 
-Recommended verification checks by task type.
+Verification checks by task type.
 
 ## File Creation Tasks
 
