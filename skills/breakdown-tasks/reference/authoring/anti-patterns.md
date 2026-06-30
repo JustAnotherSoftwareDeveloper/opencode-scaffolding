@@ -1,3 +1,9 @@
+---
+name: anti-patterns
+description: "Work-boundary and skill-assignment mistakes to avoid when decomposing tasks."
+class: documentation
+---
+
 # Anti-Patterns
 
 Work-boundary and skill-assignment mistakes to avoid when decomposing tasks.

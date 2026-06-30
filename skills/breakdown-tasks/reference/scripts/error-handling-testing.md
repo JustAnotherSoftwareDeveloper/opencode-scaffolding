@@ -5,26 +5,10 @@
 Each script uses exit codes 0, 1, and 2.
 The meaning is consistent across all scripts.
 
-### `generate-uuids`
-
-- **0** — UUIDs produced.
-- **1** — Invalid count (less than 1, greater than 100, non-integer).
-- **2** — Internal error.
-
 ### `validate-task-structure`
 - **0** — Valid structure.
 - **1** — Structural violations (missing keys, length, type).
 - **2** — Parse, file, or schema-load error.
-
-### `validate-dependencies`
-- **0** — Valid graph.
-- **1** — Orphan dependencies, cycles, self-loops.
-- **2** — Parse or file error.
-
-### `topological-sort`
-- **0** — Sorted output.
-- **1** — Cycle detected (path in stderr).
-- **2** — Parse or missing fields error.
 
 ### `validate-and-format-output`
 - **0** — Raw JSON output.
@@ -70,7 +54,7 @@ done
 - `$SCRIPTS_PYTHON` set to `~/.config/opencode/scripts/python`.
 - `$TASK_SCHEMA_PATH` set to `skills/breakdown-tasks/schema/task-packet.schema.json`.
 - `jsonschema` package installed in the Python environment.
-- All five scripts implemented and entry points registered in `pyproject.toml`.
+- All scripts implemented and entry points registered in `pyproject.toml`.
 
 ### Environment Variables
 ```bash
@@ -86,90 +70,77 @@ Run all tests from the `$SCRIPTS_PYTHON` directory.
 uv run --directory "$SCRIPTS_PYTHON" pytest tests/
 
 # Run tests for a specific script
-uv run --directory "$SCRIPTS_PYTHON" pytest tests/test_generate_uuids.py -v
 uv run --directory "$SCRIPTS_PYTHON" pytest tests/test_validate_task_structure.py -v
-uv run --directory "$SCRIPTS_PYTHON" pytest tests/test_validate_dependencies.py -v
-uv run --directory "$SCRIPTS_PYTHON" pytest tests/test_topological_sort.py -v
 uv run --directory "$SCRIPTS_PYTHON" pytest tests/test_validate_and_format_output.py -v
 
 # Check coverage
 uv run --directory "$SCRIPTS_PYTHON" pytest tests/ --cov=lib --cov=cli -v
 ```
 
-### Full Pipeline Integration Test
-1. Create a test input JSON file with an unsorted task list of 3 to 5 tasks with dependencies.
-2. Run each step manually and verify the chain.
+### Pipeline Integration Test (E2E)
 
-```bash
-# Step 1: Generate UUIDs
-uv run --directory "$SCRIPTS_PYTHON" generate-uuids 4
+Test the full pipeline end-to-end using a shell script.
+This exercises both scripts in sequence against sample input data.
 
-# Step 2: Validate task structure
-uv run --directory "$SCRIPTS_PYTHON" validate-task-structure test-tasks.json --schema "$TASK_SCHEMA_PATH"
-
-# Step 3: Validate dependencies
-uv run --directory "$SCRIPTS_PYTHON" validate-dependencies test-tasks.json
-
-# Step 4: Topological sort
-uv run --directory "$SCRIPTS_PYTHON" topological-sort test-tasks.json > sorted-tasks.json
-
-# Step 5: Assemble and validate final output
-echo '{"summary": "Test breakdown", "tasks": '$(cat sorted-tasks.json)'}' \
-  | uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output --stdin --schema "$TASK_SCHEMA_PATH"
-```
-
-3. Verify outputs.
-   - UUIDs match pattern `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx` with `y` in `[89ab]`.
-   - All UUIDs in a single generation call are unique.
-   - Task structure validation passes on well-formed input.
-   - Dependency graph validation catches orphan refs, cycles, and self-loops.
-   - Topological sort respects dependency order.
-     Parallel tasks are sorted by `id`.
-   - Final output is raw JSON.
-     No markdown fences, no leading or trailing whitespace.
-
-### End-To-End Shell Test
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPTS_PYTHON="$HOME/.config/opencode/scripts/python"
-TASK_SCHEMA_PATH="$HOME/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json"
+# --- Setup ---
+export SCRIPTS_PYTHON="$HOME/.config/opencode/scripts/python"
+export TASK_SCHEMA_PATH="$HOME/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json"
 
-echo "=== Step 1: Generate UUIDs ==="
-UIDS=$(uv run --directory "$SCRIPTS_PYTHON" generate-uuids 3)
-echo "UUIDs: $UIDS"
+STATE_FILE=$(mktemp)
+trap 'rm -f "$STATE_FILE"' EXIT
 
-echo "=== Step 2: Create test tasks ==="
-cat > /tmp/test-tasks.json << 'JSONEOF'
-[{"id":"aaa","dependencies":[],"purpose":"First task.","context":"C1","filesToRead":[],"filesToWrite":[],"skills":[],"executionInstructions":[{"step":1,"action":"Do A"}],"expectedOutput":"A"},{"id":"bbb","dependencies":["aaa"],"purpose":"Second task.","context":"C2","filesToRead":[],"filesToWrite":[],"skills":[],"executionInstructions":[{"step":1,"action":"Do B"}],"expectedOutput":"B"}]
-JSONEOF
+# Write sample task data (valid minimal structure, no id/dependencies field)
+cat > "$STATE_FILE" <<'EOF'
+{
+  "summary": "E2E pipeline test",
+  "tasks": [
+    {
+      "purpose": "Create a test file.",
+      "context": "Minimal test case.",
+      "filesToRead": [],
+      "filesToWrite": ["/tmp/e2e-test-output.txt"],
+      "skills": [],
+      "executionInstructions": [
+        {"step": 1, "action": "Create /tmp/e2e-test-output.txt with content 'ok'"}
+      ],
+      "expectedOutput": "File /tmp/e2e-test-output.txt exists with content 'ok'."
+    }
+  ]
+}
+EOF
 
-echo "=== Step 3: Validate task structure ==="
-uv run --directory "$SCRIPTS_PYTHON" validate-task-structure /tmp/test-tasks.json --schema "$TASK_SCHEMA_PATH"
+# Step 1: Validate task structure (expect exit 0)
+uv run --directory "$SCRIPTS_PYTHON" validate-task-structure \
+  --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH" || {
+  echo "FAIL: validate-task-structure exited non-zero" >&2
+  exit 1
+}
 
-echo "=== Step 4: Validate dependencies ==="
-uv run --directory "$SCRIPTS_PYTHON" validate-dependencies /tmp/test-tasks.json
+# Step 2: Validate and format output (expect exit 0)
+OUTPUT=$(uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output \
+  --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH") || {
+  echo "FAIL: validate-and-format-output exited non-zero" >&2
+  exit 1
+}
 
-echo "=== Step 5: Topological sort ==="
-uv run --directory "$SCRIPTS_PYTHON" topological-sort /tmp/test-tasks.json > /tmp/sorted-tasks.json
-cat /tmp/sorted-tasks.json
+# Verify output is raw JSON (no fences, no preamble)
+echo "$OUTPUT" | python3 -c "import json,sys; data=json.load(sys.stdin); assert 'summary' in data; assert 'tasks' in data" || {
+  echo "FAIL: output is not valid BreakDownTasksOutput JSON" >&2
+  exit 1
+}
 
-echo "=== Step 6: Assemble and validate final output ==="
-echo "{\"summary\":\"Test breakdown\",\"tasks\":$(cat /tmp/sorted-tasks.json)}" \
-  | uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output --stdin --schema "$TASK_SCHEMA_PATH"
-
-echo "=== All pipeline steps passed ==="
+echo "PASS: Pipeline integration test completed successfully."
 ```
 
 ### Validation Checklist
 After running the pipeline locally, verify these outcomes.
-- `generate-uuids` produces valid UUID v4 strings.
 - `validate-task-structure` accepts valid task lists and rejects malformed ones.
-- `validate-dependencies` detects orphan references, cycles, and self-loops.
-- `topological-sort` produces correct dependency-respecting order with deterministic tie-breaking.
 - `validate-and-format-output` accepts valid full output and emits raw JSON.
   No preamble, no fences.
-- All five scripts exit 0 on valid input, 1 on validation error, and 2 on parse or internal error.
+- All scripts exit 0 on valid input, 1 on validation error, and 2 on parse or internal error.
 - Errors appear on stderr.
   Errors never appear on stdout.

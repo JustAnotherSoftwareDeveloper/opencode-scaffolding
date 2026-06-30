@@ -1,15 +1,13 @@
 # Pipeline Overview
 
-Chain all three scripts in a strict sequence.
+Chain both scripts in a strict sequence.
 Each script reads from and writes to a shared `.tasks` state file rather than piping between stages.
 
 ## Script Order
 
-1. **`generate-uuids`** — Produce UUID v4 identifiers, one per task.
-   See `./generate-uuids.md`.
-2. **`validate-task-structure`** — Validate required keys, types, lengths, and step numbering.
+1. **`validate-task-structure`** — Validate required keys, types, lengths, and step numbering.
    See `./validate-task-structure.md`.
-3. **`validate-and-format-output`** — Perform final schema validation and emit raw JSON.
+2. **`validate-and-format-output`** — Perform final schema validation and emit raw JSON.
    See `./validate-and-format-output.md`.
 
 ## Uniform CLI Convention
@@ -33,16 +31,35 @@ Each step documents its State File I/O mode:
 - **Read/Write** — reads from the state file, processes, and writes back.
 - **Read-only** — reads from the state file without modifying it.
 
-| Step | Action | State File I/O | Command / Description |
-|------|--------|----------------|-----------------------|
-| 1 | **Initialize state file** | Write | `STATE_FILE=~/.config/opencode/.tasks/<epoch>-<slug>.json`; write `{"summary":"","tasks":[]}` |
-| 2 | **Generate UUIDs** | Read/Write | `uv run --directory "$SCRIPTS_PYTHON" generate-uuids --state-file "$STATE_FILE" <N>` — reads task list from state file, appends a UUID to each task's `id` field, writes result back |
-| 3 | **Populate task fields** | Write (manual) | Fill in remaining task fields — `title`, `description`, `priority`, `context` — by editing the state file directly |
-| 4 | **Validate task structure** | Read-only | `uv run --directory "$SCRIPTS_PYTHON" validate-task-structure --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"` — loop on exit 1 until valid |
-| 5 | **Populate dependencies** | Write (manual) | Add dependency references between tasks by editing the state file directly |
-| 6 | **Assemble full output** | Read/Write (manual) | Read the current state from `"$STATE_FILE"`, build a JSON object with `summary` and sorted `tasks`, write back |
-| 7 | **Validate and format output** | Read-only | `uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"` — loop on exit 1 until valid |
-| 8 | **Return raw JSON** | Read-only | Read `"$STATE_FILE"` and emit its raw JSON contents verbatim — no preamble, no fences, no commentary |
+### Step 1: Initialize State File
+- **Action:** Initialize state file
+- **State File I/O:** Write
+- **Command:** `STATE_FILE=~/.config/opencode/.tasks/<epoch>-<slug>.json`; write `{"summary":"","tasks":[]}`
+
+### Step 2: Populate Task Fields
+- **Action:** Populate task fields manually
+- **State File I/O:** Write (manual)
+- **Description:** Fill in remaining task fields — `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `expectedOutput` — by editing the state file directly
+
+### Step 3: Validate Task Structure
+- **Action:** Validate task structure
+- **State File I/O:** Read-only
+- **Command:** `uv run --directory "$SCRIPTS_PYTHON" validate-task-structure --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"` — loop on exit 1 until valid
+
+### Step 4: Assemble Full Output
+- **Action:** Assemble full output
+- **State File I/O:** Read/Write (manual)
+- **Description:** Read the current state from `"$STATE_FILE"`, build a JSON object with `summary` and the task list, write back
+
+### Step 5: Validate and Format Output
+- **Action:** Validate and format output
+- **State File I/O:** Read-only
+- **Command:** `uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"` — loop on exit 1 until valid
+
+### Step 6: Return Raw JSON
+- **Action:** Return raw JSON
+- **State File I/O:** Read-only
+- **Description:** Read `"$STATE_FILE"` and emit its raw JSON contents verbatim — no preamble, no fences, no commentary
 
 ## Shell Pipeline Integration
 
@@ -57,21 +74,18 @@ STATE_FILE="$HOME/.config/opencode/.tasks/${EPOCH}-${SLUG}.json"
 mkdir -p "$(dirname "$STATE_FILE")"
 echo '{"summary":"","tasks":[]}' > "$STATE_FILE"
 
-# Step 1: Generate UUIDs (one per identified task)
-uv run --directory "$SCRIPTS_PYTHON" generate-uuids --state-file "$STATE_FILE" 5
-
-# Step 2: Validate task structure (loop on exit 1)
+# Step 1: Validate task structure (loop on exit 1)
 until uv run --directory "$SCRIPTS_PYTHON" validate-task-structure \
   --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"; do
   echo "Fix task structure errors, then re-run this step." >&2
 done
 
-# Step 3: Validate and format output (loop on exit 1)
+# Step 2: Validate and format output (loop on exit 1)
 until uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output \
   --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"; do
   echo "Fix output validation errors, then re-run this step." >&2
 done
 
-# Step 4: Emit raw JSON from state file
+# Step 3: Emit raw JSON from state file
 cat "$STATE_FILE"
 ```

@@ -1,7 +1,11 @@
 ---
 name: breakdown-tasks
 description: "Use when decomposing a request into the smallest possible task-delegation work items."
-tags: [task-delegation, create, analysis, opencode]
+tags:
+  - "domain:task-delegation"
+  - "action:create"
+  - "action:analysis"
+  - "platform:opencode"
 class: delegated
 ---
 
@@ -26,13 +30,7 @@ Read the delegation packet's `## PURPOSE` and `## DETAILS` sections to understan
 Derive the state file path using the following rules:
 
 - **Directory:** `~/.config/opencode/.tasks/` (create if missing).
-- **Filename pattern:** `<unix-epoch-seconds>-<request-summary-slug>.json`
-  - `<unix-epoch-seconds>`: Output of `date +%s`.
-  - `<request-summary-slug>`: Derived from the request summary by:
-    1. Lowercasing the entire string.
-    2. Replacing non-alphanumeric characters (except hyphens) with hyphens.
-    3. Collapsing runs of multiple hyphens into one.
-    4. Truncating to 64 characters.
+- **Filename:** `<epoch>-<slug>.json` where slug is a URL-safe truncation of the request summary (max 64 chars).
   - If the slug is empty after sanitization, use `decomposition` as fallback.
 - **Collision behavior:** If the derived filename already exists in `.tasks/`, emit `BLOCKED: State file <path> already exists — remove manually or wait for next epoch second.` and halt.
 - **Retention:** `.tasks/` is ephemeral working state. Files may be cleaned after the workflow completes or retained for debugging at the operator's discretion.
@@ -61,15 +59,9 @@ Each task must represent exactly one unit of work with a single `purpose` senten
 - Consult `./reference/authoring/core-rules.md` for the five atomicity rules that define proper task boundaries.
 - Review `./reference/authoring/anti-patterns.md` for common work-boundary mistakes before finalizing task boundaries.
 
-#### 3a. UUID Generation
-
-Call `uv run --directory "$SCRIPTS_PYTHON" generate-uuids --state-file "$STATE_FILE"` with the number of identified tasks.
-The script reads the task list from the state file, appends a UUID to each task's `id` field, and writes the result back to the state file.
-Assign each UUID to one task's `id` field in the same order as the tasks were identified.
-
 Populate all remaining task fields for each task: `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `expectedOutput`.
 
-#### 3b. Task Structure Validation
+#### 3a. Task Structure Validation
 
 Call `uv run --directory "$SCRIPTS_PYTHON" validate-task-structure --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"`.
 
@@ -94,17 +86,17 @@ Build a JSON object with `summary` (string) and `tasks` (array of packet objects
 
 Populate `skills` for each task using the following LLM-based matching process:
 
-1. **Analyze each task independently.** Consider its purpose, context, files to read/write, and execution instructions in isolation. Each task receives its own skill assignment; do not reuse or inherit assignments across tasks.
+1. **Analyze each task independently.** Consider its purpose, context, files to read/write, and execution instructions in isolation. Each task receives its own skill assignment; do not reuse or inherit assignments across tasks. Tasks in the same domain may receive the same skill assignment. Independence means each task evaluates its own match, not that assignments must be unique.
 
 2. **Identify required domain/expertise.** From the task's purpose and context, determine what domain knowledge, technical skills, or specialized expertise a worker would need to complete it successfully. Consider file types, tooling, languages, frameworks, or conventions referenced in the task.
 
 3. **Cross-reference enriched skill index.** For each task, scan the discovered skill list against the task's required expertise. Use every available metadata field — `name`, `description`, `class`, `location`, and `tags` — to evaluate relevance. The `tags` field (when present) provides quick categorical matching (e.g., "python", "testing", "cli", "documentation", "node").
 
-4. **Select 0-N best-matching skills.** Zero skills is a valid outcome for any task — do not force assignment. When multiple skills match, prefer the most specific over the most general. If a skill's `class` constrains its invocation context (e.g., `delegated`), consider whether the task's execution mode is compatible.
+4. **Select best-matching skills (typically 1-N).** Select the best-matching skills (typically 1-N). Zero skills is acceptable only when no skill in the index matches the task's domain or expertise requirements. When multiple skills match, prefer the most specific over the most general. If a skill's `class` constrains its invocation context (e.g., `delegated`), consider whether the task's execution mode is compatible.
 
 5. **Document rationale.** For each skill assigned to a task, append a one-sentence rationale as a comment or adjacent note explaining why it was matched. This supports auditability and future refinement of the skill index.
 
-**Rule: Per-task independence.** Each task's skill assignment is independent of all others. Zero skills is always valid. Never merge or split tasks to accommodate skill availability.
+**Rule: Per-task independence.** Each task's skill assignment is independent of all others. When clear skill matches exist, assign them. Zero skills is appropriate only when no skill in the index fits. Never merge or split tasks to accommodate skill availability.
 
 Write the assembled output object back into `"$STATE_FILE"`, overwriting the previous content.
 
@@ -161,9 +153,7 @@ If any check fails, rework the affected packet(s) before returning.
   The `filesToWrite` in output JSON objects belongs to the downstream worker, not this skill.
 - Return BLOCKED for malformed input.
   If `## DETAILS` is missing, empty, or cannot be parsed as a decomposable request, return `BLOCKED: <reason>` immediately.
-- Skill assignment is advisory, not mandatory.
-  The 5-step matching process is guidance; the decomposer exercises judgment.
-  Zero skills per task is always valid.
+- Skill assignment should match available skills. Zero skills is acceptable only when no matching skill exists in the index.
 - Task atomicity over skill availability.
   Do not merge or split tasks to match skill scope.
 

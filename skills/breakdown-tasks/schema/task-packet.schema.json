@@ -11,7 +11,7 @@
       "maxLength": 2000
     },
     "tasks": {
-      "description": "An ordered list of atomic delegation packets. Each task should represent a single unit of work that can be completed independently.",
+      "description": "An ordered list of atomic delegation packets. Each task must represent a single unit of work that can be completed independently.",
       "type": "array",
       "items": {
         "$ref": "#/definitions/TaskPacket"
@@ -25,11 +25,6 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "id": {
-          "description": "UUID v4 unique identifier for the task. Used for dependency references, progress tracking, and cross-task traceability.",
-          "type": "string",
-          "format": "uuid"
-        },
         "purpose": {
           "description": "Single sentence describing what this task accomplishes. Must be actionable and self-contained.",
           "type": "string",
@@ -47,13 +42,13 @@
           "uniqueItems": true
         },
         "filesToWrite": {
-          "description": "Explicit list of file paths the worker is expected to create or modify. The worker should write every file in this list unless blocked.",
+          "description": "Explicit list of file paths the worker is expected to create or modify. The worker must write every file in this list unless blocked.",
           "type": "array",
           "items": { "type": "string" },
           "uniqueItems": true
         },
         "skills": {
-          "description": "Skills the worker should load before executing. Each entry must match an available skill name exactly. Loading an unknown skill is a blocker.",
+          "description": "Skills the worker must load before executing. Each entry must match an available skill name exactly. Loading an unknown skill is a blocker.",
           "type": "array",
           "items": { "type": "string" },
           "uniqueItems": true
@@ -93,7 +88,7 @@
           "maxLength": 2000
         }
       },
-      "required": ["id", "purpose", "context", "filesToRead", "filesToWrite", "skills", "executionInstructions", "expectedOutput"]
+      "required": ["purpose", "context", "filesToRead", "filesToWrite", "skills", "executionInstructions", "expectedOutput"]
     }
   }
 }

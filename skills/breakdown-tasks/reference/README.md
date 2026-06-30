@@ -23,7 +23,7 @@ Files related to validation of decomposition output correctness.
 
 Files related to verification practices.
 
-- [verification-practices](./maintenance/verification-best-practices.md) — Verification checks by task type.
+- [verification-best-practices.md](./maintenance/verification-best-practices.md) — Verification checks by task type.
 
 ## Schema
 
@@ -36,7 +36,6 @@ Files related to the canonical output format.
 Files related to breakdown pipeline scripts.
 
 - [pipeline-overview.md](./scripts/pipeline-overview.md) — End-to-end pipeline flow for task decomposition.
-- [generate-uuids.md](./scripts/generate-uuids.md) — UUID generation for task packet IDs.
 - [validate-task-structure.md](./scripts/validate-task-structure.md) — Structural validation of task packet fields.
 - [validate-and-format-output.md](./scripts/validate-and-format-output.md) — Output validation and formatting rules.
 - [error-handling-testing.md](./scripts/error-handling-testing.md) — Error handling and testing patterns for the pipeline.

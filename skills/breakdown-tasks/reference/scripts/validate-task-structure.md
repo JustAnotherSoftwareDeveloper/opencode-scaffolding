@@ -16,7 +16,7 @@ uv run --directory "$SCRIPTS_PYTHON" validate-task-structure [file-path | --stdi
 ## Input
 
 A JSON array of task objects.
-Each object contains `id`, `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, and `expectedOutput`.
+Each object contains `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, and `expectedOutput`.
 
 ## Output
 
@@ -36,14 +36,13 @@ On invalid input, write:
 
 Apply these structural rules.
 
-- Require all keys: `id`, `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `expectedOutput`.
+- Require all keys: `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `expectedOutput`.
 - Purpose must be a single sentence without line breaks.
   maxLength is 200.
 - Context maxLength is 8000.
 - ExpectedOutput maxLength is 2000.
 - Execution instruction steps must be integers starting at 1 with no gaps.
 - File array entries must be non-empty strings with no duplicates.
-- All `id` fields must match the UUID v4 pattern.
 - Purpose, context, and expectedOutput must be strings.
 - FilesToRead, filesToWrite, and skills must be arrays of strings.
 
@@ -72,5 +71,5 @@ echo '[...tasks...]' | uv run --directory "$SCRIPTS_PYTHON" validate-task-struct
 
 ## Integration Point
 
-Use after task fields are populated with UUIDs, purpose, and context.
-Use as the second pipeline step before final output validation.
+Use after task fields are populated.
+Use as the first pipeline step before final output validation.
