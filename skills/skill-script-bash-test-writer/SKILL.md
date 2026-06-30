@@ -1,11 +1,7 @@
 ---
 name: skill-script-bash-test-writer
 description: "Use when generating bats-core test files for existing bash scripts under scripts/shell/."
-tags:
-  - "domain:testing"
-  - "action:create"
-  - "output:test"
-  - "platform:cli"
+tags: [testing, cli, bash]
 class: operation
 ---
 
@@ -40,15 +36,15 @@ Do not delegate sub-tasks.
    `setup()` function loading `bats-support/load` and `bats-assert/load` from system-installed paths.
    `teardown()` function cleaning up temporary directories with `rm -rf`.
    One `@test` block per behavior:
-     - **`--help` output test** — Invoke `run bash src/<script-name>.sh --help`; assert `assert_success` and `assert_output --partial 'Usage:'`.
-     - **Success path test** — Invoke with valid arguments; assert `assert_success` and expected stdout/stderr content.
-     - **Failure path test** — Invoke with missing or invalid arguments; assert `assert_failure` and `assert_stderr --partial 'Error:'`.
-     - **Argument validation tests** — Test each option (`-h`, `-o`, `-v`) and required positional argument.
-   Use `run bash src/<script-name>.sh ...args` pattern for CLI invocation tests.
-   Use `mktemp -d` inside `setup()` for writable test fixtures; reference via `TEST_TEMP` variable.
-   Use `BATS_TEST_DIRNAME` for fixture-relative paths to `../fixtures/<script-name>/`.
-   Use `run` helper for all CLI invocations; capture exit code via `$status` and output via `$output`.
-   For file-based scripts, use the mock PATH pattern from skill-bash-conventions (testing-conventions / Mock Patterns) to isolate external command dependencies.
+   - **`--help` output test** — Invoke `run bash src/<script-name>.sh --help`; assert `assert_success` and `assert_output --partial 'Usage:'`.
+   - **Success path test** — Invoke with valid arguments; assert `assert_success` and expected stdout/stderr content.
+   - **Failure path test** — Invoke with missing or invalid arguments; assert `assert_failure` and `assert_stderr --partial 'Error:'`.
+   - **Argument validation tests** — Test each option (`-h`, `-o`, `-v`) and required positional argument.
+     Use `run bash src/<script-name>.sh ...args` pattern for CLI invocation tests.
+     Use `mktemp -d` inside `setup()` for writable test fixtures; reference via `TEST_TEMP` variable.
+     Use `BATS_TEST_DIRNAME` for fixture-relative paths to `../fixtures/<script-name>/`.
+     Use `run` helper for all CLI invocations; capture exit code via `$status` and output via `$output`.
+     For file-based scripts, use the mock PATH pattern from skill-bash-conventions (testing-conventions / Mock Patterns) to isolate external command dependencies.
 
 3. **Register in Makefile** — Add entries to `scripts/shell/Makefile`:
    Skip `run-<script-name>` target and help text — already registered by skill-script-bash-writer step 4.

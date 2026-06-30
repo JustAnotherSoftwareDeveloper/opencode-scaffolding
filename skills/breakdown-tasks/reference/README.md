@@ -19,6 +19,18 @@ Files related to validation of decomposition output correctness.
 
 - [task-validation.md](./orchestration/task-validation.md) — Validation checks for decomposition output correctness.
 
+## State Management
+
+Files related to state file derivation and initialization.
+
+- [state-initialization.md](./state-initialization.md) — State-file derivation rules, collision behavior, and retention policy.
+
+## Skill Assignment
+
+Files related to deterministic skill assignment to tasks.
+
+- [skill-assignment.md](./skill-assignment.md) — Deterministic procedure for assigning skills to tasks.
+
 ## Maintenance
 
 Files related to verification practices.
@@ -29,7 +41,7 @@ Files related to verification practices.
 
 Files related to the canonical output format.
 
-- [json-schema.md](../schema/task-packet.schema.json) — JSON Schema defining the BreakdownTasksOutput object and TaskPacket structure.
+- [task-packet.schema.json](../schema/task-packet.schema.json) — JSON Schema defining the BreakdownTasksOutput object and TaskPacket structure.
 
 ## Scripts
 

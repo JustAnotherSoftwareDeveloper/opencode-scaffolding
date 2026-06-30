@@ -48,10 +48,11 @@
           "uniqueItems": true
         },
         "skills": {
-          "description": "Skills the worker must load before executing. Each entry must match an available skill name exactly. Loading an unknown skill is a blocker.",
+          "description": "Skills the worker must load before executing. Each entry must match an available skill name exactly. Loading an unknown skill is a blocker. Maximum 3 skills per task.",
           "type": "array",
           "items": { "type": "string" },
-          "uniqueItems": true
+          "uniqueItems": true,
+          "maxItems": 3
         },
         "executionInstructions": {
           "description": "Step-by-step instructions for the worker. Each step is a discrete, verifiable action. Steps must be ordered and numbered.",

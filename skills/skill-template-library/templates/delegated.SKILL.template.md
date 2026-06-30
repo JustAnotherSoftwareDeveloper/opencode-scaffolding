@@ -41,7 +41,7 @@ Each header defines a specific dimension of the task:
 2. Perform bounded work.
    If the work includes a deterministic subtask:
 a. Prepare input for the script (file path, CLI arguments, or stdin).
-    b. Resolve `<scripts-python-dir>` or `<scripts-node-dir>` per `platform-layout-context.md`.
+    b. Load `skill-architect` for path resolution rules to resolve `<scripts-python-dir>` or `<scripts-node-dir>`.
        - **Python script:** `uv run --directory <scripts-python-dir> <entry-point> <args>`
        - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
     c. Capture and validate stdout output.
@@ -85,6 +85,6 @@ The worker must produce exactly what that section specifies, in the format it sp
 
 ## Cross-References
 
-- `./platform-layout-context.md` — Path resolution rules for script invocations.
-- `../../skill-template-library/templates/inline.SKILL.template.md` — Inline skill template for single-pass steps.
-- `../../skill-template-library/templates/orchestrated.SKILL.template.md` — Orchestrated skill template for multi-step coordination.
+- Load `skill-architect` for path resolution rules for script invocations.
+- `./inline.SKILL.template.md` — Inline skill template for single-pass steps.
+- `./orchestrated.SKILL.template.md` — Orchestrated skill template for multi-step coordination.

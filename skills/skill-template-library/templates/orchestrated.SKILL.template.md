@@ -14,7 +14,7 @@ class: orchestrated
 
 1. **Delegated: `<<Worker Skill A>>`** — `<<purpose of delegation>>`.
 2. **Script: `<<entry-point>>`** — `<<what the script computes>>`.
-   Resolve `<scripts-python-dir>` or `<scripts-node-dir>` per the global/project-local resolution order (see platform-layout-context.md).
+   Load `skill-architect` for path resolution rules per the global/project-local resolution order.
    - **Python script:** `uv run --directory <scripts-python-dir> <entry-point> [args]`
    - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
    Validate structured output before proceeding.
@@ -42,3 +42,7 @@ class: orchestrated
 - No remaining old-template sections.
 - One H1 only; all headings use Title Case.
 - [ ] No Markdown tables in filled content (use bullet lists instead).
+
+## Cross-References
+
+- Load `skill-architect` for path resolution rules for script invocations.

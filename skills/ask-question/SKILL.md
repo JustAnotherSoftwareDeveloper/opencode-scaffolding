@@ -1,6 +1,6 @@
 ---
 name: ask-question
-description: Use when resolving ambiguity in a user request by asking only necessary clarifying questions through the question tool.
+description: Use when the user request is ambiguous in a way that would materially change execution output, and asking 2-5 clarifying questions would resolve the ambiguity.
 tags: [workflow, internal]
 class: inline
 ---

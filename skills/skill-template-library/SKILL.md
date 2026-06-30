@@ -22,7 +22,7 @@ The bulleted list provides the mapping of files to their purpose.
 - `templates/operation.SKILL.template.md` — Canonical SKILL.md template for operation-class skills (imperative procedures with side effects).
 - `templates/orchestrated.SKILL.template.md` — Canonical SKILL.md template for orchestrated-class skills (multi-step, multi-worker coordination).
 - `templates/planning.SKILL.template.md` — Canonical SKILL.md template for planning-class skills (domain context reference, no side effects).
-- `schemas/index.md` — Index of class-contract schemas (JSON Schema, XSD) with instructions for seeding new skill directories.
+- `schemas/index.md` — Reference for per-skill schema patterns and class-contract documentation (see also `skills/skill-architect/class-taxonomy.md`).
 - `snippets/index.md` — Index of reusable code blocks (frontmatter YAML, collation JSON, delegation packet template) for use by templates.
 
 Choose the relevant files based on what you need to learn or reference.
@@ -32,4 +32,4 @@ Do not read every file — read as needed.
 ## Docs
 
 See the [Documentation Files](#documentation-files) listing above for template descriptions.
-See `schemas/index.md` and `snippets/index.md` for the respective indices.
+See `schemas/index.md` for schema patterns and `snippets/index.md` for code snippets.

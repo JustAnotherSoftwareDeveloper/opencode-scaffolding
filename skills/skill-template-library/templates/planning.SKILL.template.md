@@ -45,9 +45,9 @@ This is for quick reference during planning.
 ## Cross-References
 
 - `./common-workflow.md` — Workflow file template used by the Common Workflows section.
+- Load `skill-template-library` for the canonical template set and its documentation.
 
 ## Docs
 
 See the [Common Workflows](#common-workflows) section for workflow definitions.
-See `../../skill-template-library/templates/` for the canonical template set.
 Base directory for this skill: `file:///<<path-to-skill-directory>>`

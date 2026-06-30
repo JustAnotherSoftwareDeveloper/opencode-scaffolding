@@ -1,6 +1,6 @@
 ---
 name: skill-node-script-conventions
-description: Shared reference documentation for Node/TypeScript script conventions under the OpenCode platform, covering style, shared library rules, path layout, tooling, testing, and coverage.
+description: Use when writing or maintaining Node/TypeScript scripts for the OpenCode platform and needing convention guidance on style, shared library rules, path layout, tooling, testing, and coverage.
 tags: [code-generation, reference, documentation, node]
 class: documentation
 ---

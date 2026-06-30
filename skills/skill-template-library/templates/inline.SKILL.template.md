@@ -35,7 +35,7 @@ Concrete description of what this skill produces and in what format.
 
 1. <<Step 1>> — see [Input](#input).
 2. If the step involves deterministic data processing, delegate to a script:
-   Resolve `<scripts-python-dir>` or `<scripts-node-dir>` per the global/project-local resolution order (see [./platform-layout-context.md]).
+   Load `skill-architect` for path resolution rules per the global/project-local resolution order.
    - **Python script:** `uv run --directory <scripts-python-dir> <entry-point> <args>`
    - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
    Incorporate script output into the reasoning context.
@@ -53,7 +53,7 @@ Do not loop or perform multi-phase orchestration.
 
 ## Cross-References
 
-- `./platform-layout-context.md` — Path resolution rules for script invocations within this skill.
+- Load `skill-architect` for path resolution rules for script invocations within this skill.
 
 ## Self-Validation
 
@@ -66,4 +66,4 @@ Do not loop or perform multi-phase orchestration.
 
 ## Docs
 
-See the [Skill Template Library](../../skill-template-library/) for the canonical template set and its documentation.
+See the [Skill Template Library](./) for the canonical template set and its documentation.

@@ -20,7 +20,7 @@ Do not delegate sub-tasks.
 
 1. `<<step>>`.
 2. **Run script: `<script-entry-point>`** —
-   Resolve `<scripts-python-dir>` or `<scripts-node-dir>` per the global/project-local resolution order (see platform-layout-context.md).
+   Load `skill-architect` for path resolution rules per the global/project-local resolution order.
    - **Python script:** `uv run --directory <scripts-python-dir> <entry-point> <args>`
    - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
    Capture stdout as structured output.
