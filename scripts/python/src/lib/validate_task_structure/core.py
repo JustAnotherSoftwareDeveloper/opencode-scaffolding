@@ -1,28 +1,15 @@
 """Task structure validation against the task-packet JSON Schema.
 
 Validates task objects for required keys, length constraints,
-step numbering, UUID v4 format, file array rules, and type correctness.
+step numbering, file array rules, and type correctness.
 Consumed by: validate-task-structure.
 """
 
 from __future__ import annotations
 
-import re
 from typing import Any
 
 import jsonschema
-
-_UUID_V4_RE = re.compile(
-    r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
-    re.IGNORECASE,
-)
-
-
-def _validate_uuid_v4(value: str, path: str) -> str | None:
-    """Return an error message if *value* is not a valid UUID v4, else None."""
-    if not _UUID_V4_RE.match(value):
-        return f"{path}: invalid UUID v4 format: {value!r}"
-    return None
 
 
 def _validate_file_array(arr: list[Any], path: str, label: str) -> list[str]:
@@ -68,7 +55,6 @@ def validate(
     * ``context`` maxLength 8000
     * ``expectedOutput`` maxLength 2000
     * ``executionInstructions`` steps are sequential starting at 1
-    * ``id`` is a valid UUID v4
     * ``filesToRead`` / ``filesToWrite`` entries are unique, non-empty strings
     * (empty arrays are allowed)
     * type correctness via JSON Schema validation
@@ -105,14 +91,6 @@ def validate(
             errors.extend(schema_errors)
             # Continue with custom checks even if schema validation failed
             # to collect all issues at once
-
-        # --- Custom: UUID v4 format (jsonschema ``format: uuid`` is
-        # uuid-general, we enforce v4 specifically) ---
-        tid: Any = task.get("id")
-        if isinstance(tid, str):
-            msg = _validate_uuid_v4(tid, path)
-            if msg:
-                errors.append(msg)
 
         # --- Custom: execution instruction step numbering ---
         steps: Any = task.get("executionInstructions")

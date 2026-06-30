@@ -189,6 +189,22 @@ class TestSkillValidation:
         errors = validate_skill_frontmatter(fm, "display-tasks", path)
         assert errors == []
 
+    # -- tags field validation ------------------------------------------------
+
+    def test_tags_not_a_list(self) -> None:
+        """``tags`` field that is not a list is rejected."""
+        path = FIXTURES_DIR / "valid" / "ask-question" / "SKILL.md"
+        fm: dict[str, Any] = {"name": "test-skill", "description": "Use when testing", "tags": "not-a-list"}
+        errors = validate_skill_frontmatter(fm, "test-skill", path)
+        assert any("tags" in e and "list" in e for e in errors)
+
+    def test_tags_element_not_string(self) -> None:
+        """A tag element that is not a string is rejected."""
+        path = FIXTURES_DIR / "valid" / "ask-question" / "SKILL.md"
+        fm: dict[str, Any] = {"name": "test-skill", "description": "Use when testing", "tags": [42, "valid-tag"]}
+        errors = validate_skill_frontmatter(fm, "test-skill", path)
+        assert any("element" in e and "string" in e for e in errors)
+
 
 # ============================================================================
 # TestDirectoryTraversal

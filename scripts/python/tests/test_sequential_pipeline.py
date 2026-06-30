@@ -1,9 +1,8 @@
-"""test_sequential_pipeline.py — Integration tests for the 3-script sequential pipeline.
+"""test_sequential_pipeline.py — Integration tests for the 2-script sequential pipeline.
 
 Tests the reduced pipeline end-to-end:
-  1. generate-uuids --state-file   — assign UUID v4 to each task's id
-  2. validate-task-structure --state-file --schema  — validate task structure
-  3. validate-and-format-output --state-file --schema  — validate full output
+  1. validate-task-structure --state-file --schema  — validate task structure
+  2. validate-and-format-output --state-file --schema  — validate full output
 
 Also covers individual step behaviour, failure propagation, and edge cases.
 
@@ -14,13 +13,11 @@ Run from ``scripts/python/``:
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
 
-from cli.generate_uuids import main as generate_uuids_main
 from cli.validate_and_format_output import main as validate_format_main
 from cli.validate_task_structure import main as validate_structure_main
 
@@ -38,22 +35,13 @@ SCHEMA_PATH = (
 
 assert SCHEMA_PATH.is_file(), f"Task-packet schema not found at {SCHEMA_PATH}"
 
-_UUID_V4_RE = re.compile(
-    r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
-    re.IGNORECASE,
-)
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
 
 def _make_task(purpose: str = "Default purpose", context: str = "Default context.") -> dict:
-    """Return a minimal valid task dict without an ``id`` field.
-
-    The ``id`` field is deliberately omitted so that step 1 (generate-uuids)
-    can assign it.
-    """
+    """Return a minimal valid task dict."""
     return {
         "purpose": purpose,
         "context": context,
@@ -64,15 +52,6 @@ def _make_task(purpose: str = "Default purpose", context: str = "Default context
         "verification": [],
         "expectedOutput": f"Output for: {purpose}",
     }
-
-
-def _make_task_with_id(
-    task_id: str,
-    purpose: str = "Default purpose",
-    context: str = "Default context.",
-) -> dict:
-    """Return a minimal valid task dict with a pre-set ``id``."""
-    return {"id": task_id, **_make_task(purpose=purpose, context=context)}
 
 
 # ---------------------------------------------------------------------------
@@ -94,27 +73,10 @@ def state_file(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def two_valid_tasks() -> list[dict]:
-    """Two minimal tasks without ``id`` fields (for step 1 injection)."""
+    """Two minimal tasks with static UUID v4 ids (for step 1 injection)."""
     return [
         _make_task(purpose="Task one purpose", context="Context for task one."),
         _make_task(purpose="Task two purpose", context="Context for task two."),
-    ]
-
-
-@pytest.fixture
-def two_valid_tasks_with_ids() -> list[dict]:
-    """Two pre-keyed tasks with valid UUID v4 ids."""
-    return [
-        _make_task_with_id(
-            "00000000-0000-4000-8000-000000000001",
-            purpose="Task one purpose",
-            context="Context for task one.",
-        ),
-        _make_task_with_id(
-            "00000000-0000-4000-8000-000000000002",
-            purpose="Task two purpose",
-            context="Context for task two.",
-        ),
     ]
 
 
@@ -124,64 +86,18 @@ def two_valid_tasks_with_ids() -> list[dict]:
 
 
 class TestPipelineSteps:
-    """Each of the three pipeline scripts works correctly in isolation."""
+    """Each of the two pipeline scripts works correctly in isolation."""
 
-    # --- Step 1: generate-uuids ---
-
-    def test_step1_assigns_uuids_to_all_tasks(
-        self, runner: CliRunner, state_file: Path, two_valid_tasks: list[dict]
-    ) -> None:
-        """generate-uuids --state-file assigns a valid UUID v4 to every task."""
-        state = {"tasks": two_valid_tasks}
-        state_file.write_text(json.dumps(state))
-
-        result = runner.invoke(generate_uuids_main, ["--state-file", str(state_file)])
-        assert result.exit_code == 0, f"STDERR: {result.stderr}"
-
-        updated: dict = json.loads(state_file.read_text())
-        assert "tasks" in updated
-        assert len(updated["tasks"]) == 2
-        for task in updated["tasks"]:
-            assert "id" in task, f"Task missing id: {task}"
-            assert _UUID_V4_RE.match(task["id"]), f"Invalid UUID v4: {task['id']!r}"
-
-    def test_step1_ids_are_unique(
-        self, runner: CliRunner, state_file: Path, two_valid_tasks: list[dict]
-    ) -> None:
-        """UUIDs assigned by generate-uuids are unique across tasks."""
-        state = {"tasks": two_valid_tasks}
-        state_file.write_text(json.dumps(state))
-
-        runner.invoke(generate_uuids_main, ["--state-file", str(state_file)])
-        updated: dict = json.loads(state_file.read_text())
-        ids = [t["id"] for t in updated["tasks"]]
-        assert len(set(ids)) == len(ids), f"Duplicate ids found: {ids}"
-
-    def test_step1_outputs_uuid_array(
-        self, runner: CliRunner, state_file: Path, two_valid_tasks: list[dict]
-    ) -> None:
-        """stdout from generate-uuids --state-file is a JSON array of UUIDs."""
-        state = {"tasks": two_valid_tasks}
-        state_file.write_text(json.dumps(state))
-
-        result = runner.invoke(generate_uuids_main, ["--state-file", str(state_file)])
-        assert result.exit_code == 0
-        uuids: list[str] = json.loads(result.output)
-        assert isinstance(uuids, list)
-        assert len(uuids) == 2
-        for uid in uuids:
-            assert _UUID_V4_RE.match(uid), f"Invalid UUID v4 in stdout: {uid!r}"
-
-    # --- Step 2: validate-task-structure ---
+    # --- Step 1: validate-task-structure ---
 
     def test_step2_valid_tasks_pass(
         self,
         runner: CliRunner,
         state_file: Path,
-        two_valid_tasks_with_ids: list[dict],
+        two_valid_tasks: list[dict],
     ) -> None:
         """validate-task-structure --state-file exits 0 for valid tasks."""
-        state = {"tasks": two_valid_tasks_with_ids}
+        state = {"tasks": two_valid_tasks}
         state_file.write_text(json.dumps(state))
 
         result = runner.invoke(
@@ -198,10 +114,7 @@ class TestPipelineSteps:
         state_file: Path,
     ) -> None:
         """validate-task-structure --state-file exits 1 for invalid tasks."""
-        task = _make_task_with_id(
-            "00000000-0000-4000-8000-000000000001",
-            purpose="x" * 201,  # purpose over maxLength 200
-        )
+        task = _make_task(purpose="x" * 201)  # purpose over maxLength 200
         state = {"tasks": [task]}
         state_file.write_text(json.dumps(state))
 
@@ -232,10 +145,10 @@ class TestPipelineSteps:
         self,
         runner: CliRunner,
         state_file: Path,
-        two_valid_tasks_with_ids: list[dict],
+        two_valid_tasks: list[dict],
     ) -> None:
         """validate-and-format-output --state-file exits 0 for valid output."""
-        data = {"summary": "Integration test summary.", "tasks": two_valid_tasks_with_ids}
+        data = {"summary": "Integration test summary.", "tasks": two_valid_tasks}
         state_file.write_text(json.dumps(data))
 
         result = runner.invoke(
@@ -252,10 +165,10 @@ class TestPipelineSteps:
         self,
         runner: CliRunner,
         state_file: Path,
-        two_valid_tasks_with_ids: list[dict],
+        two_valid_tasks: list[dict],
     ) -> None:
         """Missing summary in output triggers exit code 1."""
-        data = {"tasks": two_valid_tasks_with_ids}
+        data = {"tasks": two_valid_tasks}
         state_file.write_text(json.dumps(data))
 
         result = runner.invoke(
@@ -284,7 +197,7 @@ class TestPipelineSteps:
 
 
 class TestEndToEndPipeline:
-    """Full 3-script pipeline executed end-to-end."""
+    """Full 2-script pipeline executed end-to-end."""
 
     def test_full_pipeline_success(
         self,
@@ -292,8 +205,8 @@ class TestEndToEndPipeline:
         state_file: Path,
         tmp_path: Path,
     ) -> None:
-        """End-to-end: create tasks → generate UUIDs → validate structure → validate output."""
-        # --- Seed: write initial state with minimal tasks (no ids) ---
+        """End-to-end: create tasks → validate structure → validate output."""
+        # --- Seed: write initial state with minimal tasks ---
         initial_tasks = [
             _make_task(purpose="Pipeline task one", context="Context for pipeline task one."),
             _make_task(purpose="Pipeline task two", context="Context for pipeline task two."),
@@ -302,42 +215,31 @@ class TestEndToEndPipeline:
         state = {"tasks": initial_tasks}
         state_file.write_text(json.dumps(state))
 
-        # --- Step 1: generate-uuids ---
-        result1 = runner.invoke(generate_uuids_main, ["--state-file", str(state_file)])
-        assert result1.exit_code == 0, f"Step 1 failed: {result1.stderr}"
-
-        # Verify UUIDs were assigned
-        after_step1: dict = json.loads(state_file.read_text())
-        assert len(after_step1["tasks"]) == 3
-        for task in after_step1["tasks"]:
-            assert "id" in task
-            assert _UUID_V4_RE.match(task["id"]), f"Invalid UUID: {task['id']!r}"
-
-        # --- Step 2: validate-task-structure ---
-        result2 = runner.invoke(
+        # --- Step 1: validate-task-structure ---
+        result1 = runner.invoke(
             validate_structure_main,
             ["--state-file", str(state_file), "--schema", str(SCHEMA_PATH)],
         )
-        assert result2.exit_code == 0, f"Step 2 failed: {result2.stderr}"
-        data2 = json.loads(result2.output)
-        assert data2["valid"] is True
+        assert result1.exit_code == 0, f"Step 1 failed: {result1.stderr}"
+        data1 = json.loads(result1.output)
+        assert data1["valid"] is True
 
         # --- Assemble full output from state file data ---
-        after_step2: dict = json.loads(state_file.read_text())
+        after_step1: dict = json.loads(state_file.read_text())
         output_data = {
-            "summary": "End-to-end pipeline test: three tasks with auto-assigned UUIDs.",
-            "tasks": after_step2["tasks"],
+            "summary": "End-to-end pipeline test: three tasks.",
+            "tasks": after_step1["tasks"],
         }
         output_file = tmp_path / "output.json"
         output_file.write_text(json.dumps(output_data))
 
-        # --- Step 3: validate-and-format-output ---
-        result3 = runner.invoke(
+        # --- Step 2: validate-and-format-output ---
+        result2 = runner.invoke(
             validate_format_main,
             [str(output_file), "--schema", str(SCHEMA_PATH)],
         )
-        assert result3.exit_code == 0, f"Step 3 failed: {result3.stderr}"
-        parsed = json.loads(result3.output.strip())
+        assert result2.exit_code == 0, f"Step 2 failed: {result2.stderr}"
+        parsed = json.loads(result2.output.strip())
         assert isinstance(parsed, dict)
         assert "summary" in parsed
         assert len(parsed["tasks"]) == 3
@@ -347,48 +249,35 @@ class TestEndToEndPipeline:
         runner: CliRunner,
         state_file: Path,
     ) -> None:
-        """Task order is preserved through all 3 pipeline steps."""
+        """Task order is preserved through both pipeline steps."""
         purposes = ["First task", "Second task", "Third task"]
         tasks = [_make_task(purpose=p, context=f"Context {p}.") for p in purposes]
         state = {"tasks": tasks}
         state_file.write_text(json.dumps(state))
 
-        # Step 1
-        runner.invoke(generate_uuids_main, ["--state-file", str(state_file)])
-        after_step1: dict = json.loads(state_file.read_text())
-        assert [t["purpose"] for t in after_step1["tasks"]] == purposes
-
-        # Step 2
+        # Step 1: validate-task-structure
         runner.invoke(
             validate_structure_main,
             ["--state-file", str(state_file), "--schema", str(SCHEMA_PATH)],
         )
-        after_step2: dict = json.loads(state_file.read_text())
-        assert [t["purpose"] for t in after_step2["tasks"]] == purposes
-
-        # State file still intact after step 2
-        assert all(_UUID_V4_RE.match(t["id"]) for t in after_step2["tasks"])
+        after_step1: dict = json.loads(state_file.read_text())
+        assert [t["purpose"] for t in after_step1["tasks"]] == purposes
 
     def test_pipeline_step2_stdin_alternative(
         self,
         runner: CliRunner,
         state_file: Path,
-        two_valid_tasks_with_ids: list[dict],
+        two_valid_tasks: list[dict],
     ) -> None:
         """Step 2 via --stdin (instead of --state-file) also works."""
-        state = {"tasks": two_valid_tasks_with_ids}
+        state = {"tasks": two_valid_tasks}
         state_file.write_text(json.dumps(state))
 
-        # Step 1: assign UUIDs (even though tasks already have ids)
-        result1 = runner.invoke(generate_uuids_main, ["--state-file", str(state_file)])
-        assert result1.exit_code == 0
-
         # Step 2 via --stdin: read tasks from stdout-like piping
-        after_step1: dict = json.loads(state_file.read_text())
         result2 = runner.invoke(
             validate_structure_main,
             ["--stdin", "--schema", str(SCHEMA_PATH)],
-            input=json.dumps(after_step1["tasks"]),
+            input=json.dumps(two_valid_tasks),
         )
         assert result2.exit_code == 0, f"Step 2 (stdin) failed: {result2.stderr}"
         data2 = json.loads(result2.output)
@@ -400,26 +289,22 @@ class TestEndToEndPipeline:
         state_file: Path,
         tmp_path: Path,
     ) -> None:
-        """Step 3 output is raw JSON without markdown fences."""
+        """Step 2 output is raw JSON without markdown fences."""
         tasks = [_make_task(purpose="Raw JSON test", context="Context.")]
         state = {"tasks": tasks}
         state_file.write_text(json.dumps(state))
 
-        # Step 1
-        runner.invoke(generate_uuids_main, ["--state-file", str(state_file)])
-        after_step1: dict = json.loads(state_file.read_text())
-
-        # Assemble and run step 3
-        output_data = {"summary": "Raw JSON test.", "tasks": after_step1["tasks"]}
+        # Run step 2 (validate-and-format-output) directly
+        output_data = {"summary": "Raw JSON test.", "tasks": tasks}
         output_file = tmp_path / "output.json"
         output_file.write_text(json.dumps(output_data))
 
-        result3 = runner.invoke(
+        result = runner.invoke(
             validate_format_main,
             [str(output_file), "--schema", str(SCHEMA_PATH)],
         )
-        assert result3.exit_code == 0
-        output = result3.output
+        assert result.exit_code == 0
+        output = result.output
         assert "```" not in output
         assert "```json" not in output
         assert not output.startswith("Here")
@@ -439,10 +324,7 @@ class TestFailurePropagation:
         self, runner: CliRunner, state_file: Path
     ) -> None:
         """Tasks missing 'purpose' fail at step 2 (validate-task-structure)."""
-        task = _make_task_with_id(
-            "00000000-0000-4000-8000-000000000001",
-            purpose="Will be removed",
-        )
+        task = _make_task(purpose="Will be removed")
         del task["purpose"]
         state = {"tasks": [task]}
         state_file.write_text(json.dumps(state))
@@ -461,29 +343,7 @@ class TestFailurePropagation:
         self, runner: CliRunner, state_file: Path
     ) -> None:
         """Purpose exceeding 200 characters fails at step 2."""
-        task = _make_task_with_id(
-            "00000000-0000-4000-8000-000000000001",
-            purpose="x" * 201,
-        )
-        state = {"tasks": [task]}
-        state_file.write_text(json.dumps(state))
-
-        result = runner.invoke(
-            validate_structure_main,
-            ["--state-file", str(state_file), "--schema", str(SCHEMA_PATH)],
-        )
-        assert result.exit_code == 1
-        data = json.loads(result.output)
-        assert data["valid"] is False
-
-    def test_step2_rejects_invalid_uuid(
-        self, runner: CliRunner, state_file: Path
-    ) -> None:
-        """A malformed UUID in a task id fails at step 2."""
-        task = _make_task_with_id(
-            "not-a-valid-uuid",
-            purpose="Bad UUID task",
-        )
+        task = _make_task(purpose="x" * 201)
         state = {"tasks": [task]}
         state_file.write_text(json.dumps(state))
 
@@ -531,10 +391,7 @@ class TestFailurePropagation:
         self, runner: CliRunner, state_file: Path
     ) -> None:
         """Missing summary at the output level fails at step 3."""
-        task = _make_task_with_id(
-            "00000000-0000-4000-8000-000000000001",
-            purpose="Task with no summary",
-        )
+        task = _make_task(purpose="Task with no summary")
         data = {"tasks": [task]}
         state_file.write_text(json.dumps(data))
 
@@ -548,10 +405,7 @@ class TestFailurePropagation:
         self, runner: CliRunner, state_file: Path
     ) -> None:
         """Extra keys at the output root (beyond summary + tasks) fail at step 3."""
-        task = _make_task_with_id(
-            "00000000-0000-4000-8000-000000000001",
-            purpose="Extra keys task",
-        )
+        task = _make_task(purpose="Extra keys task")
         data = {"summary": "Extra keys test.", "tasks": [task], "extraKey": "invalid"}
         state_file.write_text(json.dumps(data))
 
@@ -560,26 +414,6 @@ class TestFailurePropagation:
             ["--state-file", str(state_file), "--schema", str(SCHEMA_PATH)],
         )
         assert result.exit_code == 1
-
-    def test_step1_rejects_empty_state(
-        self, runner: CliRunner, state_file: Path
-    ) -> None:
-        """State file with empty tasks fails at step 1 (generate-uuids)."""
-        state = {"tasks": []}
-        state_file.write_text(json.dumps(state))
-
-        result = runner.invoke(generate_uuids_main, ["--state-file", str(state_file)])
-        assert result.exit_code == 2
-        assert "out of range" in result.output
-
-    def test_step1_rejects_missing_tasks_key(
-        self, runner: CliRunner, state_file: Path
-    ) -> None:
-        """State file missing the 'tasks' key fails at step 1."""
-        state_file.write_text(json.dumps({}))
-        result = runner.invoke(generate_uuids_main, ["--state-file", str(state_file)])
-        assert result.exit_code == 2
-        assert "missing a 'tasks' array" in result.output
 
 
 # ===========================================================================
@@ -598,20 +432,16 @@ class TestEdgeCases:
         state = {"tasks": tasks}
         state_file.write_text(json.dumps(state))
 
-        # Step 1
-        result1 = runner.invoke(generate_uuids_main, ["--state-file", str(state_file)])
-        assert result1.exit_code == 0
-
-        # Step 2
-        result2 = runner.invoke(
+        # Step 1: validate-task-structure
+        result1 = runner.invoke(
             validate_structure_main,
             ["--state-file", str(state_file), "--schema", str(SCHEMA_PATH)],
         )
-        assert result2.exit_code == 0
+        assert result1.exit_code == 0
 
-        # Step 3
-        after_step2: dict = json.loads(state_file.read_text())
-        output_data = {"summary": "Single task pipeline.", "tasks": after_step2["tasks"]}
+        # Step 2: validate-and-format-output
+        after_step1: dict = json.loads(state_file.read_text())
+        output_data = {"summary": "Single task pipeline.", "tasks": after_step1["tasks"]}
         output_file = tmp_path / "output.json"
         output_file.write_text(json.dumps(output_data))
         result3 = runner.invoke(
@@ -626,8 +456,7 @@ class TestEdgeCases:
         self, runner: CliRunner, state_file: Path, tmp_path: Path
     ) -> None:
         """Tasks with empty filesToRead, filesToWrite, skills, verification work."""
-        task = _make_task_with_id(
-            "00000000-0000-4000-8000-000000000001",
+        task = _make_task(
             purpose="Empty arrays task",
             context="All optional arrays are empty.",
         )
@@ -639,14 +468,14 @@ class TestEdgeCases:
         state = {"tasks": [task]}
         state_file.write_text(json.dumps(state))
 
-        # Step 2 (skip step 1 — id is already set)
-        result2 = runner.invoke(
+        # Step 1: validate-task-structure
+        result1 = runner.invoke(
             validate_structure_main,
             ["--state-file", str(state_file), "--schema", str(SCHEMA_PATH)],
         )
-        assert result2.exit_code == 0, f"Step 2 failed: {result2.stderr}"
+        assert result1.exit_code == 0, f"Step 1 failed: {result1.stderr}"
 
-        # Step 3
+        # Step 2: validate-and-format-output
         output_data = {"summary": "Empty arrays test.", "tasks": [task]}
         output_file = tmp_path / "output.json"
         output_file.write_text(json.dumps(output_data))
@@ -664,20 +493,16 @@ class TestEdgeCases:
         state = {"tasks": tasks}
         state_file.write_text(json.dumps(state))
 
-        # Step 1
-        result1 = runner.invoke(generate_uuids_main, ["--state-file", str(state_file)])
-        assert result1.exit_code == 0, f"Step 1 failed for 100 tasks: {result1.stderr}"
-
-        # Step 2
-        result2 = runner.invoke(
+        # Step 1: validate-task-structure
+        result1 = runner.invoke(
             validate_structure_main,
             ["--state-file", str(state_file), "--schema", str(SCHEMA_PATH)],
         )
-        assert result2.exit_code == 0, f"Step 2 failed for 100 tasks: {result2.stderr}"
+        assert result1.exit_code == 0, f"Step 1 failed for 100 tasks: {result1.stderr}"
 
-        # Step 3
-        after_step2: dict = json.loads(state_file.read_text())
-        output_data = {"summary": "Max tasks (100) pipeline test.", "tasks": after_step2["tasks"]}
+        # Step 2: validate-and-format-output
+        after_step1: dict = json.loads(state_file.read_text())
+        output_data = {"summary": "Max tasks (100) pipeline test.", "tasks": after_step1["tasks"]}
         output_file = tmp_path / "output.json"
         output_file.write_text(json.dumps(output_data))
         result3 = runner.invoke(
@@ -697,20 +522,15 @@ class TestEdgeCases:
         state = {"tasks": tasks}
         state_file.write_text(json.dumps(state))
 
-        # Step 1
-        runner.invoke(generate_uuids_main, ["--state-file", str(state_file)])
-        after_step1: dict = json.loads(state_file.read_text())
-        ids = [t["id"] for t in after_step1["tasks"]]
-        assert len(set(ids)) == 3, "UUIDs should be unique even for identical tasks"
-
-        # Step 2
-        result2 = runner.invoke(
+        # Step 1: validate-task-structure
+        result1 = runner.invoke(
             validate_structure_main,
             ["--state-file", str(state_file), "--schema", str(SCHEMA_PATH)],
         )
-        assert result2.exit_code == 0
+        assert result1.exit_code == 0
 
-        # Step 3
+        # Step 2: validate-and-format-output
+        after_step1: dict = json.loads(state_file.read_text())
         output_data = {"summary": "Identical tasks test.", "tasks": after_step1["tasks"]}
         output_file = tmp_path / "output.json"
         output_file.write_text(json.dumps(output_data))
@@ -723,13 +543,11 @@ class TestEdgeCases:
     def test_state_file_persists_after_step2(
         self, runner: CliRunner, state_file: Path, two_valid_tasks: list[dict]
     ) -> None:
-        """State file content (including custom fields) survives step 2."""
+        """State file content (including custom fields) survives step 1."""
         state = {"tasks": two_valid_tasks, "custom_metadata": "survives validation"}
         state_file.write_text(json.dumps(state))
 
-        # Step 1
-        runner.invoke(generate_uuids_main, ["--state-file", str(state_file)])
-        # Step 2
+        # Step 1: validate-task-structure
         runner.invoke(
             validate_structure_main,
             ["--state-file", str(state_file), "--schema", str(SCHEMA_PATH)],

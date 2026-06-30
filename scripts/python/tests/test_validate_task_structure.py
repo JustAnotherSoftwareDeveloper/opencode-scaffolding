@@ -27,7 +27,6 @@ from cli.validate_task_structure import main
 from lib.validate_task_structure import (
     _validate_execution_steps,
     _validate_file_array,
-    _validate_uuid_v4,
     validate,
 )
 
@@ -61,7 +60,6 @@ def schema_dict() -> dict:
 @pytest.fixture
 def valid_task_1() -> dict:
     return {
-        "id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
         "purpose": "Task one purpose",
         "context": "Context for task one",
         "filesToRead": ["src/file1.py"],
@@ -78,7 +76,6 @@ def valid_task_1() -> dict:
 @pytest.fixture
 def valid_task_2() -> dict:
     return {
-        "id": "b2c3d4e5-f6a7-4890-bcde-fa1234567890",
         "purpose": "Task two purpose",
         "context": "Context for task two",
         "filesToRead": ["src/file2.py"],
@@ -94,7 +91,6 @@ def valid_task_2() -> dict:
 @pytest.fixture
 def valid_task_3() -> dict:
     return {
-        "id": "c3d4e5f6-a7b8-4901-8cde-fa0123456789",
         "purpose": "Task three purpose",
         "context": "Context for task three",
         "filesToRead": ["src/file3a.py", "src/file3b.py"],
@@ -118,35 +114,6 @@ def valid_tasks(valid_task_1, valid_task_2, valid_task_3) -> list[dict]:
 # ===========================================================================
 # Unit tests — lib.validate_task_structure helper functions
 # ===========================================================================
-
-
-class TestValidateUuidV4:
-    """Tests for the UUID v4 validation helper."""
-
-    def test_valid_uuid_v4(self) -> None:
-        """A well-formed UUID v4 returns None."""
-        assert (
-            _validate_uuid_v4("a1b2c3d4-e5f6-4789-abcd-ef0123456789", "tasks[0]")
-            is None
-        )
-
-    def test_invalid_uuid_v4_wrong_version(self) -> None:
-        """A UUID that is valid format but not v4 (version 1) yields an error."""
-        msg = _validate_uuid_v4("a1b2c3d4-e5f6-1789-abcd-ef0123456789", "tasks[0]")
-        assert msg is not None
-        assert "tasks[0]" in msg
-        assert "invalid UUID v4 format" in msg
-
-    def test_invalid_uuid_v4_malformed(self) -> None:
-        """A completely malformed UUID yields an error."""
-        msg = _validate_uuid_v4("not-a-uuid", "tasks[1]")
-        assert msg is not None
-        assert "tasks[1]" in msg
-
-    def test_invalid_uuid_v4_wrong_version_5(self) -> None:
-        """A UUID v5 (version 5) should also be rejected."""
-        msg = _validate_uuid_v4("a1b2c3d4-e5f6-5789-abcd-ef0123456789", "tasks[0]")
-        assert msg is not None
 
 
 class TestValidateFileArray:
@@ -271,7 +238,6 @@ class TestValidateFunction:
     @pytest.mark.parametrize(
         "missing_key",
         [
-            "id",
             "purpose",
             "context",
             "filesToRead",
@@ -306,23 +272,6 @@ class TestValidateFunction:
         """executionInstructions as string instead of array is rejected."""
         task = dict(valid_task_1)
         task["executionInstructions"] = "not-an-array"
-        valid, errors = validate([task], schema_dict)
-        assert valid is False
-
-    # --- Custom validation: UUID v4 ---
-
-    def test_non_v4_uuid(self, valid_task_1, schema_dict) -> None:
-        """A UUID in valid format but not v4 is caught by custom check."""
-        task = dict(valid_task_1)
-        task["id"] = "a1b2c3d4-e5f6-1789-abcd-ef0123456789"  # version 1
-        valid, errors = validate([task], schema_dict)
-        assert valid is False
-        assert any("invalid UUID v4 format" in e for e in errors)
-
-    def test_malformed_uuid(self, valid_task_1, schema_dict) -> None:
-        """A malformed UUID string is caught by schema and/or custom check."""
-        task = dict(valid_task_1)
-        task["id"] = "not-a-uuid"
         valid, errors = validate([task], schema_dict)
         assert valid is False
 
@@ -502,18 +451,6 @@ class TestCliInvalid:
         data = json.loads(result.output)
         assert data["valid"] is False
         assert any("expected step 2" in e for e in data["errors"])
-
-    def test_malformed_uuid_returns_invalid(self, valid_task_1, tmp_path: Path) -> None:
-        """A task with malformed UUID produces errors."""
-        task = dict(valid_task_1)
-        task["id"] = "not-a-uuid"
-        input_file = tmp_path / "bad.json"
-        input_file.write_text(json.dumps([task]))
-        runner = CliRunner()
-        result = runner.invoke(main, [str(input_file), "--schema", str(SCHEMA_PATH)])
-        assert result.exit_code == 1, result.output
-        data = json.loads(result.output)
-        assert data["valid"] is False
 
     def test_string_instead_of_array_returns_invalid(
         self, valid_task_1, tmp_path: Path

@@ -17,7 +17,6 @@ dependencies = [
 [project.scripts]
 collect-skills = "cli.collect_skills:main"
 example = "cli.example:main"
-generate-uuids = "cli.generate_uuids:main"
 resolve-script-root = "cli.resolve_script_root:main"
 skill-validator = "cli.skill_validator:cli"
 validate-and-format-output = "cli.validate_and_format_output:main"

@@ -72,7 +72,6 @@ def minimal_task() -> dict:
     Does NOT include ``dependencies`` or ``verification``.
     """
     return {
-        "id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
         "purpose": "Validate the sequential schema invariants",
         "context": "Context for validating the task-packet schema.",
         "filesToRead": ["src/schema.json"],
@@ -90,7 +89,6 @@ def minimal_task() -> dict:
 def full_task() -> dict:
     """A full valid task packet including optional ``verification`` field."""
     return {
-        "id": "b2c3d4e5-f6a7-4890-bcde-fa1234567890",
         "purpose": "Full task with verification checks",
         "context": "A more complete task context for integration testing.",
         "filesToRead": ["src/main.py", "src/lib.py"],
@@ -258,7 +256,6 @@ class TestSchemaStructuralInvariants:
     def test_task_packet_required_fields(self, schema_dict: dict) -> None:
         """TaskPacket has the expected set of required fields."""
         expected_required = {
-            "id",
             "purpose",
             "context",
             "filesToRead",
@@ -299,7 +296,6 @@ class TestSchemaStructuralInvariants:
         """TaskPacket has exactly the expected number of properties."""
         props = schema_dict["definitions"]["TaskPacket"]["properties"]
         expected_properties = {
-            "id",
             "purpose",
             "context",
             "filesToRead",

@@ -38,7 +38,6 @@ _SCHEMA_PATH = (
 
 _VALID_TASKS = [
     {
-        "id": "00000000-0000-4000-8000-000000000001",
         "purpose": "Task one purpose.",
         "context": "Context for task one.",
         "filesToRead": [],
@@ -49,7 +48,6 @@ _VALID_TASKS = [
         "expectedOutput": "Output for task one.",
     },
     {
-        "id": "00000000-0000-4000-8000-000000000002",
         "purpose": "Task two purpose.",
         "context": "Context for task two.",
         "filesToRead": [],
@@ -60,7 +58,6 @@ _VALID_TASKS = [
         "expectedOutput": "Output for task two.",
     },
     {
-        "id": "00000000-0000-4000-8000-000000000003",
         "purpose": "Task three purpose.",
         "context": "Context for task three.",
         "filesToRead": [],
@@ -174,26 +171,6 @@ class TestValidateAndFormat:
         valid, errors = validate_and_format(data, schema_dict)
         assert valid is False
         assert len(errors) > 0
-
-    # --- UUID format --------------------------------------------------------
-    # Note: Draft7Validator's built-in format checker does not include 'uuid',
-    # so format: "uuid" in the schema is NOT validated by jsonschema by default.
-    # The test below documents this known limitation — the malformed UUID
-    # string passes through without error.
-
-    def test_malformed_uuid_passes_with_current_checker(
-        self,
-        valid_data: dict,
-        schema_dict: dict,
-    ) -> None:
-        """A non-UUID id passes validation — Draft7 format checker lacks uuid."""
-        task = dict(valid_data["tasks"][0], id="not-a-valid-uuid")
-        data = {**valid_data, "tasks": [task]}
-        valid, result = validate_and_format(data, schema_dict)
-        assert valid is True
-        assert isinstance(result, str)
-        parsed = json.loads(result)
-        assert parsed["tasks"][0]["id"] == "not-a-valid-uuid"
 
     # --- tasks with dependencies field (removed from schema) -----------------
 
