@@ -17,7 +17,7 @@ Reference for authors filling the 7-section orchestrated template.
 Each step in the Execution Steps section uses a type prefix in bold:
 
 - **`Delegated: <Worker Skill>`** — Delegates a sub-task to a worker skill by forwarding a delegation packet.
-  The worker is another SKILL.md that receives the packet and executes autonomously.
+  The worker is another SKILL.md that receives the packet and executes as a deterministic packet execution engine.
   Use when the sub-work is multi-step, domain-specific, or benefits from a separate skill's context.
 - **`Inline: <Inline Skill Name>`** — Declares and executes a named inline reasoning step directly within the orchestrator's body.
   Inline steps are single-pass, non-delegated reasoning blocks that do not merit a standalone skill.

@@ -9,6 +9,13 @@ class: documentation
 
 This skill provides reference documentation for the packet execution engine behavior within the OpenCode worker agent system.
 
+## Core Principles
+
+- **Packet sections are authoritative** — PURPOSE, DETAILS, FILES TO READ, FILES TO WRITE, EXECUTION INSTRUCTIONS, VERIFICATION, EXPECTED OUTPUT, and SKILLS define the operational scope.
+- **No autonomy** — The worker does not expand scope, invent missing dependencies, or deviate from explicit instructions.
+- **Atomicity** — One discrete task per packet, single unit of work.
+- **Single artifact** — Deliverables match EXPECTED OUTPUT exactly, no synthesis across packets.
+
 ## Packet Section Interpretation
 
 The worker treats each packet section as an **authoritative operational directive**, not as parsing targets or suggestions.
@@ -26,7 +33,7 @@ The `## PURPOSE` section defines the **operational intent** for the worker. It i
 The `## DETAILS` section contains the **authoritative facts** for task execution. The worker must not introduce new facts beyond what is provided here.
 
 - **Worker behavior**: Use exclusively for contextual information needed to execute
-- **Execution impact**: Any assumptions or inferences must be documented as such
+- **Execution impact**: Do not invent facts. If information is missing, report it as BLOCKED.
 - **Boundary**: Worker must not invent context, dependencies, or missing information
 
 ### `## EXECUTION INSTRUCTIONS` — Sequential Commands
@@ -91,7 +98,7 @@ When requirements cannot be met:
 
 ## Skill Integration
 
-When `## SKILLS` section is present in a packet, the worker implements a **skill loading mechanism** to parse, load, and apply named skills:
+When `## SKILLS` section is present in a packet, the worker parses skill names from the section, invokes the skill tool for each named skill, and applies loaded skill guidance to enhance packet execution:
 
 ### 1. Parse SKILLS Section
 
@@ -99,7 +106,7 @@ When `## SKILLS` section is present in a packet, the worker implements a **skill
 - Skill names are listed as a comma-separated or newline-separated list
 - Each named skill is treated as a requirement for packet execution
 
-### 2. Load Named Skills
+### 2. Invoke Skill Tool for Each Named Skill
 
 - For each skill name parsed from `## SKILLS`:
   - Invoke the `skill` tool to load the named skill
@@ -110,17 +117,15 @@ When `## SKILLS` section is present in a packet, the worker implements a **skill
 
 - Apply loaded skills' workflows to enhance packet execution
 - Use skill templates/structures when specified in the skill documentation
-- Ensure skill guidance serves packet requirements, not independent directives
 - Skill guidance supplements but does not override packet instructions
 
-### 4. Handle Unavailable Skills
+### 4. Unavailable Skills — Report BLOCKED
 
-- When a named skill is unavailable (not found or cannot be loaded):
-  - Report `BLOCKED:` status before producing any output
-  - Include a clear reason: "BLOCKED: Skill '{skill_name}' is unavailable"
-  - Do not proceed with packet execution until skill is available
+- When a named skill is unavailable (not found or cannot be loaded), report BLOCKED before producing any output
+- Include a clear reason: "BLOCKED: Skill '{skill_name}' is unavailable"
+- Do not proceed with packet execution until skill is available
 
-### 5. Restrict Skill Loading
+### 5. Restrict to Specified Skills
 
 - Only load skills explicitly named in the `## SKILLS` section
 - Never load skills not specified in the packet
@@ -133,10 +138,10 @@ The worker enforces strict tool usage boundaries to prevent scope expansion and 
 
 ### `glob` and `grep` Tools
 
-- **Restriction**: Only used when explicitly authorized by `## FILES TO READ`
-- **Authorization**: Packet must list specific files or patterns to discover
-- **Prohibition**: Never use for exploratory file discovery outside authorized scope
-- **Rationale**: Prevents autonomous scope expansion and context invention
+- **Usage**: Broadly permitted for related-file discovery by default
+- **Guidance**: Use to find files related to the task after reading required files from `## FILES TO READ`
+- **Boundary**: Avoid unbounded discovery (e.g., reading every file in the repository)
+- **Rationale**: Supports related-file discovery while preventing unbounded searches
 
 ### `webfetch` Tool
 
@@ -158,21 +163,33 @@ The worker operates under strict boundaries:
 
 | Scope | Restriction |
 |-------|-------------|
-| Read | Only `## FILES TO READ` (including authorized discoveries) |
+| Read | `## FILES TO READ` (listed files are required); broad related-file discovery permitted by default |
 | Write | Only `## FILES TO WRITE` |
 | Output | Only `## EXPECTED OUTPUT` |
-| Discovery | Only when packet-authorized via `## FILES TO READ` |
+| Discovery | Broadly permitted for related files by default; avoid unbounded searches |
 | Tool Usage | Only within authorized scopes per Tool Integration Boundaries |
+
+## Discovery Boundaries
+
+- **Allowed** — Broad related-file discovery is permitted by default. Use `glob` or `grep` to find files related to the task after reading required files. All discovered files are treated as part of `## FILES TO READ`.
+- **Never allowed** — Unbounded discovery (e.g., reading every file in the repo). Expanding scope on worker initiative. Reading files unrelated to the task.
+
+## Packet Execution Model
+
+- **Delegator responsibilities** — Provide complete, accurate packets. Specify all required files in `## FILES TO READ` and `## FILES TO WRITE`. Include `## SKILLS` when specialized capabilities are needed. Define clear `## EXPECTED OUTPUT`.
+- **Worker responsibilities** — Consume packets faithfully. Load and apply named skills. Execute `## EXECUTION INSTRUCTIONS` steps. Verify output against `## VERIFICATION` criteria. Produce exactly `## EXPECTED OUTPUT`.
+- **Packet flow** — Delegator → Packet → Worker → Execution → Output → Feedback/Blockers → Delegator.
+- **Statelessness** — Each packet is a complete, independent unit of work. The worker carries no state between packets.
 
 ## Verification
 
-Workers execute `## VERIFICATION` steps when present:
+`## VERIFICATION` defines quality checkpoints, not autonomous execution permission. Workers run these checks against their output before finishing:
 
 1. **Run verification checks** against output using criteria from `## VERIFICATION` section
 2. **Attempt remediation** when verification fails, if possible within packet constraints
-3. **Use PARTIAL:** signal for incomplete verification - includes explanation of what was left undone
-4. **Report BLOCKED:** for unmet requirements - includes clear reason explaining why requirements cannot be met
-5. **Produce clean deliverable** when verification passes - no prefixes or additional metadata
+3. **Use PARTIAL:** when verification fails but some work is complete - includes a brief explanation of what was left undone. PARTIAL is NOT a blocker and does not require BLOCKED.
+4. **Report BLOCKED:** for unmet requirements that prevent producing the deliverable - includes clear reason explaining why requirements cannot be met
+5. **Produce clean deliverable** when verification passes - silence is success, no prefixes or additional metadata
 
 ### Verification Checklist
 
@@ -181,5 +198,5 @@ Workers should verify:
 - [ ] Output matches `## EXPECTED OUTPUT` specifications exactly
 - [ ] All `## VERIFICATION` criteria are satisfied
 - [ ] No facts introduced beyond `## DETAILS`
-- [ ] No files read outside `## FILES TO READ`
+- [ ] No files read outside `## FILES TO READ` and related-file discovery scope
 - [ ] No files written outside `## FILES TO WRITE`

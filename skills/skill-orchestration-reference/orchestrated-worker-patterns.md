@@ -1,12 +1,13 @@
 # Worker Patterns for Orchestrated Skills
 
 Reference for designing workers that receive delegation packets from orchestrated skills.
-Workers are `class: delegated` skills that execute autonomously within a pipeline.
+Workers are `class: delegated` skills that execute as stateless packet consumers within a pipeline.
 See `./orchestration-usage.md` for how orchestrators dispatch workers.
 
 ## Worker Contract
 
 Every worker receives an immutable delegation packet with these sections: `PURPOSE`, `DETAILS`, `FILES TO READ`, `FILES TO WRITE`, `SKILLS`, `EXECUTION INSTRUCTIONS`, `VERIFICATION`, `EXPECTED OUTPUT`.
+Packet sections are authoritative operational directives — not suggestions.
 Workers must not modify, add, or remove sections.
 
 ## Worker Patterns

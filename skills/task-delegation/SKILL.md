@@ -25,7 +25,7 @@ Reject a full `breakdown-tasks` JSON output object unless one task is clearly se
 <full task description, constraints, and context>
 
 ## FILES TO READ
-<comma-separated file paths to read — exclusive source; no implicit discovery outside this list>
+<comma-separated file paths to read — listed files are required; broad related-file discovery is permitted by default>
 
 ## FILES TO WRITE
 <single file path, or "None">
@@ -64,8 +64,8 @@ The result returned by the worker matching the packet's `## EXPECTED OUTPUT`.
 4. **Mark uninferable fields** — For any of the 8 fields that cannot be inferred from the input, set its value to the explicit marker: `UNKNOWN — not provided in input`.
 5. **Construct complete plaintext packet** — Build a well-formed plaintext delegation packet with all 8 sections present using the Packet Template.
    Every section header (`## PURPOSE`, `## DETAILS`, etc.) must appear, even if its content is the UNKNOWN marker.
-   - **FILES TO READ: enforce explicit-only scope.** Only include files the worker is authorized to access. Do not add files from implicit discovery — FILES TO READ is the exclusive source of file access for the worker. The worker must not discover or read files beyond this list unless EXECUTION INSTRUCTIONS explicitly authorizes it.
-   - **EXECUTION INSTRUCTIONS: embed balanced productivity and pre-tool checklist.** Include the directive "Balance cost and capability — use the simplest sufficient approach" and the pre-tool checklist from worker.md (5-question internal review before each tool call: Is this call strictly necessary? Is there a simpler alternative? Have I read all FILES TO READ? Am I respecting explicit-only scope? Is the simplest sufficient tool chosen?).
+   - **FILES TO READ: list required files; broad related-file discovery is permitted by default.** Include the files the worker must read before discovering related content. After reading listed files, the worker may broadly discover and read related files needed for task execution. Avoid unbounded patterns. FILES TO READ may include glob patterns when broad file sets are needed.
+   - **EXECUTION INSTRUCTIONS: embed balanced productivity and pre-tool checklist.** Include the directive "Balance cost and capability — use the simplest sufficient approach" and the pre-tool checklist aligned with the worker contract (5-question internal review before each tool call: Is this call strictly necessary? Is there a simpler alternative? Have I read all FILES TO READ? Am I respecting explicit-only scope? Is the simplest sufficient tool chosen?).
 6. **Validate all sections present** — Confirm the constructed packet has exactly 8 sections and none are missing.
    If sections are absent, report a clear error describing which sections are missing and stop.
 7. **Invoke the worker** — Invoke the `task` tool with `subagent_type: "worker"`, `description` set to the inferred PURPOSE content, `prompt` set to the full plaintext packet, and `command` set to the inferred PURPOSE content.
