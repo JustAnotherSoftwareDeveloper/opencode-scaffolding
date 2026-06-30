@@ -1,7 +1,7 @@
 ---
 name: display-tasks
 description: "Use when rendering canonical breakdown-tasks output as a concise Markdown summary table."
-tags: [task-delegation, create, documentation, opencode]
+tags: [workflow, internal]
 class: inline
 ---
 
@@ -13,8 +13,8 @@ Render canonical `breakdown-tasks` output into a Markdown table with only safe u
 
 Accept exactly one canonical `breakdown-tasks` JSON object.
 The root object must contain only `summary` and `tasks`.
-The `tasks` array must contain task objects with `id`, `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, and `expectedOutput`.
-Task objects may also contain `dependencies` and `verification`.
+The `tasks` array must contain task objects with `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, and `expectedOutput`.
+Task objects may also contain `verification`.
 Reject plaintext packets, bare JSON arrays, single task objects, and non-canonical fields.
 
 ## Output

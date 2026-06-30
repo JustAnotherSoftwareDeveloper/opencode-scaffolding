@@ -1,7 +1,7 @@
 ---
 name: ask-question
 description: Use when resolving ambiguity in a user request by asking only necessary clarifying questions through the question tool.
-tags: [task-delegation, analyze, analysis, opencode]
+tags: [workflow, internal]
 class: inline
 ---
 
@@ -38,8 +38,16 @@ A question array of zero must never be returned.
       "items": {
         "type": "object",
         "properties": {
-          "question": { "type": "string", "minLength": 1, "description": "The actual question text" },
-          "header": { "type": "string", "maxLength": 30, "description": "Short label (max 30 chars) for the question" },
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The actual question text"
+          },
+          "header": {
+            "type": "string",
+            "maxLength": 30,
+            "description": "Short label (max 30 chars) for the question"
+          },
           "options": {
             "type": "array",
             "minItems": 1,
@@ -47,14 +55,23 @@ A question array of zero must never be returned.
             "items": {
               "type": "object",
               "properties": {
-                "label": { "type": "string", "description": "Display label for the option" },
-                "description": { "type": "string", "description": "Explanation of the choice" }
+                "label": {
+                  "type": "string",
+                  "description": "Display label for the option"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Explanation of the choice"
+                }
               },
               "required": ["label", "description"]
             },
             "description": "Array of 1-5 {label, description} option objects"
           },
-          "multiple": { "type": "boolean", "description": "Whether the user can select multiple options for this question" }
+          "multiple": {
+            "type": "boolean",
+            "description": "Whether the user can select multiple options for this question"
+          }
         },
         "required": ["question", "header", "options", "multiple"]
       }
@@ -77,8 +94,14 @@ A question array of zero must never be returned.
       "items": {
         "type": "object",
         "properties": {
-          "header": { "type": "string", "description": "Question header shown to the user" },
-          "question": { "type": "string", "description": "Question text shown to the user" },
+          "header": {
+            "type": "string",
+            "description": "Question header shown to the user"
+          },
+          "question": {
+            "type": "string",
+            "description": "Question text shown to the user"
+          },
           "selected": {
             "type": "array",
             "items": { "type": "string" },

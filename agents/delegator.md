@@ -29,8 +29,8 @@ Repeat this workflow for every request:
    Re-attempt JSON.parse on that extracted text.
    If zero or multiple fence blocks are found, report BLOCKED.
    Validate the parsed output: it must be a JSON object with `summary` as a non-empty string and `tasks` as a non-empty array.
-   Every element of `tasks` must be an object with all 8 required camelCase keys (`id`, `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `expectedOutput`).
-   Optional fields such as `dependencies` and `verification` may also be present.
+   Every element of `tasks` must be an object with all 7 required camelCase keys (`purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `expectedOutput`).
+   Optional fields such `verification` may also be present.
    If JSON parsing fails (including after fence-extraction fallback), `tasks` is empty, or any element is missing one or more required keys, report BLOCKED.
 
 3. Display Task Summary

@@ -1,7 +1,7 @@
 ---
 name: dispatch-decompose
 description: "Use when the delegator must send the full user request and clarification context to a breakdown-tasks worker and return the worker's JSON decomposition output."
-tags: [task-delegation, create, code, opencode]
+tags: [workflow, internal]
 class: inline
 ---
 
@@ -41,16 +41,14 @@ Maintain decomposition state in the .tasks/ file declared in ## FILES TO WRITE.
 
 ## VERIFICATION
 The output must be valid JSON parseable as an object with a required `summary` field (string, maxLength 2000) and a required `tasks` array (non-empty).
-Every task in the `tasks` array must be an object containing all required fields: id, purpose, context, filesToRead, filesToWrite, skills, executionInstructions, expectedOutput.
-Each `id` must be a valid UUID v4 string.
-If a task has a `dependencies` array, each entry must reference a valid task `id` within the same decomposition.
+Every task in the `tasks` array must be an object containing all required fields from `breakdown-tasks/schema/task-packet.schema.json`: purpose, context, filesToRead, filesToWrite, skills, executionInstructions, expectedOutput.
+Task objects must not include stale orchestration fields such as `id`, `dependencies`, or `tags` unless the canonical schema is updated to require them.
 Each `executionInstructions` array must be non-empty, with items containing at minimum `step` (integer ≥1) and `action` (string).
-The `tags` field is not part of the schema and must not be validated or expected.
+Use the canonical schema as the source of truth instead of restating an alternate task-packet contract.
 
 ## EXPECTED OUTPUT
 A JSON object containing a root-level `summary` string and a non-empty `tasks` array.
 Each task in `tasks` is a delegation packet object with the following fields:
-- `id` (UUID v4) — unique task identifier
 - `purpose` (string) — single-sentence task goal
 - `context` (string) — expanded context for the worker (up to 8000 characters)
 - `filesToRead` (string array) — files the worker must read before starting
@@ -59,7 +57,7 @@ Each task in `tasks` is a delegation packet object with the following fields:
 - `executionInstructions` (object array) — ordered steps with `step` and `action`, optionally `verification`
 - `verification` (string array, optional) — top-level checks on the complete deliverable
 - `expectedOutput` (string) — precise description of the deliverable
-- `dependencies` (string array, optional) — task IDs that must complete before this one begins
+Do not emit `id`, `dependencies`, `tags`, or any other fields not accepted by `breakdown-tasks/schema/task-packet.schema.json`.
 ```
 
 ## Output

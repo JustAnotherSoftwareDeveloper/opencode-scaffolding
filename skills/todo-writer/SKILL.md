@@ -1,7 +1,7 @@
 ---
 name: todo-writer
 description: "Use when writing or replacing todo entries from canonical breakdown-tasks output via the todowrite tool."
-tags: [task-delegation, create, documentation, opencode]
+tags: [workflow, internal]
 class: inline
 ---
 
@@ -15,8 +15,8 @@ Send the complete todo array in every call.
 
 Canonical `breakdown-tasks` JSON output plus caller-provided `status` and `priority`.
 The root object must contain only `summary` and `tasks`.
-The `tasks` array must contain task objects with `id`, `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, and `expectedOutput`.
-Task objects may also contain `dependencies` and `verification`.
+The `tasks` array must contain task objects with `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, and `expectedOutput`.
+Task objects may also contain `verification`.
 Each item in `tasks` becomes one todo item.
 The `tasks[*].purpose` field maps to todo `content`.
 

@@ -1,11 +1,7 @@
 ---
 name: breakdown-tasks
 description: "Use when decomposing a request into the smallest possible task-delegation work items."
-tags:
-  - "domain:task-delegation"
-  - "action:create"
-  - "action:analysis"
-  - "platform:opencode"
+tags: [workflow, internal]
 class: delegated
 ---
 
@@ -40,7 +36,7 @@ Set `STATE_FILE=~/.config/opencode/.tasks/<derived-filename>.json`.
 Initialize the file with a JSON object containing the `summary` field (empty string placeholder) and an empty `tasks` array:
 
 ```json
-{"summary": "", "tasks": []}
+{ "summary": "", "tasks": [] }
 ```
 
 ### 2. User Request Summary Extraction
