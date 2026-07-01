@@ -92,10 +92,7 @@ The OpenCode platform recognizes three script runtimes:
 **Resolution mechanism in skill invocation steps:**
 
 ```shell
-# Resolve scripts directory (see platform-layout-context.md for full rules)
-SCRIPTS_PYTHON="${OPENCODE_SCRIPTS_PYTHON:-$PWD/.opencode/scripts/python}"
-SCRIPTS_PYTHON="${SCRIPTS_PYTHON:-$HOME/.config/opencode/scripts/python}"
-uv run --directory "$SCRIPTS_PYTHON" <entry-point> [args]
+uv run --directory ~/.config/opencode/scripts/python <entry-point> [args]
 ```
 
 If a project has no `.opencode/scripts/python/` directory, resolution falls through silently to the global root.

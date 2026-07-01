@@ -1,9 +1,3 @@
----
-name: anti-patterns
-description: "Work-boundary and skill-assignment mistakes to avoid when decomposing tasks."
-class: documentation
----
-
 # Anti-Patterns
 
 Work-boundary and skill-assignment mistakes to avoid when decomposing tasks.
@@ -27,6 +21,5 @@ Work-boundary and skill-assignment mistakes to avoid when decomposing tasks.
 
 ## Skill-Assignment Anti-Patterns
 
-- **Assign no skills when skills are available** — The decomposer has skill data but leaves `## SKILLS` empty despite obvious matches in the discovered skill list.
-- **Force-assign a skill to every packet** — Assigning a skill to purely structural tasks to avoid empty `## SKILLS` fields.
-  Leave empty when no match exists.
+- **Assign no skills** — Every task must have at least one skill. If no specific skill matches after normal matching, assign `generic-analysis` as the fallback. Zero skills is never permitted.
+- **Force-assign a skill that does not match** — Do not assign a mismatched skill just to satisfy the one-skill minimum. Instead, use `generic-analysis` for genuine fallback cases where no specific skill matches.

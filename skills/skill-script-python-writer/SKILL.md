@@ -52,7 +52,7 @@ Each check is a yes/no assertion.
 - Type check passes — `uv run pyright src/cli/<script_name>.py` exits zero.
 - Tests pass — `uv run pytest tests/test_<script_name>.py tests/test_<script_name>_cli.py -v` exits zero.
 - Coverage >= 100% — `uv run pytest --cov --cov-fail-under=100` exits zero.
-- Entry point `--help` works — `uv run --directory $SCRIPTS_PYTHON <script-name> --help` exits zero.
+- Entry point `--help` works — `uv run --directory ~/.config/opencode/scripts/python <script-name> --help` exits zero.
 
 ## Expected Output
 

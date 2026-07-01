@@ -29,5 +29,7 @@ Run tasks in order so each sees the prior task's output.
 Available skills inform task decomposition but do not override atomicity.
 Use the discovered skill list to assign matching skills, shape task boundaries, and identify missing capabilities.
 Never merge or split tasks to match skill scope.
-If a skill covers two adjacent concerns, keep them as separate atomic packets — assign the skill to the matching packet only.
-Do not adjust task granularity to fit a skill's scope; atomicity rules take precedence.
+If a skill covers two adjacent concerns, keep them as separate atomic packets.
+Assign the skill to the matching packet only.
+Do not adjust task granularity to fit a skill's scope.
+Atomicity rules take precedence.

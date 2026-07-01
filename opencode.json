@@ -68,7 +68,8 @@
         "*": "deny",
         "read": {
           "*": "deny",
-          ".tasks/*.json": "allow"
+          ".tasks/*.json": "allow",
+          "~/.config/opencode/tasks/*.json": "allow"
         },
         "todowrite": "allow",
         "question": "allow",

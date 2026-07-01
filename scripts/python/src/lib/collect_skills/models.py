@@ -70,7 +70,7 @@ class Skill:
             "license": self.license,
             "compatibility": self.compatibility,
             "metadata": self.metadata,
-            "location": self.location,
+            "path": self.location,
             "source": self.source,
             "permission": self.permission,
         }

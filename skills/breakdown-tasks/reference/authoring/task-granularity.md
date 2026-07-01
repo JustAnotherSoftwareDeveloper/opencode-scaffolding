@@ -4,10 +4,12 @@ Heuristics for splitting work into atomic delegation packets.
 
 ## One Task Per File Change
 
-Each task modifies exactly one file, unless changes to multiple files are tightly coupled.
+Each task modifies exactly one file.
+Changes to multiple files are permitted only when tightly coupled.
 Adding a function to `utils.py` is one task.
 Adding a function to `utils.py` and writing its test is two tasks.
-Adding a type in `types.ts` and importing it in `handler.ts` is one task (tightly coupled).
+Adding a type in `types.ts` and importing it in `handler.ts` is one task.
+These changes are tightly coupled.
 Adding a type in `types.ts` and adding unrelated helpers in `utils.ts` is two tasks.
 
 ## One Task Per Conceptual Change

@@ -481,8 +481,8 @@ class TestJsonOutput:
         assert len(data) == 1
         item = data[0]
         # location must be the real discovered path, not ``/fake/path/...``.
-        assert item["location"] != "/fake/path/should-be-overridden"
-        assert "display-tasks" in item["location"]
+        assert item["path"] != "/fake/path/should-be-overridden"
+        assert "display-tasks" in item["path"]
 
     def test_metadata_fields_correct(self) -> None:
         """All expected fields appear in JSON output."""
@@ -510,7 +510,7 @@ class TestJsonOutput:
         assert item["license"] == "MIT"
         assert item["compatibility"] == ">=3.12"
         assert item["metadata"] == {"key": "val"}
-        assert item["location"] == "/root/sample/SKILL.md"
+        assert item["path"] == "/root/sample/SKILL.md"
         assert item["source"] == "project"
         assert item["permission"] == "allow"
 
@@ -992,7 +992,7 @@ class TestModelEdgeCases:
             "license",
             "compatibility",
             "metadata",
-            "location",
+            "path",
             "source",
             "permission",
         }

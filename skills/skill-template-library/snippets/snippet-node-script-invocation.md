@@ -3,10 +3,7 @@
 **Script invocation (Node):**
 
 ```shell
-# Resolve scripts directory (env → project-local → global fallback; see A.3)
-SCRIPTS_NODE="${OPENCODE_SCRIPTS_NODE:-$PWD/.opencode/scripts/node}"
-SCRIPTS_NODE="${SCRIPTS_NODE:-$HOME/.config/opencode/scripts/node}"
-bun run --cwd "$SCRIPTS_NODE" <entry-point> [args]
+bun run --cwd ~/.config/opencode/scripts/node <entry-point> [args]
 ```
 
 - **CLI definition** uses `cleye` — import `cleye` and export a typed `argv` parser.

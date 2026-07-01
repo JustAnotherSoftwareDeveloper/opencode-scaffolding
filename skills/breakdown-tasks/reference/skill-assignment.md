@@ -1,6 +1,7 @@
 # Skill Assignment Procedure
 
-This document describes the deterministic procedure for assigning skills to tasks during decomposition. The procedure is executed in Step 5 of the breakdown-tasks workflow.
+Deterministic procedure for assigning skills to tasks during decomposition.
+Executed in Step 5 of the breakdown-tasks workflow.
 
 ## Prerequisites
 
@@ -44,19 +45,16 @@ Match each task against the discovered skill index using this priority order:
 2. **Cap at 3 skills per task.**
 3. Prefer the most specific skill over more general ones.
 4. When multiple skills have equal specificity, order alphabetically by name.
+5. **If no skill matches after steps 5.1–5.3, assign `generic-analysis` as the fallback.**
+   Every task must have at least one skill. Zero skills is never permitted.
 
-### 5.4 Zero-Skill Criteria
-
-Use zero skills only when **no** skill in the index matches the task's required domain or expertise after steps 5.1–5.3.
-
-If a matching skill exists, assign at least one.
-
-### 5.5 Validate and Emit
+### 5.4 Validate and Emit
 
 1. Ensure the `skills` array has `uniqueItems: true`.
 2. Ensure no unknown skill names are referenced.
 3. Write the assembled output object back into `STATE_FILE`, overwriting the previous content.
-4. **Note:** Skill-match rationale is **not** persisted in task packets. The schema's `additionalProperties: false` prohibits non-standard fields.
+4. **Note:** Skill-match rationale is **not** persisted in task packets.
+   The schema's `additionalProperties: false` prohibits non-standard fields.
 
 ## Output Format
 

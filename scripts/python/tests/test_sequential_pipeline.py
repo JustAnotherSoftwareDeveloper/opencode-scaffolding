@@ -47,7 +47,7 @@ def _make_task(purpose: str = "Default purpose", context: str = "Default context
         "context": context,
         "filesToRead": [],
         "filesToWrite": [],
-        "skills": [],
+        "skills": ["generic-analysis"],
         "executionInstructions": [{"step": 1, "action": "Do the thing."}],
         "verification": [],
         "expectedOutput": f"Output for: {purpose}",
@@ -415,6 +415,21 @@ class TestFailurePropagation:
         )
         assert result.exit_code == 1
 
+    def test_step3_rejects_empty_skills(
+        self, runner: CliRunner, state_file: Path
+    ) -> None:
+        """A task with empty skills array (minItems: 1) fails at step 3."""
+        task = _make_task(purpose="Empty skills task")
+        task["skills"] = []
+        data = {"summary": "Empty skills test.", "tasks": [task]}
+        state_file.write_text(json.dumps(data))
+
+        result = runner.invoke(
+            validate_format_main,
+            ["--state-file", str(state_file), "--schema", str(SCHEMA_PATH)],
+        )
+        assert result.exit_code == 1
+
 
 # ===========================================================================
 # TestEdgeCases — unusual or boundary conditions
@@ -455,14 +470,14 @@ class TestEdgeCases:
     def test_tasks_with_empty_arrays(
         self, runner: CliRunner, state_file: Path, tmp_path: Path
     ) -> None:
-        """Tasks with empty filesToRead, filesToWrite, skills, verification work."""
+        """Tasks with empty filesToRead, filesToWrite, verification work (skills uses generic-analysis)."""
         task = _make_task(
             purpose="Empty arrays task",
             context="All optional arrays are empty.",
         )
         task["filesToRead"] = []
         task["filesToWrite"] = []
-        task["skills"] = []
+        task["skills"] = ["generic-analysis"]
         task["verification"] = []
 
         state = {"tasks": [task]}

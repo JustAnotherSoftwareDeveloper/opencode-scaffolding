@@ -34,7 +34,7 @@ Reject a full `breakdown-tasks` JSON output object unless one task is clearly se
 <comma-separated skill names to load>
 
 ## EXECUTION INSTRUCTIONS
-<step-by-step instructions — include the balanced productivity directive ("Balance cost and capability; use simplest sufficient approach") and pre-tool checklist reminder (5-question internal checklist before each tool call)>
+<step-by-step instructions>
 
 ## VERIFICATION
 <how to check work completed correctly>
@@ -65,7 +65,6 @@ The result returned by the worker matching the packet's `## EXPECTED OUTPUT`.
 5. **Construct complete plaintext packet** — Build a well-formed plaintext delegation packet with all 8 sections present using the Packet Template.
    Every section header (`## PURPOSE`, `## DETAILS`, etc.) must appear, even if its content is the UNKNOWN marker.
    - **FILES TO READ: list required files; broad related-file discovery is permitted by default.** Include the files the worker must read before discovering related content. After reading listed files, the worker may broadly discover and read related files needed for task execution. Avoid unbounded patterns. FILES TO READ may include glob patterns when broad file sets are needed.
-   - **EXECUTION INSTRUCTIONS: embed balanced productivity and pre-tool checklist.** Include the directive "Balance cost and capability — use the simplest sufficient approach" and the pre-tool checklist aligned with the worker contract (5-question internal review before each tool call: Is this call strictly necessary? Is there a simpler alternative? Have I read all FILES TO READ? Am I respecting explicit-only scope? Is the simplest sufficient tool chosen?).
 6. **Validate all sections present** — Confirm the constructed packet has exactly 8 sections and none are missing.
    If sections are absent, report a clear error describing which sections are missing and stop.
 7. **Invoke the worker** — Invoke the `task` tool with `subagent_type: "worker"`, `description` set to the inferred PURPOSE content, `prompt` set to the full plaintext packet, and `command` set to the inferred PURPOSE content.

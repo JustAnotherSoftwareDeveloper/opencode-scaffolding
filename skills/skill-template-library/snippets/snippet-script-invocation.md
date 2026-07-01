@@ -41,14 +41,7 @@ Use Shell for:
 ### Python Invocation
 
 ```shell
-# Resolution order (checked in sequence):
-# 1. $OPENCODE_SCRIPTS_PYTHON (environment override)
-# 2. <project-root>/.opencode/scripts/python (project-local)
-# 3. ~/.config/opencode/scripts/python (global fallback)
-
-SCRIPTS_PYTHON="${OPENCODE_SCRIPTS_PYTHON:-$PWD/.opencode/scripts/python}"
-SCRIPTS_PYTHON="${SCRIPTS_PYTHON:-$HOME/.config/opencode/scripts/python}"
-uv run --directory "$SCRIPTS_PYTHON" <entry-point> [args]
+uv run --directory ~/.config/opencode/scripts/python <entry-point> [args]
 ```
 
 **Directory layout conventions:**
@@ -61,14 +54,7 @@ uv run --directory "$SCRIPTS_PYTHON" <entry-point> [args]
 ### Node Invocation
 
 ```shell
-# Resolution order (checked in sequence):
-# 1. $OPENCODE_SCRIPTS_NODE (environment override)
-# 2. <project-root>/.opencode/scripts/node (project-local)
-# 3. ~/.config/opencode/scripts/node (global fallback)
-
-SCRIPTS_NODE="${OPENCODE_SCRIPTS_NODE:-$PWD/.opencode/scripts/node}"
-SCRIPTS_NODE="${SCRIPTS_NODE:-$HOME/.config/opencode/scripts/node}"
-bun run --cwd "$SCRIPTS_NODE" <script-name> [args]
+bun run --cwd ~/.config/opencode/scripts/node <script-name> [args]
 ```
 
 **Directory layout conventions:**
@@ -83,14 +69,7 @@ bun run --cwd "$SCRIPTS_NODE" <script-name> [args]
 ### Shell Invocation
 
 ```shell
-# Resolution order (checked in sequence):
-# 1. $OPENCODE_SCRIPTS_SHELL (environment override)
-# 2. <project-root>/.opencode/scripts/shell (project-local)
-# 3. ~/.config/opencode/scripts/shell (global fallback)
-
-SCRIPTS_SHELL="${OPENCODE_SCRIPTS_SHELL:-$PWD/.opencode/scripts/shell}"
-SCRIPTS_SHELL="${SCRIPTS_SHELL:-$HOME/.config/opencode/scripts/shell}"
-make -C "$SCRIPTS_SHELL" <target> [args]
+make -C ~/.config/opencode/scripts/shell <target> [args]
 ```
 
 **Directory layout conventions:**

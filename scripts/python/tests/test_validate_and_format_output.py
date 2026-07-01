@@ -42,7 +42,7 @@ _VALID_TASKS = [
         "context": "Context for task one.",
         "filesToRead": [],
         "filesToWrite": [],
-        "skills": [],
+        "skills": ["generic-analysis"],
         "executionInstructions": [{"step": 1, "action": "Do the first thing."}],
         "verification": [],
         "expectedOutput": "Output for task one.",
@@ -52,7 +52,7 @@ _VALID_TASKS = [
         "context": "Context for task two.",
         "filesToRead": [],
         "filesToWrite": [],
-        "skills": [],
+        "skills": ["generic-analysis"],
         "executionInstructions": [{"step": 1, "action": "Do the second thing."}],
         "verification": [],
         "expectedOutput": "Output for task two.",
@@ -62,7 +62,7 @@ _VALID_TASKS = [
         "context": "Context for task three.",
         "filesToRead": [],
         "filesToWrite": [],
-        "skills": [],
+        "skills": ["generic-analysis"],
         "executionInstructions": [{"step": 1, "action": "Do the third thing."}],
         "verification": [],
         "expectedOutput": "Output for task three.",
@@ -196,6 +196,18 @@ class TestValidateAndFormat:
         valid, errors = validate_and_format(data, schema_dict)
         assert valid is False
         assert len(errors) > 0
+
+    # --- empty skills array (minItems: 1) -----------------------------------
+
+    def test_empty_skills_array_rejected(self, valid_data: dict, schema_dict: dict) -> None:
+        """A task with an empty skills array (minItems: 1) is rejected."""
+        task = dict(valid_data["tasks"][0], skills=[])
+        data = {**valid_data, "tasks": [task]}
+        valid, errors = validate_and_format(data, schema_dict)
+        assert valid is False
+        assert len(errors) > 0
+        error_text = " ".join(str(e) for e in errors)
+        assert "non-empty" in error_text
 
     # --- schema-level error (SchemaError, not ValidationError) -------------
 

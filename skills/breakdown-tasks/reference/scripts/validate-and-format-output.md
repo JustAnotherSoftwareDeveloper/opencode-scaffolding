@@ -7,7 +7,7 @@ No preamble, no markdown fences, no commentary.
 ## CLI
 
 ```
-uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output [file-path | --stdin] --schema "$TASK_SCHEMA_PATH"
+uv run --directory ~/.config/opencode/scripts/python validate-and-format-output [file-path | --stdin] --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
 ```
 
 - `--stdin` reads the full output object from stdin.
@@ -54,14 +54,14 @@ On invalid input, write:
 
 ```bash
 # Validate and format piped full output
-uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output --stdin --schema "$TASK_SCHEMA_PATH"
+uv run --directory ~/.config/opencode/scripts/python validate-and-format-output --stdin --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
 
 # Validate from file
-uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output output.json --schema "$TASK_SCHEMA_PATH"
+uv run --directory ~/.config/opencode/scripts/python validate-and-format-output output.json --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
 
 # Full pipeline: assemble summary and tasks then validate
 echo '{"summary": "...", "tasks": [...]}' \
-  | uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output --stdin --schema "$TASK_SCHEMA_PATH"
+  | uv run --directory ~/.config/opencode/scripts/python validate-and-format-output --stdin --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
 ```
 
 ## Integration Point

@@ -37,7 +37,7 @@ Populate task fields: `purpose`, `context`, `filesToRead`, `filesToWrite`, `skil
 
 #### 3a. Task Structure Validation
 
-Run `uv run --directory ~/.config/opencode/scripts/python validate-task-structure --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"`. Handle exit codes 0, 1, and 2 as documented in `./reference/scripts/validate-task-structure.md`.
+Run `uv run --directory ~/.config/opencode/scripts/python validate-task-structure --state-file "$STATE_FILE" --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json`. Handle exit codes 0, 1, and 2 as documented in `./reference/scripts/validate-task-structure.md`.
 
 ### 4. Available Skills Discovery
 
@@ -50,7 +50,7 @@ Populate `skills` for each task using the deterministic assignment procedure in 
 
 ### 6. Final Validation and State Emission
 
-Run `uv run --directory ~/.config/opencode/scripts/python validate-and-format-output --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH"`.
+Run `uv run --directory ~/.config/opencode/scripts/python validate-and-format-output --state-file "$STATE_FILE" --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json`.
 See `./reference/scripts/validate-and-format-output.md`.
 
 Return the `STATE_FILE` path as a single string.

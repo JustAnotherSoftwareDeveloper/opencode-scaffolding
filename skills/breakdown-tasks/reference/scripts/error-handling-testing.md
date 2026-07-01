@@ -33,7 +33,7 @@ Use this bash retry loop for exit-1 errors.
 ```bash
 while true; do
   output=$(echo "$INPUT" \
-    | uv run --directory "$SCRIPTS_PYTHON" <script-name> --stdin [--schema "$TASK_SCHEMA_PATH"] 2>err.txt)
+    | uv run --directory ~/.config/opencode/scripts/python <script-name> --stdin [--schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json] 2>err.txt)
   exit_code=$?
   if [ "$exit_code" -eq 0 ]; then
     echo "$output"
@@ -51,30 +51,24 @@ done
 
 ### Prerequisites
 - Python environment with `uv` available.
-- `$SCRIPTS_PYTHON` set to `~/.config/opencode/scripts/python`.
-- `$TASK_SCHEMA_PATH` set to `skills/breakdown-tasks/schema/task-packet.schema.json`.
+- `~/.config/opencode/scripts/python` — Python scripts directory.
+- `~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json` — Task packet schema path.
 - `jsonschema` package installed in the Python environment.
 - All scripts implemented and entry points registered in `pyproject.toml`.
 
-### Environment Variables
-```bash
-export SCRIPTS_PYTHON="$HOME/.config/opencode/scripts/python"
-export TASK_SCHEMA_PATH="$HOME/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json"
-```
-
 ### Per-Script Unit Tests
-Run all tests from the `$SCRIPTS_PYTHON` directory.
+Run all tests from the `~/.config/opencode/scripts/python` directory.
 
 ```bash
 # Run all script tests
-uv run --directory "$SCRIPTS_PYTHON" pytest tests/
+uv run --directory ~/.config/opencode/scripts/python pytest tests/
 
 # Run tests for a specific script
-uv run --directory "$SCRIPTS_PYTHON" pytest tests/test_validate_task_structure.py -v
-uv run --directory "$SCRIPTS_PYTHON" pytest tests/test_validate_and_format_output.py -v
+uv run --directory ~/.config/opencode/scripts/python pytest tests/test_validate_task_structure.py -v
+uv run --directory ~/.config/opencode/scripts/python pytest tests/test_validate_and_format_output.py -v
 
 # Check coverage
-uv run --directory "$SCRIPTS_PYTHON" pytest tests/ --cov=lib --cov=cli -v
+uv run --directory ~/.config/opencode/scripts/python pytest tests/ --cov=lib --cov=cli -v
 ```
 
 ### Pipeline Integration Test (E2E)
@@ -87,8 +81,6 @@ This exercises both scripts in sequence against sample input data.
 set -euo pipefail
 
 # --- Setup ---
-export SCRIPTS_PYTHON="$HOME/.config/opencode/scripts/python"
-export TASK_SCHEMA_PATH="$HOME/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json"
 
 STATE_FILE=$(mktemp)
 trap 'rm -f "$STATE_FILE"' EXIT
@@ -114,15 +106,15 @@ cat > "$STATE_FILE" <<'EOF'
 EOF
 
 # Step 1: Validate task structure (expect exit 0)
-uv run --directory "$SCRIPTS_PYTHON" validate-task-structure \
-  --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH" || {
+uv run --directory ~/.config/opencode/scripts/python validate-task-structure \
+  --state-file "$STATE_FILE" --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json || {
   echo "FAIL: validate-task-structure exited non-zero" >&2
   exit 1
 }
 
 # Step 2: Validate and format output (expect exit 0)
-OUTPUT=$(uv run --directory "$SCRIPTS_PYTHON" validate-and-format-output \
-  --state-file "$STATE_FILE" --schema "$TASK_SCHEMA_PATH") || {
+OUTPUT=$(uv run --directory ~/.config/opencode/scripts/python validate-and-format-output \
+  --state-file "$STATE_FILE" --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json) || {
   echo "FAIL: validate-and-format-output exited non-zero" >&2
   exit 1
 }

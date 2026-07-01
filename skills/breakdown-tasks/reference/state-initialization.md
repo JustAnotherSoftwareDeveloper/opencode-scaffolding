@@ -1,6 +1,6 @@
 # State File Initialization
 
-This document describes the deterministic procedure for deriving and initializing the state file used during task decomposition.
+Deterministic procedure for deriving and initializing the task-decomposition state file.
 
 ## Directory Location
 
@@ -15,7 +15,9 @@ Where:
 
 - **epoch:** Unix timestamp (seconds since Unix epoch) captured at the start of decomposition.
 - **slug:** URL-safe truncation of the request summary (max 64 characters).
-  - Sanitization: Convert to lowercase, replace non-alphanumeric characters with hyphens, trim leading/trailing hyphens.
+  - Sanitization: Convert to lowercase.
+    Replace non-alphanumeric characters with hyphens.
+    Trim leading/trailing hyphens.
   - If the resulting slug is empty after sanitization, use `decomposition` as the fallback value.
 
 ## Collision Behavior
@@ -42,7 +44,7 @@ Example initial content:
 
 ## Retention Policy
 
-The `.tasks/` directory is ephemeral working state:
+The `.tasks/` directory is ephemeral working state.
 
 - Files may be cleaned after the workflow completes.
 - Files may be retained for debugging at the operator's discretion.
