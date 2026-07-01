@@ -1,20 +1,21 @@
 ---
 name: dispatch-decompose
-description: "Use when the delegator must send the full user request and clarification context to a breakdown-tasks worker and return the worker's JSON decomposition output."
+description: "Use when the delegator must send the full user request and clarification context to a breakdown-tasks worker and return the worker result unchanged."
 tags: [workflow, internal]
 class: inline
 ---
 
 # Dispatch Decompose
 
-Construct the decomposition packet for `breakdown-tasks` and invoke exactly one worker with it.
+Construct the decomposition packet for `breakdown-tasks`.
+Invoke exactly one worker with the packet.
 Return the worker result unchanged.
 
 ## Input
 
 Accept the full decomposition context as plaintext.
-The input must include the original user request and the complete clarification context gathered by the delegator.
-The clarification context preserves question text and answers when available.
+Include the original user request and the complete clarification context gathered by the delegator.
+Preserve question text and answers in the clarification context when available.
 
 ### Plaintext Packet Format Sent To Worker
 
@@ -36,34 +37,21 @@ breakdown-tasks
 
 ## EXECUTION INSTRUCTIONS
 Load the breakdown-tasks skill and use it to decompose the full request and clarification context into atomic delegation packets.
-Return only the decomposition result.
+Return only the filename of the `.tasks/` state file written during decomposition.
 Maintain decomposition state in the .tasks/ file declared in ## FILES TO WRITE.
 
 ## VERIFICATION
-The output must be valid JSON parseable as an object with a required `summary` field (string, maxLength 2000) and a required `tasks` array (non-empty).
-Every task in the `tasks` array must be an object containing all required fields from `breakdown-tasks/schema/task-packet.schema.json`: purpose, context, filesToRead, filesToWrite, skills, executionInstructions, expectedOutput.
-Task objects must not include stale orchestration fields such as `id`, `dependencies`, or `tags` unless the canonical schema is updated to require them.
-Each `executionInstructions` array must be non-empty, with items containing at minimum `step` (integer ≥1) and `action` (string).
-Use the canonical schema as the source of truth instead of restating an alternate task-packet contract.
+The output must be a non-empty string. It must not be whitespace-only. It must be a valid filename matching the pattern `<digits>-<slug>.json`.
 
 ## EXPECTED OUTPUT
-A JSON object containing a root-level `summary` string and a non-empty `tasks` array.
-Each task in `tasks` is a delegation packet object with the following fields:
-- `purpose` (string) — single-sentence task goal
-- `context` (string) — expanded context for the worker (up to 8000 characters)
-- `filesToRead` (string array) — files the worker must read before starting
-- `filesToWrite` (string array) — files the worker is expected to create or modify
-- `skills` (string array) — skills the worker must load
-- `executionInstructions` (object array) — ordered steps with `step` and `action`, optionally `verification`
-- `verification` (string array, optional) — top-level checks on the complete deliverable
-- `expectedOutput` (string) — precise description of the deliverable
-Do not emit `id`, `dependencies`, `tags`, or any other fields not accepted by `breakdown-tasks/schema/task-packet.schema.json`.
+A single string: the filename of the `.tasks/<epoch>-<slug>.json` state file written during decomposition.
 ```
 
 ## Output
 
 Return the result from the `breakdown-tasks` worker unchanged.
-`PARTIAL:` is a valid success signal from the worker — preserve and forward it as-is without transformation or rejection.
+`PARTIAL:` is a valid success signal from the worker.
+Preserve and forward `PARTIAL:` as-is without transformation or rejection.
 
 ## Execution Plan
 
@@ -86,10 +74,11 @@ Return the result from the `breakdown-tasks` worker unchanged.
    Set `prompt` to the complete decomposition packet.
 6. **Return the worker result unchanged.**
    Do not parse, normalize, summarize, or reformat the worker output.
-   If the output contains `PARTIAL:` followed by JSON, treat it as a valid completion signal and forward it as-is.
+   If the output contains `PARTIAL:` followed by JSON, treat it as a valid completion signal.
+   Forward it as-is.
    Do not reject, re-route, or re-wrap `PARTIAL:` responses.
 
-This is a single-pass process.
+Execute this as a single-pass process.
 Launch exactly one worker task per invocation.
 
 ## Guardrails
@@ -100,7 +89,8 @@ Launch exactly one worker task per invocation.
 - Never invoke more than one worker.
 - Never call any subagent type other than `worker`.
 - Never parse or rewrite the worker result before returning it.
-- Never treat `PARTIAL:` as an error — it is a valid success signal from the worker and must be forwarded unchanged.
+- Never treat `PARTIAL:` as an error.
+  Forward `PARTIAL:` unchanged when the worker returns it.
 - Never write files outside the .tasks/ state file declared in ## FILES TO WRITE.
 
 ## Docs

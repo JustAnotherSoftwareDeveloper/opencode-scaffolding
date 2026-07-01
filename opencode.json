@@ -66,6 +66,10 @@
       "prompt": "{file:./agents/delegator.md}",
       "permission": {
         "*": "deny",
+        "read": {
+          "*": "deny",
+          ".tasks/*.json": "allow"
+        },
         "todowrite": "allow",
         "question": "allow",
         "task": {
