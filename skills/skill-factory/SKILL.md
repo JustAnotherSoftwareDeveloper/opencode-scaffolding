@@ -1,7 +1,7 @@
 ---
 name: skill-factory
 description: "Use when creating or updating all OpenCode skill files under skills/<name>/ (SKILL.md, reference/, templates/, schemas/, and snippets/) from user requirements, source material."
-tags: [skill-authoring, create, code, opencode]
+tags: [skill-authoring, skill-creation, skill-updates, scaffolding, validation, content-generation]
 class: operation
 ---
 

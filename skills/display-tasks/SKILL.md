@@ -1,7 +1,7 @@
 ---
 name: display-tasks
 description: "Use when rendering canonical breakdown-tasks output as a concise Markdown summary table."
-tags: [workflow, internal]
+tags: [workflow, tasking, task-rendering, markdown-output, summary-formatting]
 class: inline
 ---
 

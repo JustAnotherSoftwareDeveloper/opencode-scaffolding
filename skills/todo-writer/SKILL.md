@@ -1,7 +1,7 @@
 ---
 name: todo-writer
 description: "Use when writing or replacing todo entries from canonical breakdown-tasks output via the todowrite tool."
-tags: [workflow, internal]
+tags: [workflow, tasking, todo-management, task-tracking, todowrite-tool, state-management]
 class: inline
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: task-delegation
 description: "Use when adapting loose task information into one worker packet and forwarding it via the task tool."
-tags: [task-delegation, create, code, opencode]
+tags: [workflow, tasking, delegation, packet-formatting, field-mapping, worker-dispatch]
 class: inline
 ---
 

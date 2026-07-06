@@ -1,7 +1,7 @@
 ---
 name: breakdown-tasks
 description: "Use when decomposing a request into the smallest possible task-delegation work items."
-tags: [workflow, internal, task-decomposition, delegator, planning, orchestration, skill-assignment]
+tags: [workflow, tasking, task-decomposition, task-planning, request-analysis, atomic-tasks]
 class: delegated
 ---
 

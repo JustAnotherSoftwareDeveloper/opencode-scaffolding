@@ -1,7 +1,7 @@
 ---
 name: generic-analysis
 description: "Use as a fallback generic analysis/execution skill when no more specific skill matches the task domain. Provides a very loose guideline for task execution."
-tags: [generic, fallback, analysis]
+tags: [fallback, generic-task, catch-all, last-resort]
 class: operation
 ---
 

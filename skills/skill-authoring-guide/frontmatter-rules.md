@@ -50,12 +50,17 @@ If the skill is a passive data store consumed by other skills, choose `documenta
 - **Type**: `list[str]`
 - **Status**: Optional. May be omitted entirely.
 - **Format**: Flat string arrays `['str1', 'str2']`.
-- **Convention**: Tags are lowercase, kebab-case preferred, and contain no spaces.
+- **Count**: Use 4–7 tags per skill when tags are present.
+- **Convention**: Tags are lowercase kebab-case strings with no spaces.
+- **Vocabulary**: Tags are descriptive freeform labels; there is no fixed registry.
+- **Scope**: Prefer concrete domain, action, tool, artifact, and workflow-context terms that help match the skill to user intent.
+- **Avoid**: Overly broad filler tags, duplicated meaning, and tags that only restate the skill name.
 - **Example**:
   ```yaml
   tags:
-    - "testing"
-    - "create"
-    - "test"
+    - "code-generation"
+    - "test-writing"
     - "node"
+    - "bun"
+    - "cli"
   ```

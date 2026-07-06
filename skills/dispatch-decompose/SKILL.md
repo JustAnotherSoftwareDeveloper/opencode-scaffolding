@@ -1,7 +1,7 @@
 ---
 name: dispatch-decompose
 description: "Use when the delegator must send the full user request to a breakdown-tasks worker and return the relative .tasks path unchanged."
-tags: [workflow, internal]
+tags: [workflow, tasking, request-forwarding, worker-invocation, packet-construction]
 class: inline
 ---
 
@@ -13,8 +13,9 @@ Return a valid worker `.tasks/` path unchanged, or return `BLOCKED:` for invalid
 
 ## Input
 
-Accept the full original user request as plaintext.
-Preserve the request verbatim in the decomposition packet.
+Accept the effective request context as plaintext — not necessarily the latest user message.
+When the user references prior work ("execute it", "use that info"), the caller must resolve what that prior work entails before invoking this skill.
+Preserve the resolved context verbatim in the decomposition packet.
 
 ### Plaintext Packet Format Sent To Worker
 
@@ -26,7 +27,7 @@ Decompose the request into atomic task-delegation work items.
 <full original user request, verbatim>
 
 ## FILES TO READ
-None
+None by default. When the effective request depends on a prior proposal, plan, or task file, include those paths.
 
 ## FILES TO WRITE
 .tasks/ state file (~/.config/opencode/.tasks/<unix-epoch-seconds>-decomposition.json)
@@ -41,6 +42,7 @@ Maintain decomposition state in the .tasks/ file declared in ## FILES TO WRITE.
 
 ## VERIFICATION
 The output must be a non-empty string. It must not be whitespace-only. It must be a relative path matching the pattern `.tasks/<digits>-decomposition.json`.
+Do NOT wrap the path in backticks, Markdown code spans, or any other formatting. Return the raw path string only.
 
 ## EXPECTED OUTPUT
 A single string: the relative `.tasks/<epoch>-decomposition.json` state file path written during decomposition.
@@ -72,9 +74,10 @@ Do not accept `PARTIAL:` for decomposition output.
    Set `command` to `Decompose request into atomic tasks`.
    Set `prompt` to the complete decomposition packet.
 6. **Validate and return the worker result.**
-   If the worker returns a relative path matching `.tasks/<digits>-decomposition.json`, forward it unchanged.
-   If the worker returns `BLOCKED:`, forward it unchanged.
-   Treat `PARTIAL:` or any other output shape as invalid and return `BLOCKED: decomposition must return a relative .tasks path or BLOCKED.`
+    Strip leading/trailing backticks (`` ` ``), whitespace, and newlines from the worker output before matching.
+    If the cleaned result is a relative path matching `.tasks/<digits>-decomposition.json`, forward the cleaned path.
+    If the cleaned result is `BLOCKED:`, forward it unchanged.
+    Treat `PARTIAL:` or any other output shape as invalid and return `BLOCKED: decomposition must return a relative .tasks path or BLOCKED.`
 
 Execute this as a single-pass process.
 Launch exactly one worker task per invocation.

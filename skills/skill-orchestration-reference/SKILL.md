@@ -1,7 +1,7 @@
 ---
 name: skill-orchestration-reference
 description: "Use when referencing orchestrated/delegated worker patterns, collation format, or orchestration usage."
-tags: [orchestration, reference, documentation, opencode]
+tags: [skill-authoring, reference, orchestration, worker-patterns, collation, fan-out]
 class: documentation
 ---
 

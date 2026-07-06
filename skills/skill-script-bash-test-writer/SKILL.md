@@ -1,7 +1,7 @@
 ---
 name: skill-script-bash-test-writer
 description: "Use when generating bats-core test files for existing bash scripts under scripts/shell/."
-tags: [testing, cli, bash]
+tags: [skill-authoring, bash, shell, testing, bats, test-generation]
 class: operation
 ---
 

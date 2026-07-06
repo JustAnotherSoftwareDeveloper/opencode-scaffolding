@@ -1,7 +1,7 @@
 ---
 name: skill-script-python-test-writer
 description: "Use when generating pytest test files for Python scripts under scripts/python/, covering CLI integration tests via CliRunner and unit tests for lib modules."
-tags: [code-generation, create, code, python]
+tags: [skill-authoring, python, testing, pytest, test-generation, click]
 class: operation
 ---
 
