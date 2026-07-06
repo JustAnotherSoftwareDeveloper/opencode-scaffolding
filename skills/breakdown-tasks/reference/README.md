@@ -27,9 +27,9 @@ Files related to state file derivation and initialization.
 
 ## Skill Assignment
 
-Files related to deterministic skill assignment to tasks.
+Files related to automatic skill assignment to tasks.
 
-- [skill-assignment.md](./skill-assignment.md) — Deterministic procedure for assigning skills to tasks.
+- [skill-assignment.md](./skill-assignment.md) — FlashRank-based procedure for assigning skills to task drafts.
 
 ## Maintenance
 
@@ -48,6 +48,5 @@ Files related to the canonical output format.
 Files related to breakdown pipeline scripts.
 
 - [pipeline-overview.md](./scripts/pipeline-overview.md) — End-to-end pipeline flow for task decomposition.
-- [validate-task-structure.md](./scripts/validate-task-structure.md) — Structural validation of task packet fields.
 - [validate-and-format-output.md](./scripts/validate-and-format-output.md) — Output validation and formatting rules.
 - [error-handling-testing.md](./scripts/error-handling-testing.md) — Error handling and testing patterns for the pipeline.

@@ -7,16 +7,21 @@ This script is invoked as:
 Exit codes:
   0 — Success, JSON index written to stdout (or --output file).
   1 — Runtime error (discovery failure, file write error).
+  2 — User error (invalid --class value).
 """
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import click
 
 from lib.collect_skills.discovery import discover_all_skills
 from lib.collect_skills.models import SkillIndex
+from lib.shared.skill_class import SkillClass
+
+VALID_CLASS_NAMES = [c.value for c in SkillClass]
 
 
 @click.command(name="collect-skills")
@@ -54,6 +59,13 @@ from lib.collect_skills.models import SkillIndex
     help="JSON file listing built-in skills",
 )
 @click.option(
+    "--class",
+    "class_filter",
+    type=click.Choice(VALID_CLASS_NAMES),
+    default=None,
+    help="Filter skills to a specific SkillClass value.",
+)
+@click.option(
     "--verbose",
     "-v",
     is_flag=True,
@@ -73,13 +85,15 @@ def main(
     extra_paths: tuple[str, ...],
     include_archive: bool,
     builtins_manifest: str | None,  # noqa: ARG001
+    class_filter: str | None,
     verbose: bool,
     output: str | None,
 ) -> None:
     """Collect OpenCode skills from the project and configuration directories.
 
     Discovers SKILL.md files across project roots, global config, archives,
-    and extra paths, then produces a deduplicated JSON index.
+    and extra paths, then produces a deduplicated JSON index.  Use --class
+    to filter to skills of a specific SkillClass.
     """
     index = SkillIndex()
 
@@ -96,7 +110,12 @@ def main(
         click.echo(f"Error: during discovery: {exc}", err=True)
         raise SystemExit(1) from exc
 
-    json_output = index.to_json()
+    # --- Apply class filter if requested ---
+    if class_filter:
+        filtered = index.filter_by_class(class_filter)
+        json_output = json.dumps([s.to_dict() for s in filtered])
+    else:
+        json_output = index.to_json()
 
     if output:
         output_path = Path(output)

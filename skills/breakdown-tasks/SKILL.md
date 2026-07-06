@@ -1,59 +1,66 @@
 ---
 name: breakdown-tasks
 description: "Use when decomposing a request into the smallest possible task-delegation work items."
-tags: [workflow, internal]
+tags: [workflow, internal, task-decomposition, delegator, planning, orchestration, skill-assignment]
 class: delegated
 ---
 
 # Breakdown Tasks
 
 Decompose a request into atomic work items suitable for serial worker delegation.
+Produce `TaskDraft` objects without a `skills` field.
+Skills are populated automatically by `assign-skills`.
 
 ## Input Contract
 
-Expect a standard delegation packet.
+Standard delegation packet — `## PURPOSE` and `## DETAILS`.
 
-## Execution Steps
+## Execution
 
-### 1. Input Parsing and State File Initialization
+### 1. Init state, discover planning skills
 
-- **Step 1a:** Read the delegation packet's `## PURPOSE` and `## DETAILS` sections.
-- **Step 1b:** Initialize the state file. See `./reference/state-initialization.md` for the deterministic derivation rules, collision behavior, and retention policy.
+```bash
+STATE_FILE=$(uv run --directory ~/.config/opencode/scripts/python init-state-file \
+  --output-dir ~/.config/opencode/.tasks)
+REL_FILE=".tasks/$(basename "$STATE_FILE")"
+PLANNING_SKILLS=$(uv run --directory ~/.config/opencode/scripts/python collect-skills --class planning)
+```
 
-### 2. User Request Summary Extraction
+`init-state-file` derives `<epoch>-decomposition.json`, checks collision, writes `{"summary":"","tasks":[]}`, prints absolute path. `BLOCKED` on collision or IO error.
 
-Extract a one-paragraph summary (max 2000 characters) from `## DETAILS` for the `summary` field.
+### 2. Decompose
 
-### 3. Atomic Task Identification
+Read `./schema/task-input.schema.json` — defines the `TaskDraft` format. No `skills` property exists.
 
-Split the request into atomic tasks following the [Atomicity Rule](#atomicity-rule).
-Each task must have a single `purpose` sentence and one `expectedOutput` paragraph.
+From `$PLANNING_SKILLS`, select 0–3 planning skills whose descriptions and tags match the request domain. Load each via `skill`.
 
-- Consult `./reference/authoring/task-granularity.md` for granularity guidelines.
-- Consult `./reference/authoring/core-rules.md` for the five atomicity rules.
-- Review `./reference/authoring/anti-patterns.md` for common mistakes.
+Load authoring guides (`./reference/authoring/core-rules.md`, `task-granularity.md`, `anti-patterns.md`, `context-preservation.md`). Extract a summary (max 2000 chars) from `## DETAILS`. Decompose the request into `TaskDraft` objects — each with `purpose`, `context`, `filesToRead`, `filesToWrite`, `executionInstructions`, `expectedOutput`, and optional `verification`.
 
-Populate task fields: `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, `expectedOutput`.
+Write `{summary, tasks: [TaskDraft, ...]}` to `$STATE_FILE`.
 
-#### 3a. Task Structure Validation
+### 3. Assign skills
 
-Run `uv run --directory ~/.config/opencode/scripts/python validate-task-structure --state-file "$STATE_FILE" --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json`. Handle exit codes 0, 1, and 2 as documented in `./reference/scripts/validate-task-structure.md`.
+```bash
+uv run --directory ~/.config/opencode/scripts/python assign-skills \
+  --state-file "$STATE_FILE" \
+  --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-input.schema.json
+```
 
-### 4. Available Skills Discovery
+The script discovers all skills internally, filters to `operation` and `documentation` classes (default), validates TaskDraft input, renders skill metadata into text passages, and uses a FlashRank cross-encoder reranker to rank skills against each task draft. Floor-only gating — no upper cap, every relevant skill above floor is assigned.
 
-Run `uv run --directory ~/.config/opencode/scripts/python collect-skills` and parse the JSON array.
-See `./reference/scripts/pipeline-overview.md` for error handling.
+Defaults are canonical. Override via `--skills-json`, `--floor`, `--min-skills`, `--skill-classes`, `--model-name` for debugging only.
 
-### 5. Skill Assignment
+### 4. Validate and return
 
-Populate `skills` for each task using the deterministic assignment procedure in `./reference/skill-assignment.md`.
+```bash
+uv run --directory ~/.config/opencode/scripts/python validate-and-format-output \
+  --state-file "$STATE_FILE" \
+  --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
+```
 
-### 6. Final Validation and State Emission
+Final schema validation. If this fails, the decomposition or assignment is fundamentally broken — inspect output and re-run from step 2.
 
-Run `uv run --directory ~/.config/opencode/scripts/python validate-and-format-output --state-file "$STATE_FILE" --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json`.
-See `./reference/scripts/validate-and-format-output.md`.
-
-Return the `STATE_FILE` path as a single string.
+Return `$REL_FILE`.
 
 ## Atomicity Rule
 
@@ -67,21 +74,22 @@ See `./reference/authoring/context-preservation.md` for detailed guidelines.
 
 ## Output Contract
 
-Return a single string.
-The string is the path to the `.tasks` state file written during decomposition.
-
-## Task Validation
-
-Verify output against checks in `./reference/orchestration/task-validation.md`.
+A single string: the relative `.tasks/<epoch>-decomposition.json` state file path (e.g. `.tasks/1710364234-decomposition.json`).
 
 ## Guardrails
 
+- `TaskDraft` has no `skills` property — do not add one.
+- Never populate `skills` manually.
+- Default floor, min-skills, and class filter are canonical — don't change per-run.
+- `assign-skills` guarantees at least 1 skill per task. No degraded/fallback mode.
 - Preserve original intent and context.
 - Include only information necessary for a worker to execute the task.
-  - Omit background and rationale.
 - Do not bundle dependent changes into a single task.
 - Do not execute the decomposed work.
 - Write state to `~/.config/opencode/.tasks/<filename>.json` throughout the pipeline.
 - Return `BLOCKED` for malformed input.
 - Prioritize task atomicity over skill availability.
-- See `./reference/README.md` for documentation of supporting files.
+
+## Docs
+
+See `./reference/README.md` for documentation of supporting files.

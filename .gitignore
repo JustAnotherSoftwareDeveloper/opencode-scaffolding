@@ -17,3 +17,5 @@ __pycache__
 *.gcno
 *.gcov
 *.gcov.out
+.results*
+.flashrank_cache

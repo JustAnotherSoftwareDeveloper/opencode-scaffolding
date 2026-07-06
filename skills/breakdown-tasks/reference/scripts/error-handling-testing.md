@@ -2,137 +2,99 @@
 
 ## Exit Code Matrix
 
-Each script uses exit codes 0, 1, and 2.
-The meaning is consistent across all scripts.
+### `init-state-file`
 
-### `validate-task-structure`
-- **0** — Valid structure.
-- **1** — Structural violations (missing keys, length, type).
-- **2** — Parse, file, or schema-load error.
+- **0** — State file created and absolute path printed.
+- **1** — Runtime error creating the directory or state file.
+- **2** — User error from CLI argument parsing.
+
+### `assign-skills`
+
+- **0** — Skills assigned and state file written.
+- **1** — Runtime error such as no matching candidate skills.
+- **2** — User error such as invalid arguments or TaskDraft schema failure.
 
 ### `validate-and-format-output`
-- **0** — Raw JSON output.
+
+- **0** — Final TaskPacket JSON emitted to stdout.
 - **1** — Schema violations.
 - **2** — Parse, file, or schema-load error.
 
 ## Retry Behavior
 
-All scripts use the same retry strategy.
 - **Exit 0** — Accept output and proceed to the next pipeline step.
-- **Exit 1** — Read error details from stderr.
-  Fix the input data.
-  Re-invoke the same script.
-  No fixed retry limit.
-- **Exit 2** — Do not retry.
-  Surface the issue to the caller.
-
-## Error Recovery Pattern
-
-Use this bash retry loop for exit-1 errors.
-
-```bash
-while true; do
-  output=$(echo "$INPUT" \
-    | uv run --directory ~/.config/opencode/scripts/python <script-name> --stdin [--schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json] 2>err.txt)
-  exit_code=$?
-  if [ "$exit_code" -eq 0 ]; then
-    echo "$output"
-    break
-  elif [ "$exit_code" -eq 1 ]; then
-    echo "Fixing: $(cat err.txt)" >&2
-  else
-    echo "Fatal error: $(cat err.txt)" >&2
-    exit 2
-  fi
-done
-```
+- **Exit 1** — Read error details, fix decomposition/assignment input when possible, and re-run the relevant step.
+- **Exit 2** — Treat as a configuration, parse, or invocation error; surface to the caller.
 
 ## Local Testing
 
 ### Prerequisites
+
 - Python environment with `uv` available.
 - `~/.config/opencode/scripts/python` — Python scripts directory.
-- `~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json` — Task packet schema path.
-- `jsonschema` package installed in the Python environment.
-- All scripts implemented and entry points registered in `pyproject.toml`.
+- `schema/task-input.schema.json` — TaskDraft schema path.
+- `schema/task-packet.schema.json` — final TaskPacket schema path.
+- `rerankers[flashrank]` and `jsonschema` installed in the Python environment.
+- Entry points registered in `pyproject.toml`.
 
 ### Per-Script Unit Tests
-Run all tests from the `~/.config/opencode/scripts/python` directory.
+
+Run all tests from the Python scripts project.
 
 ```bash
-# Run all script tests
 uv run --directory ~/.config/opencode/scripts/python pytest tests/
-
-# Run tests for a specific script
-uv run --directory ~/.config/opencode/scripts/python pytest tests/test_validate_task_structure.py -v
-uv run --directory ~/.config/opencode/scripts/python pytest tests/test_validate_and_format_output.py -v
-
-# Check coverage
-uv run --directory ~/.config/opencode/scripts/python pytest tests/ --cov=lib --cov=cli -v
+uv run --directory ~/.config/opencode/scripts/python pytest tests/test_init_state_file.py tests/test_init_state_file_cli.py -v
+uv run --directory ~/.config/opencode/scripts/python pytest tests/test_assign_skills.py tests/test_assign_skills_cli.py -v
 ```
 
 ### Pipeline Integration Test (E2E)
 
-Test the full pipeline end-to-end using a shell script.
-This exercises both scripts in sequence against sample input data.
+Test the current pipeline end-to-end with a fresh TaskDraft state file.
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-# --- Setup ---
+STATE_FILE=$(uv run --directory ~/.config/opencode/scripts/python init-state-file \
+  --output-dir /tmp/opencode/.tasks)
+REL_FILE=".tasks/$(basename "$STATE_FILE")"
 
-STATE_FILE=$(mktemp)
-trap 'rm -f "$STATE_FILE"' EXIT
-
-# Write sample task data (valid minimal structure, no id/dependencies field)
 cat > "$STATE_FILE" <<'EOF'
 {
   "summary": "E2E pipeline test",
   "tasks": [
     {
-      "purpose": "Create a test file.",
-      "context": "Minimal test case.",
-      "filesToRead": [],
-      "filesToWrite": ["/tmp/e2e-test-output.txt"],
-      "skills": [],
+      "purpose": "Create Python tests for a helper.",
+      "context": "Write pytest coverage for a small Python helper.",
+      "filesToRead": ["scripts/python/src/lib/shared/slug.py"],
+      "filesToWrite": ["scripts/python/tests/test_shared_slug.py"],
       "executionInstructions": [
-        {"step": 1, "action": "Create /tmp/e2e-test-output.txt with content 'ok'"}
+        {"step": 1, "action": "Read the helper and write pytest tests."}
       ],
-      "expectedOutput": "File /tmp/e2e-test-output.txt exists with content 'ok'."
+      "expectedOutput": "Pytest tests covering the helper."
     }
   ]
 }
 EOF
 
-# Step 1: Validate task structure (expect exit 0)
-uv run --directory ~/.config/opencode/scripts/python validate-task-structure \
-  --state-file "$STATE_FILE" --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json || {
-  echo "FAIL: validate-task-structure exited non-zero" >&2
-  exit 1
-}
+uv run --directory ~/.config/opencode/scripts/python assign-skills \
+  --state-file "$STATE_FILE" \
+  --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-input.schema.json
 
-# Step 2: Validate and format output (expect exit 0)
-OUTPUT=$(uv run --directory ~/.config/opencode/scripts/python validate-and-format-output \
-  --state-file "$STATE_FILE" --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json) || {
-  echo "FAIL: validate-and-format-output exited non-zero" >&2
-  exit 1
-}
+uv run --directory ~/.config/opencode/scripts/python validate-and-format-output \
+  --state-file "$STATE_FILE" \
+  --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json \
+  >/tmp/breakdown-output.json
 
-# Verify output is raw JSON (no fences, no preamble)
-echo "$OUTPUT" | python3 -c "import json,sys; data=json.load(sys.stdin); assert 'summary' in data; assert 'tasks' in data" || {
-  echo "FAIL: output is not valid BreakDownTasksOutput JSON" >&2
-  exit 1
-}
-
-echo "PASS: Pipeline integration test completed successfully."
+python3 -c "import json; data=json.load(open('/tmp/breakdown-output.json')); assert data['tasks'][0]['skills']"
+printf '%s\n' "$REL_FILE"
 ```
 
 ### Validation Checklist
-After running the pipeline locally, verify these outcomes.
-- `validate-task-structure` accepts valid task lists and rejects malformed ones.
-- `validate-and-format-output` accepts valid full output and emits raw JSON.
-  No preamble, no fences.
-- All scripts exit 0 on valid input, 1 on validation error, and 2 on parse or internal error.
-- Errors appear on stderr.
-  Errors never appear on stdout.
+
+- `init-state-file` creates `<epoch>-decomposition.json` and prints its absolute path.
+- TaskDraft state contains no `skills` fields before assignment.
+- `assign-skills` adds non-empty `skills` arrays from discovered/indexed skills.
+- `validate-and-format-output` accepts valid final output and emits raw JSON.
+- The worker returns only `.tasks/<epoch>-decomposition.json` to the delegator.
+- Errors appear on stderr; stdout remains machine-consumable on success.

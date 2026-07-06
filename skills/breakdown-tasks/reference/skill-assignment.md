@@ -1,64 +1,72 @@
 # Skill Assignment Procedure
 
-Deterministic procedure for assigning skills to tasks during decomposition.
-Executed in Step 5 of the breakdown-tasks workflow.
+Automatic FlashRank-based procedure for assigning skills to task drafts.
+Executed by the `assign-skills` Python script after the LLM writes `TaskDraft` objects.
 
 ## Prerequisites
 
-1. The skill index has been discovered and parsed (Step 4).
-2. The state file has been populated with task packets (Step 3).
+1. The state file contains a root `{summary, tasks}` object that matches `schema/task-input.schema.json`.
+2. Each task is a `TaskDraft` and does **not** include a `skills` field.
+3. Available skills can be discovered by `collect-skills` or supplied via `--skills-json` for debugging.
 
-## Deterministic Assignment Procedure
+## Assignment Procedure
 
-### 5.1 Derive Required Domain/Expertise
+### 1. Validate TaskDraft Input
 
-For each task, extract the required domain/expertise from the following fields:
+`assign-skills` validates the state file against `schema/task-input.schema.json`.
+Any task containing `skills` is invalid at this stage.
 
-- `purpose` — The single-sentence task purpose.
-- `context` — The relevant subset of the user request.
-- `filesToRead` — Files that inform the task's domain.
-- `filesToWrite` — Files that indicate the task's impact.
+### 2. Discover Candidate Skills
 
-Identify three categories:
+By default, `assign-skills` discovers all skills and filters candidates to these classes:
 
-1. **Primary domain keywords** — e.g., `python`, `node`, `bash`, `testing`, `validation`.
-2. **Required technical skills** — e.g., `refactoring`, `doc-generation`, `cli-integration`.
-3. **Execution context** — e.g., `execution`, `analysis`, `documentation`.
+- `operation`
+- `documentation`
 
-### 5.2 Cross-Reference Skill Index
+The default class filter is canonical for production workflow runs.
 
-Match each task against the discovered skill index using this priority order:
+### 3. Render Skill and Task Text
 
-1. **Description match (primary)** — Exact or semantic match between task domain/skills and the skill's `description` field.
-2. **Class match (secondary)** — Only match skills whose `class` is compatible with execution tasks:
-   - `operation`
-   - `delegated`
-   - `inline`
-   - `orchestrated`
-   
-   Skip `documentation` and `planning` classes unless the task is analysis/reference-heavy (e.g., research, review, doc generation).
-3. **Tags match (tertiary)** — Match against flat tag strings (e.g., `testing`, `create`, `node`).
+Each skill is rendered as structured text containing:
 
-### 5.3 Select and Cap Skills
+- `name`
+- `class`
+- `description`
+- `tags`
 
-1. Select the best-matching skills based on the above criteria.
-2. **Cap at 3 skills per task.**
-3. Prefer the most specific skill over more general ones.
-4. When multiple skills have equal specificity, order alphabetically by name.
-5. **If no skill matches after steps 5.1–5.3, assign `generic-analysis` as the fallback.**
-   Every task must have at least one skill. Zero skills is never permitted.
+Each task query is built from:
 
-### 5.4 Validate and Emit
+- `purpose`
+- `context`
+- `filesToRead`
+- `filesToWrite`
 
-1. Ensure the `skills` array has `uniqueItems: true`.
-2. Ensure no unknown skill names are referenced.
-3. Write the assembled output object back into `STATE_FILE`, overwriting the previous content.
-4. **Note:** Skill-match rationale is **not** persisted in task packets.
-   The schema's `additionalProperties: false` prohibits non-standard fields.
+### 4. Rank with FlashRank
+
+`assign-skills` ranks every candidate skill against each task draft with `rerankers[flashrank]`.
+FlashRank's sigmoid-normalized scores are converted back to raw logits.
+Raw logit scores are unbounded upward; the default floor is `0.0`.
+
+### 5. Select Skills
+
+Selection rules:
+
+1. Select every skill with raw logit score greater than or equal to the floor.
+2. There is no maximum skill count.
+3. If fewer than `--min-skills` pass the floor, fill from the highest-ranked remaining skills.
+4. Every final task must have at least one skill.
+5. Do not synthesize fallback skills; selected skills must come from discovered/indexed skills.
+
+### 6. Write Final TaskPackets
+
+`assign-skills` writes the state file back with `skills` arrays added to each task.
+The resulting object must validate against `schema/task-packet.schema.json`.
 
 ## Output Format
 
 The final output is a JSON object with:
 
-- `summary` (string) — The request summary from Step 2.
-- `tasks` (array) — Task packet objects in sequential order, each with a `skills` array.
+- `summary` — request summary from decomposition.
+- `tasks` — ordered TaskPacket array, each with a non-empty `skills` array.
+
+The delegator receives the relative `.tasks/<epoch>-decomposition.json` path, not the raw JSON.

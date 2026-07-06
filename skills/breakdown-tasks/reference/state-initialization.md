@@ -1,6 +1,6 @@
 # State File Initialization
 
-Deterministic procedure for deriving and initializing the task-decomposition state file.
+Procedure for initializing the task-decomposition state file.
 
 ## Directory Location
 
@@ -9,25 +9,22 @@ Deterministic procedure for deriving and initializing the task-decomposition sta
 
 ## Filename Derivation
 
-The state file uses the naming pattern: `<epoch>-<slug>.json`
+The state file uses the naming pattern: `<epoch>-decomposition.json`
 
 Where:
 
 - **epoch:** Unix timestamp (seconds since Unix epoch) captured at the start of decomposition.
-- **slug:** URL-safe truncation of the request summary (max 64 characters).
-  - Sanitization: Convert to lowercase.
-    Replace non-alphanumeric characters with hyphens.
-    Trim leading/trailing hyphens.
-  - If the resulting slug is empty after sanitization, use `decomposition` as the fallback value.
+- **decomposition:** Fixed suffix used for all state files.
 
 ## Collision Behavior
 
 If the derived filename already exists in `.tasks/`:
 
-1. Emit `BLOCKED: State file <path> already exists — remove manually or wait for next epoch second.`
-2. Halt execution immediately.
+1. Increment the epoch value and retry.
+2. Retry up to 10 candidate filenames.
+3. If all attempts collide or file creation fails, emit `BLOCKED:` and halt.
 
-This ensures no state file is accidentally overwritten during concurrent decomposition runs.
+State files are created with exclusive file creation, so existing files are never overwritten during concurrent decomposition runs.
 
 ## Initial State Structure
 
@@ -52,4 +49,5 @@ The `.tasks/` directory is ephemeral working state.
 
 ## Environment Variable
 
-Set `STATE_FILE=~/.config/opencode/.tasks/<derived-filename>.json` for use throughout the pipeline.
+Set `STATE_FILE=~/.config/opencode/.tasks/<epoch>-decomposition.json` for internal pipeline commands.
+Return `.tasks/<epoch>-decomposition.json` to the delegator as the relative output path.

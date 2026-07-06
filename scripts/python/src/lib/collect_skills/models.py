@@ -151,6 +151,23 @@ class SkillIndex:
         """Return all winning skills sorted alphabetically by name."""
         return sorted(self._skills.values(), key=lambda s: s.name)
 
+    # -- filtering -------------------------------------------------------
+
+    def filter_by_class(self, class_filter: str) -> list[Skill]:
+        """Return resolved skills whose ``class_`` matches *class_filter*.
+
+        Args:
+            class_filter: A SkillClass value (e.g. ``"operation"``, ``"planning"``).
+
+        Returns:
+            List of matching Skill instances sorted alphabetically by name.
+        """
+        resolved = self.resolve()
+        return sorted(
+            [s for s in resolved if s.class_ == class_filter],
+            key=lambda s: s.name,
+        )
+
     # -- serialisation ----------------------------------------------------
 
     def to_json(self) -> str:

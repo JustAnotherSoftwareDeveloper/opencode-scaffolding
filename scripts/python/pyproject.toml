@@ -12,11 +12,14 @@ dependencies = [
     "click>=8.4.2",
     "jsonschema>=4.0",
     "lxml>=6.1.0",
+    "rerankers[flashrank]>=0.10.0",
 ]
 
 [project.scripts]
+assign-skills = "cli.assign_skills:main"
 collect-skills = "cli.collect_skills:main"
 example = "cli.example:main"
+init-state-file = "cli.init_state_file:main"
 resolve-script-root = "cli.resolve_script_root:main"
 skill-validator = "cli.skill_validator:cli"
 validate-and-format-output = "cli.validate_and_format_output:main"

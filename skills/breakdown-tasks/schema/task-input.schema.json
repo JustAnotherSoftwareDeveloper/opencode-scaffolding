@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TaskDraftList",
+  "description": "Schema for LLM-produced task drafts before skill assignment. Contains zero skill information — skills are populated by the assign-skills Python script which produces final TaskPacket objects.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "summary": {
+      "description": "One-paragraph summary of the overall user request, capturing its goal, scope, and constraints.",
+      "type": "string",
+      "maxLength": 2000
+    },
+    "tasks": {
+      "description": "An ordered list of TaskDraft objects. No skills field — that is added by the Python assign-skills script.",
+      "type": "array",
+      "items": { "$ref": "#/definitions/TaskDraft" },
+      "minItems": 1
+    }
+  },
+  "required": ["summary", "tasks"],
+  "definitions": {
+    "TaskDraft": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A single atomic task produced by the LLM during decomposition. Does NOT include skills — skills are assigned later by a Python FlashRank reranking script.",
+      "properties": {
+        "purpose": {
+          "description": "Single sentence describing what this task accomplishes. Must be actionable and self-contained.",
+          "type": "string",
+          "maxLength": 200
+        },
+        "context": {
+          "description": "Expanded context for the worker. Includes the relevant subset of the user prompt, background information, and any constraints.",
+          "type": "string",
+          "maxLength": 8000
+        },
+        "filesToRead": {
+          "description": "Explicit list of file paths the worker must read before starting.",
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "filesToWrite": {
+          "description": "Explicit list of file paths the worker is expected to create or modify.",
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "executionInstructions": {
+          "description": "Step-by-step instructions for the worker. Each step is a discrete, verifiable action.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "step": { "type": "integer", "minimum": 1 },
+              "action": {
+                "type": "string",
+                "description": "What to do in this step. Must be concrete and verifiable."
+              },
+              "verification": {
+                "type": "string",
+                "description": "Optional: how to verify this step succeeded."
+              }
+            },
+            "required": ["step", "action"]
+          },
+          "minItems": 1
+        },
+        "verification": {
+          "description": "Top-level verification checks the worker must run against their output before finishing.",
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "expectedOutput": {
+          "description": "Precise description of the deliverable this task produces.",
+          "type": "string",
+          "maxLength": 2000
+        }
+      },
+      "required": ["purpose", "context", "filesToRead", "filesToWrite", "executionInstructions", "expectedOutput"]
+    }
+  }
+}

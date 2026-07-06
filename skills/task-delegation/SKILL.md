@@ -25,10 +25,10 @@ Reject a full `breakdown-tasks` JSON output object unless one task is clearly se
 <full task description, constraints, and context>
 
 ## FILES TO READ
-<comma-separated file paths to read — listed files are required; broad related-file discovery is permitted by default>
+<comma-separated file paths to read — listed files are required; no additional file discovery unless explicitly authorized in DETAILS>
 
 ## FILES TO WRITE
-<single file path, or "None">
+<comma-separated file paths to create or modify, or "None">
 
 ## SKILLS
 <comma-separated skill names to load>
@@ -64,7 +64,8 @@ The result returned by the worker matching the packet's `## EXPECTED OUTPUT`.
 4. **Mark uninferable fields** — For any of the 8 fields that cannot be inferred from the input, set its value to the explicit marker: `UNKNOWN — not provided in input`.
 5. **Construct complete plaintext packet** — Build a well-formed plaintext delegation packet with all 8 sections present using the Packet Template.
    Every section header (`## PURPOSE`, `## DETAILS`, etc.) must appear, even if its content is the UNKNOWN marker.
-   - **FILES TO READ: list required files; broad related-file discovery is permitted by default.** Include the files the worker must read before discovering related content. After reading listed files, the worker may broadly discover and read related files needed for task execution. Avoid unbounded patterns. FILES TO READ may include glob patterns when broad file sets are needed.
+   - **FILES TO READ: list required files only.** Include the files the worker must read before starting. Do not authorize related-file discovery unless the task's context or execution instructions explicitly permit it. Avoid unbounded patterns. FILES TO READ may include glob patterns only when the task explicitly requires broad file sets.
+   - **FILES TO WRITE: preserve all expected writes.** If the input provides multiple `filesToWrite` entries, include every path as a comma-separated list. Do not collapse multiple outputs to one path.
 6. **Validate all sections present** — Confirm the constructed packet has exactly 8 sections and none are missing.
    If sections are absent, report a clear error describing which sections are missing and stop.
 7. **Invoke the worker** — Invoke the `task` tool with `subagent_type: "worker"`, `description` set to the inferred PURPOSE content, `prompt` set to the full plaintext packet, and `command` set to the inferred PURPOSE content.
@@ -81,5 +82,6 @@ Launch exactly one worker task per invocation.
 - Always produce exactly 8 sections in the output packet — no more, no less.
 - Mark any uninferable field with the explicit marker `UNKNOWN — not provided in input`; do not fill with default values, placeholder text, or guesses.
 - Use loose mapping; do not require exact field names.
+- Respect explicit file boundaries from the selected task. Do not add read or write targets unless the task explicitly authorizes discovery or additional outputs.
 - After construction, do not modify, re-encode, or further transform the plaintext packet.
 - If the constructed packet is missing sections, report a clear error describing which sections are absent and do not invoke the worker.

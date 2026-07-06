@@ -41,10 +41,36 @@
             "repeat_last_n": 512
           }
         },
+        "mellum2-thinking": {
+          "name": "Worker Mellum2 Thinking",
+          "limit": {
+            "context": 131072,
+            "output": 4096
+          },
+          "options": {
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "repeat_penalty": 1.05
+          }
+        },
+        "mellum2-instruct": {
+          "name": "Worker Mellum2 Instruct",
+          "limit": {
+            "context": 131072,
+            "output": 4096
+          },
+          "options": {
+            "temperature": 0.2,
+            "top_p": 0.9,
+            "top_k": 20,
+            "repeat_penalty": 1.05
+          }
+        },
         "granite": {
           "name": "Worker Granite",
           "limit": {
-            "context": 16384,
+            "context": 131072,
             "output": 4096
           },
           "options": {
@@ -61,15 +87,14 @@
   },
   "agent": {
     "delegator": {
-      "description": "Clarifies requests, dispatches decomposition to breakdown-tasks, and delegates each task to workers in serial. Does not perform implementation work directly.",
+      "description": "Dispatches decomposition to breakdown-tasks, and delegates each task to workers in serial. Does not perform implementation work directly.",
       "mode": "primary",
       "prompt": "{file:./agents/delegator.md}",
       "permission": {
         "*": "deny",
         "read": {
           "*": "deny",
-          ".tasks/*.json": "allow",
-          "~/.config/opencode/tasks/*.json": "allow"
+          ".tasks/*.json": "allow"
         },
         "todowrite": "allow",
         "question": "allow",
@@ -89,6 +114,7 @@
     "worker": {
       "description": "Single text worker for all delegated text tasks. Handles any complexity level within the scope of a delegation packet.",
       "mode": "subagent",
+      "model": "ollama/mellum2-thinking",
       "prompt": "{file:./agents/worker.md}",
       "permission": {
         "*": "allow",

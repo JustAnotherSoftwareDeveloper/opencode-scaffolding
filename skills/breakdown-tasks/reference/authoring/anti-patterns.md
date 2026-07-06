@@ -21,5 +21,6 @@ Work-boundary and skill-assignment mistakes to avoid when decomposing tasks.
 
 ## Skill-Assignment Anti-Patterns
 
-- **Assign no skills** — Every task must have at least one skill. If no specific skill matches after normal matching, assign `generic-analysis` as the fallback. Zero skills is never permitted.
-- **Force-assign a skill that does not match** — Do not assign a mismatched skill just to satisfy the one-skill minimum. Instead, use `generic-analysis` for genuine fallback cases where no specific skill matches.
+- **Assign skills manually** — The LLM must produce `TaskDraft` objects without `skills`. The `assign-skills` script populates final skill arrays.
+- **Assign no skills after automation** — Every final task must have at least one skill. `assign-skills` satisfies the one-skill minimum from discovered/indexed skills; there is no synthetic fallback.
+- **Force a fallback skill** — Do not add `generic-analysis` or any other fallback manually. Skill selection is owned by `assign-skills`.
