@@ -12,7 +12,6 @@ dependencies = [
     "click>=8.4.2",
     "jsonschema>=4.0",
     "lxml>=6.1.0",
-    "rerankers[flashrank]>=0.10.0",
 ]
 
 [project.scripts]

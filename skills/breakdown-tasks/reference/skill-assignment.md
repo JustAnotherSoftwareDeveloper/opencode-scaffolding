@@ -1,6 +1,6 @@
 # Skill Assignment Procedure
 
-Automatic FlashRank-based procedure for assigning skills to task drafts.
+Automatic weighted-average procedure for assigning skills to task drafts.
 Executed by the `assign-skills` Python script after the LLM writes `TaskDraft` objects.
 
 ## Prerequisites
@@ -25,37 +25,42 @@ By default, `assign-skills` discovers all skills and filters candidates to these
 
 The default class filter is canonical for production workflow runs.
 
-### 3. Render Skill and Task Text
+### 3. Score Candidate Skills
 
-Each skill is rendered as structured text containing:
+By default, `assign-skills` uses the deterministic `weighted` backend. Each skill
+is scored from three normalized criteria:
 
-- `name`
-- `class`
-- `description`
-- `tags`
+- keyword overlap between task text and skill `name`/`description`/`tags`
+- class match bonus between inferred task class and skill `class`
+- tag similarity between task tokens and skill `tags`
 
-Each task query is built from:
+Default formula:
 
-- `purpose`
-- `context`
-- `filesToRead`
-- `filesToWrite`
+```text
+final_score = 0.50 * keyword_overlap
+            + 0.25 * class_match
+            + 0.25 * tag_similarity
+```
 
-### 4. Rank with FlashRank
+Task text is built from `purpose`, `context`, `filesToRead`, and `filesToWrite`.
 
-`assign-skills` ranks every candidate skill against each task draft with `rerankers[flashrank]`.
-FlashRank's sigmoid-normalized scores are converted back to raw logits.
-Raw logit scores are unbounded upward; the default floor is `0.0`.
+### 4. Optional FlashRank Backend
+
+The legacy FlashRank reranker is still selectable with `--backend flashrank`, but
+it is not the default and requires installing the optional `rerankers[flashrank]`
+dependency. FlashRank-only options such as `--floor` and `--model-name` do not
+affect the weighted backend.
 
 ### 5. Select Skills
 
 Selection rules:
 
-1. Select every skill with raw logit score greater than or equal to the floor.
-2. There is no maximum skill count.
-3. If fewer than `--min-skills` pass the floor, fill from the highest-ranked remaining skills.
-4. Every final task must have at least one skill.
-5. Do not synthesize fallback skills; selected skills must come from discovered/indexed skills.
+1. For the weighted backend, select every skill with score greater than or equal to `--threshold`.
+2. For the legacy FlashRank backend, select every skill with raw logit score greater than or equal to `--floor`.
+3. There is no maximum skill count.
+4. If fewer than `--min-skills` pass the threshold/floor, fill from the highest-ranked remaining skills.
+5. Every final task must have at least one skill.
+6. Do not synthesize fallback skills; selected skills must come from discovered/indexed skills.
 
 ### 6. Write Final TaskPackets
 

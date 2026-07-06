@@ -15,9 +15,12 @@ from __future__ import annotations
 import click
 
 from lib.assign_skills.core import (
+    DEFAULT_BACKEND,
     DEFAULT_CLASSES,
     DEFAULT_FLOOR,
     DEFAULT_MIN,
+    DEFAULT_THRESHOLD,
+    DEFAULT_WEIGHTS,
     assign_skills,
 )
 from lib.shared.skill_class import SkillClass
@@ -39,11 +42,25 @@ VALID_CLASS_NAMES = [c.value for c in SkillClass]
     help="Path to the TaskDraft JSON Schema file.",
 )
 @click.option(
+    "--backend",
+    type=click.Choice(["weighted", "flashrank"]),
+    default=DEFAULT_BACKEND,
+    show_default=True,
+    help="Assignment backend. Weighted is deterministic and dependency-light.",
+)
+@click.option(
     "--floor",
     type=float,
     default=DEFAULT_FLOOR,
     show_default=True,
-    help="Minimum relevance score (raw logit) for skill inclusion.",
+    help="FlashRank-only minimum raw logit score for skill inclusion.",
+)
+@click.option(
+    "--threshold",
+    type=float,
+    default=DEFAULT_THRESHOLD,
+    show_default=True,
+    help="Weighted-backend minimum score for skill inclusion.",
 )
 @click.option(
     "--min-skills",
@@ -64,7 +81,28 @@ VALID_CLASS_NAMES = [c.value for c in SkillClass]
     type=str,
     default="ms-marco-MiniLM-L-12-v2",
     show_default=True,
-    help="FlashRank cross-encoder model name.",
+    help="FlashRank-only cross-encoder model name.",
+)
+@click.option(
+    "--weight-keyword-overlap",
+    type=float,
+    default=DEFAULT_WEIGHTS["keyword_overlap"],
+    show_default=True,
+    help="Weighted-backend keyword overlap weight.",
+)
+@click.option(
+    "--weight-class-match",
+    type=float,
+    default=DEFAULT_WEIGHTS["class_match"],
+    show_default=True,
+    help="Weighted-backend class match weight.",
+)
+@click.option(
+    "--weight-tag-similarity",
+    type=float,
+    default=DEFAULT_WEIGHTS["tag_similarity"],
+    show_default=True,
+    help="Weighted-backend tag similarity weight.",
 )
 @click.option(
     "--skills-json",
@@ -75,16 +113,21 @@ VALID_CLASS_NAMES = [c.value for c in SkillClass]
 def main(
     state_file: str,
     schema: str,
+    backend: str,
     floor: float,
+    threshold: float,
     min_skills: int,
     skill_classes: str,
     model_name: str,
+    weight_keyword_overlap: float,
+    weight_class_match: float,
+    weight_tag_similarity: float,
     skills_json: str | None,
 ) -> None:
-    """Populate skills on each task draft using a FlashRank cross-encoder.
+    """Populate skills on each task draft.
 
-    Discovers skills, renders them as text passages, reranks against each
-    draft, and selects skills above the floor threshold.
+    The default weighted backend scores lexical and metadata overlap. The
+    legacy FlashRank backend remains available with --backend flashrank.
     """
     # --- Parse skill classes ---
     class_list: list[str] = [c.strip() for c in skill_classes.split(",") if c.strip()]
@@ -97,16 +140,28 @@ def main(
         )
         raise SystemExit(2)
 
-    skill_class_tup: tuple[SkillClass, ...] = tuple(
-        SkillClass(c) for c in class_list
-    )
+    skill_class_tup: tuple[SkillClass, ...] = tuple(SkillClass(c) for c in class_list)
 
-    # --- Validate floor and min_skills ---
+    # --- Validate scoring options and min_skills ---
     if floor < 0:
         click.echo(f"Error: floor must be >= 0, got {floor}", err=True)
         raise SystemExit(2)
+    if threshold < 0:
+        click.echo(f"Error: threshold must be >= 0, got {threshold}", err=True)
+        raise SystemExit(2)
     if min_skills < 1:
         click.echo(f"Error: min-skills must be >= 1, got {min_skills}", err=True)
+        raise SystemExit(2)
+    weights = {
+        "keyword_overlap": weight_keyword_overlap,
+        "class_match": weight_class_match,
+        "tag_similarity": weight_tag_similarity,
+    }
+    if any(value < 0 for value in weights.values()):
+        click.echo("Error: weights must be >= 0", err=True)
+        raise SystemExit(2)
+    if abs(sum(weights.values()) - 1.0) > 1e-9:
+        click.echo("Error: weights must sum to 1.0", err=True)
         raise SystemExit(2)
 
     # --- Parse external skills if provided ---
@@ -132,10 +187,13 @@ def main(
             state_file=state_file,
             schema_path=schema,
             skills_index=skills_index,
+            backend=backend,
             floor=floor,
+            threshold=threshold,
             min_skills=min_skills,
             skill_classes=skill_class_tup,
             model_name=model_name,
+            weights=weights,
         )
     except ValueError as exc:
         click.echo(f"Error: {exc}", err=True)

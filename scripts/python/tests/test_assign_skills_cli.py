@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from click.testing import CliRunner
 
@@ -73,9 +73,12 @@ def test_invalid_skill_classes(tmp_path: Path) -> None:
     result = runner.invoke(
         main,
         [
-            "--state-file", state_path,
-            "--schema", schema_path,
-            "--skill-classes", "operation,nonexistent",
+            "--state-file",
+            state_path,
+            "--schema",
+            schema_path,
+            "--skill-classes",
+            "operation,nonexistent",
         ],
     )
     assert result.exit_code == 2
@@ -83,20 +86,63 @@ def test_invalid_skill_classes(tmp_path: Path) -> None:
 
 
 def test_invalid_floor(tmp_path: Path) -> None:
-    """Negative --floor exits 2."""
+    """Negative legacy --floor exits 2."""
     state_path = _make_state_with_tasks(tmp_path)
     schema_path = _make_schema(tmp_path)
     runner = CliRunner()
     result = runner.invoke(
         main,
         [
-            "--state-file", state_path,
-            "--schema", schema_path,
-            "--floor", "-1.0",
+            "--state-file",
+            state_path,
+            "--schema",
+            schema_path,
+            "--floor",
+            "-1.0",
         ],
     )
     assert result.exit_code == 2
     assert "floor" in result.output.lower()
+
+
+def test_invalid_threshold(tmp_path: Path) -> None:
+    """Negative --threshold exits 2."""
+    state_path = _make_state_with_tasks(tmp_path)
+    schema_path = _make_schema(tmp_path)
+    runner = CliRunner()
+    result = runner.invoke(
+        main,
+        [
+            "--state-file",
+            state_path,
+            "--schema",
+            schema_path,
+            "--threshold",
+            "-1.0",
+        ],
+    )
+    assert result.exit_code == 2
+    assert "threshold" in result.output.lower()
+
+
+def test_invalid_weight_sum(tmp_path: Path) -> None:
+    """Weights must sum to 1.0."""
+    state_path = _make_state_with_tasks(tmp_path)
+    schema_path = _make_schema(tmp_path)
+    runner = CliRunner()
+    result = runner.invoke(
+        main,
+        [
+            "--state-file",
+            state_path,
+            "--schema",
+            schema_path,
+            "--weight-keyword-overlap",
+            "1.0",
+        ],
+    )
+    assert result.exit_code == 2
+    assert "weights must sum" in result.output.lower()
 
 
 def test_invalid_min_skills(tmp_path: Path) -> None:
@@ -107,9 +153,12 @@ def test_invalid_min_skills(tmp_path: Path) -> None:
     result = runner.invoke(
         main,
         [
-            "--state-file", state_path,
-            "--schema", schema_path,
-            "--min-skills", "0",
+            "--state-file",
+            state_path,
+            "--schema",
+            schema_path,
+            "--min-skills",
+            "0",
         ],
     )
     assert result.exit_code == 2
@@ -124,9 +173,12 @@ def test_invalid_skills_json(tmp_path: Path) -> None:
     result = runner.invoke(
         main,
         [
-            "--state-file", state_path,
-            "--schema", schema_path,
-            "--skills-json", "not valid json",
+            "--state-file",
+            state_path,
+            "--schema",
+            schema_path,
+            "--skills-json",
+            "not valid json",
         ],
     )
     assert result.exit_code == 2
@@ -140,31 +192,21 @@ def test_skills_json_not_array(tmp_path: Path) -> None:
     result = runner.invoke(
         main,
         [
-            "--state-file", state_path,
-            "--schema", schema_path,
-            "--skills-json", '{"not": "array"}',
+            "--state-file",
+            state_path,
+            "--schema",
+            schema_path,
+            "--skills-json",
+            '{"not": "array"}',
         ],
     )
     assert result.exit_code == 2
 
 
 def test_success_with_mocked_ranker(tmp_path: Path) -> None:
-    """Normal invocation succeeds with mocked ranker."""
+    """Normal invocation succeeds with mocked assignment function."""
     state_path = _make_state_with_tasks(tmp_path)
     schema_path = _make_schema(tmp_path)
-
-    mock_ranker = MagicMock()
-    mock_result = MagicMock()
-    mock_result.doc_id = "skill-a"
-    mock_result.score = 3.0
-    mock_ranker.rank.return_value.results = [mock_result]
-
-    # Need to provide discovery mocks too
-    skill = MagicMock()
-    skill.name = "skill-a"
-    skill.class_ = "operation"
-    skill.description = "desc"
-    skill.tags = ["test"]
 
     with patch(
         "cli.assign_skills.assign_skills",
@@ -174,8 +216,10 @@ def test_success_with_mocked_ranker(tmp_path: Path) -> None:
         result = runner.invoke(
             main,
             [
-                "--state-file", state_path,
-                "--schema", schema_path,
+                "--state-file",
+                state_path,
+                "--schema",
+                schema_path,
             ],
         )
         assert result.exit_code == 0

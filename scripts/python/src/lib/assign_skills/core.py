@@ -1,4 +1,4 @@
-"""FlashRank-based skill assignment — render, rerank, select.
+"""Skill assignment — weighted scoring by default, FlashRank optional.
 
 Consumers: :mod:`cli.assign_skills`.
 """
@@ -6,6 +6,8 @@ Consumers: :mod:`cli.assign_skills`.
 from __future__ import annotations
 
 import json
+import math
+import re
 from pathlib import Path
 from typing import Any
 
@@ -18,8 +20,15 @@ from lib.shared.skill_class import SkillClass
 # Defaults
 # ---------------------------------------------------------------------------
 
-DEFAULT_FLOOR = 0.0  # raw cross-encoder logit — 0.0 = even odds
+DEFAULT_BACKEND = "weighted"
+DEFAULT_FLOOR = 0.0  # legacy FlashRank raw cross-encoder logit floor
 DEFAULT_MIN = 1
+DEFAULT_THRESHOLD = 0.15
+DEFAULT_WEIGHTS: dict[str, float] = {
+    "keyword_overlap": 0.50,
+    "class_match": 0.25,
+    "tag_similarity": 0.25,
+}
 DEFAULT_CLASSES: tuple[SkillClass, ...] = (
     SkillClass.OPERATION,
     SkillClass.DOCUMENTATION,
@@ -61,6 +70,127 @@ def build_query(
 
 
 # ---------------------------------------------------------------------------
+# Weighted scoring
+# ---------------------------------------------------------------------------
+
+
+def tokenize(text: str) -> set[str]:
+    """Return lowercase alphanumeric tokens with short noise removed."""
+    return set(re.findall(r"[a-z0-9_]{2,}", text.lower()))
+
+
+def infer_task_class(task_text: str) -> str:
+    """Infer the preferred SkillClass value from simple task keywords."""
+    tokens = tokenize(task_text)
+    documentation = {
+        "analyze",
+        "analysis",
+        "describe",
+        "design",
+        "document",
+        "documentation",
+        "explain",
+        "guide",
+        "proposal",
+        "reference",
+        "summary",
+    }
+    operation = {
+        "build",
+        "create",
+        "execute",
+        "fix",
+        "generate",
+        "implement",
+        "modify",
+        "run",
+        "test",
+        "update",
+        "write",
+    }
+    doc_score = len(tokens & documentation)
+    op_score = len(tokens & operation)
+    if doc_score > op_score:
+        return SkillClass.DOCUMENTATION.value
+    return SkillClass.OPERATION.value
+
+
+def _task_text(
+    purpose: str,
+    context: str,
+    files_to_read: list[str],
+    files_to_write: list[str],
+) -> str:
+    """Join task fields used by both lexical and tag scoring."""
+    return " ".join(
+        [purpose, context, " ".join(files_to_read), " ".join(files_to_write)]
+    )
+
+
+def score_skill_weighted(
+    skill: Skill,
+    purpose: str,
+    context: str,
+    files_to_read: list[str],
+    files_to_write: list[str],
+    weights: dict[str, float] | None = None,
+) -> float:
+    """Score one skill against one task with weighted lexical criteria."""
+    w = weights or DEFAULT_WEIGHTS
+    task_text = _task_text(purpose, context, files_to_read, files_to_write)
+    task_tokens = tokenize(task_text)
+    skill_tokens = tokenize(f"{skill.name} {skill.description} {' '.join(skill.tags)}")
+    tag_tokens = {tag.lower() for tag in skill.tags}
+
+    keyword_overlap = len(task_tokens & skill_tokens) / max(len(task_tokens), 1)
+    class_match = 1.0 if skill.class_ == infer_task_class(task_text) else 0.0
+    tag_similarity = len(task_tokens & tag_tokens) / max(
+        len(task_tokens | tag_tokens), 1
+    )
+
+    return (
+        w["keyword_overlap"] * keyword_overlap
+        + w["class_match"] * class_match
+        + w["tag_similarity"] * tag_similarity
+    )
+
+
+def _rank_candidates_weighted(
+    purpose: str,
+    context: str,
+    files_to_read: list[str],
+    files_to_write: list[str],
+    candidates: list[Skill],
+    weights: dict[str, float] | None = None,
+) -> tuple[list[str], list[float]]:
+    """Rank candidate skills using deterministic weighted scores."""
+    scored = [
+        (
+            skill.name,
+            score_skill_weighted(
+                skill, purpose, context, files_to_read, files_to_write, weights
+            ),
+        )
+        for skill in candidates
+    ]
+    scored.sort(key=lambda item: (-item[1], item[0]))
+    return [name for name, _ in scored], [score for _, score in scored]
+
+
+def _validate_weights(weights: dict[str, float]) -> None:
+    """Validate weighted scorer configuration."""
+    expected = set(DEFAULT_WEIGHTS)
+    if set(weights) != expected:
+        missing = sorted(expected - set(weights))
+        extra = sorted(set(weights) - expected)
+        raise ValueError(f"invalid weights; missing={missing}, extra={extra}")
+    if any(value < 0 for value in weights.values()):
+        raise ValueError("weights must be >= 0")
+    if abs(sum(weights.values()) - 1.0) > 1e-9:
+        raise ValueError("weights must sum to 1.0")
+
+
+# ---------------------------------------------------------------------------
 # Reranking
 # ---------------------------------------------------------------------------
 
@@ -74,10 +204,17 @@ def _get_ranker(model_name: str) -> Any:
     drafts for the same model.
     """
     if model_name not in _ranker_cache:
-        from rerankers import Reranker  # noqa: PLC0415 — lazy import
+        try:
+            from rerankers import Reranker  # noqa: PLC0415 — lazy import
+        except ImportError as exc:  # pragma: no cover - depends on env deps
+            raise RuntimeError(
+                "FlashRank backend requires optional dependency "
+                "'rerankers[flashrank]'. Use --backend weighted or install it."
+            ) from exc
 
         _ranker_cache[model_name] = Reranker(
-            model_name=model_name, model_type="flashrank",
+            model_name=model_name,
+            model_type="flashrank",
         )
     return _ranker_cache[model_name]
 
@@ -96,8 +233,6 @@ def _rank_candidates(
     Scores are raw cross-encoder logits (unbounded upward) obtained by
     inverting FlashRank's sigmoid normalization.
     """
-    import numpy as np
-
     query = build_query(purpose, context, files_to_read, files_to_write)
     skill_texts = [render_skill(s) for s in candidates]
     skill_names = [s.name for s in candidates]
@@ -109,8 +244,8 @@ def _rank_candidates(
     for r in results.results:
         # FlashRank applies sigmoid:  score = 1 / (1 + exp(-logit))
         # Invert:  logit = log(score / (1 - score))
-        clamped = float(np.clip(float(r.score), 1e-10, 1 - 1e-10))
-        raw_logit = float(np.log(clamped / (1.0 - clamped)))
+        clamped = min(max(float(r.score), 1e-10), 1 - 1e-10)
+        raw_logit = math.log(clamped / (1.0 - clamped))
         names.append(str(r.doc_id))
         scores.append(raw_logit)
 
@@ -167,26 +302,39 @@ def assign_skills(
     schema_path: str,
     *,
     skills_index: list[dict[str, Any]] | None = None,
+    backend: str = DEFAULT_BACKEND,
     floor: float = DEFAULT_FLOOR,
+    threshold: float = DEFAULT_THRESHOLD,
     min_skills: int = DEFAULT_MIN,
     skill_classes: tuple[SkillClass, ...] = DEFAULT_CLASSES,
     model_name: str = "ms-marco-MiniLM-L-12-v2",
+    weights: dict[str, float] | None = None,
 ) -> str:
-    """Assign skills to each task draft in the state file using FlashRank.
+    """Assign skills to each task draft in the state file.
 
     Args:
         state_file: Path to the ``.tasks/<epoch>-decomposition.json`` file.
         schema_path: Path to the TaskDraft JSON Schema file.
         skills_index: Optional external skill index JSON (auto-discovers if
             ``None``).
-        floor: Minimum relevance score for inclusion.
+        backend: Assignment backend: ``weighted`` (default) or ``flashrank``.
+        floor: Legacy FlashRank minimum relevance score for inclusion.
+        threshold: Weighted backend minimum score for inclusion.
         min_skills: Minimum skills per task (always satisfied).
         skill_classes: SkillClass values to consider as candidates.
-        model_name: FlashRank cross-encoder model name.
+        model_name: FlashRank cross-encoder model name for legacy backend.
+        weights: Optional weighted backend criterion weights.
 
     Returns:
         The *state_file* path (same as input).
     """
+    if backend not in {"weighted", "flashrank"}:
+        raise ValueError(f"backend must be 'weighted' or 'flashrank', got {backend}")
+    if threshold < 0:
+        raise ValueError(f"threshold must be >= 0, got {threshold}")
+    active_weights = weights or DEFAULT_WEIGHTS
+    _validate_weights(active_weights)
+
     # --- Load state ---
     raw = Path(state_file).read_text(encoding="utf-8")
     state: dict[str, Any] = json.loads(raw)
@@ -196,9 +344,7 @@ def assign_skills(
     schema: dict[str, Any] = json.loads(schema_raw)
     errors = validate_json_schema(state, schema)
     if errors:
-        raise ValueError(
-            f"state file failed TaskDraft schema: {errors}"
-        )
+        raise ValueError(f"state file failed TaskDraft schema: {errors}")
 
     drafts: list[dict[str, Any]] = state.get("tasks", [])
 
@@ -220,8 +366,8 @@ def assign_skills(
             f" (searched {len(all_skills)} total, source: {skills_source})"
         )
 
-    # --- Rerank and select ---
-    ranker = _get_ranker(model_name)
+    # --- Rank and select ---
+    ranker = _get_ranker(model_name) if backend == "flashrank" else None
     output_tasks: list[dict[str, Any]] = []
     summary_lines: list[str] = []
 
@@ -231,11 +377,31 @@ def assign_skills(
         files_to_read: list[str] = draft.get("filesToRead", [])
         files_to_write: list[str] = draft.get("filesToWrite", [])
 
-        ranked_names, ranked_scores = _rank_candidates(
-            ranker, purpose, context, files_to_read, files_to_write, candidates,
-        )
+        if backend == "flashrank":
+            ranked_names, ranked_scores = _rank_candidates(
+                ranker,
+                purpose,
+                context,
+                files_to_read,
+                files_to_write,
+                candidates,
+            )
+            selection_floor = floor
+        else:
+            ranked_names, ranked_scores = _rank_candidates_weighted(
+                purpose,
+                context,
+                files_to_read,
+                files_to_write,
+                candidates,
+                active_weights,
+            )
+            selection_floor = threshold
         names, scores = _select_skills(
-            ranked_names, ranked_scores, floor, min_skills,
+            ranked_names,
+            ranked_scores,
+            selection_floor,
+            min_skills,
         )
 
         task_out: dict[str, Any] = {**draft, "skills": names}
@@ -263,10 +429,16 @@ def assign_skills(
         },
         "skill_class_filter": [c.value for c in skill_classes],
         "skills_source": skills_source,
-        "model": model_name,
+        "backend": backend,
         "candidates_considered": len(candidates),
         "details": summary_lines,
     }
+    if backend == "flashrank":
+        summary["model"] = model_name
+        summary["floor"] = floor
+    else:
+        summary["threshold"] = threshold
+        summary["weights"] = active_weights
     print(json.dumps(summary, indent=2))
 
     return state_file
