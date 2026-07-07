@@ -1,5 +1,7 @@
 # Validate And Format Output
 
+Why this step exists: Schema validation catches structural errors before output reaches the delegator, preventing worker failures downstream.
+
 Perform final schema validation against the full `BreakdownTasksOutput` JSON object.
 Emit raw JSON if valid.
 No preamble, no markdown fences, no commentary.

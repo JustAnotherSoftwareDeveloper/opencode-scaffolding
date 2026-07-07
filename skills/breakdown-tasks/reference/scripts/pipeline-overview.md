@@ -3,6 +3,21 @@
 The breakdown pipeline uses a shared `.tasks` state file.
 Scripts read and write that file in sequence; the worker returns the relative path to the final state file.
 
+## Design Philosophy
+
+The breakdown pipeline uses a controlled factory model: each step adds one layer of structure to a shared state file.
+
+1. **Empty file** (init-state-file) — Establishes the shared artifact.
+2. **Task drafts** (LLM decomposition) — Populates the structure-aware content.
+3. **Assigned skills** (assign-skills) — Adds deterministic skill selections.
+4. **Validated packets** (validate-and-format-output) — Confirms structural correctness.
+
+This separation exists for three reasons:
+
+- **Determinism** — Each step is independently reproducible. If a step fails, you can re-run from that step without affecting upstream work.
+- **Auditability** — The state file at each step can be inspected, versioned, or compared across runs.
+- **Error isolation** — A failure in one step (e.g., corrupt LLM output) is caught before it propagates to the next step.
+
 ## Script Order
 
 1. **`init-state-file`** — Create an empty state file and print its absolute path.
@@ -25,6 +40,8 @@ Scripts read and write that file in sequence; the worker returns the relative pa
 
 ### Step 1: Initialize State File
 
+*Why: Creates the shared file handle that all subsequent stages read and write. The empty structure prevents partial-write races and gives the pipeline a well-defined starting point.*
+
 - **Action:** Create the state file.
 - **State File I/O:** Write.
 - **Command:**
@@ -40,12 +57,16 @@ The delegator receives `$REL_FILE`.
 
 ### Step 2: Populate TaskDrafts
 
+*Why: The LLM produces structure-aware task drafts with domain understanding. Skills are intentionally absent at this stage — the LLM should focus on work boundaries, not skill matching.*
+
 - **Action:** LLM writes decomposition output.
 - **State File I/O:** Write.
 - **Description:** Write `{summary, tasks}` where each task includes `purpose`, `context`, `filesToRead`, `filesToWrite`, `executionInstructions`, `expectedOutput`, and optional `verification`.
   Do **not** write `skills`.
 
 ### Step 3: Assign Skills
+
+*Why: Skills must be assigned by a deterministic script to ensure consistency, avoid hallucinated assignments, and maintain an audit trail of which skills were selected and why.*
 
 - **Action:** Populate `skills` arrays automatically.
 - **State File I/O:** Read/Write.
@@ -60,6 +81,8 @@ uv run --directory ~/.config/opencode/scripts/python assign-skills \
 `assign-skills` discovers candidate skills internally, filters to `operation` and `documentation` by default, ranks with FlashRank raw logits, applies floor-only gating, and guarantees at least one discovered/indexed skill per task.
 
 ### Step 4: Validate and Format Output
+
+*Why: Schema validation catches structural errors (missing fields, wrong types, constraint violations) before the output reaches the delegator. Without this gate, malformed packets would cause worker failures downstream.*
 
 - **Action:** Validate final TaskPacket output.
 - **State File I/O:** Read-only.

@@ -1,52 +1,32 @@
-# Breakdown Tasks — Reference Documents
+# Reference Documentation Map
 
-Reference documents organized by domain module.
-Each file covers one topic for progressive disclosure from SKILL.md.
+How the pieces fit together — the breakdown pipeline flows through six domains, from authoring to execution:
 
-## Authoring
+1. **Authoring** (`reference/authoring/`) — Rules and heuristics for producing atomic, well-structured task packets. Start here if a task fails validation or feels too large. Includes:
+   - `core-rules.md` — Five atomicity rules (why tasks must be atomic)
+   - `anti-patterns.md` — Common mistakes and how to diagnose them
+   - `task-granularity.md` — Heuristics for splitting work at the right boundaries
+   - `field-reference-table.md` — All fields in the TaskPacket and root-level object
+   - `context-preservation.md` — Guidelines for self-contained worker packets
 
-Files related to task decomposition rules, anti-patterns, granularity guidelines, and context preservation.
+2. **Orchestration** (`reference/orchestration/`) — Validation of decomposition output correctness. Use after completing a decomposition to check structure.
+   - `task-validation.md` — Validation checks for decomposition output correctness
 
-- [core-rules.md](./authoring/core-rules.md) — Five atomicity rules for decomposing work into delegation packets.
-- [anti-patterns.md](./authoring/anti-patterns.md) — Work-boundary and skill-assignment mistakes to avoid.
-- [task-granularity.md](./authoring/task-granularity.md) — Heuristics for splitting work into atomic units.
-- [field-reference-table.md](./authoring/field-reference-table.md) — All fields in the TaskPacket and root-level object.
-- [context-preservation.md](./authoring/context-preservation.md) — Guidelines for populating the context field in each task packet.
+3. **State Management** (`reference/state-initialization.md`) — How the shared state file is initialized and managed across pipeline stages. Consult when debugging state-related failures or filename collisions.
+   - `state-initialization.md` — State-file derivation rules, collision behavior, and retention policy
 
-## Orchestration
+4. **Skill Assignment** (`reference/skill-assignment.md`) — The deterministic scoring system that assigns skills to task drafts. Consult when troubleshooting skill selection or scoring behavior.
+   - `skill-assignment.md` — FlashRank-based procedure for assigning skills to task drafts
 
-Files related to validation of decomposition output correctness.
+5. **Scripts** (`reference/scripts/`) — Automation layer documentation for the breakdown pipeline. Consult when running, debugging, or extending the pipeline scripts:
+   - `pipeline-overview.md` — Full pipeline walkthrough and design philosophy
+   - `validate-and-format-output.md` — Final validation gate reference
+   - `validate-task-structure.md` — Task structure validation rules
+   - `error-handling-testing.md` — Exit code conventions and testing patterns
 
-- [task-validation.md](./orchestration/task-validation.md) — Validation checks for decomposition output correctness.
+6. **Maintenance** (`reference/maintenance/`) — Quality assurance and verification best practices. Use before dispatch to confirm output integrity:
+   - `verification-best-practices.md` — Verification checks by task type
 
-## State Management
-
-Files related to state file derivation and initialization.
-
-- [state-initialization.md](./state-initialization.md) — State-file derivation rules, collision behavior, and retention policy.
-
-## Skill Assignment
-
-Files related to automatic skill assignment to tasks.
-
-- [skill-assignment.md](./skill-assignment.md) — FlashRank-based procedure for assigning skills to task drafts.
-
-## Maintenance
-
-Files related to verification practices.
-
-- [verification-best-practices.md](./maintenance/verification-best-practices.md) — Verification checks by task type.
-
-## Schema
-
-Files related to the canonical output format.
-
-- [task-packet.schema.json](../schema/task-packet.schema.json) — JSON Schema defining the BreakdownTasksOutput object and TaskPacket structure.
-
-## Scripts
-
-Files related to breakdown pipeline scripts.
-
-- [pipeline-overview.md](./scripts/pipeline-overview.md) — End-to-end pipeline flow for task decomposition.
-- [validate-and-format-output.md](./scripts/validate-and-format-output.md) — Output validation and formatting rules.
-- [error-handling-testing.md](./scripts/error-handling-testing.md) — Error handling and testing patterns for the pipeline.
+7. **Schema** (`../schema/`) — Canonical output format definitions that all pipeline stages conform to.
+   - `task-packet.schema.json` — JSON Schema defining the BreakdownTasksOutput object and TaskPacket structure
+   - `task-input.schema.json` — JSON Schema defining the TaskDraft input format (no `skills` property — enforced by schema)
