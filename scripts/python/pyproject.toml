@@ -15,13 +15,11 @@ dependencies = [
 ]
 
 [project.scripts]
-assign-skills = "cli.assign_skills:main"
 collect-skills = "cli.collect_skills:main"
 example = "cli.example:main"
-init-state-file = "cli.init_state_file:main"
+generate-task-json = "cli.generate_task_json:main"
 resolve-script-root = "cli.resolve_script_root:main"
 skill-validator = "cli.skill_validator:cli"
-validate-and-format-output = "cli.validate_and_format_output:main"
 validate-skill-meta = "cli.validate_skill_meta:main"
 validate-task-structure = "cli.validate_task_structure:main"
 

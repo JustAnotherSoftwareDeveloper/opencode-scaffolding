@@ -73,7 +73,7 @@ def minimal_task() -> dict:
     """
     return {
         "purpose": "Validate the sequential schema invariants",
-        "context": "Context for validating the task-packet schema.",
+        "context": "x" * 2000,
         "filesToRead": ["src/schema.json"],
         "filesToWrite": ["src/output.py"],
         "skills": ["python"],
@@ -90,7 +90,7 @@ def full_task() -> dict:
     """A full valid task packet including optional ``verification`` field."""
     return {
         "purpose": "Full task with verification checks",
-        "context": "A more complete task context for integration testing.",
+        "context": "x" * 2000,
         "filesToRead": ["src/main.py", "src/lib.py"],
         "filesToWrite": ["src/output.py", "tests/test_output.py"],
         "skills": ["python", "testing"],
@@ -278,7 +278,17 @@ class TestSchemaStructuralInvariants:
         props = schema_dict["definitions"]["TaskPacket"]["properties"]
         assert "verification" in props
         assert props["verification"]["type"] == "array"
+        assert props["verification"]["minItems"] == 1
         assert props["verification"]["uniqueItems"] is True
+
+    def test_task_packet_enforces_context_and_instruction_limits(
+        self, schema_dict: dict
+    ) -> None:
+        """TaskPacket requires detailed context and at most five steps."""
+        props = schema_dict["definitions"]["TaskPacket"]["properties"]
+        assert props["context"]["minLength"] == 2000
+        assert props["executionInstructions"]["maxItems"] == 5
+        assert props["skills"]["maxItems"] == 3
 
     def test_dependencies_is_removed_from_properties(
         self, schema_dict: dict

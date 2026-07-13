@@ -28,9 +28,9 @@ Work-boundary and skill-assignment mistakes to avoid when decomposing tasks.
 
 ## Skill-Assignment Anti-Patterns
 
-- **Assign skills manually** — The LLM must produce `TaskDraft` objects without `skills`. The `assign-skills` script populates final skill arrays.
+- **Assign skills manually** — The LLM must produce `TaskDraft` objects without `skills`. The `generate-task-json` script populates final skill arrays.
   *Why: Manual assignment bypasses the deterministic scoring backend, breaking separation of concerns. The LLM is probabilistic; the script is deterministic.*
-- **Assign no skills after automation** — Every final task must have at least one skill. `assign-skills` satisfies the one-skill minimum from discovered/indexed skills; there is no synthetic fallback.
+- **Assign no skills after automation** — Every final task must have at least one skill. `generate-task-json` satisfies the one-skill minimum from discovered skills; there is no synthetic fallback.
   *Why: Every worker needs at least one skill to execute; without a minimum, some tasks would be dispatched with no execution capability.*
-- **Force a fallback skill** — Do not add `generic-analysis` or any other fallback manually. Skill selection is owned by `assign-skills`.
+- **Force a fallback skill** — Do not add `generic-analysis` or any other fallback manually. Skill selection is owned by `generate-task-json`.
   *Why: A synthetic fallback would create misleading skill assignments and erode trust in the skill system. If no skill matches, the pipeline should surface the gap, not paper over it.*

@@ -33,6 +33,7 @@
         "context": {
           "description": "Expanded context for the worker. Includes the relevant subset of the user prompt, background information, and any constraints. Supports longer prompts up to 8000 characters.",
           "type": "string",
+          "minLength": 2000,
           "maxLength": 8000
         },
         "filesToRead": {
@@ -52,7 +53,8 @@
           "type": "array",
           "items": { "type": "string" },
           "uniqueItems": true,
-          "minItems": 1
+          "minItems": 1,
+          "maxItems": 3
         },
         "executionInstructions": {
           "description": "Step-by-step instructions for the worker. Each step is a discrete, verifiable action. Steps must be ordered and numbered.",
@@ -75,12 +77,14 @@
             },
             "required": ["step", "action"]
           },
-          "minItems": 1
+          "minItems": 1,
+          "maxItems": 5
         },
         "verification": {
           "description": "Top-level verification checks the worker must run against their output before finishing. These are checks on the complete deliverable, not per-step checks.",
           "type": "array",
           "items": { "type": "string" },
+          "minItems": 1,
           "uniqueItems": true
         },
         "expectedOutput": {

@@ -1,7 +1,7 @@
 """Path bootstrap helper for CLI entry points.
 
-Consumers: collect-skills, generate-uuids, topological-sort,
-validate-and-format-output, validate-task-structure, example, skill-validator.
+Consumers: collect-skills, generate-task-json, generate-uuids, topological-sort,
+validate-task-structure, example, skill-validator.
 
 When running via ``uv run``, the project root (``scripts/python/``) is placed
 on ``sys.path``, but ``src/`` is *not*.  This means that direct

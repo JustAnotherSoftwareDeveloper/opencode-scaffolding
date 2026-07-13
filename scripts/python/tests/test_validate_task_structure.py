@@ -61,7 +61,7 @@ def schema_dict() -> dict:
 def valid_task_1() -> dict:
     return {
         "purpose": "Task one purpose",
-        "context": "Context for task one",
+        "context": "x" * 2000,
         "filesToRead": ["src/file1.py"],
         "filesToWrite": ["src/out1.py"],
         "skills": ["python"],
@@ -77,7 +77,7 @@ def valid_task_1() -> dict:
 def valid_task_2() -> dict:
     return {
         "purpose": "Task two purpose",
-        "context": "Context for task two",
+        "context": "x" * 2000,
         "filesToRead": ["src/file2.py"],
         "filesToWrite": ["src/out2.py"],
         "skills": ["typescript"],
@@ -92,7 +92,7 @@ def valid_task_2() -> dict:
 def valid_task_3() -> dict:
     return {
         "purpose": "Task three purpose",
-        "context": "Context for task three",
+        "context": "x" * 2000,
         "filesToRead": ["src/file3a.py", "src/file3b.py"],
         "filesToWrite": ["src/out3.py"],
         "skills": ["python", "testing"],

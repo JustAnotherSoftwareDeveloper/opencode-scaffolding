@@ -30,7 +30,7 @@ Decompose the request into atomic task-delegation work items.
 None by default. When the effective request depends on a prior proposal, plan, or task file, include those paths.
 
 ## FILES TO WRITE
-.tasks/ state file (~/.config/opencode/.tasks/<unix-epoch-seconds>-decomposition.json)
+.tasks/<summary-slug>.json
 
 ## SKILLS
 breakdown-tasks
@@ -41,11 +41,11 @@ Return only the relative `.tasks/` path of the state file written during decompo
 Maintain decomposition state in the .tasks/ file declared in ## FILES TO WRITE.
 
 ## VERIFICATION
-The output must be a non-empty string. It must not be whitespace-only. It must be a relative path matching the pattern `.tasks/<digits>-decomposition.json`.
+The output must be a non-empty string. It must not be whitespace-only. It must be a relative path matching `.tasks/<kebab-case-slug>.json`.
 Do NOT wrap the path in backticks, Markdown code spans, or any other formatting. Return the raw path string only.
 
 ## EXPECTED OUTPUT
-A single string: the relative `.tasks/<epoch>-decomposition.json` state file path written during decomposition.
+A single string: the relative `.tasks/<summary-slug>.json` path written during decomposition.
 ```
 
 ## Output
@@ -75,7 +75,7 @@ Do not accept `PARTIAL:` for decomposition output.
    Set `prompt` to the complete decomposition packet.
 6. **Validate and return the worker result.**
     Strip leading/trailing backticks (`` ` ``), whitespace, and newlines from the worker output before matching.
-    If the cleaned result is a relative path matching `.tasks/<digits>-decomposition.json`, forward the cleaned path.
+     If the cleaned result is a relative path matching `.tasks/<kebab-case-slug>.json`, forward the cleaned path.
     If the cleaned result is `BLOCKED:`, forward it unchanged.
     Treat `PARTIAL:` or any other output shape as invalid and return `BLOCKED: decomposition must return a relative .tasks path or BLOCKED.`
 

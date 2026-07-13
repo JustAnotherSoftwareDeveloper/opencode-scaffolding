@@ -1,10 +1,10 @@
 """SkillClass enumeration — single source of truth for skill class labels.
 
-Consumers: collect-skills, assign-skills.
+Consumers: collect-skills, generate-task-json.
 
 All six valid skill classes as defined in the skill-architect taxonomy.
 Used by ``collect-skills --class <value>`` for filtering and by
-``assign-skills --skill-classes`` for candidate discovery.
+``generate-task-json`` for candidate discovery.
 """
 
 from __future__ import annotations

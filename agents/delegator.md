@@ -19,9 +19,9 @@ Repeat this workflow for every request.
    Load `dispatch-decompose` with the full original user request as input.
    `dispatch-decompose` constructs the decomposition packet, sets `## SKILLS` to `breakdown-tasks`, launches exactly one `worker`, and returns the worker's relative `.tasks/` path unchanged.
    If decomposition returns `BLOCKED:`, report it and stop.
-   Expect the worker to return a relative path string (e.g. `.tasks/1710364234-decomposition.json`).
+    Expect the worker to return a relative path string (e.g. `.tasks/update-task-generator.json`).
    The path is relative to the project root.  Use it directly — do not construct a path.
-   If the returned string does not match `.tasks/<digits>-decomposition.json`, report BLOCKED.
+    If the returned string does not match `.tasks/<kebab-case-slug>.json`, report BLOCKED.
    Use the `read` tool to read the file contents.
    If the file does not exist or cannot be read, report BLOCKED.
    Parse the file contents as JSON.

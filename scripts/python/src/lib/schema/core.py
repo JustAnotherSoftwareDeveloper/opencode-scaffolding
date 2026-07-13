@@ -3,8 +3,8 @@
 Provides ``load_schema()``, a zero-dependency function that reads a JSON
 Schema file and returns it as a ``dict``.
 
-Consumers: :mod:`src.cli.validate_task_structure` and
-:mod:`src.cli.validate_and_format_output`.
+Consumers: :mod:`src.cli.generate_task_json` and
+:mod:`src.cli.validate_task_structure`.
 """
 
 from __future__ import annotations

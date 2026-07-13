@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "TaskDraftList",
-  "description": "Schema for LLM-produced task drafts before skill assignment. Contains zero skill information — skills are populated by the assign-skills Python script which produces final TaskPacket objects.",
+  "description": "Schema for LLM-produced task drafts before skill assignment. Contains zero skill information — skills are populated by the generate-task-json Python script which produces final TaskPacket objects.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -11,7 +11,7 @@
       "maxLength": 2000
     },
     "tasks": {
-      "description": "An ordered list of TaskDraft objects. No skills field — that is added by the Python assign-skills script.",
+      "description": "An ordered list of TaskDraft objects. No skills field — that is added by the Python generate-task-json script.",
       "type": "array",
       "items": { "$ref": "#/definitions/TaskDraft" },
       "minItems": 1
@@ -22,7 +22,7 @@
     "TaskDraft": {
       "type": "object",
       "additionalProperties": false,
-      "description": "A single atomic task produced by the LLM during decomposition. Does NOT include skills — skills are assigned later by a Python FlashRank reranking script.",
+      "description": "A single atomic task produced by the LLM during decomposition. Does NOT include skills — skills are assigned later by the Python generate-task-json script.",
       "properties": {
         "purpose": {
           "description": "Single sentence describing what this task accomplishes. Must be actionable and self-contained.",
@@ -32,6 +32,7 @@
         "context": {
           "description": "Expanded context for the worker. Includes the relevant subset of the user prompt, background information, and any constraints.",
           "type": "string",
+          "minLength": 2000,
           "maxLength": 8000
         },
         "filesToRead": {
@@ -64,12 +65,14 @@
             },
             "required": ["step", "action"]
           },
-          "minItems": 1
+          "minItems": 1,
+          "maxItems": 5
         },
         "verification": {
           "description": "Top-level verification checks the worker must run against their output before finishing.",
           "type": "array",
           "items": { "type": "string" },
+          "minItems": 1,
           "uniqueItems": true
         },
         "expectedOutput": {
