@@ -10,6 +10,17 @@ import yaml
 
 # Matches kebab-case: lowercase letters and digits, hyphen-separated.
 SKILL_NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+TAG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+FILLER_TAGS = {
+    "common",
+    "default",
+    "general",
+    "helper",
+    "misc",
+    "skill",
+    "tool",
+    "utility",
+}
 
 
 def extract_frontmatter(file_path: Path) -> dict[str, Any] | None:
@@ -136,14 +147,31 @@ def validate_skill_frontmatter(
     # --- tags ----------------------------------------------------------------
     tags = frontmatter.get("tags")
 
-    if tags is not None:
-        if not isinstance(tags, list):
-            errors.append(f"{file_path}: 'tags' must be a list")
-        else:
-            for i, tag in enumerate(tags):
-                if not isinstance(tag, str):
-                    errors.append(
-                        f"{file_path}: 'tags' element {i} must be a string"
-                    )
+    if tags is None:
+        errors.append(f"{file_path}: missing 'tags' field")
+    elif not isinstance(tags, list):
+        errors.append(f"{file_path}: 'tags' must be a list")
+    elif not 4 <= len(tags) <= 7:
+        errors.append(f"{file_path}: 'tags' must contain 4–7 values")
+    else:
+        normalized_tags: set[str] = set()
+        for i, tag in enumerate(tags):
+            if not isinstance(tag, str):
+                errors.append(f"{file_path}: 'tags' element {i} must be a string")
+                continue
+
+            tag_value = tag.strip()
+            if not TAG_RE.fullmatch(tag_value):
+                errors.append(
+                    f"{file_path}: 'tags' element {i} must be lowercase kebab-case"
+                )
+            if tag_value in FILLER_TAGS:
+                errors.append(f"{file_path}: 'tags' element {i} is a filler value")
+            if tag_value in normalized_tags:
+                errors.append(f"{file_path}: 'tags' contains duplicate {tag_value!r}")
+            normalized_tags.add(tag_value)
+
+        if isinstance(name, str) and name.strip() in normalized_tags:
+            errors.append(f"{file_path}: 'tags' must not repeat the skill name")
 
     return errors

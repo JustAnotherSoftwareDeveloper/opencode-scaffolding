@@ -18,13 +18,15 @@ Produce a validated skill artifact.
    - Does not exist → mode is CREATE.
    - Exists → mode is UPDATE.
 3. Determine `<class>` from requirements (CREATE) or existing frontmatter (UPDATE).
-4. Load `skill-architect` when class determination requires taxonomy, boundary rules, or platform layout context.
-5. Gather source material: requirements, reference content, class guidance, template path.
+4. Derive 4–7 descriptive `<tags>` from the trigger, deliverable, domain, tools, and workflow context.
+5. Preserve existing tags unless the request explicitly changes them.
+6. Load `skill-architect` when class determination requires taxonomy, boundary rules, or platform layout context.
+7. Gather source material: requirements, reference content, class guidance, template path.
 
 ## Procedure
 
 1. Load relevant documentation skills based on mode and class.
-   - Load `skill-authoring-guide` for editorial conventions, frontmatter field rules, progressive disclosure guidance, and trigger evaluation rules.
+   - Load `skill-authoring-guide` for editorial conventions, required frontmatter, descriptive tag selection, progressive disclosure guidance, and trigger evaluation rules.
    - Load `skill-orchestration-reference` when the target skill is orchestrated or uses delegated worker patterns.
    - Load `skill-maintenance-reference` when mode is UPDATE or when migration guidance or validation checklist items are needed.
    - Load `skill-template-library` for template selection, schema indices, and snippet indices.
@@ -47,6 +49,7 @@ Produce a validated skill artifact.
 - `skill-authoring-guide` was loaded before drafting body content.
 - `skill-maintenance-reference` was loaded before UPDATE path execution.
 - `skill-template-library` was loaded before template selection.
+- Every created or modified `SKILL.md` contains 4–7 descriptive tags that satisfy the loaded `skill-authoring-guide` tag rules.
 - All created or modified files pass the validation checklist.
 
 ## Expected Output

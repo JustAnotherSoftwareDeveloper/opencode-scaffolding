@@ -12,6 +12,8 @@ import yaml
 
 from lib.validate_skill_meta.core import validate_frontmatter, validate_skill_file
 
+VALID_TAGS = ["test-capability", "metadata-validation", "yaml-frontmatter", "python"]
+
 # ---------------------------------------------------------------------------
 # validate_frontmatter — parametrized
 # ---------------------------------------------------------------------------
@@ -22,9 +24,45 @@ def test_validate_frontmatter_valid() -> None:
     data = {
         "name": "my-skill",
         "description": "Use when doing something useful",
+        "tags": VALID_TAGS,
         "class": "operation",
     }
     assert validate_frontmatter(data) == []
+
+
+@pytest.mark.parametrize(
+    ("tags", "error"),
+    [
+        (None, "Missing required frontmatter field: 'tags'"),
+        ("testing", "Field 'tags' must be a list"),
+        (["testing"], "Field 'tags' must contain 4–7 values"),
+        (
+            ["testing", "validation", "yaml-frontmatter", "Bad Tag"],
+            "Field 'tags' values must be lowercase kebab-case",
+        ),
+        (
+            ["testing", "validation", "yaml-frontmatter", "helper"],
+            "Field 'tags' values must not be filler terms",
+        ),
+        (
+            ["testing", "validation", "yaml-frontmatter", "testing"],
+            "Field 'tags' values must be unique",
+        ),
+        (
+            ["my-skill", "validation", "yaml-frontmatter", "python"],
+            "Field 'tags' must not repeat the skill name",
+        ),
+    ],
+)
+def test_validate_frontmatter_tags(tags: object, error: str) -> None:
+    """Required tag metadata rejects invalid tag lists."""
+    data = {
+        "name": "my-skill",
+        "description": "Use when doing something useful",
+        "tags": tags,
+        "class": "operation",
+    }
+    assert error in validate_frontmatter(data)
 
 
 @pytest.mark.parametrize(
@@ -40,6 +78,7 @@ def test_validate_frontmatter_valid() -> None:
             [
                 "Missing required frontmatter field: 'name'",
                 "Missing required frontmatter field: 'description'",
+                "Missing required frontmatter field: 'tags'",
                 "Missing required frontmatter field: 'class'",
             ],
             id="all-missing",
@@ -114,6 +153,8 @@ def test_validate_frontmatter_errors(
     expected_errors: list[str],
 ) -> None:
     """Each parametrized case produces the expected error messages."""
+    if isinstance(data, dict) and data:
+        data = {**data, "tags": VALID_TAGS}
     assert validate_frontmatter(data) == expected_errors
 
 
@@ -135,6 +176,7 @@ def test_validate_skill_file_valid(tmp_path: Path) -> None:
         "---\n"
         "name: valid-skill\n"
         "description: Use when doing the thing\n"
+        "tags: [test-capability, metadata-validation, yaml-frontmatter, python]\n"
         "class: operation\n"
         "---\n"
         "\n"

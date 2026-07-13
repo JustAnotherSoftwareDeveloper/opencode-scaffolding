@@ -17,6 +17,7 @@ _VALID_SKILL = (
     "---\n"
     "name: valid-skill\n"
     "description: Use when testing\n"
+    "tags: [test-capability, metadata-validation, yaml-frontmatter, python]\n"
     "class: operation\n"
     "---\n"
     "\n"

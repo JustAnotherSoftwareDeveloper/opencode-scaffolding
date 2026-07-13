@@ -1,6 +1,7 @@
 ---
 name: display-tasks
 description: Render task delegation packets as a concise Markdown summary table.
+tags: [task-rendering, markdown-output, summary-formatting, workflow]
 class: display
 version: 1.2.0
 license: MIT

@@ -27,7 +27,7 @@ All rules in this section apply to all body text.
 
 - **Title Case for headings** — "Skill Authoring Guide", "Quality Rules", "Validation Checklist", not "Skill authoring guide", "Quality rules". Applies to `H1` and `H2` headings.
 - **One `H1` per file** — the filename's topic. All subsections are `H2` or deeper.
-- **YAML frontmatter** — exactly three fields: `name`, `description`, `class`. No extra top-level keys. See `./frontmatter-rules.md` for field rules.
+- **YAML frontmatter** — exactly four required fields: `name`, `description`, `tags`, `class`. See `./frontmatter-rules.md` and `./tagging-guide.md` for field rules.
 - **Ordered lists for sequential steps** — use `1. 2. 3.`.
 - **Bullet lists for unordered items** — use `-`.
 - **Flat Markdown** — Do not use Markdown tables in skill supporting documentation (reference files, READMEs, guides, examples). Use bullet lists, definition lists, or subsection headings instead.

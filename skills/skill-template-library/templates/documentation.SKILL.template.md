@@ -1,6 +1,11 @@
 ---
 name: <<skill-name>>
 description: "Use when referencing <<domain-context>>."
+tags:
+  - <<primary-capability>>
+  - <<domain-or-artifact>>
+  - <<tool-or-workflow-context>>
+  - <<additional-discriminator>>
 class: documentation
 ---
 

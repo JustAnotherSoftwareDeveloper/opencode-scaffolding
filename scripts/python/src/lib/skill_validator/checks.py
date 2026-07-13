@@ -35,7 +35,7 @@ class CheckResult:
 
 
 def check_frontmatter_valid(skill_dir: Path) -> CheckResult:
-    """Check 1: Frontmatter YAML is valid and contains exactly name, description, class."""
+    """Check 1: Frontmatter YAML is valid and contains required tag metadata."""
     content = _read_skill_md(skill_dir)
     if content is None:
         return CheckResult("frontmatter-valid", False, "SKILL.md not found")
@@ -46,7 +46,7 @@ def check_frontmatter_valid(skill_dir: Path) -> CheckResult:
             "frontmatter-valid", False, "Frontmatter YAML is missing or invalid"
         )
 
-    expected_keys = {"name", "description", "class"}
+    expected_keys = {"name", "description", "tags", "class"}
     actual_keys = set(fm.keys())
     if actual_keys != expected_keys:
         extra = actual_keys - expected_keys
@@ -58,8 +58,8 @@ def check_frontmatter_valid(skill_dir: Path) -> CheckResult:
             parts.append(f"missing keys: {', '.join(sorted(missing))}")
         return CheckResult("frontmatter-valid", False, "; ".join(parts))
 
-    # Verify each value is non-empty string
-    for key in expected_keys:
+    # Verify scalar required values.
+    for key in expected_keys - {"tags"}:
         val = fm.get(key)
         if not isinstance(val, str) or not val.strip():
             return CheckResult(
@@ -68,8 +68,20 @@ def check_frontmatter_valid(skill_dir: Path) -> CheckResult:
                 f"Field '{key}' is missing or empty",
             )
 
+    tags = fm.get("tags")
+    if not isinstance(tags, list) or not 4 <= len(tags) <= 7:
+        return CheckResult(
+            "frontmatter-valid", False, "Field 'tags' must contain 4–7 values"
+        )
+    if any(not isinstance(tag, str) or not tag.strip() for tag in tags):
+        return CheckResult(
+            "frontmatter-valid", False, "Field 'tags' must contain non-empty strings"
+        )
+
     return CheckResult(
-        "frontmatter-valid", True, "Valid frontmatter with name, description, class"
+        "frontmatter-valid",
+        True,
+        "Valid frontmatter with name, description, tags, class",
     )
 
 

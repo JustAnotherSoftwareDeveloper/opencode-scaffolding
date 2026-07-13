@@ -6,6 +6,7 @@ Used by:
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import TypedDict
 
@@ -31,6 +32,17 @@ _VALID_CLASSES: set[str] = {
     "orchestrated",
     "planning",
     "documentation",
+}
+_TAG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+_FILLER_TAGS = {
+    "common",
+    "default",
+    "general",
+    "helper",
+    "misc",
+    "skill",
+    "tool",
+    "utility",
 }
 
 
@@ -79,6 +91,31 @@ def validate_frontmatter(data: object) -> list[str]:
         errors.append("Field 'description' must be a string")
     elif not description.startswith("Use when"):
         errors.append("Field 'description' must start with 'Use when'")
+
+    # Validate tags
+    tags = data.get("tags")
+    if tags is None:
+        errors.append("Missing required frontmatter field: 'tags'")
+    elif not isinstance(tags, list):
+        errors.append("Field 'tags' must be a list")
+    elif not 4 <= len(tags) <= 7:
+        errors.append("Field 'tags' must contain 4–7 values")
+    else:
+        normalized_tags: set[str] = set()
+        for tag in tags:
+            if not isinstance(tag, str):
+                errors.append("Field 'tags' values must be strings")
+                continue
+            tag_value = tag.strip()
+            if not _TAG_RE.fullmatch(tag_value):
+                errors.append("Field 'tags' values must be lowercase kebab-case")
+            if tag_value in _FILLER_TAGS:
+                errors.append("Field 'tags' values must not be filler terms")
+            if tag_value in normalized_tags:
+                errors.append("Field 'tags' values must be unique")
+            normalized_tags.add(tag_value)
+        if isinstance(name, str) and name.strip() in normalized_tags:
+            errors.append("Field 'tags' must not repeat the skill name")
 
     # Validate class
     class_val = data.get("class")

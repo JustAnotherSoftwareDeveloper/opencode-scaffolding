@@ -6,9 +6,10 @@ Produce a new skill directory from scratch.
 
 1. Select class per the loaded `skill-authoring-guide` frontmatter rules.
    Copy the matching template from the loaded `skill-template-library`.
-2. Write YAML frontmatter with exactly three fields: `name`, `description`, `class`.
+2. Write YAML frontmatter with exactly four fields: `name`, `description`, `tags`, `class`.
    - `name` is the skill directory name.
    - `description` starts with "Use when ".
+   - `tags` contains 4–7 descriptive lowercase kebab-case strings selected from the trigger, deliverable, domain, tools, and workflow context.
    - `class` is one of: operation, planning, documentation, delegated, inline, orchestrated.
 3. Draft body content following editorial conventions from the loaded `skill-authoring-guide`.
    - Use imperative voice, active voice.
@@ -39,8 +40,9 @@ Edit one or more files in an existing skill directory.
 3. Determine which files the request targets from DETAILS or user instructions.
 4. For each targeted file:
    - Read its full current content.
-   - Apply targeted edits — do not rewrite the entire file unless explicitly requested.
-   - Preserve existing frontmatter, structure, and prose outside the edit scope.
+    - Apply targeted edits — do not rewrite the entire file unless explicitly requested.
+    - Preserve existing frontmatter, structure, and prose outside the edit scope.
+    - Preserve existing tags unless the request explicitly changes them.
 5. If creating a new supporting file (e.g., a new reference or template), write it following conventions from `skill-authoring-guide` and matching templates from `skill-template-library`.
 6. Re-validate all modified files against the Validation section below.
 
@@ -48,9 +50,12 @@ Edit one or more files in an existing skill directory.
 
 **Shape checks:**
 
-- YAML frontmatter is valid and contains exactly `name`, `description`, `class`.
+- YAML frontmatter is valid and contains exactly `name`, `description`, `tags`, `class`.
 - `name` matches the skill directory name.
 - `description` begins with "Use when ".
+- `tags` contains 4–7 unique lowercase kebab-case strings.
+- `tags` describes the skill's capability and material domain, artifact, tool, or workflow context.
+- `tags` contains no filler values, duplicate concepts, or values that only restate the skill name.
 - `class` is a valid OpenCode class.
 - One H1 per file; all subsections are H2 or deeper.
 - All headings use Title Case.
@@ -88,3 +93,4 @@ Edit one or more files in an existing skill directory.
 - Existing content not silently deleted — every edit preserves surrounding context.
 - Update path references current file content, not assumed content.
 - Targeted edits are scoped to the request — no unrelated sections modified.
+- Required tags remain present and valid after every frontmatter edit.

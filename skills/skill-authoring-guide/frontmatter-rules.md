@@ -1,11 +1,16 @@
 # Required Frontmatter
 
-Every `SKILL.md` must open with valid YAML frontmatter containing exactly three required fields (plus one optional field, `tags`):
+Every `SKILL.md` must open with valid YAML frontmatter containing four required fields:
 
 ```yaml
 ---
 name: <<skill-name>>
 description: "Use when <<trigger description>>."
+tags:
+  - <<primary-capability>>
+  - <<domain-or-artifact>>
+  - <<tool-or-workflow-context>>
+  - <<additional-discriminator>>
 class: <<one-of-six-classes>>
 ---
 ```
@@ -38,22 +43,13 @@ One of exactly six values:
 
 - **No other classes** are valid. If uncertain, lean toward `operation`. If the skill is a passive data store consumed by other skills, choose `documentation`.
 
-## `Tags` (optional)
+## `Tags`
 
-- **Type**: `list[str]`
-- **Status**: Optional. May be omitted entirely.
-- **Format**: Flat string arrays `['str1', 'str2']`.
-- **Count**: Use 4–7 tags per skill when tags are present.
-- **Convention**: Tags are lowercase kebab-case strings with no spaces.
-- **Vocabulary**: Tags are descriptive freeform labels; there is no fixed registry.
-- **Scope**: Prefer concrete domain, action, tool, artifact, and workflow-context terms that help match the skill to user intent.
-- **Avoid**: Overly broad filler tags, duplicated meaning, and tags that only restate the skill name.
-- **Example**:
-  ```yaml
-  tags:
-    - "code-generation"
-    - "test-writing"
-    - "node"
-    - "bun"
-    - "cli"
-  ```
+- **Type**: `list[str]`.
+- **Status**: Required. Do not omit or leave the list empty.
+- **Count**: Provide 4–7 tags.
+- **Format**: Use lowercase kebab-case strings with no spaces.
+- **Uniqueness**: Do not repeat a tag or use synonyms that add no distinct matching signal.
+- **Quality**: Select descriptive capability, domain, artifact, tool, and workflow-context terms.
+- **Prohibited values**: Do not use filler values such as `general`, `helper`, `tool`, `skill`, `misc`, `utility`, `common`, or `default`.
+- **Selection method**: Follow `./tagging-guide.md`.

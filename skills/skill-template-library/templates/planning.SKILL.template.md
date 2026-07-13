@@ -1,6 +1,11 @@
 ---
 name: <<skill-name>>
 description: "Use as planning reference for <<domain>>."
+tags:
+  - <<primary-capability>>
+  - <<domain-or-artifact>>
+  - <<tool-or-workflow-context>>
+  - <<additional-discriminator>>
 class: planning
 ---
 

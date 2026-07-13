@@ -55,7 +55,7 @@ def skill_dir(tmp_path: Path) -> Path:
     d.mkdir()
     skill_md = d / "SKILL.md"
     skill_md.write_text(
-        "---\nname: my-skill\ndescription: Use when testing\nclass: operation\n---\n\n## Docs\n\nContent.\n"
+        "---\nname: my-skill\ndescription: Use when testing\ntags: [test-capability, skill-validation, yaml-frontmatter, python]\nclass: operation\n---\n\n## Docs\n\nContent.\n"
     )
     return d
 
@@ -86,7 +86,7 @@ def skill_dir_valid_full(tmp_path: Path) -> Path:
     d = tmp_path / "full-skill"
     d.mkdir()
     (d / "SKILL.md").write_text(
-        "---\nname: full-skill\ndescription: Use when testing everything\nclass: operation\n---\n\n## Docs\n\nContent.\n"
+        "---\nname: full-skill\ndescription: Use when testing everything\ntags: [test-capability, skill-validation, yaml-frontmatter, python]\nclass: operation\n---\n\n## Docs\n\nContent.\n"
     )
     ref = d / "reference"
     ref.mkdir()
@@ -219,7 +219,7 @@ class TestCheckFrontmatterValid:
         d = tmp_path / "empty-name"
         d.mkdir()
         (d / "SKILL.md").write_text(
-            "---\nname: ''\ndescription: Use when testing\nclass: operation\n---\n"
+            "---\nname: ''\ndescription: Use when testing\ntags: [test-capability, skill-validation, yaml-frontmatter, python]\nclass: operation\n---\n"
         )
         result = check_frontmatter_valid(d)
         assert result.passed is False

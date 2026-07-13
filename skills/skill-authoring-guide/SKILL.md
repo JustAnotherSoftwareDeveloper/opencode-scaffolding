@@ -16,7 +16,8 @@ Read the documentation files listed below as needed for your current task.
 The bulleted list provides the mapping of files to their purpose.
 
 - `authoring-style.md` — Defines prose style, tone, and formatting conventions for skill documentation.
-- `frontmatter-rules.md` — Specifies required and optional frontmatter fields and their validation rules.
+- `frontmatter-rules.md` — Specifies required frontmatter fields and their validation rules.
+- `tagging-guide.md` — Defines how to select descriptive, routable tags.
 - `progressive-disclosure.md` — Guidelines for layering detail from summary to deep reference.
 - `trigger-evaluation.md` — Rules for evaluating when this skill's trigger conditions are met.
 

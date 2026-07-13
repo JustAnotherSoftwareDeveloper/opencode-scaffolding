@@ -76,7 +76,7 @@ class TestDiscoveryEdgeCases:
         skill_dir = root / "valid"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: valid\ndescription: Use when testing\nclass: operation\n---\n"
+            "---\nname: valid\ndescription: Use when testing\ntags: [test-capability, discovery, symlink-handling, parsing]\nclass: operation\n---\n"
         )
         # Create a symlink inside loop_dir that points to its parent (creating a loop)
         link = loop_dir / "back"
@@ -104,7 +104,7 @@ class TestDiscoveryEdgeCases:
         skill_dir = root / "ok-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: ok-skill\ndescription: Use when testing\nclass: operation\n---\n"
+            "---\nname: ok-skill\ndescription: Use when testing\ntags: [test-capability, discovery, permission-handling, parsing]\nclass: operation\n---\n"
         )
         index = SkillIndex()
         discover_skills_from_root(root, "project", index, verbose=True)
@@ -559,7 +559,7 @@ class TestModuleMainGuards:
         d = tmp_path / "test-skill"
         d.mkdir()
         (d / "SKILL.md").write_text(
-            "---\nname: test-skill\ndescription: Use when testing\nclass: operation\n---\n\n## Docs\n\nContent.\n"
+            "---\nname: test-skill\ndescription: Use when testing\ntags: [test-capability, skill-validation, yaml-frontmatter, python]\nclass: operation\n---\n\n## Docs\n\nContent.\n"
         )
         ref = d / "reference"
         ref.mkdir()
@@ -620,7 +620,7 @@ class TestDiscoverAllSkillsDefaults:
         skill_dir = skill_root / "my-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: my-skill\ndescription: Use when testing\nclass: operation\n---\n"
+            "---\nname: my-skill\ndescription: Use when testing\ntags: [test-capability, discovery, project-scope, parsing]\nclass: operation\n---\n"
         )
 
         index = SkillIndex()
@@ -649,7 +649,7 @@ class TestDiscoverAllSkillsDefaults:
         skill_dir = skill_root / "my-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: my-skill\ndescription: Use when testing\nclass: operation\n---\n"
+            "---\nname: my-skill\ndescription: Use when testing\ntags: [test-capability, discovery, project-scope, parsing]\nclass: operation\n---\n"
         )
 
         monkeypatch.setattr("lib.collect_skills.discovery.Path.cwd", lambda: project)

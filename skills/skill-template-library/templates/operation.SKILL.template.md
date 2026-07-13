@@ -1,6 +1,11 @@
 ---
 name: <<skill-name>>
 description: "Use when <<trigger-condition>>."
+tags:
+  - <<primary-capability>>
+  - <<domain-or-artifact>>
+  - <<tool-or-workflow-context>>
+  - <<additional-discriminator>>
 class: operation
 ---
 

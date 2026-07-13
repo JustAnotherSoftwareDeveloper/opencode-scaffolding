@@ -201,9 +201,32 @@ class TestSkillValidation:
     def test_tags_element_not_string(self) -> None:
         """A tag element that is not a string is rejected."""
         path = FIXTURES_DIR / "valid" / "ask-question" / "SKILL.md"
-        fm: dict[str, Any] = {"name": "test-skill", "description": "Use when testing", "tags": [42, "valid-tag"]}
+        fm: dict[str, Any] = {"name": "test-skill", "description": "Use when testing", "tags": [42, "valid-tag", "test-validation", "python"]}
         errors = validate_skill_frontmatter(fm, "test-skill", path)
         assert any("element" in e and "string" in e for e in errors)
+
+    @pytest.mark.parametrize(
+        ("tags", "error_fragment"),
+        [
+            ([], "4–7"),
+            (["valid-tag", "test-validation", "python", "Bad Tag"], "kebab-case"),
+            (["valid-tag", "test-validation", "python", "helper"], "filler"),
+            (["valid-tag", "test-validation", "python", "valid-tag"], "duplicate"),
+            (["test-skill", "test-validation", "python", "yaml-frontmatter"], "skill name"),
+        ],
+    )
+    def test_tags_require_descriptive_values(
+        self, tags: list[str], error_fragment: str
+    ) -> None:
+        """Required tags reject empty, malformed, generic, and duplicate values."""
+        path = FIXTURES_DIR / "valid" / "ask-question" / "SKILL.md"
+        fm: dict[str, Any] = {
+            "name": "test-skill",
+            "description": "Use when testing",
+            "tags": tags,
+        }
+        errors = validate_skill_frontmatter(fm, "test-skill", path)
+        assert any(error_fragment in error for error in errors)
 
 
 # ============================================================================
@@ -322,7 +345,7 @@ class TestDirectoryTraversal:
         real_skill = tmp_path / "real-skill"
         real_skill.mkdir()
         (real_skill / "SKILL.md").write_text(
-            "---\nname: real-skill\ndescription: a real skill\n---\n"
+            "---\nname: real-skill\ndescription: a real skill\ntags: [real-capability, test-discovery, symlink, parsing]\n---\n"
         )
 
         root = tmp_path / "symlink-root"
@@ -350,7 +373,7 @@ class TestDirectoryTraversal:
         skill_dir = root / "valid-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: valid-skill\ndescription: not in loop\n---\n"
+            "---\nname: valid-skill\ndescription: not in loop\ntags: [valid-capability, loop-safety, test-discovery, parsing]\n---\n"
         )
 
         index = SkillIndex()
@@ -636,7 +659,7 @@ class TestDiscoverAllSkills:
         skill_dir = skill_root / "my-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: my-skill\ndescription: Use when testing\nclass: operation\n---\n"
+            "---\nname: my-skill\ndescription: Use when testing\ntags: [test-capability, discovery, project-scope, parsing]\nclass: operation\n---\n"
         )
         index = SkillIndex()
         discover_all_skills(
@@ -657,7 +680,7 @@ class TestDiscoverAllSkills:
         skill_dir = extra_root / "extra-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: extra-skill\ndescription: Use when testing\nclass: operation\n---\n"
+            "---\nname: extra-skill\ndescription: Use when testing\ntags: [test-capability, discovery, extra-paths, parsing]\nclass: operation\n---\n"
         )
         index = SkillIndex()
         discover_all_skills(
@@ -680,7 +703,7 @@ class TestDiscoverAllSkills:
         skill_dir = archive_root / "archived-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: archived-skill\ndescription: Use when testing\nclass: operation\n---\n"
+            "---\nname: archived-skill\ndescription: Use when testing\ntags: [test-capability, discovery, archive-paths, parsing]\nclass: operation\n---\n"
         )
         index = SkillIndex()
         discover_all_skills(
@@ -766,7 +789,7 @@ class TestDiscoverAllSkills:
         skill_dir = archive_root / "archive-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: archive-skill\ndescription: Use when testing\nclass: operation\n---\n"
+            "---\nname: archive-skill\ndescription: Use when testing\ntags: [test-capability, discovery, archive-paths, parsing]\nclass: operation\n---\n"
         )
         index = SkillIndex()
         discover_all_skills(
@@ -787,7 +810,7 @@ class TestDiscoverAllSkills:
         skill_dir = extra_root / "path-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: path-skill\ndescription: Use when testing\nclass: operation\n---\n"
+            "---\nname: path-skill\ndescription: Use when testing\ntags: [test-capability, discovery, path-handling, parsing]\nclass: operation\n---\n"
         )
         index = SkillIndex()
         discover_all_skills(

@@ -1,6 +1,11 @@
 ---
 name: <<skill-name>>
 description: "Use when <<trigger description for multi-phase coordination>>."
+tags:
+  - <<primary-capability>>
+  - <<domain-or-artifact>>
+  - <<tool-or-workflow-context>>
+  - <<additional-discriminator>>
 class: orchestrated
 ---
 

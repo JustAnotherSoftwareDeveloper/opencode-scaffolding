@@ -5,6 +5,9 @@ Every authored skill must be verified against this checklist before declaring do
 - **Name match**: `name` in frontmatter matches directory under `skills/`.
 - **Description prefix**: Starts with `"Use when"`, is specific, and captures trigger intent.
 - **Class validity**: One of the six allowed values (planning, documentation, operation, orchestrated, delegated, inline).
+- **Tags present**: `tags` is a non-empty list of 4–7 strings.
+- **Tags descriptive**: Tags are unique lowercase kebab-case terms that identify capability and material domain, artifact, tool, or workflow context.
+- **Tags specific**: Tags contain no filler values, redundant synonyms, or a value that only repeats the skill name.
 - **Original prose**: No text copied from templates or reference files.
 - **Body is procedural**: Steps, conditions, decisions.
   Not a tutorial, not a reference (unless class is `documentation`).
