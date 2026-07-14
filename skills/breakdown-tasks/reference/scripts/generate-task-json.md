@@ -2,13 +2,14 @@
 
 `generate-task-json` reads one `TaskDraftList` JSON object from standard input.
 It loads `~/.config/opencode/skills/breakdown-tasks/schema/task-input.schema.json` and `~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json`.
-It validates draft input before assignment and atomically creates a valid `BreakdownTasksOutput` JSON file in local `.tasks/`.
+It validates draft input before assignment and atomically creates a valid `BreakdownTasksOutput` JSON file in `--output-dir`.
 
 ## CLI
 
 ```bash
 uv run --project ~/.config/opencode/scripts/python generate-task-json \
-  --summary-slug <kebab-case-slug> < input.json
+  --summary-slug <kebab-case-slug> \
+  --output-dir "$CWD/.tasks" < input.json
 ```
 
 ## Exit Codes

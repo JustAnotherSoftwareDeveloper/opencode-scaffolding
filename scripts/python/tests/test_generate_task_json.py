@@ -11,6 +11,12 @@ import pytest
 from lib.collect_skills.models import Skill
 from lib.generate_task_json import core
 
+VALID_CONTEXT = (
+    "Add focused Python tests for the example CLI behavior and preserve the existing "
+    "test layout. Cover the supported input path, error handling, and output contract "
+    "without changing unrelated production code or adding dependencies."
+)
+
 
 def _drafts() -> dict:
     return {
@@ -18,7 +24,7 @@ def _drafts() -> dict:
         "tasks": [
             {
                 "purpose": "Write Python tests.",
-                "context": "x" * 2000,
+                "context": VALID_CONTEXT,
                 "filesToRead": ["scripts/python/src/cli/example.py"],
                 "filesToWrite": ["scripts/python/tests/test_example.py"],
                 "executionInstructions": [{"step": 1, "action": "Write tests."}],
@@ -56,6 +62,17 @@ def test_generate_task_json_writes_assigned_output(tmp_path: Path) -> None:
     assert result["tasks"][0]["skills"] == ["python-test"]
 
 
+def test_generate_task_json_writes_to_explicit_output_directory(tmp_path: Path) -> None:
+    output_dir = tmp_path / "state"
+    output = core.generate_task_json(
+        _drafts(),
+        "generate-tests",
+        output_dir=output_dir,
+        skills_index=[{"name": "python-test", "class": "operation"}],
+    )
+    assert output == output_dir / "generate-tests.json"
+
+
 def test_generate_task_json_rejects_invalid_input_without_replacing_output(
     tmp_path: Path,
 ) -> None:
@@ -69,6 +86,19 @@ def test_generate_task_json_rejects_invalid_input_without_replacing_output(
             project_root=tmp_path,
         )
     assert output.read_text() == '{"preserve": true}\n'
+
+
+def test_generate_task_json_rejects_context_below_minimum(tmp_path: Path) -> None:
+    drafts = _drafts()
+    drafts["tasks"][0]["context"] = "x" * 199
+    with pytest.raises(core.GenerationValidationError, match="input failed"):
+        core.generate_task_json(
+            drafts,
+            "generate-tests",
+            project_root=tmp_path,
+            skills_index=[{"name": "python-test", "class": "operation"}],
+        )
+    assert not (tmp_path / ".tasks").exists()
 
 
 def test_generate_task_json_rejects_draft_skills_before_creating_tasks_directory(
@@ -158,7 +188,7 @@ def test_task_text_and_scoring_helpers() -> None:
 
 def test_output_path_rejects_invalid_slug(tmp_path: Path) -> None:
     with pytest.raises(core.SummarySlugError, match="kebab-case"):
-        core._output_path("not/a-slug", tmp_path)
+        core._output_path("not/a-slug", tmp_path / ".tasks")
 
 
 def test_write_json_new_cleans_up_after_link_failure(

@@ -33,6 +33,12 @@ SCHEMA_PATH = (
     / "task-packet.schema.json"
 )
 
+VALID_CONTEXT = (
+    "Validate the task packet schema using the declared inputs and expected output. "
+    "Preserve all existing structure, follow each execution instruction in order, and "
+    "report only the requested result after completing relevant checks."
+)
+
 assert SCHEMA_PATH.is_file(), f"Schema not found at {SCHEMA_PATH}"
 
 # ---------------------------------------------------------------------------
@@ -73,7 +79,7 @@ def minimal_task() -> dict:
     """
     return {
         "purpose": "Validate the sequential schema invariants",
-        "context": "x" * 2000,
+        "context": VALID_CONTEXT,
         "filesToRead": ["src/schema.json"],
         "filesToWrite": ["src/output.py"],
         "skills": ["python"],
@@ -90,7 +96,7 @@ def full_task() -> dict:
     """A full valid task packet including optional ``verification`` field."""
     return {
         "purpose": "Full task with verification checks",
-        "context": "x" * 2000,
+        "context": VALID_CONTEXT,
         "filesToRead": ["src/main.py", "src/lib.py"],
         "filesToWrite": ["src/output.py", "tests/test_output.py"],
         "skills": ["python", "testing"],
@@ -284,9 +290,9 @@ class TestSchemaStructuralInvariants:
     def test_task_packet_enforces_context_and_instruction_limits(
         self, schema_dict: dict
     ) -> None:
-        """TaskPacket requires detailed context and at most five steps."""
+        """TaskPacket requires concise context and at most five steps."""
         props = schema_dict["definitions"]["TaskPacket"]["properties"]
-        assert props["context"]["minLength"] == 2000
+        assert props["context"]["minLength"] == 200
         assert props["executionInstructions"]["maxItems"] == 5
         assert props["skills"]["maxItems"] == 3
 

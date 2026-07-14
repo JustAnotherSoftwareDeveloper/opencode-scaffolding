@@ -55,6 +55,7 @@ def generate_task_json(
     summary_slug: str,
     *,
     project_root: Path | None = None,
+    output_dir: Path | None = None,
     skills_index: list[dict[str, Any]] | None = None,
 ) -> Path:
     """Assign skills to *data* and write a slug-named local task file."""
@@ -83,16 +84,21 @@ def generate_task_json(
             f"output failed BreakdownTasksOutput schema: {output_errors}"
         )
 
-    output_path = _output_path(summary_slug, project_root or Path.cwd())
+    if output_dir is not None and project_root is not None:
+        raise ValueError("provide either output_dir or project_root, not both")
+    output_path = _output_path(
+        summary_slug,
+        output_dir or (project_root or Path.cwd()) / ".tasks",
+    )
     _write_json_new(output_path, result)
     return output_path
 
 
-def _output_path(summary_slug: str, project_root: Path) -> Path:
+def _output_path(summary_slug: str, output_dir: Path) -> Path:
     """Return the local task-file path for a validated summary slug."""
     if not SUMMARY_SLUG_PATTERN.fullmatch(summary_slug):
         raise SummarySlugError("summary slug must be lowercase kebab-case")
-    return project_root / ".tasks" / f"{summary_slug}.json"
+    return output_dir / f"{summary_slug}.json"
 
 
 def _candidate_skills(skills_index: list[dict[str, Any]] | None) -> list[Skill]:

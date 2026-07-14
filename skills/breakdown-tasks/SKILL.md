@@ -33,7 +33,8 @@ Return `BLOCKED: missing PURPOSE or DETAILS` if either section is missing.
 
 ```bash
 printf '%s' "$TASK_DRAFT_JSON" | uv run --directory ~/.config/opencode/scripts/python generate-task-json \
-  --summary-slug "$SUMMARY_SLUG"
+  --summary-slug "$SUMMARY_SLUG" \
+  --output-dir "$CWD/.tasks"
 ```
 
 10. Return generator stdout only.

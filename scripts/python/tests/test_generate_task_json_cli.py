@@ -3,11 +3,18 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 from click.testing import CliRunner
 
 from cli import generate_task_json
 from lib.generate_task_json.core import GenerationValidationError
+
+VALID_CONTEXT = (
+    "Exercise the CLI task generator with a complete draft that identifies the test "
+    "scope, target behavior, expected output, and relevant constraints while avoiding "
+    "unrelated code changes or unsupported execution paths."
+)
 
 
 def _drafts() -> str:
@@ -17,7 +24,7 @@ def _drafts() -> str:
             "tasks": [
                 {
                     "purpose": "Write tests.",
-                    "context": "x" * 2000,
+                    "context": VALID_CONTEXT,
                     "filesToRead": [],
                     "filesToWrite": [],
                     "executionInstructions": [{"step": 1, "action": "Write tests."}],
@@ -38,26 +45,42 @@ def test_success_prints_relative_output_path(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(
         generate_task_json,
         "generate_task_json",
-        lambda _data, slug: tmp_path / ".tasks" / f"{slug}.json",
+        lambda _data, slug, *, output_dir: output_dir / f"{slug}.json",
     )
-    result = CliRunner().invoke(
-        generate_task_json.main,
-        ["--summary-slug", "cli-test"],
-        input=_drafts(),
-    )
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        result = runner.invoke(
+            generate_task_json.main,
+            [
+                "--summary-slug",
+                "cli-test",
+                "--output-dir",
+                str(Path.cwd() / ".tasks"),
+            ],
+            input=_drafts(),
+        )
     assert result.exit_code == 0
     assert result.output == ".tasks/cli-test.json\n"
 
 
 def test_missing_summary_slug_fails() -> None:
-    result = CliRunner().invoke(generate_task_json.main, [], input=_drafts())
+    result = CliRunner().invoke(
+        generate_task_json.main, ["--output-dir", ".tasks"], input=_drafts()
+    )
+    assert result.exit_code == 2
+
+
+def test_missing_output_dir_fails() -> None:
+    result = CliRunner().invoke(
+        generate_task_json.main, ["--summary-slug", "cli-test"], input=_drafts()
+    )
     assert result.exit_code == 2
 
 
 def test_invalid_summary_slug_fails() -> None:
     result = CliRunner().invoke(
         generate_task_json.main,
-        ["--summary-slug", "Not a slug"],
+        ["--summary-slug", "Not a slug", "--output-dir", ".tasks"],
         input=_drafts(),
     )
     assert result.exit_code == 1
@@ -67,7 +90,7 @@ def test_invalid_summary_slug_fails() -> None:
 def test_malformed_json_fails() -> None:
     result = CliRunner().invoke(
         generate_task_json.main,
-        ["--summary-slug", "cli-test"],
+        ["--summary-slug", "cli-test", "--output-dir", ".tasks"],
         input="not json",
     )
     assert result.exit_code == 2
@@ -77,7 +100,7 @@ def test_malformed_json_fails() -> None:
 def test_array_json_fails() -> None:
     result = CliRunner().invoke(
         generate_task_json.main,
-        ["--summary-slug", "cli-test"],
+        ["--summary-slug", "cli-test", "--output-dir", ".tasks"],
         input="[]",
     )
     assert result.exit_code == 2
@@ -88,11 +111,13 @@ def test_validation_failure_has_no_stdout(monkeypatch) -> None:
     monkeypatch.setattr(
         generate_task_json,
         "generate_task_json",
-        lambda *_: (_ for _ in ()).throw(GenerationValidationError("invalid draft")),
+        lambda *_, **__: (_ for _ in ()).throw(
+            GenerationValidationError("invalid draft")
+        ),
     )
     result = CliRunner().invoke(
         generate_task_json.main,
-        ["--summary-slug", "cli-test"],
+        ["--summary-slug", "cli-test", "--output-dir", ".tasks"],
         input=_drafts(),
     )
     assert result.exit_code == 1
@@ -103,11 +128,11 @@ def test_runtime_failure_fails(monkeypatch) -> None:
     monkeypatch.setattr(
         generate_task_json,
         "generate_task_json",
-        lambda *_: (_ for _ in ()).throw(RuntimeError("no skills")),
+        lambda *_, **__: (_ for _ in ()).throw(RuntimeError("no skills")),
     )
     result = CliRunner().invoke(
         generate_task_json.main,
-        ["--summary-slug", "cli-test"],
+        ["--summary-slug", "cli-test", "--output-dir", ".tasks"],
         input=_drafts(),
     )
     assert result.exit_code == 1
@@ -117,11 +142,11 @@ def test_output_error_fails(monkeypatch) -> None:
     monkeypatch.setattr(
         generate_task_json,
         "generate_task_json",
-        lambda *_: (_ for _ in ()).throw(OSError("bad path")),
+        lambda *_, **__: (_ for _ in ()).throw(OSError("bad path")),
     )
     result = CliRunner().invoke(
         generate_task_json.main,
-        ["--summary-slug", "cli-test"],
+        ["--summary-slug", "cli-test", "--output-dir", ".tasks"],
         input=_drafts(),
     )
     assert result.exit_code == 2

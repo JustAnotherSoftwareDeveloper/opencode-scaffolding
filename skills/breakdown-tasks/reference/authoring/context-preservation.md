@@ -13,7 +13,8 @@ The `context` field contains:
 - Background information and constraints
 - References to prior decisions or artifacts
 
-Context fields are 2000–8000 characters.
-*The 2000-character minimum ensures the worker has enough context to execute without ambiguity — too little context forces the worker to make assumptions. The 8000-character maximumLength keeps tasks self-contained and respects worker token limits.*
+Context fields are 200–8000 characters.
+Use concise, task-specific information to meet the minimum.
+Do not pad context with repeated or irrelevant text.
 Do not truncate context.
 *Why: Truncation introduces ambiguity. If the context is too long, prioritize by relevance rather than truncating — the worker needs complete information for its specific task.*

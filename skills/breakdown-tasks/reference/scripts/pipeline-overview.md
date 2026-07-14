@@ -26,7 +26,7 @@ This separation exists for three reasons:
 ## Uniform CLI Convention
 
 - `generate-task-json` reads root JSON from standard input.
-- `generate-task-json` creates `.tasks/<summary-slug>.json` in the caller's project root.
+- `generate-task-json` writes to the directory supplied through `--output-dir`.
 - Errors are written to stderr.
 - Exit 0 on success.
 - Exit non-zero on user, validation, file, or runtime errors.
@@ -52,10 +52,11 @@ This separation exists for three reasons:
 
 ```bash
 uv run --project ~/.config/opencode/scripts/python generate-task-json \
-  --summary-slug "$SUMMARY_SLUG" < draft.json
+  --summary-slug "$SUMMARY_SLUG" \
+  --output-dir "$CWD/.tasks" < draft.json
 ```
 
-`generate-task-json` loads schemas from `~/.config/opencode/skills/breakdown-tasks/schema/`, validates drafts before assignment, discovers `operation` and `documentation` skills, and atomically creates `.tasks/<summary-slug>.json`.
+`generate-task-json` loads schemas from `~/.config/opencode/skills/breakdown-tasks/schema/`, validates drafts before assignment, discovers `operation` and `documentation` skills, and atomically creates `.tasks/<summary-slug>.json` in the supplied output directory.
 
 ### Step 3: Return Relative Path
 

@@ -42,6 +42,12 @@ SCHEMA_PATH = (
     / "task-packet.schema.json"
 )
 
+VALID_CONTEXT = (
+    "Update the target source file while preserving its public behavior and existing "
+    "interfaces. Read the listed files first, make only the requested change, and run "
+    "the relevant checks before reporting the resulting deliverable."
+)
+
 assert SCHEMA_PATH.is_file(), f"Schema not found at {SCHEMA_PATH}"
 
 # ---------------------------------------------------------------------------
@@ -61,7 +67,7 @@ def schema_dict() -> dict:
 def valid_task_1() -> dict:
     return {
         "purpose": "Task one purpose",
-        "context": "x" * 2000,
+        "context": VALID_CONTEXT,
         "filesToRead": ["src/file1.py"],
         "filesToWrite": ["src/out1.py"],
         "skills": ["python"],
@@ -77,7 +83,7 @@ def valid_task_1() -> dict:
 def valid_task_2() -> dict:
     return {
         "purpose": "Task two purpose",
-        "context": "x" * 2000,
+        "context": VALID_CONTEXT,
         "filesToRead": ["src/file2.py"],
         "filesToWrite": ["src/out2.py"],
         "skills": ["typescript"],
@@ -92,7 +98,7 @@ def valid_task_2() -> dict:
 def valid_task_3() -> dict:
     return {
         "purpose": "Task three purpose",
-        "context": "x" * 2000,
+        "context": VALID_CONTEXT,
         "filesToRead": ["src/file3a.py", "src/file3b.py"],
         "filesToWrite": ["src/out3.py"],
         "skills": ["python", "testing"],
@@ -222,6 +228,22 @@ class TestValidateFunction:
         valid, errors = validate([task], schema_dict)
         assert valid is False
         assert any("too long" in e for e in errors)
+
+    def test_context_below_minimum_is_rejected(self, valid_task_1, schema_dict) -> None:
+        """context shorter than 200 chars is rejected."""
+        task = dict(valid_task_1)
+        task["context"] = "x" * 199
+        valid, errors = validate([task], schema_dict)
+        assert valid is False
+        assert any("too short" in error for error in errors)
+
+    def test_context_at_minimum_is_accepted(self, valid_task_1, schema_dict) -> None:
+        """context with exactly 200 chars is accepted."""
+        task = dict(valid_task_1)
+        task["context"] = "x" * 200
+        valid, errors = validate([task], schema_dict)
+        assert valid is True
+        assert errors == []
 
     def test_expected_output_maxlength_exceeded(
         self, valid_task_1, schema_dict
@@ -479,7 +501,9 @@ class TestCliInvalid:
         assert result.exit_code == 1, result.output
         data = json.loads(result.output)
         assert data["valid"] is False
-        assert any("dependencies" in e for e in data["errors"]), f"errors={data['errors']}"
+        assert any("dependencies" in error for error in data["errors"]), (
+            f"errors={data['errors']}"
+        )
 
 class TestCliErrors:
     """Tests for parse/file/schema errors — exit code 2."""

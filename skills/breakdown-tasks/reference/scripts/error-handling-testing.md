@@ -63,7 +63,8 @@ EOF
 
 SUMMARY_SLUG=e2e-pipeline-test
 uv run --project ~/.config/opencode/scripts/python generate-task-json \
-  --summary-slug "$SUMMARY_SLUG" < /tmp/draft.json
+  --summary-slug "$SUMMARY_SLUG" \
+  --output-dir "$CWD/.tasks" < /tmp/draft.json
 
 python3 -c "import json; data=json.load(open('.tasks/e2e-pipeline-test.json')); assert data['tasks'][0]['skills']"
 ```

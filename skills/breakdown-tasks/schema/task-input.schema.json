@@ -30,9 +30,9 @@
           "maxLength": 200
         },
         "context": {
-          "description": "Expanded context for the worker. Includes the relevant subset of the user prompt, background information, and any constraints.",
+          "description": "Task-specific context for the worker. Include the relevant user-request details, background information, and constraints. Do not add filler text.",
           "type": "string",
-          "minLength": 2000,
+          "minLength": 200,
           "maxLength": 8000
         },
         "filesToRead": {

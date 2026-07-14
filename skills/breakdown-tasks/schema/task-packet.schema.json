@@ -31,9 +31,9 @@
           "maxLength": 200
         },
         "context": {
-          "description": "Expanded context for the worker. Includes the relevant subset of the user prompt, background information, and any constraints. Supports longer prompts up to 8000 characters.",
+          "description": "Task-specific context for the worker. Include the relevant user-request details, background information, and constraints. Do not add filler text. Supports longer prompts up to 8000 characters.",
           "type": "string",
-          "minLength": 2000,
+          "minLength": 200,
           "maxLength": 8000
         },
         "filesToRead": {

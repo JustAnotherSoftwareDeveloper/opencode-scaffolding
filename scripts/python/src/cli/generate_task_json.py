@@ -1,7 +1,7 @@
 """CLI entry point for generate-task-json.
 
 Reads a TaskDraftList JSON object from stdin and creates a valid,
-skill-assigned BreakdownTasksOutput JSON object in local .tasks/.
+skill-assigned BreakdownTasksOutput JSON object in the requested output directory.
 
 Exit codes:
   0 — Output path written to stdout.
@@ -31,11 +31,17 @@ from lib.generate_task_json.core import (
     required=True,
     help="Kebab-case filename slug for the local .tasks output.",
 )
-def main(summary_slug: str) -> None:
+@click.option(
+    "--output-dir",
+    type=click.Path(file_okay=False, path_type=Path, resolve_path=True),
+    required=True,
+    help="Directory for the generated task JSON file.",
+)
+def main(summary_slug: str, output_dir: Path) -> None:
     """Assign skills to stdin TaskDraftList JSON and print its local path."""
     try:
         data = _read_stdin_json()
-        output_path = generate_task_json(data, summary_slug)
+        output_path = generate_task_json(data, summary_slug, output_dir=output_dir)
     except (GenerationValidationError, SummarySlugError) as exc:
         click.echo(f"Error: {exc}", err=True)
         raise SystemExit(1) from exc
@@ -45,7 +51,7 @@ def main(summary_slug: str) -> None:
     except (json.JSONDecodeError, OSError, ValueError) as exc:
         click.echo(f"Error: {exc}", err=True)
         raise SystemExit(2) from exc
-    click.echo(str(Path(".tasks") / output_path.name))
+    click.echo(str(output_path.relative_to(Path.cwd())))
 
 
 def _read_stdin_json() -> dict[str, Any]:
