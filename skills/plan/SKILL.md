@@ -1,9 +1,9 @@
 ---
 name: plan
-description: "Use when converting a memo and supporting documents into a copied-source workspace with executable task JSON and reviewable task Markdown."
+description: "Use when creating a source-document plan workspace that produces executable task JSON."
 tags:
   - task-planning
-  - memo-analysis
+  - source-analysis
   - task-packets
   - markdown-rendering
   - source-provenance
@@ -12,31 +12,36 @@ class: operation
 
 # Plan
 
-Create an evidence-preserving plan workspace from a primary memo and related documents.
+Create an evidence-preserving plan workspace from source documents.
 
 ## Normalize Input
 
-Require a topic or summary and one primary memo path.
+Require either a topic or summary.
 
-Accept zero or more memo-support, analysis, research, requirements, design, notes, and other source paths.
+Require one or more source-document paths.
 
-Store memo-support sources in the `memo` category.
+Accept an optional source category for each path.
+
+Assign uncategorized paths to `other`.
 
 Return `BLOCKED: Missing plan topic.` when the topic is absent.
 
-Return `BLOCKED: Missing primary memo.` when the primary memo is absent.
+Return `BLOCKED: Missing source documents.` when no source paths are supplied.
 
 ## Procedure
 
-1. Validate every source path under the workspace contract in `./reference/workspace-contract.md`.
-2. Derive a lowercase kebab-case summary slug and an epoch-millisecond timestamp.
-3. Create `$CWD/.plans/<epoch-ms>-<summary-slug>/` without replacing an existing directory.
-4. Copy each validated source into its category directory and preserve its relative workspace path.
-5. Produce schema-valid `{summary, tasks}` TaskDraftList JSON without `skills` by applying `./reference/task-authoring.md`.
-6. Pipe the complete draft object to `generate-task-json --output-file "$PLAN_DIR/tasks.json"`.
-7. Invoke `render-task-markdown` with `$PLAN_DIR/tasks.json` and `$PLAN_DIR/tasks.md`.
-8. Validate the workspace under `./reference/workspace-contract.md`.
-9. Return only the relative `.plans/<epoch-ms>-<summary-slug>/` path.
+1. Validate every source path under the [workspace contract](./reference/workspace-contract.md).
+2. Derive a lowercase kebab-case summary slug.
+3. Derive an epoch-millisecond timestamp.
+4. Create `$CWD/.plans/<epoch-ms>-<summary-slug>/` without replacing an existing directory.
+5. Copy each validated source into its category directory.
+6. Preserve each source filename.
+7. Add a deterministic suffix to resolve a filename collision.
+8. Produce schema-valid `{summary, tasks}` TaskDraftList JSON without `skills` under [task-authoring rules](./reference/task-authoring.md).
+9. Pipe the complete draft object to `generate-task-json --output-file "$PLAN_DIR/tasks.json"`.
+10. Render task Markdown under [script contracts](./reference/scripts.md).
+11. Validate the workspace under the [workspace contract](./reference/workspace-contract.md).
+12. Return only the relative `.plans/<epoch-ms>-<summary-slug>/` path.
 
 ## Guardrails
 
@@ -49,15 +54,24 @@ Return `BLOCKED: Missing primary memo.` when the primary memo is absent.
 
 ## Self-Validation
 
-- [ ] The workspace name matches the required timestamp and slug format.
+- [ ] The workspace name contains the required timestamp.
+- [ ] The workspace name contains the required slug.
 - [ ] Every source document exists under its declared category directory.
 - [ ] `tasks.json` validates through the shared task generator.
-- [ ] `tasks.md` exists and renders every final task purpose in order.
-- [ ] The task count and task purposes match in `tasks.json` and `tasks.md`.
+- [ ] `tasks.md` exists.
+- [ ] `tasks.md` renders every final task purpose in order.
+- [ ] The task count matches in `tasks.json` and `tasks.md`.
+- [ ] The task purposes match in `tasks.json` and `tasks.md`.
 
 ## Expected Output
 
-Create `.plans/<epoch-ms>-<summary-slug>/` with `tasks.json`, `tasks.md`, and copied categorized source documents.
+Create `.plans/<epoch-ms>-<summary-slug>/`.
+
+Create `tasks.json`.
+
+Create `tasks.md`.
+
+Copy categorized source documents.
 
 Return the relative workspace path only.
 

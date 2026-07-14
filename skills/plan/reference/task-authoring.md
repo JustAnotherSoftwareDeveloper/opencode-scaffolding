@@ -4,7 +4,9 @@ Produce one root object with `summary` and `tasks`.
 
 Produce atomic TaskDraft objects without a `skills` field.
 
-Preserve material memo constraints and source-derived requirements in each task `context`.
+Preserve material source constraints in each task `context`.
+
+Preserve source-derived requirements in each task `context`.
 
 Use copied relative source paths in `filesToRead` when a worker must inspect a source document.
 

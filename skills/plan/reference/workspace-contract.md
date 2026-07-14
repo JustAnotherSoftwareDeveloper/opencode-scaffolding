@@ -2,11 +2,9 @@
 
 ## Inputs
 
-Require one primary memo.
+Require one or more source documents.
 
-Accept source categories of `memo`, `analysis`, `research`, `requirements`, `design`, `notes`, and `other`.
-
-Store the primary memo and every memo-support source under `memo/`.
+Accept source categories of `analysis`, `research`, `requirements`, `design`, `notes`, and `other`.
 
 Resolve each path and reject a missing path, a non-file path, a target outside `$CWD`, or a target inside the new plan workspace.
 
@@ -20,7 +18,6 @@ Create this workspace structure.
 .plans/<epoch-ms>-<summary-slug>/
   tasks.json
   tasks.md
-  memo/
   analysis/
   research/
   requirements/

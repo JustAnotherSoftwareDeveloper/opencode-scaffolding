@@ -10,53 +10,51 @@ status: draft
 
 ## Purpose
 
-State the intended outcome and link to the recommended option in `PROPOSAL.md`.
+State the intended outcome.
+
+Link to the recommended option in `PROPOSAL.md`.
 
 ## High-Level Implementation Sequence
 
 1. **Prepare**
-
-   Confirm prerequisites and scope boundaries.
-
-   Outcome: A confirmed implementation starting point.
-
-   Decision Gate: Resolve the prerequisites and scope questions required to proceed.
+   - Confirm prerequisites.
+   - Confirm scope boundaries.
+   - Record the confirmed implementation starting point as the outcome.
+   - Resolve all prerequisites before proceeding.
+   - Resolve all scope questions before proceeding.
 
 2. **Establish**
-
-   Establish the proposed capability, foundation, or operating model.
-
-   Outcome: The recommended approach is ready for integration.
-
-   Dependency: The confirmed starting point from Prepare.
+   - Establish the proposed capability.
+   - Record the established foundation as the outcome.
+   - Record the confirmed starting point as the dependency.
 
 3. **Integrate**
-
-   Integrate affected systems, workflows, interfaces, or stakeholders.
-
-   Outcome: A connected capability that supports the proposal requirements.
-
-   Dependency: The established capability or operating model.
+   - Integrate affected systems.
+   - Integrate affected workflows.
+   - Integrate affected interfaces.
+   - Coordinate affected stakeholders.
+   - Record the connected capability as the outcome.
+   - Record the established capability as the dependency.
 
 4. **Validate**
-
-   Validate the proposal requirements and success measures.
-
-   Outcome: Evidence that the acceptance criteria are met or gaps are recorded.
-
-   Decision Gate: Resolve material validation gaps before rollout.
+   - Validate proposal requirements.
+   - Validate success measures.
+   - Record validation evidence as the outcome.
+   - Record gaps that prevent acceptance.
+   - Resolve material validation gaps before rollout.
 
 5. **Roll Out**
-
-   Roll out the approved change, monitor the defined outcomes, and close remaining questions.
-
-   Outcome: An adopted change with monitored success measures.
-
-   Dependency: The validation decision from Validate.
+   - Roll out the approved change.
+   - Monitor defined outcomes.
+   - Close remaining questions.
+   - Record the adopted change as the outcome.
+   - Record the validation decision as the dependency.
 
 ## Dependencies And Decision Gates
 
-List proposal dependencies and the decision required before each affected sequence step.
+List proposal dependencies.
+
+List the decision required before each affected sequence step.
 
 ## Validation Summary
 
