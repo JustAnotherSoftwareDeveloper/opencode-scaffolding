@@ -52,10 +52,11 @@ class SummarySlugError(ValueError):
 
 def generate_task_json(
     data: dict[str, Any],
-    summary_slug: str,
+    summary_slug: str | None = None,
     *,
     project_root: Path | None = None,
     output_dir: Path | None = None,
+    output_file: Path | None = None,
     skills_index: list[dict[str, Any]] | None = None,
 ) -> Path:
     """Assign skills to *data* and write a slug-named local task file."""
@@ -84,14 +85,44 @@ def generate_task_json(
             f"output failed BreakdownTasksOutput schema: {output_errors}"
         )
 
-    if output_dir is not None and project_root is not None:
-        raise ValueError("provide either output_dir or project_root, not both")
-    output_path = _output_path(
+    output_path = _resolve_output_path(
         summary_slug,
-        output_dir or (project_root or Path.cwd()) / ".tasks",
+        project_root=project_root,
+        output_dir=output_dir,
+        output_file=output_file,
     )
     _write_json_new(output_path, result)
     return output_path
+
+
+def _resolve_output_path(
+    summary_slug: str | None,
+    *,
+    project_root: Path | None,
+    output_dir: Path | None,
+    output_file: Path | None,
+) -> Path:
+    """Return one validated output path for legacy or explicit-file mode."""
+    if output_file is not None:
+        if (
+            summary_slug is not None
+            or output_dir is not None
+            or project_root is not None
+        ):
+            raise ValueError(
+                "output_file is mutually exclusive with legacy output options"
+            )
+        if output_file.suffix != ".json":
+            raise ValueError("output file must use a .json suffix")
+        return output_file
+    if summary_slug is None:
+        raise ValueError("summary_slug is required without output_file")
+    if output_dir is not None and project_root is not None:
+        raise ValueError("provide either output_dir or project_root, not both")
+    return _output_path(
+        summary_slug,
+        output_dir or (project_root or Path.cwd()) / ".tasks",
+    )
 
 
 def _output_path(summary_slug: str, output_dir: Path) -> Path:
@@ -104,9 +135,7 @@ def _output_path(summary_slug: str, output_dir: Path) -> Path:
 def _candidate_skills(skills_index: list[dict[str, Any]] | None) -> list[Skill]:
     """Return discovered or supplied executable skill candidates."""
     skills = (
-        _parse_skills(skills_index)
-        if skills_index is not None
-        else _discover_skills()
+        _parse_skills(skills_index) if skills_index is not None else _discover_skills()
     )
     allowed = {skill_class.value for skill_class in DEFAULT_CLASSES}
     return [skill for skill in skills if skill.class_ in allowed]
@@ -135,10 +164,7 @@ def _parse_skills(index: list[dict[str, Any]]) -> list[Skill]:
 def _select_skills(task: dict[str, Any], candidates: list[Skill]) -> list[str]:
     """Return every threshold-qualified candidate or the highest-ranked skill."""
     task_text = _task_text(task)
-    scored = [
-        (skill.name, _score_skill(skill, task_text))
-        for skill in candidates
-    ]
+    scored = [(skill.name, _score_skill(skill, task_text)) for skill in candidates]
     scored.sort(key=lambda item: (-item[1], item[0]))
     selected = [name for name, score in scored if score >= DEFAULT_THRESHOLD]
     return (selected or [scored[0][0]])[:MAX_SKILLS]

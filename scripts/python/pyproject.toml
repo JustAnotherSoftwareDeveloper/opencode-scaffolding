@@ -18,6 +18,7 @@ dependencies = [
 collect-skills = "cli.collect_skills:main"
 example = "cli.example:main"
 generate-task-json = "cli.generate_task_json:main"
+render-task-markdown = "cli.render_task_markdown:main"
 resolve-script-root = "cli.resolve_script_root:main"
 skill-validator = "cli.skill_validator:cli"
 validate-skill-meta = "cli.validate_skill_meta:main"

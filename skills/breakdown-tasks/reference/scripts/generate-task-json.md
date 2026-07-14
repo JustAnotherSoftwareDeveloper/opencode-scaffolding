@@ -12,6 +12,12 @@ uv run --project ~/.config/opencode/scripts/python generate-task-json \
   --output-dir "$CWD/.tasks" < input.json
 ```
 
+The breakdown pipeline uses this legacy destination mode exclusively.
+
+Other consumers can use `--output-file <path>` instead of both legacy options.
+
+The two destination modes are mutually exclusive.
+
 ## Exit Codes
 
 - `0` writes the relative `.tasks/<summary-slug>.json` path to stdout.

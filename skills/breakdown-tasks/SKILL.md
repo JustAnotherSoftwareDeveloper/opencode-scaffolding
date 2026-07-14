@@ -39,6 +39,10 @@ printf '%s' "$TASK_DRAFT_JSON" | uv run --directory ~/.config/opencode/scripts/p
 
 10. Return generator stdout only.
 
+The breakdown workflow must use `--summary-slug` with `--output-dir "$CWD/.tasks"`.
+
+Do not use `--output-file`; that destination mode belongs to other shared-generator consumers.
+
 ## Output Contract
 
 Return only the `.tasks/<summary-slug>.json` path emitted by `generate-task-json`.
@@ -55,6 +59,7 @@ Match the path format requested by `## EXPECTED OUTPUT`.
 - Pipe the complete root JSON object to `generate-task-json` through standard input.
 - Derive the lowercase kebab-case summary slug from `summary`.
 - Do not create `.tasks` or write a task-draft file manually.
+- Use the legacy summary-slug and output-directory destination mode only.
 - Do not bundle dependent changes.
 - Return `BLOCKED: <reason>` for malformed input or generator failure.
 

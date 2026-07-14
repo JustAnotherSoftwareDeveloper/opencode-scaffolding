@@ -28,20 +28,36 @@ from lib.generate_task_json.core import (
 @click.option(
     "--summary-slug",
     type=str,
-    required=True,
+    required=False,
     help="Kebab-case filename slug for the local .tasks output.",
 )
 @click.option(
     "--output-dir",
     type=click.Path(file_okay=False, path_type=Path, resolve_path=True),
-    required=True,
+    required=False,
     help="Directory for the generated task JSON file.",
 )
-def main(summary_slug: str, output_dir: Path) -> None:
+@click.option(
+    "--output-file",
+    type=click.Path(dir_okay=False, path_type=Path, resolve_path=True),
+    required=False,
+    help="Explicit JSON output file, mutually exclusive with legacy output options.",
+)
+def main(
+    summary_slug: str | None, output_dir: Path | None, output_file: Path | None
+) -> None:
     """Assign skills to stdin TaskDraftList JSON and print its local path."""
     try:
+        _validate_destination_options(summary_slug, output_dir, output_file)
+        if output_file is not None:
+            _require_local_output(output_file)
         data = _read_stdin_json()
-        output_path = generate_task_json(data, summary_slug, output_dir=output_dir)
+        output_path = generate_task_json(
+            data,
+            summary_slug,
+            output_dir=output_dir,
+            output_file=output_file,
+        )
     except (GenerationValidationError, SummarySlugError) as exc:
         click.echo(f"Error: {exc}", err=True)
         raise SystemExit(1) from exc
@@ -52,6 +68,29 @@ def main(summary_slug: str, output_dir: Path) -> None:
         click.echo(f"Error: {exc}", err=True)
         raise SystemExit(2) from exc
     click.echo(str(output_path.relative_to(Path.cwd())))
+
+
+def _require_local_output(path: Path) -> None:
+    """Reject an explicit output path outside the current working directory."""
+    if not path.is_relative_to(Path.cwd()):
+        raise ValueError("--output-file must be within the current working directory")
+
+
+def _validate_destination_options(
+    summary_slug: str | None,
+    output_dir: Path | None,
+    output_file: Path | None,
+) -> None:
+    """Require either the complete legacy destination or an explicit file."""
+    legacy = summary_slug is not None or output_dir is not None
+    if output_file is not None and legacy:
+        raise ValueError(
+            "--output-file is mutually exclusive with legacy output options"
+        )
+    if output_file is None and (summary_slug is None or output_dir is None):
+        raise ValueError(
+            "provide --output-file or both --summary-slug and --output-dir"
+        )
 
 
 def _read_stdin_json() -> dict[str, Any]:

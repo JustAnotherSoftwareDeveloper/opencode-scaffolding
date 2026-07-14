@@ -6,7 +6,7 @@
 
 - **0** — Relative local task path written to stdout.
 - **1** — TaskDraft validation, assignment, or final TaskPacket validation failure.
-- **2** — Parse, output-path, or schema-load error.
+- **2** — Parse, output-path, schema-load, or destination-option error.
 
 ## Retry Behavior
 

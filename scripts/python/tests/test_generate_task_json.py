@@ -73,6 +73,34 @@ def test_generate_task_json_writes_to_explicit_output_directory(tmp_path: Path) 
     assert output == output_dir / "generate-tests.json"
 
 
+def test_generate_task_json_writes_to_explicit_output_file(tmp_path: Path) -> None:
+    output = core.generate_task_json(
+        _drafts(),
+        output_file=tmp_path / "plan" / "tasks.json",
+        skills_index=[{"name": "python-test", "class": "operation"}],
+    )
+    assert output == tmp_path / "plan" / "tasks.json"
+
+
+def test_generate_task_json_rejects_mixed_destination_modes(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        core.generate_task_json(
+            _drafts(),
+            "generate-tests",
+            output_file=tmp_path / "tasks.json",
+            skills_index=[{"name": "python-test", "class": "operation"}],
+        )
+
+
+def test_generate_task_json_rejects_non_json_explicit_output(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match=".json suffix"):
+        core.generate_task_json(
+            _drafts(),
+            output_file=tmp_path / "tasks.txt",
+            skills_index=[{"name": "python-test", "class": "operation"}],
+        )
+
+
 def test_generate_task_json_rejects_invalid_input_without_replacing_output(
     tmp_path: Path,
 ) -> None:

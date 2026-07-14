@@ -45,7 +45,10 @@ def test_success_prints_relative_output_path(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(
         generate_task_json,
         "generate_task_json",
-        lambda _data, slug, *, output_dir: output_dir / f"{slug}.json",
+        lambda _data, slug, *, output_dir, output_file: (
+            output_file,
+            output_dir / f"{slug}.json",
+        )[1],
     )
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
@@ -75,6 +78,53 @@ def test_missing_output_dir_fails() -> None:
         generate_task_json.main, ["--summary-slug", "cli-test"], input=_drafts()
     )
     assert result.exit_code == 2
+
+
+def test_explicit_output_file_succeeds(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(
+        generate_task_json,
+        "generate_task_json",
+        lambda _data, _slug, *, output_dir, output_file: (output_dir, output_file)[1],
+    )
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        output_file = Path.cwd() / "tasks.json"
+        result = runner.invoke(
+            generate_task_json.main,
+            ["--output-file", str(output_file)],
+            input=_drafts(),
+        )
+    assert result.exit_code == 0
+    assert result.output == "tasks.json\n"
+
+
+def test_explicit_output_file_outside_cwd_fails(tmp_path: Path) -> None:
+    result = CliRunner().invoke(
+        generate_task_json.main,
+        ["--output-file", str(tmp_path / "tasks.json")],
+        input=_drafts(),
+    )
+    assert result.exit_code == 2
+    assert "within the current working directory" in result.output
+
+
+def test_partial_or_mixed_destination_options_fail() -> None:
+    runner = CliRunner()
+    for arguments in (
+        [],
+        ["--summary-slug", "cli-test"],
+        ["--output-dir", ".tasks"],
+        [
+            "--summary-slug",
+            "cli-test",
+            "--output-dir",
+            ".tasks",
+            "--output-file",
+            "tasks.json",
+        ],
+    ):
+        result = runner.invoke(generate_task_json.main, arguments, input=_drafts())
+        assert result.exit_code == 2
 
 
 def test_invalid_summary_slug_fails() -> None:
