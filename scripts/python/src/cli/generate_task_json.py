@@ -29,7 +29,7 @@ from lib.generate_task_json.core import (
     "--summary-slug",
     type=str,
     required=False,
-    help="Kebab-case filename slug for the local .tasks output.",
+    help="Kebab-case slug for the epoch-prefixed local .tasks output.",
 )
 @click.option(
     "--output-dir",

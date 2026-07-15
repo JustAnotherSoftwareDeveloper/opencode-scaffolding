@@ -1,7 +1,7 @@
 ---
 title: "{{title}}"
 slug: "{{slug}}"
-created: "{{unix_epoch_timestamp}}"
+created: "{{epoch_milliseconds}}"
 created-at: "{{utc_timestamp}}"
 status: draft
 decision-owner: "{{decision_owner}}"

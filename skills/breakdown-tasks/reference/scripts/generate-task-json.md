@@ -20,6 +20,6 @@ The two destination modes are mutually exclusive.
 
 ## Exit Codes
 
-- `0` writes the relative `.tasks/<summary-slug>.json` path to stdout.
+- `0` writes the relative `.tasks/<epoch-milliseconds>-<summary-slug>.json` path to stdout.
 - `1` reports input validation, assignment, or final validation failure.
 - `2` reports malformed JSON, output-path, or schema-load failure.

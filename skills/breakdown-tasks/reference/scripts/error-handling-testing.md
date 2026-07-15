@@ -62,11 +62,11 @@ cat > /tmp/draft.json <<'EOF'
 EOF
 
 SUMMARY_SLUG=e2e-pipeline-test
-uv run --project ~/.config/opencode/scripts/python generate-task-json \
+REL_FILE=$(uv run --project ~/.config/opencode/scripts/python generate-task-json \
   --summary-slug "$SUMMARY_SLUG" \
-  --output-dir "$CWD/.tasks" < /tmp/draft.json
+  --output-dir "$CWD/.tasks" < /tmp/draft.json)
 
-python3 -c "import json; data=json.load(open('.tasks/e2e-pipeline-test.json')); assert data['tasks'][0]['skills']"
+python3 -c "import json; data=json.load(open('$REL_FILE')); assert data['tasks'][0]['skills']"
 ```
 
 ### Validation Checklist
@@ -74,5 +74,5 @@ python3 -c "import json; data=json.load(open('.tasks/e2e-pipeline-test.json')); 
 - TaskDraft state contains no `skills` fields before assignment.
 - `generate-task-json` adds non-empty `skills` arrays from discovered skills.
 - `generate-task-json` writes only valid final output.
-- The worker returns only `.tasks/<summary-slug>.json` to the delegator.
+- The worker returns only `.tasks/<epoch-milliseconds>-<summary-slug>.json` to the delegator.
 - Errors appear on stderr; stdout remains machine-consumable on success.

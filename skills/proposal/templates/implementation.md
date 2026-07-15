@@ -2,7 +2,7 @@
 title: "{{title}} Implementation Overview"
 proposal: "PROPOSAL.md"
 slug: "{{slug}}"
-created: "{{unix_epoch_timestamp}}"
+created: "{{epoch_milliseconds}}"
 status: draft
 ---
 

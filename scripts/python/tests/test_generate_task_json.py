@@ -43,7 +43,11 @@ def _skill(name: str = "python-test", class_: str = "operation") -> Skill:
     )
 
 
-def test_generate_task_json_writes_assigned_output(tmp_path: Path) -> None:
+def test_generate_task_json_writes_assigned_output(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(core.time, "time_ns", lambda: 1_700_000_000_123_000_000)
     output = core.generate_task_json(
         _drafts(),
         "generate-tests",
@@ -58,11 +62,15 @@ def test_generate_task_json_writes_assigned_output(tmp_path: Path) -> None:
         ],
     )
     result = json.loads(output.read_text())
-    assert output == tmp_path / ".tasks" / "generate-tests.json"
+    assert output == tmp_path / ".tasks" / "1700000000123-generate-tests.json"
     assert result["tasks"][0]["skills"] == ["python-test"]
 
 
-def test_generate_task_json_writes_to_explicit_output_directory(tmp_path: Path) -> None:
+def test_generate_task_json_writes_to_explicit_output_directory(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(core.time, "time_ns", lambda: 1_700_000_000_123_000_000)
     output_dir = tmp_path / "state"
     output = core.generate_task_json(
         _drafts(),
@@ -70,7 +78,7 @@ def test_generate_task_json_writes_to_explicit_output_directory(tmp_path: Path) 
         output_dir=output_dir,
         skills_index=[{"name": "python-test", "class": "operation"}],
     )
-    assert output == output_dir / "generate-tests.json"
+    assert output == output_dir / "1700000000123-generate-tests.json"
 
 
 def test_generate_task_json_writes_to_explicit_output_file(tmp_path: Path) -> None:
@@ -206,6 +214,9 @@ def test_task_text_and_scoring_helpers() -> None:
     task = _drafts()["tasks"][0]
     text = core._task_text(task)
     assert "Write Python tests." in text
+    assert "Python tests." in text
+    assert "scripts/python/src/cli/example.py" not in text
+    assert "scripts/python/tests/test_example.py" not in text
     assert core._score_skill(_skill(), text) > core._score_skill(
         Skill(name="docs", description="docs", tags=[], class_="documentation"), text
     )
@@ -214,24 +225,97 @@ def test_task_text_and_scoring_helpers() -> None:
     assert core._infer_task_class({"write", "test"}) == "operation"
 
 
+def test_task_text_excludes_file_paths() -> None:
+    """File paths in filesToRead and filesToWrite are absent from scoring text."""
+    task = _drafts()["tasks"][0]
+    text = core._task_text(task)
+    assert "scripts/python/src/cli/example.py" not in text
+    assert "scripts/python/tests/test_example.py" not in text
+
+
+def test_task_text_includes_expected_output() -> None:
+    """expectedOutput content is present in the task scoring text."""
+    task = _drafts()["tasks"][0]
+    text = core._task_text(task)
+    assert "Python tests." in text
+
+
+def test_skill_assignment_ignores_misleading_file_paths() -> None:
+    """A task touching skill-factory's SKILL.md must not assign skill-factory
+    based on file-path tokens alone when purpose/context are unrelated."""
+    task = {
+        "purpose": "Fix a typo in the README",
+        "context": (
+            "Correct a typographical error in the project's main README file. "
+            "This documentation guide contains a misspelled word that could "
+            "confuse new users. The fix involves locating the exact line with "
+            "the error, replacing the incorrect spelling, and verifying the "
+            "change renders properly in the rendered output. No functional "
+            "code changes are required. This is a straightforward documentation "
+            "correction that improves the quality of the project's primary "
+            "entry point for new contributors and serves as a reference for "
+            "the entire project."
+        ),
+        "filesToRead": ["README.md"],
+        "filesToWrite": ["skills/skill-factory/SKILL.md"],
+        "executionInstructions": [{"step": 1, "action": "Fix the typo."}],
+        "expectedOutput": "The README with the typo corrected.",
+    }
+    skill_factory = Skill(
+        name="skill-factory",
+        description="Create and manage OpenCode skills",
+        tags=["skill", "factory", "create", "manage"],
+        class_="operation",
+    )
+    readme_editor = Skill(
+        name="readme-editor",
+        description="Fix typo and formatting error in documentation and README file",
+        tags=["readme", "documentation", "fix", "typo", "docs"],
+        class_="documentation",
+    )
+    selected = core._select_skills(task, [skill_factory, readme_editor])
+    assert "skill-factory" not in selected
+    assert "readme-editor" in selected
+
+
 def test_score_skill_tokenizes_compound_tags() -> None:
     """Hyphenated tags contribute their individual terms to tag similarity."""
     matching = Skill(
         name="workspace",
         description="",
-        tags=["plan-workspace", "task-json", "source-documents", "workspace-generation"],
+        tags=[
+            "plan-workspace",
+            "task-json",
+            "source-documents",
+            "workspace-generation",
+        ],
         class_="operation",
     )
     unrelated = Skill(
         name="proposal",
         description="",
-        tags=["decision-record", "evidence-linking", "proposal-authoring", "workspace-creation"],
+        tags=[
+            "decision-record",
+            "evidence-linking",
+            "proposal-authoring",
+            "workspace-creation",
+        ],
         class_="operation",
     )
 
     assert core._score_skill(matching, "create a plan workspace") > core._score_skill(
         unrelated,
         "create a plan workspace",
+    )
+
+
+def test_output_path_prefixes_slug_with_epoch_milliseconds(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(core.time, "time_ns", lambda: 1_700_000_000_123_000_000)
+    assert core._output_path("generate-tests", tmp_path / ".tasks") == (
+        tmp_path / ".tasks" / "1700000000123-generate-tests.json"
     )
 
 

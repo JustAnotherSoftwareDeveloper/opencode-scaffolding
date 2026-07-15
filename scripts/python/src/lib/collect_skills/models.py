@@ -153,18 +153,19 @@ class SkillIndex:
 
     # -- filtering -------------------------------------------------------
 
-    def filter_by_class(self, class_filter: str) -> list[Skill]:
-        """Return resolved skills whose ``class_`` matches *class_filter*.
+    def filter_by_classes(self, class_filters: tuple[str, ...]) -> list[Skill]:
+        """Return resolved skills whose ``class_`` is in *class_filters*.
 
         Args:
-            class_filter: A SkillClass value (e.g. ``"operation"``, ``"planning"``).
+            class_filters: One or more SkillClass values (e.g. ``("operation", "documentation")``).
 
         Returns:
             List of matching Skill instances sorted alphabetically by name.
         """
         resolved = self.resolve()
+        allowed = set(class_filters)
         return sorted(
-            [s for s in resolved if s.class_ == class_filter],
+            [s for s in resolved if s.class_ in allowed],
             key=lambda s: s.name,
         )
 

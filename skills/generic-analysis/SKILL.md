@@ -23,7 +23,15 @@ Analyze ambiguous or cross-domain work with a deliberate, evidence-calibrated re
 
 ## Output
 
-Produce a concise analysis that separates facts, inferences, uncertainties, and recommendations.
+Create one analysis document at `$CWD/.analysis/<unix-epoch-milliseconds>-<summary-slug>.md`.
+
+Derive `<summary-slug>` as a lowercase kebab-case slug from the analysis question.
+
+Create `$CWD/.analysis/` when absent.
+
+Never replace an existing analysis document.
+
+Return only the relative path to the created analysis document.
 
 ### Output Format
 
@@ -67,7 +75,9 @@ Produce a concise analysis that separates facts, inferences, uncertainties, and 
 7. Test the leading conclusion against credible alternatives, boundary conditions, risks, and counterevidence.
 8. State a direct conclusion with a calibrated confidence level and the assumptions that limit it.
 9. Ask a focused question when a missing fact materially changes the conclusion.
-10. Produce the result in the specified output format.
+10. Derive an epoch-millisecond timestamp and lowercase kebab-case summary slug from the analysis question.
+11. Write the result in the specified output format to `$CWD/.analysis/<timestamp>-<summary-slug>.md`.
+12. Return the created document's relative path.
 
 Execute one reasoning pass.
 Avoid delegation and multi-phase orchestration.
@@ -81,6 +91,8 @@ Avoid delegation and multi-phase orchestration.
 - Present alternatives fairly before rejecting them.
 - Keep recommendations within the stated scope and authority.
 - Do not execute changes unless the request explicitly includes implementation.
+- Write analysis documents only under `$CWD/.analysis/`.
+- Do not replace an existing analysis document.
 
 ## Self-Validation
 
@@ -90,6 +102,7 @@ Avoid delegation and multi-phase orchestration.
 - State confidence and material uncertainty.
 - Deliver a conclusion that answers the request directly.
 - List actionable next steps when uncertainty or risk remains.
+- Confirm the analysis document exists at `$CWD/.analysis/<timestamp>-<summary-slug>.md`.
 
 ## Docs
 

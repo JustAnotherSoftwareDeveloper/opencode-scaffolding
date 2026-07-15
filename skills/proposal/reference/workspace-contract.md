@@ -5,7 +5,7 @@
 Create this workspace structure.
 
 ```text
-.proposals/<unix-epoch-timestamp>-<summary-slug>/
+.proposals/<epoch-ms>-<summary-slug>/
   PROPOSAL.md
   implementation.md
   analysis/
@@ -17,6 +17,8 @@ Create this workspace structure.
 ```
 
 Create only category directories that contain copied source documents.
+
+Require an epoch-millisecond prefix and lowercase kebab-case summary slug.
 
 Copy each supplied source document into its declared category directory.
 

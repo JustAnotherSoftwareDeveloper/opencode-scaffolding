@@ -47,7 +47,7 @@ def test_success_prints_relative_output_path(tmp_path, monkeypatch) -> None:
         "generate_task_json",
         lambda _data, slug, *, output_dir, output_file: (
             output_file,
-            output_dir / f"{slug}.json",
+            output_dir / f"1700000000123-{slug}.json",
         )[1],
     )
     runner = CliRunner()
@@ -63,7 +63,7 @@ def test_success_prints_relative_output_path(tmp_path, monkeypatch) -> None:
             input=_drafts(),
         )
     assert result.exit_code == 0
-    assert result.output == ".tasks/cli-test.json\n"
+    assert result.output == ".tasks/1700000000123-cli-test.json\n"
 
 
 def test_missing_summary_slug_fails() -> None:

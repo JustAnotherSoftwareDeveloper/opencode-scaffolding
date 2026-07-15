@@ -7,6 +7,7 @@ import json
 import os
 import re
 import tempfile
+import time
 from pathlib import Path
 from typing import Any
 
@@ -59,7 +60,7 @@ def generate_task_json(
     output_file: Path | None = None,
     skills_index: list[dict[str, Any]] | None = None,
 ) -> Path:
-    """Assign skills to *data* and write a slug-named local task file."""
+    """Assign skills to *data* and write an epoch-prefixed local task file."""
     input_schema = load_schema(INPUT_SCHEMA_PATH)
     input_errors = validate_json_schema(data, input_schema)
     if input_errors:
@@ -126,10 +127,11 @@ def _resolve_output_path(
 
 
 def _output_path(summary_slug: str, output_dir: Path) -> Path:
-    """Return the local task-file path for a validated summary slug."""
+    """Return an epoch-prefixed local task-file path for a validated slug."""
     if not SUMMARY_SLUG_PATTERN.fullmatch(summary_slug):
         raise SummarySlugError("summary slug must be lowercase kebab-case")
-    return output_dir / f"{summary_slug}.json"
+    epoch_milliseconds = time.time_ns() // 1_000_000
+    return output_dir / f"{epoch_milliseconds}-{summary_slug}.json"
 
 
 def _candidate_skills(skills_index: list[dict[str, Any]] | None) -> list[Skill]:
@@ -171,13 +173,18 @@ def _select_skills(task: dict[str, Any], candidates: list[Skill]) -> list[str]:
 
 
 def _task_text(task: dict[str, Any]) -> str:
-    """Build the text corpus used for deterministic skill scoring."""
+    """Build the text corpus used for deterministic skill scoring.
+
+    Composed from purpose, context, and expectedOutput — the three
+    semantic fields that describe *what the task is about*.  File-path
+    fields (filesToRead, filesToWrite) are excluded because their tokens
+    dominate Jaccard similarity without contributing task-meaning signal.
+    """
     return " ".join(
         [
             task["purpose"],
             task["context"],
-            " ".join(task["filesToRead"]),
-            " ".join(task["filesToWrite"]),
+            task["expectedOutput"],
         ]
     )
 

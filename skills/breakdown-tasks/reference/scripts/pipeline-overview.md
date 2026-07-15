@@ -56,15 +56,15 @@ uv run --project ~/.config/opencode/scripts/python generate-task-json \
   --output-dir "$CWD/.tasks" < draft.json
 ```
 
-`generate-task-json` loads schemas from `~/.config/opencode/skills/breakdown-tasks/schema/`, validates drafts before assignment, discovers `operation` and `documentation` skills, and atomically creates `.tasks/<summary-slug>.json` in the supplied output directory.
+`generate-task-json` loads schemas from `~/.config/opencode/skills/breakdown-tasks/schema/`, validates drafts before assignment, discovers `operation` and `documentation` skills, and atomically creates `.tasks/<epoch-milliseconds>-<summary-slug>.json` in the supplied output directory.
 
 `generate-task-json` also supports an explicit output-file mode for other consumers.
 
-The breakdown pipeline does not use that mode and retains its `.tasks/<summary-slug>.json` return contract.
+The breakdown pipeline does not use that mode and retains its `.tasks/<epoch-milliseconds>-<summary-slug>.json` return contract.
 
 ### Step 3: Return Relative Path
 
 - **Action:** Return the state file location to the delegator.
-- **Expected output:** `.tasks/<summary-slug>.json`
+- **Expected output:** `.tasks/<epoch-milliseconds>-<summary-slug>.json`
 
 Return `$REL_FILE` as a single string.

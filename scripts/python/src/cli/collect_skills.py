@@ -60,10 +60,11 @@ VALID_CLASS_NAMES = [c.value for c in SkillClass]
 )
 @click.option(
     "--class",
-    "class_filter",
+    "class_filters",
     type=click.Choice(VALID_CLASS_NAMES),
-    default=None,
-    help="Filter skills to a specific SkillClass value.",
+    multiple=True,
+    default=[],
+    help="Filter skills to specific SkillClass values (repeatable).",
 )
 @click.option(
     "--verbose",
@@ -85,7 +86,7 @@ def main(
     extra_paths: tuple[str, ...],
     include_archive: bool,
     builtins_manifest: str | None,  # noqa: ARG001
-    class_filter: str | None,
+    class_filters: tuple[str, ...],
     verbose: bool,
     output: str | None,
 ) -> None:
@@ -93,7 +94,7 @@ def main(
 
     Discovers SKILL.md files across project roots, global config, archives,
     and extra paths, then produces a deduplicated JSON index.  Use --class
-    to filter to skills of a specific SkillClass.
+    to filter to skills of specific SkillClass values (repeatable).
     """
     index = SkillIndex()
 
@@ -111,8 +112,8 @@ def main(
         raise SystemExit(1) from exc
 
     # --- Apply class filter if requested ---
-    if class_filter:
-        filtered = index.filter_by_class(class_filter)
+    if class_filters:
+        filtered = index.filter_by_classes(class_filters)
         json_output = json.dumps([s.to_dict() for s in filtered])
     else:
         json_output = index.to_json()

@@ -456,6 +456,149 @@ class TestDeduplication:
 
 
 # ============================================================================
+# TestFilterByClasses
+# ============================================================================
+
+
+class TestFilterByClasses:
+    """Tests for ``SkillIndex.filter_by_classes()``."""
+
+    # ------------------------------------------------------------------
+    # Repeatable --class union coverage
+    # ------------------------------------------------------------------
+
+    def _build_multi_class_index(self) -> SkillIndex:
+        """Build a deterministic SkillIndex with skills across multiple classes."""
+        index = SkillIndex()
+        for name, class_ in [
+            ("alpha", "operation"),
+            ("bravo", "documentation"),
+            ("charlie", "operation"),
+            ("delta", "documentation"),
+            ("echo", "planning"),
+            ("foxtrot", "inline"),
+        ]:
+            index.add(
+                Skill(
+                    name=name,
+                    description=f"A {class_} skill named {name}",
+                    class_=class_,
+                    source="project",
+                    location=f"/tmp/.opencode/skills/{name}/SKILL.md",
+                )
+            )
+        return index
+
+    def test_empty_filter_returns_empty(self) -> None:
+        """An empty tuple of class filters returns an empty list."""
+        index = self._build_multi_class_index()
+        result = index.filter_by_classes(())
+        assert result == []
+
+    def test_single_class_filter(self) -> None:
+        """A single class value returns only skills of that class."""
+        index = self._build_multi_class_index()
+        result = index.filter_by_classes(("operation",))
+        assert len(result) == 2
+        names = [s.name for s in result]
+        assert names == ["alpha", "charlie"]
+        for s in result:
+            assert s.class_ == "operation"
+
+    def test_multi_class_union(self) -> None:
+        """Two class values return the union of both classes."""
+        index = self._build_multi_class_index()
+        result = index.filter_by_classes(("operation", "documentation"))
+        assert len(result) == 4
+        names = [s.name for s in result]
+        assert names == ["alpha", "bravo", "charlie", "delta"]
+        for s in result:
+            assert s.class_ in ("operation", "documentation")
+
+    def test_multi_class_no_duplicates(self) -> None:
+        """Skills are never duplicated even if a skill matched multiple classes.
+
+        (Each Skill has exactly one class_, so this is structural, but the
+        test documents the guarantee.)
+        """
+        index = self._build_multi_class_index()
+        result = index.filter_by_classes(("operation", "documentation"))
+        names = [s.name for s in result]
+        assert len(names) == len(set(names))  # no duplicates
+
+    def test_multi_class_alphabetical_order(self) -> None:
+        """Multi-class output is sorted alphabetically by name."""
+        index = self._build_multi_class_index()
+        # Add skills out of alphabetical order to prove sorting.
+        index.add(
+            Skill(
+                name="zeta",
+                description="A documentation skill",
+                class_="documentation",
+                source="project",
+            )
+        )
+        index.add(
+            Skill(
+                name="yankee",
+                description="An operation skill",
+                class_="operation",
+                source="project",
+            )
+        )
+        result = index.filter_by_classes(("documentation", "operation"))
+        names = [s.name for s in result]
+        assert names == sorted(names)
+
+    def test_filter_preserves_index_content(self) -> None:
+        """Filtering does not mutate the underlying index."""
+        index = self._build_multi_class_index()
+        before_count = len(index.resolve())
+        index.filter_by_classes(("operation",))
+        after_count = len(index.resolve())
+        assert before_count == after_count
+
+    def test_no_match_returns_empty(self) -> None:
+        """A class value that matches no skills returns an empty list."""
+        index = self._build_multi_class_index()
+        result = index.filter_by_classes(("orchestrated",))
+        assert result == []
+
+    def test_empty_index_returns_empty(self) -> None:
+        """An empty SkillIndex returns an empty list for any filter."""
+        index = SkillIndex()
+        assert index.filter_by_classes(("operation",)) == []
+        assert index.filter_by_classes(()) == []
+
+    def test_multi_class_interleaved_alpha_order(self) -> None:
+        """Alphabetical order holds across interleaved class values."""
+        index = SkillIndex()
+        for name, class_ in [
+            ("advance", "operation"),
+            ("basic", "documentation"),
+            ("core", "operation"),
+            ("data", "documentation"),
+            ("edge", "operation"),
+        ]:
+            index.add(
+                Skill(
+                    name=name,
+                    class_=class_,
+                    source="project",
+                )
+            )
+        # All five names are in alphabetical order already.
+        result = index.filter_by_classes(("operation", "documentation"))
+        assert [s.name for s in result] == [
+            "advance",
+            "basic",
+            "core",
+            "data",
+            "edge",
+        ]
+
+
+# ============================================================================
 # TestJsonOutput
 # ============================================================================
 
