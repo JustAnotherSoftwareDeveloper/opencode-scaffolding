@@ -1,7 +1,7 @@
 ---
 name: skill-template-library
 description: "Use when referencing skill templates, schemas, or snippets for skill authoring."
-tags: [skill-authoring, reference, templates, schemas, snippets, boilerplate]
+tags: [templates, schemas, snippets, boilerplate, template-registry]
 class: documentation
 ---
 

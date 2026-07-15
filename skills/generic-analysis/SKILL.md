@@ -2,11 +2,12 @@
 name: generic-analysis
 description: "Use when analyzing a problem, request, artifact, or decision to produce an evidence-calibrated assessment and next actions."
 tags:
-  - analytical-reasoning
+  - evidence-analysis
+  - decision-assessment
   - problem-framing
-  - evidence-evaluation
-  - decision-support
-  - risk-assessment
+  - root-cause-analysis
+  - trade-off-evaluation
+  - analytical-reasoning
 class: inline
 ---
 

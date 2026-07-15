@@ -1,7 +1,7 @@
 ---
 name: skill-script-node-test-writer
 description: "Use when generating bun test files for Node scripts under scripts/node/, covering CLI integration tests via Bun.spawnSync and unit tests for lib modules."
-tags: [skill-authoring, node, typescript, testing, bun, test-generation]
+tags: [node-testing, typescript-testing, bun-test, test-generation, bun-testing]
 class: operation
 ---
 

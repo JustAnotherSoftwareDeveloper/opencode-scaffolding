@@ -1,7 +1,7 @@
 ---
 name: skill-bash-conventions
 description: "Use when referencing shared bash script conventions for the OpenCode platform, covering set flags, quoting, shellcheck rules, error handling, function naming, exit codes, JSON output format, and cross-platform portability."
-tags: [skill-authoring, reference, bash, shell, shellcheck, error-handling, portability]
+tags: [bash, shell-scripting, shellcheck, error-handling, portability, scripting-conventions]
 class: documentation
 ---
 

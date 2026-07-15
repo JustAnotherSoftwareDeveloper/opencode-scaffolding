@@ -185,9 +185,12 @@ def _task_text(task: dict[str, Any]) -> str:
 def _score_skill(skill: Skill, task_text: str) -> float:
     """Return the weighted lexical and class-match score for one skill."""
     task_tokens = _tokenize(task_text)
-    skill_tokens = _tokenize(f"{skill.name} {skill.description} {' '.join(skill.tags)}")
-    tag_tokens = {tag.lower() for tag in skill.tags}
-    keyword_overlap = len(task_tokens & skill_tokens) / max(len(task_tokens), 1)
+    skill_tokens = _tokenize(f"{skill.name} {skill.description}")
+    tag_tokens = _tokenize(" ".join(skill.tags))
+    keyword_overlap = len(task_tokens & skill_tokens) / max(
+        len(task_tokens | skill_tokens),
+        1,
+    )
     tag_similarity = len(task_tokens & tag_tokens) / max(
         len(task_tokens | tag_tokens),
         1,

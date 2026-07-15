@@ -1,7 +1,7 @@
 ---
 name: skill-script-bash-writer
 description: "Use when generating deterministic bash scripts from skill requirements, including CLI entry points, library modules, test files, and Makefile registration."
-tags: [skill-authoring, bash, shell, code-generation, cli, scripting]
+tags: [bash-code-generation, shell-scripting, cli, makefile, scripting, shell-cli]
 class: operation
 ---
 

@@ -16,13 +16,15 @@ from pathlib import Path
 
 import click
 
-from lib.validate_skill_meta.core import validate_skill_file
+from lib.validate_skill_meta.core import compute_tag_frequencies, validate_skill_file
 
 
 @click.command(name="validate-skill-meta")
 @click.argument(
-    "skill_path",
+    "skill_paths",
     type=click.Path(exists=True, dir_okay=False, readable=True),
+    nargs=-1,
+    required=True,
 )
 @click.option(
     "--format",
@@ -37,29 +39,34 @@ from lib.validate_skill_meta.core import validate_skill_file
     default=False,
     help="Print diagnostic information to stderr.",
 )
-def main(skill_path: str, format: str, verbose: bool) -> None:
-    """Validate YAML frontmatter fields (name, description, class) in SKILL_PATH.
+def main(skill_paths: tuple[str, ...], format: str, verbose: bool) -> None:
+    """Validate YAML frontmatter fields (name, description, class) in SKILL_PATHS.
 
-    SKILL_PATH is the path to a SKILL.md file.
+    SKILL_PATHS are one or more paths to SKILL.md files.
     """
-    path = Path(skill_path)
+    paths = [Path(skill_path) for skill_path in skill_paths]
+    tag_frequencies = compute_tag_frequencies()
+    results = []
 
-    if verbose:
-        click.echo(f"Validating: {path.resolve()}", err=True)
+    for path in paths:
+        if verbose:
+            click.echo(f"Validating: {path.resolve()}", err=True)
+        result = validate_skill_file(path, tag_frequencies)
+        results.append(result)
 
-    result = validate_skill_file(path)
+        if format == "text":
+            if result["valid"]:
+                click.echo(f"VALID {path}")
+            else:
+                click.echo(f"INVALID {path}")
+                for err in result["errors"]:
+                    click.echo(f"  - {err}")
 
     if format == "json":
-        click.echo(json.dumps(result, default=str))
-    else:
-        if result["valid"]:
-            click.echo("VALID")
-        else:
-            click.echo("INVALID")
-            for err in result["errors"]:
-                click.echo(f"  - {err}")
+        output = results[0] if len(results) == 1 else results
+        click.echo(json.dumps(output, default=str))
 
-    if not result["valid"]:
+    if any(not result["valid"] for result in results):
         raise SystemExit(1)
 
 

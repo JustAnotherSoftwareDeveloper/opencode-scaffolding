@@ -1,7 +1,7 @@
 ---
 name: skill-authoring-guide
 description: "Use when referencing authoring style, frontmatter field rules, progressive disclosure, or trigger evaluation conventions for OpenCode skills."
-tags: [skill-authoring, reference, authoring-style, frontmatter, trigger-design, progressive-disclosure]
+tags: [authoring-style, frontmatter-rules, tagging-guide, progressive-disclosure, trigger-design, authoring-guide]
 class: documentation
 ---
 

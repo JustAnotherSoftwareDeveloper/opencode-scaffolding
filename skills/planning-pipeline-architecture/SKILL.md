@@ -1,13 +1,13 @@
 ---
 name: planning-pipeline-architecture
-description: "Use as planning reference for selecting analysis, proposal, and plan stages in a planning lifecycle."
+description: "Use when selecting analysis, proposal, and plan stages in a planning lifecycle."
 tags:
   - planning-lifecycle
-  - decision-analysis
-  - proposal-workspaces
-  - plan-workspaces
-  - source-provenance
-  - workflow-architecture
+  - pipeline-stages
+  - stage-selection
+  - analysis-workflow
+  - proposal-workflow
+  - plan-workflow
 class: planning
 ---
 

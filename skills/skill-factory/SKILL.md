@@ -1,7 +1,7 @@
 ---
 name: skill-factory
 description: "Use when creating or updating all OpenCode skill files under skills/<name>/ (SKILL.md, reference/, templates/, schemas/, and snippets/) from user requirements, source material."
-tags: [skill-authoring, skill-creation, skill-updates, scaffolding, validation, content-generation]
+tags: [skill-scaffolding, file-generation, frontmatter-validation, create-workflow, update-workflow, skill-maintenance]
 class: operation
 ---
 
@@ -35,6 +35,12 @@ Produce a validated skill artifact.
    - Follow the CREATE path when mode is CREATE.
    - Follow the UPDATE path when mode is UPDATE.
 3. Validate all created or modified files against the validation checks in `./workflow-create-update.md#validation`.
+3a. Cross-reference tags against sibling skills:
+      - Run `uv run --directory ~/.config/opencode/scripts/python collect-skills` to enumerate all skills with their tags.
+      - For each tag in the created/updated skill, count total occurrences across all skills.
+      - Reject any tag appearing in 6+ skills total.
+      - Reject any tag that is a filler value (general, helper, tool, misc, utility, etc.).
+      - Ensure the tag count is between 4 and 7 (inclusive).
 4. **Run automated lint check** — Invoke `bun run --cwd ~/.config/opencode/scripts/node lint:md -- <path-to-created-or-modified-file>` on all created or modified `.md` files. Address any violations before proceeding.
 
 ## Guardrails
@@ -49,7 +55,7 @@ Produce a validated skill artifact.
 - `skill-authoring-guide` was loaded before drafting body content.
 - `skill-maintenance-reference` was loaded before UPDATE path execution.
 - `skill-template-library` was loaded before template selection.
-- Every created or modified `SKILL.md` contains 4–7 descriptive tags that satisfy the loaded `skill-authoring-guide` tag rules.
+- Every created or modified SKILL.md contains 4-7 descriptive tags, with no filler values, no cluster-wide duplicates (6+ occurrences), and at least one tag naming a tool or deliverable.
 - All created or modified files pass the validation checklist.
 
 ## Expected Output

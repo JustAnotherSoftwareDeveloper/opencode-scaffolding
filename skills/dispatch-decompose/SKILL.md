@@ -1,7 +1,7 @@
 ---
 name: dispatch-decompose
 description: "Use when the delegator must send the full user request to a breakdown-tasks worker and return the relative .tasks path unchanged."
-tags: [workflow, tasking, request-forwarding, worker-invocation, packet-construction]
+tags: [request-forwarding, worker-invocation, packet-construction, breakdown-dispatch, worker-launch]
 class: inline
 ---
 

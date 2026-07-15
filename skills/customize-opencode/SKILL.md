@@ -1,7 +1,7 @@
 ---
 name: customize-opencode
 description: "Use when reference is needed for packet execution engine behavior in opencode worker agents."
-tags: [opencode, reference, packet-execution, worker-agents, engine-behavior, section-interpretation]
+tags: [opencode-config, packet-execution, worker-agents, engine-behavior, section-interpretation]
 class: documentation
 ---
 

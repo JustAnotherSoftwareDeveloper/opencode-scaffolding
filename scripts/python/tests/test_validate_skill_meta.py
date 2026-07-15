@@ -188,6 +188,41 @@ def test_validate_skill_file_valid(tmp_path: Path) -> None:
     assert result["errors"] == []
 
 
+def test_validate_skill_file_checks_cross_skill_tag_rules(tmp_path: Path) -> None:
+    """Cross-skill checks reject an overused tag when frequencies are supplied."""
+    path = _write_skill(
+        tmp_path,
+        "---\n"
+        "name: valid-skill\n"
+        "description: Use when doing the thing\n"
+        "tags: [test-capability, metadata-validation, yaml-frontmatter, python]\n"
+        "class: operation\n"
+        "---\n",
+    )
+
+    result = validate_skill_file(path, {"test-capability": 6})
+
+    assert result["valid"] is False
+    assert any("Tag 'test-capability' appears in 6 skills" in error for error in result["errors"])
+
+
+def test_validate_skill_file_accepts_analysis_as_deliverable(tmp_path: Path) -> None:
+    """Analysis artifacts satisfy the tool-or-deliverable tag requirement."""
+    path = _write_skill(
+        tmp_path,
+        "---\n"
+        "name: analysis-skill\n"
+        "description: Use when analysing an artifact\n"
+        "tags: [evidence-analysis, problem-framing, decision-assessment, root-cause-analysis]\n"
+        "class: planning\n"
+        "---\n",
+    )
+
+    result = validate_skill_file(path, {})
+
+    assert result["valid"] is True
+
+
 def test_validate_skill_file_nonexistent(tmp_path: Path) -> None:
     """Nonexistent file produces a file-not-found error."""
     path = tmp_path / "does_not_exist.md"

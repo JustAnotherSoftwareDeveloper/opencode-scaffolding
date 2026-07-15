@@ -34,16 +34,108 @@ _VALID_CLASSES: set[str] = {
     "documentation",
 }
 _TAG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-_FILLER_TAGS = {
+_FILLER_TAGS: set[str] = {
     "common",
     "default",
     "general",
     "helper",
     "misc",
+    "miscellaneous",
+    "other",
     "skill",
     "tool",
     "utility",
 }
+_KNOWN_TOOLS: frozenset[str] = frozenset({
+    "bash",
+    "pytest",
+    "python",
+    "bats",
+    "bun",
+    "cleye",
+    "click",
+    "todowrite",
+    "makefile",
+    "shellcheck",
+    "biome",
+})
+_DELIVERABLE_SUFFIXES: frozenset[str] = frozenset({
+    "-analysis",
+    "-architecture",
+    "-config",
+    "-conventions",
+    "-generation",
+    "-guide",
+    "-creation",
+    "-output",
+    "-json",
+    "-workspace",
+    "-record",
+    "-reference",
+    "-registry",
+    "-dispatch",
+    "-pipeline",
+    "-rendering",
+    "-tool",
+    "-testing",
+    "-writing",
+    "-workflow",
+    "-authoring",
+})
+_CLUSTER_OVERUSE_THRESHOLD: int = 6
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _has_tool_or_deliverable_tag(tags: list[str]) -> bool:
+    """Return *True* if *tags* includes at least one known tool or deliverable.
+
+    A tag matches if it is a known tool name *or* ends with one of the
+    recognised deliverable suffixes.
+    """
+    for tag in tags:
+        if tag in _KNOWN_TOOLS:
+            return True
+        for suffix in _DELIVERABLE_SUFFIXES:
+            if tag.endswith(suffix):
+                return True
+    return False
+
+
+def compute_tag_frequencies(
+    project_root: Path | None = None,
+    config_dir: Path | None = None,
+    extra_paths: list[Path] | None = None,
+) -> dict[str, int]:
+    """Compute frequency of each tag across all discovered skills.
+
+    Uses :func:`lib.collect_skills.discovery.discover_all_skills` to
+    enumerate all skills from the standard search roots and *extra_paths*.
+    Returns a ``{tag: count}`` mapping for all tags found.
+    """
+    from lib.collect_skills.discovery import discover_all_skills
+    from lib.collect_skills.models import SkillIndex
+
+    index = SkillIndex()
+    discover_all_skills(
+        index,
+        project_root=project_root,
+        config_dir=config_dir,
+        extra_paths=extra_paths,
+    )
+    freq: dict[str, int] = {}
+    for skill in index.resolve():
+        for tag in skill.tags:
+            freq[tag] = freq.get(tag, 0) + 1
+    return freq
+
+
+# ---------------------------------------------------------------------------
+# Frontmatter validation
+# ---------------------------------------------------------------------------
 
 
 def _extract_frontmatter(text: str) -> str | None:
@@ -130,8 +222,18 @@ def validate_frontmatter(data: object) -> list[str]:
     return errors
 
 
-def validate_skill_file(path: Path) -> ValidationResult:
+def validate_skill_file(
+    path: Path,
+    tag_frequencies: dict[str, int] | None = None,
+) -> ValidationResult:
     """Read and validate a SKILL.md file's frontmatter.
+
+    When *tag_frequencies* is provided (a ``{tag: count}`` mapping from
+    :func:`compute_tag_frequencies`), two additional checks are enforced:
+
+    * **Tool / deliverable tag** — at least one tag must name a known tool or
+      end with a recognised deliverable suffix.
+    * **Cluster overuse** — no tag may appear in 6 or more discovered skills.
 
     Returns a dict with keys:
       - ``valid`` (bool): *True* when no validation errors were found.
@@ -163,4 +265,28 @@ def validate_skill_file(path: Path) -> ValidationResult:
         return {"valid": False, "errors": [f"Frontmatter YAML parse error: {exc}"]}
 
     errors = validate_frontmatter(parsed)
+
+    # --- Additional checks requiring cross-skill context -------------------
+    if tag_frequencies is not None and isinstance(parsed, dict):
+        tags = parsed.get("tags")
+        if isinstance(tags, list):
+            # 5. Tool / deliverable tag requirement
+            if not _has_tool_or_deliverable_tag(tags):
+                errors.append(
+                    "Field 'tags' must include at least one tool or "
+                    "deliverable tag"
+                )
+
+            # 4. Cluster overuse — any tag in 6+ discovered skills
+            for tag in tags:
+                if not isinstance(tag, str):
+                    continue
+                tag_val = tag.strip()
+                count = tag_frequencies.get(tag_val, 0)
+                if count >= _CLUSTER_OVERUSE_THRESHOLD:
+                    errors.append(
+                        f"Tag '{tag_val}' appears in {count} skills — "
+                        f"use a more specific alternative"
+                    )
+
     return {"valid": len(errors) == 0, "errors": errors}

@@ -111,7 +111,22 @@ def test_valid_file_format_text(runner: CliRunner) -> None:
         Path("SKILL.md").write_text(_VALID_SKILL)
         result = runner.invoke(main, ["SKILL.md", "--format", "text"])
         assert result.exit_code == 0
-        assert result.output.strip() == "VALID"
+        assert result.output.startswith("VALID SKILL.md")
+
+
+def test_multiple_valid_files_json(runner: CliRunner, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Multiple files produce a JSON array after one frequency calculation."""
+    monkeypatch.setattr("cli.validate_skill_meta.compute_tag_frequencies", lambda: {})
+    with runner.isolated_filesystem():
+        Path("one.md").write_text(_VALID_SKILL)
+        Path("two.md").write_text(_VALID_SKILL.replace("valid-skill", "other-skill"))
+
+        result = runner.invoke(main, ["one.md", "two.md"])
+
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        assert isinstance(data, list)
+        assert [entry["valid"] for entry in data] == [True, True]
 
 
 # ---------------------------------------------------------------------------

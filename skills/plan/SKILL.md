@@ -3,10 +3,11 @@ name: plan
 description: "Use when creating a source-document plan workspace that produces executable task JSON."
 tags:
   - task-planning
-  - source-analysis
-  - task-packets
-  - markdown-rendering
-  - source-provenance
+  - workspace-generation
+  - task-json
+  - source-documents
+  - skill-assignment
+  - plan-workspace
 class: operation
 ---
 

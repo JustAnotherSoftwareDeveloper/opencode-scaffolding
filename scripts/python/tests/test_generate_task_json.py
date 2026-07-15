@@ -214,6 +214,27 @@ def test_task_text_and_scoring_helpers() -> None:
     assert core._infer_task_class({"write", "test"}) == "operation"
 
 
+def test_score_skill_tokenizes_compound_tags() -> None:
+    """Hyphenated tags contribute their individual terms to tag similarity."""
+    matching = Skill(
+        name="workspace",
+        description="",
+        tags=["plan-workspace", "task-json", "source-documents", "workspace-generation"],
+        class_="operation",
+    )
+    unrelated = Skill(
+        name="proposal",
+        description="",
+        tags=["decision-record", "evidence-linking", "proposal-authoring", "workspace-creation"],
+        class_="operation",
+    )
+
+    assert core._score_skill(matching, "create a plan workspace") > core._score_skill(
+        unrelated,
+        "create a plan workspace",
+    )
+
+
 def test_output_path_rejects_invalid_slug(tmp_path: Path) -> None:
     with pytest.raises(core.SummarySlugError, match="kebab-case"):
         core._output_path("not/a-slug", tmp_path / ".tasks")

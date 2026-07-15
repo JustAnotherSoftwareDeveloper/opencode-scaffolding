@@ -1,6 +1,8 @@
-.PHONY: help run-main run-example run example lint format format-check test coverage check clean deps-check run-tool-versions
+.PHONY: help run-main run-example run example lint format format-check test coverage check clean deps-check run-tool-versions validate-skill-meta
 
 SCRIPT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+SCRIPTS_PYTHON_DIR := $(abspath $(SCRIPT_DIR)../python)
+SKILLS_DIR := $(abspath $(SCRIPT_DIR)../../skills)
 
 # Tool detection
 SHELLCHECK := $(shell command -v shellcheck 2>/dev/null)
@@ -27,6 +29,7 @@ help:
 	@printf '%s\n' '  clean         Remove tmp/ directory'
 	@printf '%s\n' '  deps-check    Verify shellcheck, shfmt, bats, bashcov, and system-installed bats helpers (apt)'
 	@printf '%s\n' '  run-tool-versions  Detect CLI tool versions and report as JSON'
+	@printf '%s\n' '  validate-skill-meta  Validate all skill SKILL.md frontmatter (tags, quality, structure)'
 
 run-main:
 	@bash "$(SCRIPT_DIR)src/main.sh"
@@ -45,6 +48,7 @@ ifndef SHELLCHECK
 	$(error shellcheck is not installed; install it via your package manager (apt install shellcheck, brew install shellcheck, etc.))
 endif
 		"$(SHELLCHECK)" -x -S warning "$(SCRIPT_DIR)src/"*.sh "$(SCRIPT_DIR)lib/"*.sh "$(SCRIPT_DIR)lib/"*/*.sh
+	@$(MAKE) validate-skill-meta
 
 format:
 ifndef SHFMT
@@ -109,3 +113,6 @@ deps-check:
 
 run-tool-versions:
 	@bash "$(SCRIPT_DIR)src/tool-versions.sh"
+
+validate-skill-meta:
+	@uv run --directory "$(SCRIPTS_PYTHON_DIR)" validate-skill-meta "$(SKILLS_DIR)"/*/SKILL.md --format text

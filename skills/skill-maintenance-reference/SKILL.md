@@ -1,7 +1,7 @@
 ---
 name: skill-maintenance-reference
 description: "Use when referencing maintenance workflows, migration procedures, validation checks, or known pitfalls for skill maintenance."
-tags: [skill-authoring, reference, update-workflow, migration, troubleshooting, validation-checklist]
+tags: [update-workflow, migration, troubleshooting, validation-checklist, maintenance-reference, maintenance-guidance]
 class: documentation
 ---
 

@@ -4,9 +4,10 @@ description: "Use when creating an evidence-based decision proposal from source 
 tags:
   - proposal-authoring
   - decision-record
-  - evidence-synthesis
-  - workflow-artifacts
-  - implementation-overview
+  - evidence-linking
+  - workspace-creation
+  - proposal-sources
+  - decision-proposal
 class: operation
 ---
 

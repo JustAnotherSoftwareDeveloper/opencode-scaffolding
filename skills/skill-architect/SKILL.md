@@ -1,7 +1,7 @@
 ---
 name: skill-architect
-description: "Use as planning reference for skill class taxonomy, class decision flow, class boundary rules, and platform layout/context."
-tags: [skill-authoring, planning, skill-taxonomy, class-design, boundary-rules, platform-architecture]
+description: "Use when selecting skill classes, evaluating class boundaries, or referencing platform architecture."
+tags: [skill-taxonomy, class-design, boundary-rules, platform-architecture, architecture-reference, class-selection]
 class: planning
 ---
 
