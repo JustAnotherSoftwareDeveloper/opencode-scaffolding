@@ -86,6 +86,28 @@
     }
   },
   "agent": {
+    "executor": {
+      "description": "Reads task JSON from .plans/ or .tasks/, displays the task summary, and delegates tasks to workers in order.",
+      "mode": "primary",
+      "prompt": "{file:./agents/executor.md}",
+      "permission": {
+        "*": "deny",
+        "read": {
+          "*": "deny",
+          ".plans/*/tasks.json": "allow",
+          ".tasks/*.json": "allow"
+        },
+        "task": {
+          "*": "deny",
+          "worker": "allow"
+        },
+        "skill": {
+          "*": "deny",
+          "display-tasks": "allow",
+          "task-delegation": "allow"
+        }
+      }
+    },
     "delegator": {
       "description": "Dispatches decomposition to breakdown-tasks, and delegates each task to workers in serial. Does not perform implementation work directly.",
       "mode": "primary",
