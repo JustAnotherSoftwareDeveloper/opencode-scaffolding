@@ -1,12 +1,12 @@
 ---
 name: planning-pipeline-architecture
-description: "Use when selecting analysis, proposal, and plan stages in a planning lifecycle."
+description: "Use as planning reference for the analysis, proposal, and plan lifecycle."
 tags:
   - planning-lifecycle
-  - pipeline-stages
+  - lifecycle-reference
   - stage-selection
-  - analysis-workflow
-  - proposal-workflow
+  - planning-reference
+  - pipeline-workflow
   - plan-workflow
 class: planning
 ---
@@ -49,16 +49,19 @@ This skill documents the planning lifecycle around analysis, proposal, and plan 
 - `proposal` — Produces evidence-based decision workspaces.
 - `plan` — Produces evidence-preserving plan workspaces.
 
-## Files
+## Self-Validation
 
-- [reference/README.md](./reference/README.md) — Indexes the planning lifecycle workflow references.
-- [reference/analysis-only.md](./reference/analysis-only.md) — Describes the terminal assessment workflow.
-- [reference/proposal-only.md](./reference/proposal-only.md) — Describes direct decision-record creation.
-- [reference/plan-only.md](./reference/plan-only.md) — Describes direct executable-plan creation.
-- [reference/analysis-to-proposal.md](./reference/analysis-to-proposal.md) — Describes the assessment-to-decision workflow.
-- [reference/analysis-to-plan.md](./reference/analysis-to-plan.md) — Describes the assessment-to-plan workflow.
-- [reference/proposal-to-plan.md](./reference/proposal-to-plan.md) — Describes the decision-to-plan workflow.
-- [reference/analysis-to-proposal-to-plan.md](./reference/analysis-to-proposal-to-plan.md) — Describes the complete planning lifecycle.
+- [ ] No Markdown tables in body content (use bullet lists instead).
+- [ ] Description uses the `"Use as planning reference"` prefix.
+- [ ] Tags are 4–7 unique, descriptive, lowercase kebab-case values.
+- [ ] All reference files listed in Common Workflows exist under `reference/`.
+- [ ] No execution steps, tool invocations, or side-effect instructions present.
+
+## Cross-References
+
+- `./reference/README.md` — Index of planning lifecycle workflow references.
+- Load `skill-template-library` for the planning SKILL.md template and class conventions.
+- Load `skill-authoring-guide` for frontmatter rules, tagging guide, and editorial conventions.
 
 ## Docs
 

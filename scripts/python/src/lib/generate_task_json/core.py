@@ -32,7 +32,11 @@ OUTPUT_SCHEMA_PATH = (
     / "schema"
     / "task-packet.schema.json"
 )
-DEFAULT_THRESHOLD = 0.15
+# A class match contributes 0.25 by itself. Require additional semantic
+# evidence before assigning a skill so every operation or documentation skill
+# is not selected solely because it shares the inferred task class.
+DEFAULT_THRESHOLD = 0.26
+MIN_SEMANTIC_SCORE = 0.05
 MAX_SKILLS = 3
 DEFAULT_WEIGHTS = {
     "keyword_overlap": 0.50,
@@ -166,10 +170,18 @@ def _parse_skills(index: list[dict[str, Any]]) -> list[Skill]:
 def _select_skills(task: dict[str, Any], candidates: list[Skill]) -> list[str]:
     """Return every threshold-qualified candidate or the highest-ranked skill."""
     task_text = _task_text(task)
-    scored = [(skill.name, _score_skill(skill, task_text)) for skill in candidates]
-    scored.sort(key=lambda item: (-item[1], item[0]))
-    selected = [name for name, score in scored if score >= DEFAULT_THRESHOLD]
-    return (selected or [scored[0][0]])[:MAX_SKILLS]
+    task_class = _infer_task_class(_tokenize(task_text))
+    scored = [(skill, _score_skill(skill, task_text)) for skill in candidates]
+    scored.sort(key=lambda item: (-item[1], item[0].name))
+    selected = [
+        skill.name
+        for skill, score in scored
+        if score >= DEFAULT_THRESHOLD
+        and score
+        - (DEFAULT_WEIGHTS["class_match"] if skill.class_ == task_class else 0)
+        >= MIN_SEMANTIC_SCORE
+    ]
+    return (selected or [scored[0][0].name])[:MAX_SKILLS]
 
 
 def _task_text(task: dict[str, Any]) -> str:

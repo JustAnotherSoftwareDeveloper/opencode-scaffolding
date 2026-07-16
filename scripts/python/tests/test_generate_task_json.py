@@ -200,6 +200,36 @@ def test_select_skills_uses_threshold_and_fallback() -> None:
     assert core._select_skills(task, [weak]) == ["docs"]
 
 
+def test_select_skills_does_not_select_a_class_only_match() -> None:
+    """Do not assign unrelated skills solely because their class matches."""
+    task = {
+        "purpose": "Update the planning architecture reference.",
+        "context": (
+            "Revise the planning lifecycle reference skill frontmatter and required "
+            "sections. Preserve passive reference content and validate the updated "
+            "skill against authoring requirements without generating scripts or tests."
+        ),
+        "filesToRead": ["skills/planning-pipeline-architecture/SKILL.md"],
+        "filesToWrite": ["skills/planning-pipeline-architecture/SKILL.md"],
+        "executionInstructions": [{"step": 1, "action": "Update the reference."}],
+        "expectedOutput": "A validated planning reference skill.",
+    }
+    factory = Skill(
+        name="skill-factory",
+        description="Create and update OpenCode skill files",
+        tags=["skill-authoring", "frontmatter-validation"],
+        class_="operation",
+    )
+    bash_tests = Skill(
+        name="skill-script-bash-test-writer",
+        description="Generate bats tests for bash scripts",
+        tags=["bash-testing", "bats", "test-generation"],
+        class_="operation",
+    )
+
+    assert core._select_skills(task, [factory, bash_tests]) == ["skill-factory"]
+
+
 def test_select_skills_caps_matches_at_three() -> None:
     task = _drafts()["tasks"][0]
     candidates = [_skill(f"python-test-{index}") for index in range(4)]
