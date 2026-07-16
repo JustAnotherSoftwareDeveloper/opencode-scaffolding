@@ -47,6 +47,18 @@ DEFAULT_CLASSES = (SkillClass.OPERATION, SkillClass.DOCUMENTATION)
 SUMMARY_SLUG_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 
 
+def _derive_slug(summary: str) -> str | None:
+    """Derive a valid kebab-case slug from *summary*, or return None."""
+    slug = summary.lower()
+    slug = re.sub(r"\s+", "-", slug)
+    slug = re.sub(r"[^a-z0-9-]", "", slug)
+    slug = re.sub(r"-{2,}", "-", slug)
+    slug = slug.strip("-")
+    if not SUMMARY_SLUG_PATTERN.fullmatch(slug):
+        return None
+    return slug
+
+
 class GenerationValidationError(ValueError):
     """Raised when draft or final task JSON fails schema validation."""
 
@@ -89,6 +101,13 @@ def generate_task_json(
         raise GenerationValidationError(
             f"output failed BreakdownTasksOutput schema: {output_errors}"
         )
+
+    if summary_slug is None and output_file is None:
+        summary_slug = _derive_slug(data["summary"])
+        if summary_slug is None:
+            raise SummarySlugError(
+                f"cannot derive a valid slug from summary: {data['summary']!r}"
+            )
 
     output_path = _resolve_output_path(
         summary_slug,

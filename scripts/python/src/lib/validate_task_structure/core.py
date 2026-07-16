@@ -7,6 +7,8 @@ Consumed by: validate-task-structure.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any
 
 import jsonschema
@@ -68,9 +70,9 @@ def validate(
         ``(False, [error_messages])`` with descriptive messages otherwise.
     """
     errors: list[str] = []
-    task_schema: dict[str, Any] = schema.get(
-        "definitions", {}
-    ).get("TaskPacket", schema)
+    task_schema: dict[str, Any] = schema.get("definitions", {}).get(
+        "TaskPacket", schema
+    )
 
     for idx, task in enumerate(tasks):
         path = f"tasks[{idx}]"
@@ -106,3 +108,88 @@ def validate(
     if errors:
         return False, errors
     return True, []
+
+
+def auto_fix(tasks: list[dict[str, Any]]) -> bool:
+    """Fix skills-only structural errors in task objects.
+
+    Applies fixes deterministically for purely structural skills errors:
+    * maxItems exceeded — trim to first 3
+    * uniqueItems violated — deduplicate keeping first occurrence
+    * empty strings in array — remove
+
+    Does NOT:
+    * remove unknown skill names (requires skill inventory)
+    * add fallback skills (requires skill inventory)
+    * fix non-skills errors
+
+    Args:
+        tasks: List of task dicts to fix (modified in place).
+    Returns:
+        ``True`` when at least one skills array changed.
+    """
+    changed = False
+    for task in tasks:
+        skills = task.get("skills")
+        if not isinstance(skills, list):
+            continue
+
+        normalized = [skill for skill in skills if skill != ""]
+        seen: set[str] = set()
+        deduped: list[str] = []
+        for skill in normalized:
+            if skill not in seen:
+                seen.add(skill)
+                deduped.append(skill)
+        normalized = deduped[:3]
+        if normalized != skills:
+            task["skills"] = normalized
+            changed = True
+    return changed
+
+
+def auto_fix_task_structure(
+    state_path: str | Path, schema: dict[str, Any]
+) -> dict[str, Any]:
+    """Validate and auto-fix skills-only structural errors in a state file.
+
+    Reads the state file, validates, applies auto-fix for skills-only errors,
+    writes back, and re-validates up to 3 times.
+
+    Args:
+        state_path: Path to .tasks state file (JSON object with ``tasks`` array).
+        schema: The full task-packet JSON Schema.
+
+    Returns:
+        ``{"valid": True, "fixed": True}`` when auto-fix resolved all errors,
+        ``{"valid": True, "fixed": False}`` when already valid,
+        ``{"valid": False, "errors": [...]}`` when errors remain after fix attempts.
+    """
+    state_path = Path(state_path)
+
+    # Read initial state
+    raw = state_path.read_text(encoding="utf-8")
+    parsed: object = json.loads(raw)
+    if not isinstance(parsed, dict) or not isinstance(parsed.get("tasks"), list):
+        raise ValueError("state file must contain a JSON object with a 'tasks' array")
+    tasks = parsed["tasks"]
+    if not all(isinstance(task, dict) for task in tasks):
+        raise ValueError("state file tasks must contain JSON objects")
+
+    fixed = False
+    errors: list[str] = []
+    for _ in range(3):
+        changed = auto_fix(tasks)
+        fixed = fixed or changed
+        valid, errors = validate(tasks, schema)
+        if valid:
+            if fixed:
+                state_path.write_text(
+                    json.dumps(parsed, indent=2, ensure_ascii=False) + "\n",
+                    encoding="utf-8",
+                )
+            return {"valid": True, "fixed": fixed}
+        if not changed:
+            return {"valid": False, "errors": errors}
+
+    return {"valid": False, "errors": errors}

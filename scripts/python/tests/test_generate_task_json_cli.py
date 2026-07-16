@@ -66,11 +66,50 @@ def test_success_prints_relative_output_path(tmp_path, monkeypatch) -> None:
     assert result.output == ".tasks/1700000000123-cli-test.json\n"
 
 
-def test_missing_summary_slug_fails() -> None:
-    result = CliRunner().invoke(
-        generate_task_json.main, ["--output-dir", ".tasks"], input=_drafts()
+def test_missing_summary_slug_is_derived_from_summary(tmp_path, monkeypatch) -> None:
+    from lib.generate_task_json.core import _derive_slug
+
+    monkeypatch.setattr(
+        generate_task_json,
+        "generate_task_json",
+        lambda _data, _slug, *, output_dir, **_kwargs: (
+            output_dir / f"1700000000123-{_derive_slug(_data['summary'])}.json"
+        ),
     )
-    assert result.exit_code == 2
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        result = runner.invoke(
+            generate_task_json.main,
+            ["--output-dir", str(Path.cwd() / ".tasks")],
+            input=_drafts(),
+        )
+    assert result.exit_code == 0
+    assert result.output == ".tasks/1700000000123-cli-test.json\n"
+
+
+def test_success_uses_preserved_pwd_after_uv_directory_change(
+    tmp_path, monkeypatch
+) -> None:
+    workspace = tmp_path / "workspace"
+    output_dir = workspace / ".tasks"
+    workspace.mkdir()
+    monkeypatch.setenv("PWD", str(workspace))
+    monkeypatch.setattr(
+        generate_task_json,
+        "generate_task_json",
+        lambda _data, _slug, *, output_dir, **_kwargs: (
+            output_dir / "1700000000123-cli-test.json"
+        ),
+    )
+
+    result = CliRunner().invoke(
+        generate_task_json.main,
+        ["--summary-slug", "cli-test", "--output-dir", str(output_dir)],
+        input=_drafts(),
+    )
+
+    assert result.exit_code == 0, result.output
+    assert result.output == ".tasks/1700000000123-cli-test.json\n"
 
 
 def test_missing_output_dir_fails() -> None:
@@ -113,7 +152,6 @@ def test_partial_or_mixed_destination_options_fail() -> None:
     for arguments in (
         [],
         ["--summary-slug", "cli-test"],
-        ["--output-dir", ".tasks"],
         [
             "--summary-slug",
             "cli-test",

@@ -116,7 +116,7 @@ Validate the corrected state file:
 ```bash
 uv run --directory ~/.config/opencode/scripts/python validate-task-structure \
   --state-file "$GENERATED_PATH" \
-  --schema ./schema/task-packet.schema.json
+  --schema "$PWD/skills/breakdown-tasks/schema/task-packet.schema.json"
 ```
 
 If validation succeeds (exit code 0, `{"valid": true}`), proceed to return.

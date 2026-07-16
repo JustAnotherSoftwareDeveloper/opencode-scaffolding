@@ -1,5 +1,10 @@
 # Task Validation
 
+> **Note**: These validation rules are enforced during **Phase C (Audit)** of the
+> `breakdown-tasks` worker. The Phase C audit evaluates every task's skills for
+> reasonableness and atomicity. See `../../SKILL.md` (Phase C,
+> Step C2) for the enforcement criteria.
+
 Validation checks for decomposition output correctness.
 Verify output against these checks.
 Rework affected packet(s) if any check fails.

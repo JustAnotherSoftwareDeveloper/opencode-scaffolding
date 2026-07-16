@@ -13,11 +13,15 @@ from __future__ import annotations
 from lib.validate_task_structure.core import (
     _validate_execution_steps,
     _validate_file_array,
+    auto_fix,
+    auto_fix_task_structure,
     validate,
 )
 
 __all__ = [
     "_validate_execution_steps",
     "_validate_file_array",
+    "auto_fix",
+    "auto_fix_task_structure",
     "validate",
 ]

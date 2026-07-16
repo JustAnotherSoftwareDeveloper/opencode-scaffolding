@@ -62,9 +62,9 @@ cat > /tmp/draft.json <<'EOF'
 EOF
 
 SUMMARY_SLUG=e2e-pipeline-test
-REL_FILE=$(uv run --project ~/.config/opencode/scripts/python generate-task-json \
+REL_FILE=$(uv run --directory ~/.config/opencode/scripts/python generate-task-json \
   --summary-slug "$SUMMARY_SLUG" \
-  --output-dir "$CWD/.tasks" < /tmp/draft.json)
+  --output-dir "$PWD/.tasks" < /tmp/draft.json)
 
 python3 -c "import json; data=json.load(open('$REL_FILE')); assert data['tasks'][0]['skills']"
 ```

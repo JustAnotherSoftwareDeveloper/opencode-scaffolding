@@ -27,6 +27,8 @@ from cli.validate_task_structure import main
 from lib.validate_task_structure import (
     _validate_execution_steps,
     _validate_file_array,
+    auto_fix,
+    auto_fix_task_structure,
     validate,
 )
 
@@ -351,6 +353,94 @@ class TestValidateFunction:
         assert any("expected step 1" in e for e in errors)
 
 
+class TestAutoFix:
+    """Tests for skills-only structural auto-fixes."""
+
+    def test_auto_fix_normalizes_skills(self, valid_task_1: dict) -> None:
+        """Remove empty skills, duplicates, and entries beyond the first three."""
+        valid_task_1["skills"] = [
+            "python",
+            "",
+            "python",
+            "testing",
+            "linting",
+            "authoring",
+        ]
+
+        changed = auto_fix([valid_task_1])
+
+        assert changed is True
+        assert valid_task_1["skills"] == ["python", "testing", "linting"]
+
+    def test_auto_fix_reports_no_change_for_normalized_skills(
+        self, valid_task_1: dict
+    ) -> None:
+        """Leave an already normalized skills array unchanged."""
+        assert auto_fix([valid_task_1]) is False
+
+    def test_auto_fix_state_file_writes_valid_normalized_tasks(
+        self, valid_task_1: dict, schema_dict: dict, tmp_path: Path
+    ) -> None:
+        """Persist a valid state file after normalizing its skills array."""
+        valid_task_1["skills"] = [
+            "python",
+            "",
+            "python",
+            "testing",
+            "linting",
+            "authoring",
+        ]
+        state_file = tmp_path / "state.json"
+        state_file.write_text(
+            json.dumps({"summary": "Test state", "tasks": [valid_task_1]})
+        )
+
+        result = auto_fix_task_structure(state_file, schema_dict)
+
+        assert result == {"valid": True, "fixed": True}
+        persisted = json.loads(state_file.read_text())
+        assert persisted["tasks"][0]["skills"] == ["python", "testing", "linting"]
+
+    def test_auto_fix_state_file_preserves_unfixable_errors(
+        self, valid_task_1: dict, schema_dict: dict, tmp_path: Path
+    ) -> None:
+        """Report an empty skills array without inventing a fallback skill."""
+        valid_task_1["skills"] = []
+        state_file = tmp_path / "state.json"
+        state_file.write_text(
+            json.dumps({"summary": "Test state", "tasks": [valid_task_1]})
+        )
+
+        result = auto_fix_task_structure(state_file, schema_dict)
+
+        assert result["valid"] is False
+        assert result["errors"]
+
+    def test_cli_auto_fix_writes_state_file(
+        self, valid_task_1: dict, tmp_path: Path
+    ) -> None:
+        """Expose normalized skills through the state-file CLI mode."""
+        valid_task_1["skills"] = ["python", "python", "testing", "linting"]
+        state_file = tmp_path / "state.json"
+        state_file.write_text(
+            json.dumps({"summary": "Test state", "tasks": [valid_task_1]})
+        )
+
+        result = CliRunner().invoke(
+            main,
+            [
+                "--state-file",
+                str(state_file),
+                "--schema",
+                str(SCHEMA_PATH),
+                "--auto-fix",
+            ],
+        )
+
+        assert result.exit_code == 0, result.output
+        assert json.loads(result.output) == {"valid": True, "fixed": True}
+
+
 class TestRejectDependencies:
     """Tests that task packets with a ``dependencies`` field are rejected.
 
@@ -488,9 +578,7 @@ class TestCliInvalid:
         data = json.loads(result.output)
         assert data["valid"] is False
 
-    def test_cli_rejects_dependencies_field(
-        self, valid_task_1, tmp_path: Path
-    ) -> None:
+    def test_cli_rejects_dependencies_field(self, valid_task_1, tmp_path: Path) -> None:
         """A task with ``dependencies`` field produces validation errors."""
         task = dict(valid_task_1)
         task["dependencies"] = []
@@ -504,6 +592,7 @@ class TestCliInvalid:
         assert any("dependencies" in error for error in data["errors"]), (
             f"errors={data['errors']}"
         )
+
 
 class TestCliErrors:
     """Tests for parse/file/schema errors — exit code 2."""

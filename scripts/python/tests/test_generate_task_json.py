@@ -354,6 +354,43 @@ def test_output_path_rejects_invalid_slug(tmp_path: Path) -> None:
         core._output_path("not/a-slug", tmp_path / ".tasks")
 
 
+def test_derive_slug_from_summary() -> None:
+    """Verbs and nouns in the summary become a valid kebab-case slug."""
+    assert (
+        core._derive_slug("Generate test task packets.") == "generate-test-task-packets"
+    )
+    assert core._derive_slug("  Hello   World  ") == "hello-world"
+    assert core._derive_slug("Special!@#Chars___Here") == "specialcharshere"
+    assert core._derive_slug("---leading and trailing---") == "leading-and-trailing"
+
+
+def test_derive_slug_returns_none_for_invalid_summary() -> None:
+    """A summary that produces no valid slug characters returns None."""
+    assert core._derive_slug("!!!") is None
+    assert core._derive_slug("") is None
+
+
+def test_generate_task_json_derives_slug_from_summary(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(core.time, "time_ns", lambda: 1_700_000_000_123_000_000)
+    drafts = _drafts()  # summary is "Generate test task packets."
+    output = core.generate_task_json(
+        drafts,
+        summary_slug=None,
+        project_root=tmp_path,
+        skills_index=[
+            {
+                "name": "python-test",
+                "description": "Write Python tests",
+                "class": "operation",
+            }
+        ],
+    )
+    assert output.name == "1700000000123-generate-test-task-packets.json"
+
+
 def test_write_json_new_cleans_up_after_link_failure(
     tmp_path: Path,
 ) -> None:

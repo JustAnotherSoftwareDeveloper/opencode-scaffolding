@@ -22,7 +22,7 @@ from pathlib import Path
 import click
 
 from lib.schema import load_schema
-from lib.validate_task_structure import validate
+from lib.validate_task_structure import auto_fix_task_structure, validate
 
 
 @click.command(name="validate-task-structure")
@@ -45,6 +45,13 @@ from lib.validate_task_structure import validate
     "Mutually exclusive with file_path and --stdin.",
 )
 @click.option(
+    "--auto-fix",
+    is_flag=True,
+    default=False,
+    help="Auto-fix skills-only structural errors (maxItems, uniqueItems, "
+    "empty strings) in the state file. Requires --state-file.",
+)
+@click.option(
     "--schema",
     type=click.Path(exists=True, dir_okay=False, readable=True),
     required=True,
@@ -54,6 +61,7 @@ def main(
     file_path: str | None,
     stdin: bool,
     state_file: str | None,
+    auto_fix: bool,
     schema: str,
 ) -> None:
     """Validate task objects from FILE_PATH, --stdin, or --state-file
@@ -86,12 +94,32 @@ def main(
         )
         raise SystemExit(2)
 
+    if auto_fix and not state_file:
+        click.echo(
+            "Error: --auto-fix requires --state-file.",
+            err=True,
+        )
+        raise SystemExit(2)
+
     # --- Load schema ---
     try:
         schema_dict: dict = load_schema(Path(schema))
     except Exception as exc:
         click.echo(f"Error: failed to load schema: {exc}", err=True)
         raise SystemExit(2) from exc
+
+    # --- Auto-fix mode ---
+    if auto_fix:
+        try:
+            result: dict = auto_fix_task_structure(Path(state_file), schema_dict)  # type: ignore[arg-type]
+        except Exception as exc:
+            click.echo(f"Error: auto-fix failed: {exc}", err=True)
+            raise SystemExit(2) from exc
+
+        click.echo(json.dumps(result))
+        if not result.get("valid"):
+            raise SystemExit(1)
+        return
 
     # --- Read input ---
     try:

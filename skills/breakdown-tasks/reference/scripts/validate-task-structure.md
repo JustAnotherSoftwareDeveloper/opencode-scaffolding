@@ -32,6 +32,9 @@ On invalid input, write:
 {"valid": false, "errors": ["Task 2: purpose exceeds maxLength 200", "Task 3: missing required key: filesToWrite"]}
 ```
 
+With `--auto-fix --state-file`, valid output includes `"fixed": true` when the
+script removed empty skills, deduplicated skills, or trimmed a skills array to three entries.
+
 ## Validation Rules
 
 Apply these structural rules.
@@ -71,5 +74,14 @@ echo '[...tasks...]' | uv run --directory ~/.config/opencode/scripts/python vali
 
 ## Integration Point
 
-Use after task fields are populated.
-Use as the first pipeline step before final output validation.
+Use after the Phase C audit writes corrected skill assignments.
+Use as the final validation gate before returning the task-file path.
+
+## Auto-Fix
+
+Use `--auto-fix` only with `--state-file`.
+
+- Remove empty strings from `skills` arrays.
+- Deduplicate `skills` arrays while preserving first-occurrence order.
+- Trim `skills` arrays to three entries.
+- Report unresolved errors without adding fallback skills or removing unknown skill names.

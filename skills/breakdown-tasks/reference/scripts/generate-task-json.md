@@ -7,10 +7,12 @@ It validates draft input before assignment and atomically creates a valid `Break
 ## CLI
 
 ```bash
-uv run --project ~/.config/opencode/scripts/python generate-task-json \
-  --summary-slug <kebab-case-slug> \
-  --output-dir "$CWD/.tasks" < input.json
+uv run --directory ~/.config/opencode/scripts/python generate-task-json \
+  --output-dir "$PWD/.tasks" < input.json
 ```
+
+`--summary-slug <kebab-case-slug>` is optional.
+When omitted, the script derives the slug from the root `summary` field.
 
 The breakdown pipeline uses this legacy destination mode exclusively.
 

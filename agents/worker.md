@@ -45,6 +45,8 @@ Contradictions between sections are blockers.
   Apply loaded skill guidance to enhance packet execution.
   Report BLOCKED if a named skill is unavailable.
   Do not load skills not specified in this section.
+  This restriction applies only to the skill tool.
+  Read additional relevant files for execution context when the packet instructions require them.
 - `## EXECUTION INSTRUCTIONS` — Execute step by step.
   Report failure at the failing step.
   Do not skip or reorder steps.
@@ -118,6 +120,7 @@ The worker operates within packet-defined boundaries:
 - **Allowed** — Broadly discover related files by default.
   Use tools such as `glob` or `grep` to find related files needed for task execution.
   Treat all discovered files as part of `## FILES TO READ`.
+  Read additional relevant files for context when an execution step identifies a concrete need.
 - **Never allowed** — Unbounded discovery such as reading every file in the repo.
   Expanding scope on worker initiative.
   Reading files unrelated to the task.
