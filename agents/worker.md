@@ -1,6 +1,6 @@
 ---
 description: "Single text worker for all delegated text tasks. Handles any complexity level within the scope of a delegation packet."
-model: "openrouter/deepseek/deepseek-v4-flash"
+model: "openrouter/qwen/qwen3-coder-next"
 mode: "subagent"
 version: "2.0"
 ---

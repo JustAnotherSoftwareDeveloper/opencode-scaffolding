@@ -108,6 +108,17 @@
         }
       }
     },
+    "executor-simple": {
+      "description": "Reads task JSON from .plans/ or .tasks/, displays the task summary, and executes tasks inline in order.",
+      "mode": "primary",
+      "prompt": "{file:./agents/executor-simple.md}",
+      "permission": {
+        "*": "allow",
+        "task": "deny",
+        "todowrite": "deny",
+        "question": "deny"
+      }
+    },
     "delegator": {
       "description": "Dispatches decomposition to breakdown-tasks, and delegates each task to workers in serial. Does not perform implementation work directly.",
       "mode": "primary",
@@ -136,7 +147,7 @@
     "worker": {
       "description": "Single text worker for all delegated text tasks. Handles any complexity level within the scope of a delegation packet.",
       "mode": "subagent",
-      "model": "ollama/mellum2-thinking",
+      "model": "openrouter/qwen/qwen3-coder-next",
       "prompt": "{file:./agents/worker.md}",
       "permission": {
         "*": "allow",
