@@ -36,13 +36,13 @@
           "maxLength": 8000
         },
         "filesToRead": {
-          "description": "Explicit list of file paths the worker must read before starting.",
+          "description": "Explicit list of file paths the worker must read before starting. Purposeful task-related discovery remains permitted under the worker contract.",
           "type": "array",
           "items": { "type": "string" },
           "uniqueItems": true
         },
         "filesToWrite": {
-          "description": "Explicit list of file paths the worker is expected to create or modify.",
+          "description": "Explicit write boundary containing file paths or bounded path patterns the worker is authorized to create, modify, or delete.",
           "type": "array",
           "items": { "type": "string" },
           "uniqueItems": true
@@ -76,7 +76,7 @@
           "uniqueItems": true
         },
         "expectedOutput": {
-          "description": "Precise description of the deliverable this task produces.",
+          "description": "Precise description of the Deliverable payload this task produces.",
           "type": "string",
           "maxLength": 2000
         }

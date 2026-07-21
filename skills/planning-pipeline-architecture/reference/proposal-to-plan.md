@@ -7,7 +7,7 @@
 ## Purpose
 
 This workflow converts decision evidence into an executable planning artifact.
-The proposal workspace provides decision context, scope boundaries, requirements, and unresolved material for plan authoring.
+The proposal workspace provides decision context, scope boundaries, requirements, and open engineering decisions for plan authoring.
 
 ## Sequence
 
@@ -26,5 +26,5 @@ The proposal workspace provides decision context, scope boundaries, requirements
 
 - Plan source documents remain preserved within the plan workspace.
 - Source-derived constraints remain present in task context.
-- Unresolved material remains labeled as `Open Question:` in task context.
+- Open engineering decisions remain labeled as `Open Question:` in task context.
 - Unverified material remains labeled as `Assumption:` in task context.

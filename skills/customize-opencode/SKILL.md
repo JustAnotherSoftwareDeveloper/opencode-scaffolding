@@ -5,198 +5,138 @@ tags: [opencode-config, packet-execution, worker-agents, engine-behavior, sectio
 class: documentation
 ---
 
-# Customize OpenCode — Packet Execution Engine Reference
+# Customize OpenCode Packet Execution Reference
 
-This skill provides reference documentation for the packet execution engine behavior within the OpenCode worker agent system.
+## Core Contract
 
-## Core Principles
+- **Packet scope** — `PURPOSE`, `DETAILS`, `FILES TO READ`, `FILES TO WRITE`, `SKILLS`, `EXECUTION INSTRUCTIONS`, `VERIFICATION`, and `EXPECTED OUTPUT` define one task.
+- **Hard boundaries** — Purpose, explicit prohibitions, write scope, named-skill scope, atomicity, and task-related discovery limits remain mandatory.
+- **Bounded judgment** — The worker adapts supporting actions only when required to achieve the objective within every hard boundary.
+- **Payload fidelity** — `EXPECTED OUTPUT` controls the payload under `Deliverable`.
+- **Result visibility** — The worker contract controls the surrounding result envelope.
+- **Statelessness** — Each packet contains all state required for one independent invocation.
 
-- **Packet sections are authoritative** — PURPOSE, DETAILS, FILES TO READ, FILES TO WRITE, EXECUTION INSTRUCTIONS, VERIFICATION, EXPECTED OUTPUT, and SKILLS define the operational scope.
-- **No autonomy** — The worker does not expand scope, invent missing dependencies, or deviate from explicit instructions.
-- **Atomicity** — One discrete task per packet, single unit of work.
-- **Single artifact** — Deliverables match EXPECTED OUTPUT exactly, no synthesis across packets.
+## Packet Sections
 
-## Packet Section Interpretation
+### `## PURPOSE`
 
-The worker treats each packet section as an **authoritative operational directive**, not as parsing targets or suggestions.
+- Defines the primary task objective.
+- Controls all execution and interpretation decisions.
 
-### `## PURPOSE` — Operational Directive
+### `## DETAILS`
 
-The `## PURPOSE` section defines the **operational intent** for the worker. It is not metadata to be parsed and stored—it is a directive that shapes execution context.
+- Supplies authoritative context and facts.
+- Excludes invented facts and unsupported outcomes.
+- Permits repository evidence and reversible interpretations to resolve non-material omissions.
 
-- **Worker behavior**: Treat as the primary directive governing what work should be performed
-- **Execution impact**: All actions must align with the stated purpose
-- **Boundary**: Purpose clarifies scope but does not override explicit instructions in other sections
+### `## FILES TO READ`
 
-### `## DETAILS` — Source of Truth
+- Lists required initial read targets.
+- Permits purposeful discovery of additional task-related read context.
+- Makes a missing listed file blocking only when the absence materially prevents the deliverable or required verification.
 
-The `## DETAILS` section contains the **authoritative facts** for task execution. The worker must not introduce new facts beyond what is provided here.
+### `## FILES TO WRITE`
 
-- **Worker behavior**: Use exclusively for contextual information needed to execute
-- **Execution impact**: Do not invent facts. If information is missing, report it as BLOCKED.
-- **Boundary**: Worker must not invent context, dependencies, or missing information
+- Defines the complete write boundary through literal paths or explicit bounded path patterns.
+- Requires every dynamic output to match an authorized pattern.
+- Requires bounded patterns to identify a directory, filename structure, and extension.
+- Excludes recursive wildcards and repository-wide write patterns.
+- Records each listed path as created, modified, deleted, unchanged, or not completed.
+- Permits an unchanged result when verification establishes that the path already satisfies the requested state.
 
-### `## EXECUTION INSTRUCTIONS` — Sequential Commands
+### `## SKILLS`
 
-The `## EXECUTION INSTRUCTIONS` section contains **ordered imperative commands** that the worker executes sequentially.
+- Lists every authorized skill-tool invocation.
+- Requires successful loading of every named skill.
+- Excludes skill-tool invocations for unlisted names.
+- Applies skill-level output instructions to the `Deliverable` payload while preserving the worker result envelope.
+- Translates skill-level `PARTIAL:` and `BLOCKED:` guidance into envelope status and report fields.
 
-- **Worker behavior**: Execute each step in order, reporting failures at the failing step
-- **Execution impact**: Steps are actions, not suggestions—execute until completion or blocker
-- **Boundary**: Worker must not skip, reorder, or modify steps without explicit authorization
+### `## EXECUTION INSTRUCTIONS`
 
-### `## EXPECTED OUTPUT` — Deliverable Specification
+- Defines required outcomes and the default execution order.
+- Permits supporting actions and safe reordering when correctness requires them.
+- Excludes omission of required outcomes.
 
-The `## EXPECTED OUTPUT` section defines the **exact deliverable** the worker must produce.
+### `## VERIFICATION`
 
-- **Worker behavior**: Produce output matching specifications exactly, nothing more or less
-- **Execution impact**: Output is verified against this specification
-- **Boundary**: Worker must not add, remove, or modify output without explicit instruction
+- Defines applicable quality checks.
+- Records every check as `PASS`, `FAIL`, or `NOT RUN`.
+- Permits remediation within the hard boundaries.
 
-## Execution Model
+### `## EXPECTED OUTPUT`
 
-### Sequential Execution
+- Defines the exact payload shape under `Deliverable`.
+- Does not suppress or replace the worker result envelope.
 
-Workers execute `## EXECUTION INSTRUCTIONS` steps sequentially:
+## Sentinel Values
 
-1. Read all `## FILES TO READ` before executing any step
-2. Execute each step in order as an imperative action
-3. Report failure at the failing step—do not skip or continue
-4. Complete all steps before producing output
+- `None` identifies an explicitly empty list or non-applicable packet value.
+- `UNKNOWN — not provided in input` identifies missing information.
+- Neither sentinel represents a literal path or skill name.
+- Unknown purpose, execution instructions, or expected output blocks before side effects.
+- Unknown write or skill scope grants no authorization.
+- Unknown verification produces a `NOT RUN` row for absent declared checks.
 
-### Output Fidelity
+## Conflict And Ambiguity Rules
 
-Workers produce output matching `## EXPECTED OUTPUT` exactly:
+- Compatible instructions use the most specific instruction.
+- Material interpretations and execution deviations appear in `Deviations`.
+- Repository evidence supports reversible interpretations.
+- Unresolved information or conflict produces `BLOCKED` only when it can materially alter scope, safety, externally visible behavior, irreversible output, or the requested deliverable.
+- A blocked result states both the blocker and the unblock condition.
 
-### Verification Step
+## Status Values
 
-Before producing output, workers must:
+- `COMPLETE` identifies a full usable deliverable with every applicable required verification check passing.
+- `PARTIAL` identifies a usable deliverable with a non-critical instruction or verification check incomplete or failed.
+- `BLOCKED` identifies the absence of a usable deliverable because an essential requirement prevents completion.
+- Valid envelopes do not use legacy `PARTIAL:` or `BLOCKED:` prefixes.
 
-1. Compare the actual output against the `## EXPECTED OUTPUT` specification
-2. Verify all requirements in `## VERIFICATION` section are met
-3. Check that output scope matches `## EXPECTED OUTPUT` exactly (no more, no less)
+## Output Format
 
-### PARTIAL: Signaling for Incomplete Work
+The worker returns these sections in order.
 
-When verification reveals incomplete work:
+```markdown
+## Worker Result
 
-- Use `PARTIAL:` prefix before the deliverable
-- Include a brief explanation of what was left undone
-- Example: `PARTIAL: Deliverable completed but missing X, Y, Z`
+| Field | Value |
+| --- | --- |
+| Status | COMPLETE, PARTIAL, or BLOCKED |
+| What was done | Concise execution summary |
+| Accomplishments | Concrete outcomes, or None |
+| Files modified | Created, modified, or deleted path list or count, or None |
+| Skills loaded | Exact loaded skill names, or None |
+| Deviations | Material interpretations or execution deviations, or None |
+| Blocker | Blocking reason, or None |
+| Unblock condition | Required condition, or None |
 
-### BLOCKED: Signaling for Unmet Requirements
+## File Changes
 
-When requirements cannot be met:
-
-- Use `BLOCKED:` prefix before the deliverable
-- Include a clear reason explaining why requirements are unmet
-- Example: `BLOCKED: Cannot fulfill requirement because X, Y, Z`
-
-### Success Signal
-
-- Silence is success—clean deliverable only when complete
-- No prefixes or additional metadata in successful output
-
-## Skill Integration
-
-When `## SKILLS` section is present in a packet, the worker parses skill names from the section, invokes the skill tool for each named skill, and applies loaded skill guidance to enhance packet execution:
-
-### 1. Parse SKILLS Section
-
-- Extract skill names from the `## SKILLS` section
-- Skill names are listed as a comma-separated or newline-separated list
-- Each named skill is treated as a requirement for packet execution
-
-### 2. Invoke Skill Tool for Each Named Skill
-
-- For each skill name parsed from `## SKILLS`:
-  - Invoke the `skill` tool to load the named skill
-  - The skill tool returns the skill's guidance and workflows
-- Skills are loaded in the order they appear in the `## SKILLS` section
-
-### 3. Apply Skill Guidance
-
-- Apply loaded skills' workflows to enhance packet execution
-- Use skill templates/structures when specified in the skill documentation
-- Skill guidance supplements but does not override packet instructions
-
-### 4. Unavailable Skills — Report BLOCKED
-
-- When a named skill is unavailable (not found or cannot be loaded), report BLOCKED before producing any output
-- Include a clear reason: "BLOCKED: Skill '{skill_name}' is unavailable"
-- Do not proceed with packet execution until skill is available
-
-### 5. Restrict to Specified Skills
-
-- Only load skills explicitly named in the `## SKILLS` section
-- Never load skills not specified in the packet
-- Never load skills based on implicit requirements or assumptions
-- Never discover or load skills outside the authorized scope
-
-## Tool Integration Boundaries
-
-The worker enforces strict tool usage boundaries to prevent scope expansion and unauthorized operations:
-
-### `glob` and `grep` Tools
-
-- **Usage**: Broadly permitted for related-file discovery by default
-- **Guidance**: Use to find files related to the task after reading required files from `## FILES TO READ`
-- **Boundary**: Avoid unbounded discovery (e.g., reading every file in the repository)
-- **Rationale**: Supports related-file discovery while preventing unbounded searches
-
-### `webfetch` Tool
-
-- **Restriction**: Only used when explicitly directed in `## EXECUTION INSTRUCTIONS`
-- **Authorization**: Packet must contain explicit instruction to fetch web content
-- **Prohibition**: Never use for unprompted information gathering
-- **Rationale**: Prevents unauthorized external data collection
-
-### `edit` and `write` Tools
-
-- **Restriction**: Only used within `## FILES TO WRITE`
-- **Authorization**: Packet must explicitly list target files for modification
-- **Prohibition**: Never modify or create files outside the authorized list
-- **Rationale**: Prevents unauthorized file system modifications
-
-## Strict Delegation Model
-
-The worker operates under strict boundaries:
-
-| Scope | Restriction |
-|-------|-------------|
-| Read | `## FILES TO READ` (listed files are required); broad related-file discovery permitted by default |
-| Write | Only `## FILES TO WRITE` |
-| Output | Only `## EXPECTED OUTPUT` |
-| Discovery | Broadly permitted for related files by default; avoid unbounded searches |
-| Tool Usage | Only within authorized scopes per Tool Integration Boundaries |
-
-## Discovery Boundaries
-
-- **Allowed** — Broad related-file discovery is permitted by default. Use `glob` or `grep` to find files related to the task after reading required files. All discovered files are treated as part of `## FILES TO READ`.
-- **Never allowed** — Unbounded discovery (e.g., reading every file in the repo). Expanding scope on worker initiative. Reading files unrelated to the task.
-
-## Packet Execution Model
-
-- **Delegator responsibilities** — Provide complete, accurate packets. Specify all required files in `## FILES TO READ` and `## FILES TO WRITE`. Include `## SKILLS` when specialized capabilities are needed. Define clear `## EXPECTED OUTPUT`.
-- **Worker responsibilities** — Consume packets faithfully. Load and apply named skills. Execute `## EXECUTION INSTRUCTIONS` steps. Verify output against `## VERIFICATION` criteria. Produce exactly `## EXPECTED OUTPUT`.
-- **Packet flow** — Delegator → Packet → Worker → Execution → Output → Feedback/Blockers → Delegator.
-- **Statelessness** — Each packet is a complete, independent unit of work. The worker carries no state between packets.
+| Path | Action | Details |
+| --- | --- | --- |
+| relative/path, or None | created, modified, deleted, unchanged, not completed, or none | Concise result or reason |
 
 ## Verification
 
-`## VERIFICATION` defines quality checkpoints, not autonomous execution permission. Workers run these checks against their output before finishing:
+| Check | Result | Details |
+| --- | --- | --- |
+| check name, or None | PASS, FAIL, or NOT RUN | Concise evidence or reason |
 
-1. **Run verification checks** against output using criteria from `## VERIFICATION` section
-2. **Attempt remediation** when verification fails, if possible within packet constraints
-3. **Use PARTIAL:** when verification fails but some work is complete - includes a brief explanation of what was left undone. PARTIAL is NOT a blocker and does not require BLOCKED.
-4. **Report BLOCKED:** for unmet requirements that prevent producing the deliverable - includes clear reason explaining why requirements cannot be met
-5. **Produce clean deliverable** when verification passes - silence is success, no prefixes or additional metadata
+## Deliverable
 
-### Verification Checklist
+The exact payload required by `EXPECTED OUTPUT`, or `None` for `BLOCKED`.
+```
 
-Workers should verify:
+## Consumer Contract
 
-- [ ] Output matches `## EXPECTED OUTPUT` specifications exactly
-- [ ] All `## VERIFICATION` criteria are satisfied
-- [ ] No facts introduced beyond `## DETAILS`
-- [ ] No files read outside `## FILES TO READ` and related-file discovery scope
-- [ ] No files written outside `## FILES TO WRITE`
+- `task-delegation` validates and preserves the complete worker result envelope.
+- Controllers read `Status` to continue after `COMPLETE` or `PARTIAL` and stop after `BLOCKED`.
+- Payload-specific consumers extract all content after `## Deliverable` and validate that content against their own contract.
+- Malformed envelopes fail before payload consumption.
+- Report-table cells remain on one physical line, use `<br>` for line breaks, and escape literal pipes as `\|`.
+- `Files modified` reconciles with every `created`, `modified`, or `deleted` row in `File Changes` and remains `None` for no-op results.
+
+## Docs
+
+See `./reference/README.md` for documentation of supporting files.

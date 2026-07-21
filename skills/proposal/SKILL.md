@@ -23,9 +23,9 @@ Accept an optional source category for each path.
 
 Assign uncategorized paths to `other`.
 
-Return `BLOCKED: Missing proposal topic.` when the topic is absent.
+Return `BLOCKED: Missing proposal topic.` when the input contains no topic or summary.
 
-Return `BLOCKED: Missing source documents.` when no source paths are supplied.
+Return `BLOCKED: Missing source documents.` when the input contains no source paths.
 
 ## Procedure
 
@@ -40,16 +40,23 @@ Return `BLOCKED: Missing source documents.` when no source paths are supplied.
 9. Copy [the implementation template](./templates/implementation.md) to the workspace as `implementation.md`.
 10. Populate both documents from copied source documents.
 11. Replace every template placeholder.
-12. Preserve each document's YAML frontmatter contract.
-13. Replace `{{source_document_toc_entries}}` in `PROPOSAL.md` with relative links to every copied source document.
-14. Generate the `PROPOSAL.md` table of contents.
-15. Link every proposal section from the table of contents.
-16. Link `implementation.md` from the table of contents.
-17. Link every copied source document from the table of contents.
-18. Link each material statement to a copied source document.
-19. Label unverified material as `Assumption: <statement>`.
-20. Label unresolved material as `Open Question: <question>`.
-21. Validate the workspace against [the workspace contract](./reference/workspace-contract.md).
+12. Remove every authoring instruction and every optional section that does not apply.
+13. Preserve each document's YAML frontmatter contract.
+14. Replace `{{source_document_toc_entries}}` in `PROPOSAL.md` with relative links to every copied source document.
+15. Generate the `PROPOSAL.md` table of contents.
+16. Link every proposal section from the table of contents.
+17. Link `implementation.md` from the table of contents.
+18. Link every copied source document from the table of contents.
+19. Link each material statement to a copied source document.
+20. Label unverified material as `Assumption: <statement>`.
+21. Resolve questions answerable through source review, analysis, research, testing, or discovery.
+22. Label material evidence that remains unavailable as `Evidence Gap: <missing evidence>`.
+23. Label only unresolved decisions required from the responsible engineer as `Open Question: <question>`.
+24. Populate `implementation.md` with proposal-specific artifact and behavior changes under the structure in [the implementation format](./reference/implementation-format.md).
+25. Name each known target, such as a file, component, data structure, API endpoint, workflow, or policy, and state its intended modification.
+26. Reject implementation claims that lack proposal evidence or an explicit assumption label.
+27. Reject generic lifecycle phases that lack proposal evidence.
+28. Validate the completed workspace against [the workspace contract](./reference/workspace-contract.md).
 
 ## Self-Validation
 
@@ -62,7 +69,15 @@ Return `BLOCKED: Missing source documents.` when no source paths are supplied.
 - [ ] The proposal table of contents links to every copied source document.
 - [ ] Every material claim is evidence-linked.
 - [ ] Every unsupported material claim is explicitly labeled.
-- [ ] `implementation.md` contains high-level ordered steps without task-level implementation detail.
+- [ ] Every researchable unresolved matter is labeled as an evidence gap rather than an open question.
+- [ ] Each concise box complies with its item and sentence limits.
+- [ ] Each open question requires an engineer decision rather than further investigation.
+- [ ] `implementation.md` groups proposal-specific changes by affected area and names each known target and modification.
+- [ ] Every implementation claim is evidence-linked or explicitly labeled as an assumption.
+- [ ] `implementation.md` contains no generic lifecycle phase unsupported by proposal evidence.
+- [ ] Every concrete change uses the heading and bullet structure in the implementation format.
+- [ ] Neither generated document contains a template placeholder or authoring instruction.
+- [ ] Optional implementation sections appear only when proposal evidence supports their content.
 
 ## Expected Output
 
@@ -70,7 +85,7 @@ Create `.proposals/<epoch-ms>-<summary-slug>/`.
 
 Create `PROPOSAL.md` as the canonical decision document.
 
-Create `implementation.md` as the high-level implementation sequence.
+Create `implementation.md` as the concrete implementation-change document with affected-area headings, concrete-change subheadings, and concise change details.
 
 Copy source documents into their top-level category directories.
 

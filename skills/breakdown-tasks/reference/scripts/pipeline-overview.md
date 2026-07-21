@@ -1,7 +1,7 @@
 # Pipeline Overview
 
 The breakdown pipeline uses a shared `.tasks` state file.
-Scripts read and write that file in sequence; the worker returns the relative path to the final state file.
+Scripts read and write that file in sequence; the worker places the relative path to the final state file under `Deliverable` in its result envelope.
 
 ## Design Philosophy
 
@@ -12,7 +12,7 @@ from the context window by the large decomposition output and must not be refere
 1. **Phase A — Decomposition** (LLM-driven) — Reads planning-skill files and produces structure-aware TaskDraftList JSON.
 2. **Phase B — Script Assignment** (`generate-task-json`) — Derives slug, assigns skills, validates, writes task file.
 3. **Phase C — Audit** (LLM-driven) — Loads fresh inventory, reviews script-assigned skills for semantic correctness.
-4. **Phase D — Validation** (`validate-task-structure --auto-fix`) — Validates and auto-fixes skills arrays, returns path.
+4. **Phase D — Validation** (`validate-task-structure --auto-fix`) — Validates and auto-fixes skills arrays, then prepares the path payload.
 
 This four-phase separation exists for three reasons:
 
@@ -24,7 +24,7 @@ This four-phase separation exists for three reasons:
 
 1. **Phase A — Decomposition** — LLM produces `{summary, tasks}` TaskDraftList JSON (no skills, no slug).
 2. **Phase B — Script Assignment** — `generate-task-json` reads TaskDraftList from stdin, derives the kebab-case slug, assigns operation and documentation skills via deterministic weighted scoring, validates against schemas, and atomically writes `.tasks/<epoch>-<slug>.json`.
-3. **Phase C — Audit** — LLM loads fresh `collect-skills` inventory, reviews every script-assigned skill for semantic correctness, inventory existence, circular self-references, cross-task consistency, and fallback scrutiny. Only skills arrays may be modified.
+3. **Phase C — Audit** — LLM loads fresh `collect-skills` inventory, reviews every script-assigned skill for semantic correctness, inventory existence, circular self-references, cross-task consistency, and empty-assignment suitability. Only skills arrays may be modified.
 4. **Phase D — Validation** — `validate-task-structure --auto-fix` validates the corrected task file, auto-fixes skills-only errors (trim to max 3, remove empty strings, deduplicate), and returns the relative path.
 
 ## Uniform CLI Convention
@@ -73,15 +73,15 @@ The script outputs the relative path of the created file. The worker captures th
 
 ### Phase C — Audit
 
-*Why: Script-assigned skills are deterministic but may not be semantically correct. A human-quality review catches inventory mismatches, circular self-references, and poor fallback selections.*
+*Why: Script-assigned skills are deterministic but may not be semantically correct. A human-quality review catches inventory mismatches, circular self-references, and unnecessary assignments.*
 
 - **Action:** LLM reviews every script-assigned skill for semantic correctness.
 - **State File I/O:** Read/write (corrects skills arrays in `GENERATED_PATH`).
 - **Steps:**
   1. Run `collect-skills --class operation --class documentation` for a fresh executable skill inventory. Do not rely on any earlier skill data.
-  2. For each task in `TASK_PACKET_JSON`, evaluate: inventory check, semantic fit, circular self-references, cross-task consistency, and fallback scrutiny.
+  2. For each task in `TASK_PACKET_JSON`, evaluate: inventory check, semantic fit, circular self-references, cross-task consistency, and empty-assignment suitability.
   3. Only skills arrays may be modified. All other fields stay byte-identical.
-  4. Every assigned skill must exist in the fresh inventory. Each task must retain 1–3 skills.
+  4. Every assigned skill must exist in the fresh inventory. Each task must retain 0–3 semantically appropriate skills.
   5. Write the corrected `TASK_PACKET_JSON` back to `GENERATED_PATH`.
 
 ### Phase D — Validation
@@ -103,9 +103,9 @@ The `--auto-fix` flag resolves skills-only errors deterministically: trim to max
 
 If validation reports errors that `--auto-fix` cannot resolve, the worker fixes only the skills arrays manually, re-writes to `GENERATED_PATH`, re-runs validation, and repeats until success or an unrecoverable error is identified.
 
-### Return Relative Path
+### Return Relative Path Payload
 
-- **Action:** Return the state file location to the delegator.
-- **Expected output:** `.tasks/<epoch>-<slug>.json`
+- **Action:** Place the state file location under `Deliverable` in the worker result envelope.
+- **Expected payload:** `.tasks/<epoch>-<slug>.json`
 
-Return `GENERATED_PATH` as a single string.
+Use `GENERATED_PATH` as the complete `Deliverable` payload.

@@ -1,22 +1,23 @@
 ---
-description: Load the proposal skill and start a deep proposal for the given topic, running delegated exploration/analysis with worker before drafting.
+description: Create an evidence-based decision proposal from a topic and explicit source-document paths.
 ---
 
-Load skill `proposal`, then create a proposal artifact for:
+Load skill `proposal`, then create a proposal workspace for:
 
 `$ARGUMENTS`
 
 ## Workflow
 
 1. Load the `proposal` skill.
-2. Classify intent and depth for the request above.
-3. Run discovery (local file inventory, prior art, conventions). For `deep` proposals, run delegated exploration/analysis with `worker` before drafting.
-4. Create `.proposals/<unix-timestamp>-slug/INDEX.md` as a table of contents only, plus `metadata.md` and the canonical section files from the proposal workspace template, including lane rationale, evidence, analysis, and clarification markers in their section files when applicable.
-5. Run embedded quality check via `worker` with review-mode instructions.
-6. Report the artifact path, status, key tradeoffs, and next user decision.
+2. Parse the topic and explicit source-document paths from the request above.
+3. Follow the loaded skill without adding delegation or a separate discovery workflow.
+4. Create `.proposals/<epoch-ms>-<summary-slug>/` with canonical `PROPOSAL.md`, `implementation.md`, and copied source documents.
+5. Validate the workspace against the proposal workspace contract.
+6. Report the proposal workspace path.
 
 ## Constraints
 
-- Do not plan or implement. This command creates a proposal only.
+- Do not create an analysis or plan workspace.
+- Do not implement the proposal.
 - Do not migrate, rewrite, move, or split existing historical `.proposals/*.md` proposal files.
-- If `$ARGUMENTS` is empty, prompt the user for the topic to propose.
+- If `$ARGUMENTS` lacks a topic or explicit source-document paths, report the applicable proposal-skill blocker.

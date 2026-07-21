@@ -15,13 +15,13 @@ from context by the large decomposition output.
 ## Input Contract
 
 Read `## PURPOSE` and `## DETAILS`.
-Return `BLOCKED: missing PURPOSE or DETAILS` if either section is missing.
+Return `BLOCKED` envelope status with the missing section and unblock condition when either section is absent.
 
 ## Phase A — Decomposition
 
 Goal: produce a TaskDraftList JSON object (no skills, no slug).
 
-Step A1. Run collect-skills for planning context:
+Step A1. Invoke the bash tool with this command to collect planning skills:
     ```bash
     uv run --directory ~/.config/opencode/scripts/python collect-skills --class planning
     ```
@@ -84,7 +84,7 @@ Step B3. Read `GENERATED_PATH` into `TASK_PACKET_JSON`.
 Goal: review every script-assigned skill for semantic correctness.
 You must load fresh dependencies here — Phase A's planning skills are gone.
 
-Step C1. Run collect-skills for the executable skill inventory:
+Step C1. Invoke the bash tool with this command to collect the executable skill inventory:
     ```bash
     uv run --directory ~/.config/opencode/scripts/python collect-skills --class operation --class documentation
     ```
@@ -106,13 +106,13 @@ Step C2. For every task in `TASK_PACKET_JSON`, evaluate:
       editing breakdown-tasks/SKILL.md)
     - **Cross-task consistency**: do related tasks (variants of the same work,
       sequential pipeline steps) receive aligned skill assignments?
-    - **Fallback scrutiny**: when no skill reached the threshold, the scorer
-      selected the highest-ranked. Examine these extra carefully.
+    - **Empty-assignment scrutiny**: when no skill reached the threshold,
+      confirm direct packet execution is appropriate.
 
     Constraints:
     - Only skills arrays may be modified.
     - Every assigned skill must exist in `SKILL_INVENTORY`.
-    - Each task must retain 1–3 skills.
+    - Each task must retain 0–3 semantically appropriate skills.
     - All other fields stay byte-identical.
 
     Do not reference planning skills — they are not available at this phase.
@@ -121,9 +121,9 @@ Step C3. Write the corrected `TASK_PACKET_JSON` back to `GENERATED_PATH`.
 
 ## Phase D — Validation
 
-Goal: validate the corrected task file and return its path.
+Goal: validate the corrected task file and prepare its path as the `Deliverable` payload.
 
-Step D1. Run validation with auto-fix:
+Step D1. Invoke the bash tool with this command to run validation with auto-fix:
     ```bash
     uv run --directory ~/.config/opencode/scripts/python validate-task-structure \
       --state-file "$PWD/$GENERATED_PATH" \
@@ -138,19 +138,19 @@ Step D2. If validation reports errors that `--auto-fix` cannot resolve:
     - Re-write to `GENERATED_PATH`.
     - Re-run validation.
     - Repeat until success or an unrecoverable error is identified.
-    If unrecoverable, return `BLOCKED: <reason>`.
+    If unrecoverable, return `BLOCKED` envelope status with the validation reason and unblock condition.
 
-Step D3. Return `GENERATED_PATH` only.
+Step D3. Place `GENERATED_PATH` alone in the worker envelope's `Deliverable` section.
 
 ## Output Contract
 
 Phase A produces TaskDraftList JSON on stdout (captured for piping to Phase B).
 Phase B produces `.tasks/<epoch>-<slug>.json` (the script writes it).
 Phase C writes corrections to the same file.
-Phase D validates and returns `GENERATED_PATH`.
+Phase D validates `GENERATED_PATH` and uses it as the `Deliverable` payload.
 
-Final return: `.tasks/<epoch>-<slug>.json` (the relative path emitted by
-`generate-task-json` in Phase B, validated in Phase D).
+Final payload: `.tasks/<epoch>-<slug>.json` (the relative path emitted by
+`generate-task-json` in Phase B, validated in Phase D) under the worker result envelope's `Deliverable` section.
 
 ## Guardrails
 

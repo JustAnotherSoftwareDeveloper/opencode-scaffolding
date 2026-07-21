@@ -32,11 +32,17 @@ class: orchestrated
 
 - `<<dispatch model: parallel fan-out / sequential pipeline / conditional branching>>`.
 - `<<concurrency limits and data flow between steps>>`.
+- Require every delegated result to contain `Worker Result`, `File Changes`, `Verification`, and `Deliverable` in order.
+- Continue or collate after `COMPLETE` and `PARTIAL`; stop, retry, or escalate after `BLOCKED` according to the workflow policy.
+- Treat a malformed result envelope as blocked orchestration input and do not consume its payload.
+- Pass only the `Deliverable` payload into payload-specific downstream steps.
 
 ## Verification Checklist
 
 - `<<verification assertion that a worker must pass>>`.
 - `<<verification assertion that a worker must pass>>`.
+- Every delegated result has one valid `COMPLETE`, `PARTIAL`, or `BLOCKED` envelope status.
+- Every consumed payload came from a validated `Deliverable` section.
 
 ## Self-Validation
 
@@ -51,3 +57,7 @@ class: orchestrated
 ## Cross-References
 
 - Load `skill-architect` for path resolution rules for script invocations.
+
+## Docs
+
+See `./reference/README.md` for documentation of supporting files.

@@ -401,10 +401,10 @@ class TestAutoFix:
         persisted = json.loads(state_file.read_text())
         assert persisted["tasks"][0]["skills"] == ["python", "testing", "linting"]
 
-    def test_auto_fix_state_file_preserves_unfixable_errors(
+    def test_auto_fix_state_file_accepts_empty_skills(
         self, valid_task_1: dict, schema_dict: dict, tmp_path: Path
     ) -> None:
-        """Report an empty skills array without inventing a fallback skill."""
+        """Accept an empty skills array without inventing a fallback skill."""
         valid_task_1["skills"] = []
         state_file = tmp_path / "state.json"
         state_file.write_text(
@@ -413,8 +413,7 @@ class TestAutoFix:
 
         result = auto_fix_task_structure(state_file, schema_dict)
 
-        assert result["valid"] is False
-        assert result["errors"]
+        assert result == {"valid": True, "fixed": False}
 
     def test_cli_auto_fix_writes_state_file(
         self, valid_task_1: dict, tmp_path: Path

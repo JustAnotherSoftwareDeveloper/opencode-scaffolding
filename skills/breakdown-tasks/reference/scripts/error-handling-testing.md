@@ -72,7 +72,7 @@ python3 -c "import json; data=json.load(open('$REL_FILE')); assert data['tasks']
 ### Validation Checklist
 
 - TaskDraft state contains no `skills` fields before assignment.
-- `generate-task-json` adds non-empty `skills` arrays from discovered skills.
+- `generate-task-json` adds zero to three threshold-qualified skills without forcing a fallback.
 - `generate-task-json` writes only valid final output.
-- The worker returns only `.tasks/<epoch-milliseconds>-<summary-slug>.json` to the delegator.
+- The worker places only `.tasks/<epoch-milliseconds>-<summary-slug>.json` under `Deliverable`; `dispatch-decompose` extracts it for the delegator.
 - Errors appear on stderr; stdout remains machine-consumable on success.

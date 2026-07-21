@@ -1,0 +1,28 @@
+## Worker Result
+
+| Field | Value |
+| --- | --- |
+| Status | COMPLETE |
+| What was done | Updated and validated the target file. |
+| Accomplishments | Applied the requested contract. |
+| Files modified | 1 |
+| Skills loaded | skill-factory |
+| Deviations | None |
+| Blocker | None |
+| Unblock condition | None |
+
+## File Changes
+
+| Path | Action | Details |
+| --- | --- | --- |
+| skills/example/SKILL.md | modified | Updated the output contract. |
+
+## Verification
+
+| Check | Result | Details |
+| --- | --- | --- |
+| Markdown lint | PASS | Lint completed successfully. |
+
+## Deliverable
+
+skills/example/SKILL.md

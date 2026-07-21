@@ -77,7 +77,7 @@ Dispatch model, concurrency limits, and data flow.
 Assertions the orchestrator run must satisfy.
 **Pitfall**: Listing skill-authoring rules instead of run-time gates.
 
-- All delegated workers returned `"success"` status.
+- All delegated workers returned `COMPLETE` envelope status.
 - No critical violations in static analysis output.
 
 ### Self-Validation

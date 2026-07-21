@@ -13,7 +13,7 @@ The skill assignment system is designed as a deterministic, auditable, and contr
 - **Class match (0.25)** and **tag similarity (0.25)** are supporting signals that refine the ranking. Class match ensures operation/documentation skills are preferred for executable tasks; tag similarity catches semantic matches the keyword overlap might miss.
 - **Threshold gating** (vs. top-k) was chosen because it guarantees a minimum quality bar independent of the candidate pool size. With top-k, a large pool of low-quality matches would still produce assignments; threshold gating ensures only sufficiently relevant skills are assigned.
 - The **class filter** restricts to `operation` and `documentation` because only these classes have executable worker workflows. Other classes (planning, inline, orchestrated, delegated) are handled at the delegator or orchestrator level and should not be assigned per-task.
-- **No synthetic fallback**: If no skill reaches the threshold, the pipeline surfaces a discovery gap rather than silently assigning a misleading fallback. This makes skill inventory gaps visible and actionable.
+- **No synthetic fallback**: If no skill reaches the threshold, the pipeline leaves the skills array empty rather than assigning a misleading skill. The worker then executes the packet directly without specialized skill guidance.
 - **LLM review augments the baseline**: The deterministic scorer is reproducible but cannot reason semantically. The LLM review step corrects assignments where lexical matching produces poor results — it does not replace the scorer.
 
 ## Prerequisites
@@ -62,10 +62,9 @@ Task text is built from `purpose`, `context`, and `expectedOutput`.
 Selection rules:
 
 1. Select every skill with score greater than or equal to the canonical threshold.
-2. Select the highest-ranked skill when no candidate reaches the threshold.
+2. Leave the skills array empty when no candidate reaches the threshold.
 3. Keep at most the three highest-ranked selected skills.
-4. Every final task must have at least one skill.
-5. Do not synthesize fallback skills; selected skills must come from discovered skills.
+4. Do not synthesize fallback skills; selected skills must come from discovered skills.
 
 ### 5. Write Final TaskPackets
 
@@ -75,7 +74,7 @@ The resulting object validates against `schema/task-packet.schema.json`.
 ## Stage 2 — LLM Review and Self-Correction
 
 After `generate-task-json` writes the state file, the `breakdown-tasks` worker
-performs a mandatory LLM review before returning the path.
+performs a mandatory LLM review before publishing the path under `Deliverable`.
 
 ### 1. Read Generated State File
 
@@ -94,14 +93,14 @@ For every task in `TASK_PACKET_JSON`, evaluate:
 
 - **Semantic fit**: Does each assigned skill's purpose match the task's purpose, context, and expected output? Lexical overlap may indicate a match where none exists, or miss a match where terminology differs.
 - **Cross-task consistency**: Do related tasks (variants of the same work, sequential pipeline steps) receive aligned skill assignments? Minor wording differences should not produce divergent assignments for substantively similar tasks.
-- **Fallback scrutiny**: When the deterministic scorer selected the highest-ranked skill because no candidate reached the threshold (fallback path), examine the assignment with extra rigor. The fallback may be the least-bad option rather than a good match.
+- **Empty-assignment scrutiny**: When no skill reaches the threshold, confirm direct packet execution is appropriate and do not force an unrelated assignment.
 
 ### 4. Constraints on Changes
 
 - Only `skills` arrays may be modified.
 - All other fields (`purpose`, `context`, `filesToRead`, `filesToWrite`, `executionInstructions`, `verification`, `expectedOutput`) must remain byte-identical to the `generate-task-json` output.
 - Every assigned skill must have a matching entry in the `SKILL_INVENTORY`.
-- Each task must retain 1–3 skills (schema constraint, enforced by validation).
+- Each task must retain 0–3 semantically appropriate skills (schema constraint, enforced by validation).
 - If no correction is warranted for a given task, leave its `skills` array unchanged.
 
 ### 5. Write Corrected State File
@@ -140,7 +139,8 @@ must pass validation.
 The final output is a JSON object with:
 
 - `summary` — request summary from decomposition.
-- `tasks` — ordered TaskPacket array, each with a non-empty `skills` array.
+- `tasks` — ordered TaskPacket array, each with a `skills` array containing zero to three names.
 
-The delegator receives the relative `.tasks/<epoch-milliseconds>-<summary-slug>.json` path, not the raw JSON.
+The worker places the relative `.tasks/<epoch-milliseconds>-<summary-slug>.json` path under `Deliverable` in its result envelope.
+`dispatch-decompose` validates the envelope and returns that path to the delegator, not the raw JSON.
 The state file at that path contains the LLM-reviewed skill assignments.

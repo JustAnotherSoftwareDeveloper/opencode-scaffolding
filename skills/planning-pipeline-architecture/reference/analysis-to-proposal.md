@@ -27,6 +27,7 @@ Proposal records the decision from explicit source documents.
 ## Notes
 
 - A conversational analysis response is not a proposal source path until it is preserved as a document.
-- Unresolved material remains labeled as `Open Question:` in the proposal workspace.
+- Only unresolved decisions required from the responsible engineer remain labeled as `Open Question:` in the proposal workspace.
+- Researchable uncertainty remains in the analysis artifact rather than becoming a proposal open question.
 - Unverified material remains labeled as `Assumption:` in the proposal workspace.
 - This workflow ends after decision recording unless executable planning is required.

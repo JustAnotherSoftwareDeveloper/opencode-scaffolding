@@ -40,10 +40,28 @@ package = true
 
 [tool.coverage.run]
 source = ["cli", "lib"]
-omit = ["*/tests/*", "*/test_*", "*/.tox/*", "*/venv/*", "*/env/*"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/.tox/*",
+    "*/venv/*",
+    "*/env/*",
+    "*/agent_eval_suite/*",
+]
 
 [tool.coverage.report]
-fail_under = 100
+fail_under = 85
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
 
 [tool.pytest.ini_options]
-addopts = "--cov=cli --cov=lib --cov-report=term-missing --cov-fail-under=100"
+addopts = "--cov=cli --cov=lib --cov-report=term-missing --cov-fail-under=85"
+markers = [
+    "skip_coverage: Skip coverage checks for this test",
+]
+

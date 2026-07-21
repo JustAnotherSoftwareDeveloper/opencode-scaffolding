@@ -1,0 +1,28 @@
+## Worker Result
+
+| Field | Value |
+| --- | --- |
+| Status | BLOCKED |
+| What was done | Validated the packet and stopped before execution. |
+| Accomplishments | None |
+| Files modified | None |
+| Skills loaded | None |
+| Deviations | None |
+| Blocker | A required skill was unavailable. |
+| Unblock condition | Make the required skill available. |
+
+## File Changes
+
+| Path | Action | Details |
+| --- | --- | --- |
+| None | none | No files changed. |
+
+## Verification
+
+| Check | Result | Details |
+| --- | --- | --- |
+| Deliverable validation | NOT RUN | Execution was blocked. |
+
+## Deliverable
+
+None

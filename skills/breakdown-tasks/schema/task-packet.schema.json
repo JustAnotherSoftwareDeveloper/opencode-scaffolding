@@ -37,23 +37,22 @@
           "maxLength": 8000
         },
         "filesToRead": {
-          "description": "Explicit list of file paths the worker must read before starting. No file discovery is permitted beyond this list unless the task packet explicitly authorizes it.",
+          "description": "Explicit list of file paths the worker must read before starting. Purposeful task-related discovery remains permitted under the worker contract.",
           "type": "array",
           "items": { "type": "string" },
           "uniqueItems": true
         },
         "filesToWrite": {
-          "description": "Explicit list of file paths the worker is expected to create or modify. The worker must write every file in this list unless blocked.",
+          "description": "Explicit write boundary containing file paths or bounded path patterns the worker is authorized to create, modify, or delete.",
           "type": "array",
           "items": { "type": "string" },
           "uniqueItems": true
         },
         "skills": {
-          "description": "Skills the worker must load before executing. Each entry must match an available skill name exactly. Loading an unknown skill is a blocker. At least 1 skill per task.",
+          "description": "Zero to three skills the worker must load before executing. Each entry must match an available skill name exactly. An empty array authorizes direct packet execution without specialized skill guidance.",
           "type": "array",
           "items": { "type": "string" },
           "uniqueItems": true,
-          "minItems": 1,
           "maxItems": 3
         },
         "executionInstructions": {
@@ -88,7 +87,7 @@
           "uniqueItems": true
         },
         "expectedOutput": {
-          "description": "Precise description of the deliverable this task produces. The worker must produce exactly this and nothing more. Use concrete language (file paths, function names, data formats).",
+          "description": "Precise description of the Deliverable payload this task produces. Use concrete language such as file paths, function names, and data formats.",
           "type": "string",
           "maxLength": 2000
         }

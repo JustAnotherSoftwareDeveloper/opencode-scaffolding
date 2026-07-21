@@ -30,7 +30,9 @@ This skill documents the planning lifecycle around analysis, proposal, and plan 
 - Plan fits requests that require executable task planning from source documents.
 - A persisted analysis document provides a source artifact for proposal work.
 - A proposal workspace and its source evidence provide source artifacts for plan work.
-- Assumptions and open questions remain visible through every later planning stage.
+- Assumptions remain visible through every later planning stage.
+- Proposal open questions contain only unresolved decisions required from the responsible engineer.
+- Researchable uncertainty remains in analysis or evidence rather than becoming a proposal open question.
 - The stages are selectable independently; the full lifecycle is not mandatory for every request.
 
 ## Common Workflows

@@ -8,6 +8,7 @@ How the pieces fit together — the breakdown pipeline flows through six domains
    - `task-granularity.md` — Heuristics for splitting work at the right boundaries
    - `field-reference-table.md` — All fields in the TaskPacket and root-level object
    - `context-preservation.md` — Guidelines for self-contained worker packets
+   - `implementation-steps-format.md` — Format specification for implementation steps documentation
 
 2. **Orchestration** (`reference/orchestration/`) — Validation of decomposition output correctness. Use after completing a decomposition to check structure.
    - `task-validation.md` — Validation checks for decomposition output correctness

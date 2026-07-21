@@ -147,11 +147,12 @@ def test_generate_task_json_rejects_draft_skills_before_creating_tasks_directory
     assert not (tmp_path / ".tasks").exists()
 
 
-def test_generate_task_json_rejects_missing_candidates(tmp_path: Path) -> None:
-    with pytest.raises(RuntimeError, match="No skills found"):
-        core.generate_task_json(
-            _drafts(), "generate-tests", project_root=tmp_path, skills_index=[]
-        )
+def test_generate_task_json_allows_missing_candidates(tmp_path: Path) -> None:
+    output = core.generate_task_json(
+        _drafts(), "generate-tests", project_root=tmp_path, skills_index=[]
+    )
+    result = json.loads(output.read_text())
+    assert result["tasks"][0]["skills"] == []
 
 
 def test_generate_task_json_rejects_invalid_final_output(
@@ -192,12 +193,13 @@ def test_discover_skills_resolves_index() -> None:
     discover.assert_called_once()
 
 
-def test_select_skills_uses_threshold_and_fallback() -> None:
+def test_select_skills_uses_threshold_without_fallback() -> None:
     matching = _skill()
     weak = Skill(name="docs", description="", tags=[], class_="documentation")
     task = _drafts()["tasks"][0]
     assert core._select_skills(task, [weak, matching]) == ["python-test"]
-    assert core._select_skills(task, [weak]) == ["docs"]
+    assert core._select_skills(task, [weak]) == []
+    assert core._select_skills(task, []) == []
 
 
 def test_select_skills_does_not_select_a_class_only_match() -> None:

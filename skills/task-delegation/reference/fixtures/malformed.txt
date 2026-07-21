@@ -1,0 +1,9 @@
+## Worker Result
+
+| Field | Value |
+| --- | --- |
+| Status | COMPLETE |
+
+## Deliverable
+
+This fixture intentionally omits File Changes and Verification.

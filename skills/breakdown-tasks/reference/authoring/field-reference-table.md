@@ -34,19 +34,19 @@ Field definitions extracted from `../../schema/task-packet.schema.json`. All fie
   - Type: `array` of `string`
   - Required: yes
   - Constraints: `uniqueItems`: true
-  - Description: Explicit list of file paths the worker must read before starting. No file discovery is permitted beyond this list unless the task packet explicitly authorizes it.
+  - Description: Explicit list of file paths the worker must read before starting. Purposeful task-related discovery remains permitted under the worker contract.
 
 - **`filesToWrite`**
   - Type: `array` of `string`
   - Required: yes
   - Constraints: `uniqueItems`: true
-  - Description: Explicit list of file paths the worker is expected to create or modify. The worker must write every file in this list unless blocked.
+  - Description: Explicit write boundary containing file paths or bounded path patterns the worker is authorized to create, modify, or delete.
 
 - **`skills`**
   - Type: `array` of `string`
   - Required: yes
-  - Constraints: `uniqueItems`: true, `minItems`: 1, `maxItems`: 3
-  - Description: Skills the worker must load before executing. Each entry must match an available skill name exactly. Loading an unknown skill is a blocker. At least 1 skill per task.
+  - Constraints: `uniqueItems`: true, `maxItems`: 3
+  - Description: Zero to three skills the worker must load before executing. An empty array authorizes direct packet execution without specialized skill guidance.
 
 - **`executionInstructions`**
   - Type: `array` of `object`
@@ -68,4 +68,4 @@ Field definitions extracted from `../../schema/task-packet.schema.json`. All fie
   - Type: `string`
   - Required: yes
   - Constraints: `maxLength`: 2000
-  - Description: Precise description of the deliverable this task produces. The worker must produce exactly this and nothing more. Use concrete language (file paths, function names, data formats).
+  - Description: Precise description of the `Deliverable` payload this task produces. Use concrete language such as file paths, function names, and data formats.

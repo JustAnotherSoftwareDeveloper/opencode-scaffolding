@@ -10,52 +10,28 @@ status: draft
 
 ## Purpose
 
-State the intended outcome.
+State the intended outcome in one sentence.
 
 Link to the recommended option in `PROPOSAL.md`.
 
-## High-Level Implementation Sequence
+## {{affected-area}}
 
-1. **Prepare**
-   - Confirm prerequisites.
-   - Confirm scope boundaries.
-   - Record the confirmed implementation starting point as the outcome.
-   - Resolve all prerequisites before proceeding.
-   - Resolve all scope questions before proceeding.
+### `{{affected-target}}` — {{modification}}
 
-2. **Establish**
-   - Establish the proposed capability.
-   - Record the established foundation as the outcome.
-   - Record the confirmed starting point as the dependency.
+- **Change:** State the exact modification to the named artifact, interface, workflow, or policy.
+- **Reason:** State the evidence-linked reason or intended effect when it is not clear from the change.
 
-3. **Integrate**
-   - Integrate affected systems.
-   - Integrate affected workflows.
-   - Integrate affected interfaces.
-   - Coordinate affected stakeholders.
-   - Record the connected capability as the outcome.
-   - Record the established capability as the dependency.
-
-4. **Validate**
-   - Validate proposal requirements.
-   - Validate success measures.
-   - Record validation evidence as the outcome.
-   - Record gaps that prevent acceptance.
-   - Resolve material validation gaps before rollout.
-
-5. **Roll Out**
-   - Roll out the approved change.
-   - Monitor defined outcomes.
-   - Close remaining questions.
-   - Record the adopted change as the outcome.
-   - Record the validation decision as the dependency.
+Repeat the H2 area and H3 concrete-change structure for every proposal-specific change.
 
 ## Dependencies And Decision Gates
 
-List proposal dependencies.
+Omit this section when the proposal evidence establishes no dependencies or gates.
 
-List the decision required before each affected sequence step.
+- **Dependency:** List an evidence-linked dependency and the affected concrete change.
+- **Decision gate:** List an evidence-linked decision required before the affected concrete change.
 
 ## Validation Summary
 
-Link each high-level validation activity to the applicable acceptance criteria in `PROPOSAL.md`.
+Omit this section when the proposal defines no applicable acceptance criteria.
+
+- **Validation:** Link each affected area to the applicable acceptance criteria in `PROPOSAL.md`.

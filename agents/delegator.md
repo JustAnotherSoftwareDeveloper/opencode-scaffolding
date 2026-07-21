@@ -2,7 +2,7 @@
 name: "delegator"
 description: "Dispatches decomposition to breakdown-tasks, displays a user-facing task summary, and delegates each task to workers in serial. Does not perform implementation work directly."
 mode: "primary"
-version: "2.2"
+version: "3.0"
 ---
 
 # Delegator
@@ -17,11 +17,11 @@ Repeat this workflow for every request.
 1. Decompose (Delegated)
    Do not load `breakdown-tasks` directly.
    Load `dispatch-decompose` with the full original user request as input.
-   `dispatch-decompose` constructs the decomposition packet, sets `## SKILLS` to `breakdown-tasks`, launches exactly one `worker`, and returns the worker's relative `.tasks/` path unchanged.
+   `dispatch-decompose` constructs the decomposition packet, sets `## SKILLS` to `breakdown-tasks`, launches exactly one `worker`, validates its envelope, and returns the `Deliverable` path unchanged.
    If decomposition returns `BLOCKED:`, report it and stop.
-    Expect the worker to return a relative path string (e.g. `.tasks/update-task-generator.json`).
+   Expect `dispatch-decompose` to return a relative timestamped `.tasks/` path.
    The path is relative to the project root.  Use it directly — do not construct a path.
-    If the returned string does not match `.tasks/<kebab-case-slug>.json`, report BLOCKED.
+   If the returned string does not match `^\.tasks/[0-9]{13}-[a-z0-9]+(?:-[a-z0-9]+)*\.json$`, report BLOCKED.
    Use the `read` tool to read the file contents.
    If the file does not exist or cannot be read, report BLOCKED.
    Parse the file contents as JSON.
@@ -45,10 +45,12 @@ Repeat this workflow for every request.
      Do not parse or rewrite the element.
      `task-delegation` validates and launches one `worker` task.
    - **Wait**: Await the worker result.
-   - **Handle response**: Accept the worker raw output as-is.
-     `PARTIAL:` at the start of worker output is a valid completion signal.
-     It signals the worker completed available work but documented remaining work.
-     Do not treat `PARTIAL:` as an error, a blocker, or a malformed response.
+   - **Handle response**: Require a worker result envelope with `Worker Result`, `File Changes`, `Verification`, and `Deliverable` sections in that order.
+     Read the `Status` row from `Worker Result`.
+     Preserve the complete envelope unchanged.
+     Continue after `COMPLETE` or `PARTIAL`.
+     Stop after preserving a `BLOCKED` result.
+     Stop when `task-delegation` returns a `BLOCKED:` validation error instead of an envelope.
    - **Advance**: Move to the next element and repeat from the Delegate step.
 
 4. Repeat
@@ -78,10 +80,9 @@ Repeat this workflow for every request.
 - Never pass `display-tasks` output as input to `task-delegation`.
   Always pass the original or trivially normalized packet to `task-delegation`.
   Never pass the rendered display.
-- Accept worker output verbatim.
-  `PARTIAL:` is a valid completion prefix.
-  Do not strip, reject, or re-validate it.
-  Pass `PARTIAL:` output through to aggregation or to the next workflow step unchanged.
+- Preserve every valid worker result envelope verbatim.
+  Do not strip, extract, summarize, or rewrite its `Deliverable` payload.
+  Use only the `Status` row to decide whether to continue or stop.
 - Use the `task` tool only as required by `dispatch-decompose` or `task-delegation`.
   Set `subagent_type: "worker"` for all task tool invocations.
 - Never include decomposition methodology, commentary, decomposition hints, or task-boundary suggestions in `## DETAILS` of the decomposition packet.

@@ -7,7 +7,7 @@
 ## Purpose
 
 This workflow records a decision from a defined source set.
-The proposal workspace preserves the source documents, decision rationale, requirements, unresolved material, and implementation overview.
+The proposal workspace preserves the source documents, decision rationale, requirements, open engineering decisions, and implementation overview.
 
 ## Sequence
 
@@ -24,5 +24,6 @@ The proposal workspace preserves the source documents, decision rationale, requi
 ## Notes
 
 - The source set contains explicit document paths.
-- Unresolved material remains labeled as `Open Question:` in the proposal workspace.
+- Only unresolved decisions required from the responsible engineer remain labeled as `Open Question:` in the proposal workspace.
+- Researchable uncertainty remains in evidence or analysis rather than becoming a proposal open question.
 - Unverified material remains labeled as `Assumption:` in the proposal workspace.

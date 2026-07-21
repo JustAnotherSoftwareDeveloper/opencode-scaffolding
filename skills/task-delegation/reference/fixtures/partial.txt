@@ -1,0 +1,28 @@
+## Worker Result
+
+| Field | Value |
+| --- | --- |
+| Status | PARTIAL |
+| What was done | Produced a usable deliverable and ran available checks. |
+| Accomplishments | Completed the requested edit. |
+| Files modified | 1 |
+| Skills loaded | skill-factory |
+| Deviations | One non-critical check was unavailable. |
+| Blocker | None |
+| Unblock condition | None |
+
+## File Changes
+
+| Path | Action | Details |
+| --- | --- | --- |
+| skills/example/SKILL.md | modified | Applied the requested edit. |
+
+## Verification
+
+| Check | Result | Details |
+| --- | --- | --- |
+| External service check | NOT RUN | The service was unavailable. |
+
+## Deliverable
+
+Usable partial payload.

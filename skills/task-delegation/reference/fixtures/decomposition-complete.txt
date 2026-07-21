@@ -1,0 +1,28 @@
+## Worker Result
+
+| Field | Value |
+| --- | --- |
+| Status | COMPLETE |
+| What was done | Decomposed the request and wrote canonical task state. |
+| Accomplishments | Created one canonical task file. |
+| Files modified | 1 |
+| Skills loaded | breakdown-tasks |
+| Deviations | None |
+| Blocker | None |
+| Unblock condition | None |
+
+## File Changes
+
+| Path | Action | Details |
+| --- | --- | --- |
+| .tasks/1784648503403-example-task.json | created | Wrote canonical task state. |
+
+## Verification
+
+| Check | Result | Details |
+| --- | --- | --- |
+| Relative task path | PASS | The payload matches the required path shape. |
+
+## Deliverable
+
+.tasks/1784648503403-example-task.json

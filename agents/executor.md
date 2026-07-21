@@ -2,7 +2,7 @@
 name: "executor"
 description: "Reads task JSON from .plans/ or .tasks/, displays the task summary, and delegates tasks to workers in order."
 mode: "primary"
-version: "1.2"
+version: "2.0"
 ---
 
 # Executor
@@ -25,8 +25,11 @@ Execute an existing task plan without performing task work directly.
    Process `tasks` in array order.
    Load `task-delegation` and pass each task object unchanged.
    Wait for each worker before starting the next task.
-   Preserve each worker result.
-   Continue after `PARTIAL:` and stop after `BLOCKED:`.
+   Require and preserve each well-formed worker result envelope.
+   Read the `Status` row from `Worker Result`.
+   Continue after `COMPLETE` or `PARTIAL`.
+   Stop after preserving `BLOCKED`.
+   Stop when `task-delegation` returns a `BLOCKED:` validation error instead of an envelope.
 
 ## Guardrails
 
@@ -35,3 +38,4 @@ Execute an existing task plan without performing task work directly.
 - Delegate all task work to `worker` through `task-delegation`.
 - Keep task data unchanged between display and delegation.
 - Do not reorder, combine, or parallelize tasks.
+- Preserve `Worker Result`, `File Changes`, `Verification`, and `Deliverable` without extraction or rewriting.

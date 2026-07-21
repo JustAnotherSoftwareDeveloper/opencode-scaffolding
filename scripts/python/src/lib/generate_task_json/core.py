@@ -85,9 +85,6 @@ def generate_task_json(
         )
 
     candidates = _candidate_skills(skills_index)
-    if not candidates:
-        raise RuntimeError("No skills found for operation or documentation classes")
-
     tasks: list[dict[str, Any]] = []
     for draft in data["tasks"]:
         task = dict(draft)
@@ -187,7 +184,7 @@ def _parse_skills(index: list[dict[str, Any]]) -> list[Skill]:
 
 
 def _select_skills(task: dict[str, Any], candidates: list[Skill]) -> list[str]:
-    """Return every threshold-qualified candidate or the highest-ranked skill."""
+    """Return up to three threshold-qualified candidates without fallback."""
     task_text = _task_text(task)
     task_class = _infer_task_class(_tokenize(task_text))
     scored = [(skill, _score_skill(skill, task_text)) for skill in candidates]
@@ -200,7 +197,7 @@ def _select_skills(task: dict[str, Any], candidates: list[Skill]) -> list[str]:
         - (DEFAULT_WEIGHTS["class_match"] if skill.class_ == task_class else 0)
         >= MIN_SEMANTIC_SCORE
     ]
-    return (selected or [scored[0][0].name])[:MAX_SKILLS]
+    return selected[:MAX_SKILLS]
 
 
 def _task_text(task: dict[str, Any]) -> str:

@@ -27,18 +27,19 @@ Each header defines a specific dimension of the task:
   The worker reads this first to understand what must be done.
 - **`## DETAILS`** — Primary context, constraints, and background.
   The worker must not invent facts beyond what is here.
-- **`## FILES TO READ`** — Every file listed must be read before producing output.
-  Missing or inaccessible files are blockers.
-- **`## FILES TO WRITE`** — Only files in this list may be modified or created.
-  All listed files must be written unless blocked.
+- **`## FILES TO READ`** — Every available listed file must be read before producing output.
+  Missing files block only when their absence materially prevents the deliverable or required verification.
+- **`## FILES TO WRITE`** — Only literal paths or bounded path patterns in this list may be modified or created.
+  Bounded patterns identify a directory, filename structure, and extension without recursive wildcards.
+  Already-compliant files remain unchanged and appear in the worker result.
 - **`## SKILLS`** — Skill names to load for specialized instructions.
-  Unknown or missing skills are blockers.
-- **`## EXECUTION INSTRUCTIONS`** — Step-by-step instructions the worker must follow in order.
-  A failure at any step blocks the task.
+  `None` authorizes no skills; unknown skill scope grants no authorization and blocks only when execution requires a skill.
+- **`## EXECUTION INSTRUCTIONS`** — Required outcomes and their default order.
+  Supporting actions and safe reordering remain permitted within hard boundaries.
 - **`## VERIFICATION`** — Checks the worker must run against its own output before finishing.
   Fix issues if possible.
-- **`## EXPECTED OUTPUT`** — Defines the deliverable format and content.
-  The worker must produce exactly this and nothing more.
+- **`## EXPECTED OUTPUT`** — Defines the `Deliverable` payload format and content.
+  The worker result envelope remains mandatory.
 
 ## Execution Steps
 
@@ -50,27 +51,28 @@ a. Prepare input for the script (file path, CLI arguments, or stdin).
        - **Python script:** `uv run --directory <scripts-python-dir> <entry-point> <args>`
        - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
     c. Capture and validate stdout output.
-   d. On non-zero exit, return `BLOCKED: <script-name> failed — <stderr>`.
-3. Produce output per Output Contract below.
+   d. On non-zero exit, return `BLOCKED` envelope status with the script failure and unblock condition.
+3. Produce the payload per Output Contract below.
 4. Self-validate using the packet's `## VERIFICATION` instructions and the template's `## Verification` section.
-5. Return exactly what the packet's `## EXPECTED OUTPUT` requests, following the template's `## Output Contract`.
+5. Place exactly what the packet's `## EXPECTED OUTPUT` requests under `Deliverable` in the worker result envelope.
 
 ## Output Contract
 
-The delegation packet's `## EXPECTED OUTPUT` is the sole authority for what the worker returns.
-The worker must produce exactly what that section specifies, in the format it specifies, without wrapping the result in extra sections, metadata, status markers, or explanatory framing.
+The delegation packet's `## EXPECTED OUTPUT` is the sole authority for the `Deliverable` payload.
+The worker agent contract remains the authority for the surrounding result envelope.
 
 **Format rules:**
 
-- **Default format is plaintext.**
-  If `## EXPECTED OUTPUT` does not explicitly request a specific format (e.g., JSON, structured sections), the worker returns plaintext and nothing more.
-- **No wrapping.**
-  Do not add a `Summary`, `Deliverables`, `Status`, or any other wrapper section unless `## EXPECTED OUTPUT` itself calls for them.
+- **Default payload format is plaintext.**
+  If `## EXPECTED OUTPUT` does not request a specific format, place plaintext under `Deliverable`.
+- **Mandatory envelope.**
+  Preserve `Worker Result`, `File Changes`, `Verification`, and `Deliverable` in the order required by the worker agent contract.
 - **Missing or ambiguous `## EXPECTED OUTPUT`.**
-  If the section is absent or its intent cannot be determined, the worker must use CLARIFY rather than inventing a format or guessing the deliverable.
-- **Silence is success.**
-  A clean return of the requested deliverable signals completion.
-  Do not append a status message unless the packet explicitly asks for one.
+  Return `BLOCKED` envelope status when the payload contract cannot be determined without a material assumption.
+- **Explicit status.**
+  Return `COMPLETE`, `PARTIAL`, or `BLOCKED` through the worker result envelope.
+- **Legacy skill guidance.**
+  Translate skill-level `PARTIAL:` or `BLOCKED:` instructions into envelope status and report fields.
 
 ## Verification
 
@@ -82,14 +84,16 @@ The worker must produce exactly what that section specifies, in the format it sp
 ## Guardrails
 
 - Do not invent facts.
-  If information is missing, state it as an assumption; if the assumption is critical to correctness, use CLARIFY.
+  Record non-material assumptions as deviations and return `BLOCKED` when a material fact remains unavailable.
 - Work only within supplied files and instructions.
 - Do not edit files outside `## FILES TO WRITE`.
 - Prefer the simplest sufficient approach.
-- Report blockers as `BLOCKED: <reason>` when contradictions or missing dependencies prevent completion.
+- Report blockers through `BLOCKED` envelope status with blocker and unblock-condition fields.
 
 ## Cross-References
 
 - Load `skill-architect` for path resolution rules for script invocations.
-- `./inline.SKILL.template.md` — Inline skill template for single-pass steps.
-- `./orchestrated.SKILL.template.md` — Orchestrated skill template for multi-step coordination.
+
+## Docs
+
+See `./reference/README.md` for documentation of supporting files.
