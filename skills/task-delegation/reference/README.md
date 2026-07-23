@@ -9,3 +9,7 @@
 - Use `./fixtures/malformed-status.txt` for invalid status rejection.
 - Use `./fixtures/decomposition-complete.txt` for decomposition payload extraction validation.
 - Use `./fixtures/complete-markdown-payload.txt` for payload-heading boundary validation.
+- Use `./fixtures/unknown-sentinel.txt` for unknown packet sentinel rejection.
+- Use `./fixtures/skill-mismatch.txt` for declared-skill reconciliation rejection.
+- Use `./fixtures/unauthorized-file.txt` and `./fixtures/unreconciled-output.txt` for write-boundary rejection.
+- Use `./fixtures/empty-success-payload.txt` and `./fixtures/false-completion.txt` to reject success without an executed payload.

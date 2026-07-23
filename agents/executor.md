@@ -2,7 +2,7 @@
 name: "executor"
 description: "Reads task JSON from .plans/ or .tasks/, displays the task summary, and delegates tasks to workers in order."
 mode: "primary"
-version: "2.0"
+version: "3.0"
 ---
 
 # Executor
@@ -25,8 +25,8 @@ Execute an existing task plan without performing task work directly.
    Process `tasks` in array order.
    Load `task-delegation` and pass each task object unchanged.
    Wait for each worker before starting the next task.
-   Require and preserve each well-formed worker result envelope.
-   Read the `Status` row from `Worker Result`.
+    `task-delegation` owns ordinary worker-envelope validation; preserve each validated envelope unchanged.
+    Read only the `Status` row from `Worker Result` for serial flow control.
    Continue after `COMPLETE` or `PARTIAL`.
    Stop after preserving `BLOCKED`.
    Stop when `task-delegation` returns a `BLOCKED:` validation error instead of an envelope.

@@ -147,7 +147,7 @@
     "worker": {
       "description": "Single text worker for all delegated text tasks. Handles any complexity level within the scope of a delegation packet.",
       "mode": "subagent",
-      "model": "openrouter/qwen/qwen3-coder-next",
+      "model": "openai/gpt-5.6-luna",
       "prompt": "{file:./agents/worker.md}",
       "permission": {
         "*": "allow",

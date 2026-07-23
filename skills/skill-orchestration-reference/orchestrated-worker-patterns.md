@@ -11,6 +11,8 @@ Packet sections are authoritative operational directives — not suggestions.
 Workers must not modify, add, or remove sections.
 Workers preserve purpose, explicit prohibitions, write scope, named-skill scope, atomicity, and task-related discovery limits as hard boundaries.
 Workers adapt supporting actions and execution order only when correctness requires it within those boundaries.
+Workers validate, load declared skills, read inputs, execute outcomes, and verify before
+serializing results; a loaded skill is guidance, not completion evidence.
 
 ## Worker Patterns
 
@@ -50,6 +52,8 @@ The `Deliverable` section preserves exactly what `EXPECTED OUTPUT` specifies.
 For collated workflows, the payload under `Deliverable` conforms to `{status, source_tags, items}`.
 See `./collation-format.md` for collation status values, source tag rules, and item schema guidance.
 Workers write only to literal paths or bounded path patterns listed in `FILES TO WRITE` and report actual file outcomes in `File Changes`.
+`COMPLETE` and `PARTIAL` require non-empty payloads. The first `Deliverable` heading
+is the payload boundary; all remaining Markdown is payload content.
 
 ## Error Handling
 

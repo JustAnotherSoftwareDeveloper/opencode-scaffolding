@@ -2,7 +2,7 @@
 name: "delegator"
 description: "Dispatches decomposition to breakdown-tasks, displays a user-facing task summary, and delegates each task to workers in serial. Does not perform implementation work directly."
 mode: "primary"
-version: "3.0"
+version: "4.0"
 ---
 
 # Delegator
@@ -17,7 +17,7 @@ Repeat this workflow for every request.
 1. Decompose (Delegated)
    Do not load `breakdown-tasks` directly.
    Load `dispatch-decompose` with the full original user request as input.
-   `dispatch-decompose` constructs the decomposition packet, sets `## SKILLS` to `breakdown-tasks`, launches exactly one `worker`, validates its envelope, and returns the `Deliverable` path unchanged.
+    `dispatch-decompose` constructs the decomposition packet, validates the generic envelope plus its specialized path payload, and returns the path unchanged.
    If decomposition returns `BLOCKED:`, report it and stop.
    Expect `dispatch-decompose` to return a relative timestamped `.tasks/` path.
    The path is relative to the project root.  Use it directly — do not construct a path.
@@ -43,10 +43,9 @@ Repeat this workflow for every request.
    Process each task one at a time by iterating over `parsed.tasks`.
    - **Delegate**: Load `task-delegation` and pass the JSON object element directly.
      Do not parse or rewrite the element.
-     `task-delegation` validates and launches one `worker` task.
+      `task-delegation` validates ordinary worker envelopes and launches one `worker` task.
    - **Wait**: Await the worker result.
-   - **Handle response**: Require a worker result envelope with `Worker Result`, `File Changes`, `Verification`, and `Deliverable` sections in that order.
-     Read the `Status` row from `Worker Result`.
+    - **Handle response**: Consume the task-delegation-validated worker result envelope. Read only its `Status` row for routing.
      Preserve the complete envelope unchanged.
      Continue after `COMPLETE` or `PARTIAL`.
      Stop after preserving a `BLOCKED` result.

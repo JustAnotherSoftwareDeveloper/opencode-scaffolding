@@ -45,7 +45,7 @@ Reject a full `breakdown-tasks` JSON output object unless one task is clearly se
 
 ## Output
 
-Return one valid worker result envelope unchanged.
+`task-delegation` is the canonical constructor for ordinary eight-section worker packets and the validator for ordinary worker result envelopes. Return one complete, valid worker result envelope unchanged.
 Require the first non-whitespace content to be `## Worker Result`.
 Parse the first exact `## File Changes`, `## Verification`, and `## Deliverable` heading lines in that order.
 Require the `Worker Result` table to contain `Status`, `What was done`, `Accomplishments`, `Files modified`, `Skills loaded`, `Deviations`, `Blocker`, and `Unblock condition`.
@@ -56,9 +56,11 @@ Require every file action to equal `created`, `modified`, `deleted`, `unchanged`
 Require every verification result to equal `PASS`, `FAIL`, or `NOT RUN`.
 Require every report-table value and data-table cell to be non-empty.
 Require `Files modified` to reconcile with every `created`, `modified`, and `deleted` row and remain `None` when no such row exists.
+Require `Skills loaded` to list exactly the successfully loaded skills declared in the packet; reject undeclared, missing, or sentinel skill names.
+Require every created, modified, deleted, or unchanged file row to be authorized by the packet's `FILES TO WRITE`, and require each authorized target to be reconciled by an outcome row.
 Require `BLOCKED` to contain non-`None` blocker fields and a `None` deliverable.
 Require `COMPLETE` and `PARTIAL` to contain `None` blocker fields and a non-empty, non-`None` deliverable.
-Treat the content under `Deliverable` as the payload specified by `## EXPECTED OUTPUT`.
+Treat all content after the first `## Deliverable` heading as arbitrary Markdown payload specified by `## EXPECTED OUTPUT`; do not parse later headings as envelope sections.
 
 ## Execution Plan
 
@@ -87,9 +89,9 @@ Treat the content under `Deliverable` as the payload specified by `## EXPECTED O
 6. **Validate all sections present** — Confirm the constructed packet has exactly 8 sections and none are missing.
    If sections are absent, report a clear error describing which sections are missing and stop.
 7. **Invoke the worker** — Invoke the `task` tool with `subagent_type: "worker"`, `description` set to the inferred PURPOSE content, `prompt` set to the full plaintext packet, and `command` set to the inferred PURPOSE content.
-8. **Validate the worker result** — Confirm the result starts with `Worker Result` and contains the remaining envelope sections in order.
+8. **Validate the worker result** — Confirm the result starts with `Worker Result` and contains the remaining envelope sections in order. Validate the envelope against the original packet's declared skills, authorized writes, requested outcomes, and expected payload.
    Require exactly one valid status row before `File Changes`.
-   Validate the report rows, table headers, data rows, blocker fields, and deliverable against the Output contract.
+    Validate the report rows, table headers, data rows, blocker fields, reconciliation, and deliverable against the Output contract. A loaded skill alone is never evidence that the packet's required outcomes completed.
    Return `BLOCKED: task-delegation received a malformed worker result envelope.` when validation fails.
 9. **Return the worker result unchanged** — Preserve the complete valid envelope without rewrapping, extracting, or modifying `Deliverable`.
 

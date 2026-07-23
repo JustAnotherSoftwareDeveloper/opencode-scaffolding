@@ -51,7 +51,7 @@ A single string payload under Deliverable: the relative `.tasks/<epoch-milliseco
 
 ## Output
 
-Return the valid relative `.tasks/` path extracted from a `COMPLETE` worker result envelope.
+First validate the complete worker envelope using the ordinary `task-delegation` envelope rules: section order, fields, actions, verification values, reconciliation, status invariants, and the first-`Deliverable` payload boundary. Then return the valid relative `.tasks/` path extracted from a `COMPLETE` envelope.
 Return `BLOCKED:` for every non-complete or invalid result.
 
 ## Execution Plan
@@ -80,7 +80,7 @@ Return `BLOCKED:` for every non-complete or invalid result.
    Require the first non-whitespace content to be `## Worker Result`.
    Parse the first exact `## File Changes`, `## Verification`, and `## Deliverable` heading lines in that order.
    Require exactly one `Status` row before `File Changes` with `COMPLETE`, `PARTIAL`, or `BLOCKED`.
-   Require the worker-result fields plus valid `File Changes` and `Verification` tables.
+    Require the worker-result fields plus valid `File Changes` and `Verification` tables, declared-skill and authorized-write reconciliation, and a non-empty payload for success statuses.
    Return `BLOCKED: decomposition worker returned a malformed result envelope.` when validation fails.
 7. **Handle non-complete status.**
    Return `BLOCKED: decomposition worker was blocked — <Blocker>. Unblock condition: <Unblock condition>.` for `BLOCKED`.

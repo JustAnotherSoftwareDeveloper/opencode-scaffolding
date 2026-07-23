@@ -1,28 +1,47 @@
 # Implementation Format
 
-## Required Structure
+Use this reference for `implementation.md`. Follow the sentence-case and plain
+Markdown rules in [proposal-format.md](./proposal-format.md).
 
-- Use one H2 heading for each affected area.
-- Use one H3 heading for each concrete change within that area.
-- Name the affected artifact, interface, workflow, or policy and its modification in the H3 heading.
-- Add one or two short bullets that state the modification and its reason or intended effect.
+## Structure
+
+- Use one H2 heading for each affected area: a component, interface, workflow,
+  policy, or closely related set of artifacts.
+- Use one H3 heading for each concrete change in that area.
+- Name the affected target and its modification in each H3 heading.
+- Add one or two concise bullets: the precise change, then its reason or effect
+  when the heading does not make that clear.
 - Use selective bolding for short labels only.
 
-## Compliant Structure
+Group multiple changes under one H2 only when they affect the same area and are
+reviewed together. Start a new H2 when the target area, owner-facing concern, or
+reason for the change differs. Do not use lifecycle phases as area headings.
+
+## Compliant Multi-Change Structure
 
 ```markdown
-## Proposal Skill Contract
+## Proposal skill contract
 
-### `skills/proposal/SKILL.md` — Require concrete implementation changes
+### `skills/proposal/SKILL.md` — Apply proportional document validation
 
-- **Change:** Replace the generic sequence requirement with a requirement to name affected artifacts and modifications.
-- **Reason:** Keep generated implementation documents tied to the proposal decision and evidence.
+- **Change:** Replace fixed section and sentence checks with semantic-core and optional-section checks.
+- **Reason:** Keep validation aligned with the generated document format.
+
+### `skills/proposal/SKILL.md` — Apply conditional navigation
+
+- **Change:** Require a table of contents only when proposal complexity makes it useful.
+
+## Proposal templates
+
+### `skills/proposal/templates/PROPOSAL.md` — Use the semantic core
+
+- **Change:** Replace decorative boxes with sentence-case headings and ordinary lists.
 ```
 
 ## Rejected Structure
 
 ```markdown
-## Implementation Changes
+## Implementation changes
 
 ### Prepare
 
@@ -33,19 +52,16 @@
 - Integrate affected systems.
 ```
 
-Reject this structure because it names lifecycle phases instead of affected targets and modifications.
+Reject this structure because it names lifecycle phases instead of affected
+targets and modifications.
 
-## Evidence Boundaries
+## Optional Content And Evidence
 
-Include dependencies, decision gates, validation checks, rollout procedures, or stakeholder actions only when one of these conditions applies.
+Include dependencies, decision gates, validation checks, rollout procedures, or
+stakeholder actions only when a copied source, explicit proposal assumption, or
+external constraint supports them. Omit their headings when no supported content
+exists.
 
-- A copied source document states the item.
-- An explicit proposal assumption supports the item.
-- An external constraint requires the item.
-
-Exclude these unsupported items.
-
-- Generic implementation steps.
-- Unstated dependencies.
-- Standard practices without source justification.
-- Stakeholder actions without an explicit requirement.
+Exclude generic implementation steps, unstated dependencies, standard practices
+without source justification, and stakeholder actions without an explicit
+requirement.

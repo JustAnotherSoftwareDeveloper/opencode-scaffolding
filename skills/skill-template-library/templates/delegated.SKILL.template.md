@@ -43,8 +43,8 @@ Each header defines a specific dimension of the task:
 
 ## Execution Steps
 
-1. Parse input contract from delegation packet.
-2. Perform bounded work.
+1. Parse the eight-section input contract and sentinel values from the delegation packet.
+2. Load declared skills, read required inputs, and perform bounded work. Loading a skill is context acquisition, not completion.
    If the work includes a deterministic subtask:
 a. Prepare input for the script (file path, CLI arguments, or stdin).
     b. Load `skill-architect` for path resolution rules to resolve `<scripts-python-dir>` or `<scripts-node-dir>`.
@@ -66,7 +66,8 @@ The worker agent contract remains the authority for the surrounding result envel
 - **Default payload format is plaintext.**
   If `## EXPECTED OUTPUT` does not request a specific format, place plaintext under `Deliverable`.
 - **Mandatory envelope.**
-  Preserve `Worker Result`, `File Changes`, `Verification`, and `Deliverable` in the order required by the worker agent contract.
+   Preserve `Worker Result`, `File Changes`, `Verification`, and `Deliverable` in the order required by the worker agent contract.
+   `COMPLETE` and `PARTIAL` require non-empty payloads, and all content after the first `Deliverable` heading belongs to that payload.
 - **Missing or ambiguous `## EXPECTED OUTPUT`.**
   Return `BLOCKED` envelope status when the payload contract cannot be determined without a material assumption.
 - **Explicit status.**

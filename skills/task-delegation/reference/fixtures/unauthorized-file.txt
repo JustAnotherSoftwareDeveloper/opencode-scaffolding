@@ -1,0 +1,5 @@
+## Invalid Semantic Fixture
+
+Packet write target: `docs/allowed.md`.
+Envelope file row: `docs/other.md | modified | Changed.`
+Expected rejection: file row is outside the authorized write boundary.

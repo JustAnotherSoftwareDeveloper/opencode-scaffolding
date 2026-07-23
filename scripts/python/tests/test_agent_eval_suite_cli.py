@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 
-def test_agent_eval_suite_list_cases(tmp_path: Path) -> None:
+def test_agent_eval_suite_list_cases() -> None:
     """Verify --list-cases outputs JSON with cases."""
     pytest.skip("Requires Inspect AI to be installed")
     result = subprocess.run(

@@ -1,0 +1,4 @@
+## Invalid Semantic Fixture
+
+Packet `## EXPECTED OUTPUT` is `UNKNOWN — not provided in input`.
+Expected rejection: unknown expected output blocks before a success envelope.

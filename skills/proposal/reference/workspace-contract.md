@@ -34,12 +34,15 @@ Use YAML frontmatter as the only workspace metadata store.
 
 Set `title`, `slug`, `created`, `created-at`, `status`, `decision-owner`, and `source-documents` in `PROPOSAL.md`.
 
+List every copied source document under `source-documents` by its workspace-relative path.
+
 Set `title`, `proposal`, `slug`, `created`, and `status` in `implementation.md`.
 
 Set `status` to `draft` when creating the workspace.
 
 ## Evidence Notation
 
+Use the material-claim and inline-link rules in [proposal-format.md](./proposal-format.md).
 Link evidence with a relative Markdown link to a copied source document.
 
 Label an unverified statement as `Assumption: <statement>`.
@@ -52,25 +55,33 @@ Resolve questions answerable through source review, analysis, research, testing,
 
 Record unavailable evidence as an evidence gap rather than an open question.
 
-Record a material objection and its disposition in `Open Engineering Decisions And Decision Record`.
+Record a material objection and its disposition in the decision record.
 
 ## Document Requirements
 
-Generate a table of contents in `PROPOSAL.md`.
+Follow the semantic-core, proportionality, plain-Markdown, and navigation rules
+in [proposal-format.md](./proposal-format.md).
 
-Include the eight proposal sections defined in the proposal template.
+Require a summary, problem and context, scope, options and recommendation,
+requirements, acceptance criteria, decision record, and supporting sources.
+Combine compatible required content under clear headings when that makes a short
+proposal easier to review.
 
-Keep the context box to three one-sentence bullets.
+Omit optional sections that have no applicable evidence. Do not create empty
+sections, decorative blockquotes, or presentation-only callout boxes.
 
-Keep the scope box to five one-sentence bullets.
+Add a table of contents only when document length or expanded structure makes
+navigation materially useful. When present, link proposal sections,
+`implementation.md`, and the supporting-sources section.
 
-Keep each option in the options box to four bullets.
+List every copied source document once in **Supporting sources**. Do not repeat
+individual source links in the table of contents.
 
-Replace `{{source_document_toc_entries}}` with a relative link to every copied source document.
+Link `implementation.md` from the recommendation and from the table of contents
+when navigation is present.
 
-Link the implementation overview and every copied source document from `PROPOSAL.md`.
-
-Use relative links only.
+Use relative links only. Remove authoring instructions and placeholders from
+completed documents.
 
 Keep the substantive body of `implementation.md` limited to concrete artifact and behavior changes plus evidence-supported dependencies, decision gates, and validation criteria.
 

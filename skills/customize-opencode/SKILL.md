@@ -15,6 +15,8 @@ class: documentation
 - **Payload fidelity** — `EXPECTED OUTPUT` controls the payload under `Deliverable`.
 - **Result visibility** — The worker contract controls the surrounding result envelope.
 - **Statelessness** — Each packet contains all state required for one independent invocation.
+- **Authority** — `task-delegation` constructs the canonical ordinary packet and validates ordinary worker envelopes.
+- **Execution first** — Load skills for guidance, read inputs, execute outcomes, and verify before rendering the result envelope; loading a skill is not completion.
 
 ## Packet Sections
 
@@ -136,6 +138,7 @@ The exact payload required by `EXPECTED OUTPUT`, or `None` for `BLOCKED`.
 - Malformed envelopes fail before payload consumption.
 - Report-table cells remain on one physical line, use `<br>` for line breaks, and escape literal pipes as `\|`.
 - `Files modified` reconciles with every `created`, `modified`, or `deleted` row in `File Changes` and remains `None` for no-op results.
+- The first `## Deliverable` heading is the payload boundary; all following Markdown belongs to the payload.
 
 ## Docs
 

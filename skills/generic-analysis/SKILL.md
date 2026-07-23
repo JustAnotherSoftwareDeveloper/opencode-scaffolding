@@ -8,7 +8,7 @@ tags:
   - root-cause-analysis
   - trade-off-evaluation
   - analytical-reasoning
-class: inline
+class: operation
 ---
 
 # Generic Analysis

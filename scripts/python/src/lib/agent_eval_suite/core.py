@@ -249,6 +249,82 @@ CASES: tuple[EvalCase, ...] = (
         forbidden_terms=("```",),
         requires_json=True,
     ),
+    EvalCase(
+        case_id="worker_read_only_payload",
+        category="worker_contract",
+        prompt=(
+            "Execute a read-only worker packet. Require a non-empty Deliverable, "
+            "File Changes none, declared skill reconciliation, and verification "
+            "evidence."
+        ),
+        required_terms=("Deliverable", "non-empty", "none", "verification"),
+    ),
+    EvalCase(
+        case_id="worker_authorized_write",
+        category="worker_contract",
+        prompt=(
+            "Evaluate a worker write packet: it may modify only FILES TO WRITE and "
+            "must reconcile each actual write in File Changes."
+        ),
+        required_terms=("FILES TO WRITE", "File Changes", "reconcile", "authorized"),
+    ),
+    EvalCase(
+        case_id="worker_no_op",
+        category="worker_contract",
+        prompt=(
+            "Evaluate an already-compliant worker packet. It must return a non-empty "
+            "payload and report the authorized target unchanged rather than inventing "
+            "a modification."
+        ),
+        required_terms=("non-empty", "unchanged", "payload", "authorized"),
+    ),
+    EvalCase(
+        case_id="worker_verification_payload",
+        category="worker_contract",
+        prompt=(
+            "Evaluate a verification-only worker packet. It must return requested "
+            "findings under Deliverable without requiring a file write."
+        ),
+        required_terms=("verification", "Deliverable", "findings", "file write"),
+    ),
+    EvalCase(
+        case_id="worker_unavailable_skill",
+        category="worker_contract",
+        prompt=(
+            "Evaluate a packet with an unavailable declared skill. It must return "
+            "BLOCKED with blocker and unblock condition, not a success payload."
+        ),
+        required_terms=("BLOCKED", "blocker", "unblock", "skill"),
+    ),
+    EvalCase(
+        case_id="worker_blocked_input",
+        category="worker_contract",
+        prompt=(
+            "Evaluate a packet with unknown required input. It must block before side "
+            "effects when the missing input prevents the deliverable."
+        ),
+        required_terms=(
+            "BLOCKED",
+            "before side effects",
+            "missing input",
+            "deliverable",
+        ),
+    ),
+    EvalCase(
+        case_id="worker_decomposition_false_completion",
+        category="worker_contract",
+        prompt=(
+            "Evaluate decomposition where breakdown-tasks loads but no task path is "
+            "produced. Reject COMPLETE or PARTIAL: loading a skill alone is not "
+            "completion and Deliverable must be non-empty."
+        ),
+        required_terms=(
+            "breakdown-tasks",
+            "not completion",
+            "Deliverable",
+            "non-empty",
+        ),
+    ),
 )
 
 

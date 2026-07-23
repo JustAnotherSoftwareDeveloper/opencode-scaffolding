@@ -1,0 +1,5 @@
+## Invalid Semantic Fixture
+
+Packet skills: `generic-analysis`.
+Envelope `Skills loaded`: `skill-factory`.
+Expected rejection: loaded skills must exactly reconcile with declared skills.

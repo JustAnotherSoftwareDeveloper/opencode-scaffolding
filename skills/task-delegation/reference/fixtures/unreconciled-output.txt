@@ -1,0 +1,5 @@
+## Invalid Semantic Fixture
+
+Packet write target: `docs/required.md`.
+Envelope file row: `None | none | No files changed.`
+Expected rejection: authorized required output has no reconciled outcome.

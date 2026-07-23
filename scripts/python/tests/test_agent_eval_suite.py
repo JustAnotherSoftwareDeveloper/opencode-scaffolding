@@ -4,17 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
-from cli.agent_eval_suite import main
 from lib.agent_eval_suite.core import (
     CASES,
-    EvalCase,
-    FrameworkStatus,
     list_cases,
-    preflight_frameworks,
-    run_inspect_eval,
-    run_terminal_bench,
     write_inspect_task,
 )
 
@@ -58,3 +50,17 @@ def test_cases_have_required_fields() -> None:
         assert len(case.category) > 0
         assert len(case.prompt) > 0
         assert len(case.required_terms) > 0
+
+
+def test_worker_contract_cases_cover_required_categories() -> None:
+    """Verify generic worker cases include the completion regression coverage."""
+    case_ids = {case.case_id for case in CASES}
+    assert {
+        "worker_read_only_payload",
+        "worker_authorized_write",
+        "worker_no_op",
+        "worker_verification_payload",
+        "worker_unavailable_skill",
+        "worker_blocked_input",
+        "worker_decomposition_false_completion",
+    } <= case_ids

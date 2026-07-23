@@ -1,0 +1,28 @@
+## Worker Result
+
+| Field | Value |
+| --- | --- |
+| Status | COMPLETE |
+| What was done | Loaded breakdown-tasks. |
+| Accomplishments | None |
+| Files modified | None |
+| Skills loaded | breakdown-tasks |
+| Deviations | None |
+| Blocker | None |
+| Unblock condition | None |
+
+## File Changes
+
+| Path | Action | Details |
+| --- | --- | --- |
+| None | none | No task state was written. |
+
+## Verification
+
+| Check | Result | Details |
+| --- | --- | --- |
+| Task path | NOT RUN | Execution stopped after skill loading. |
+
+## Deliverable
+
+None

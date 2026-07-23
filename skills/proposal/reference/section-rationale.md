@@ -1,12 +1,17 @@
 # Section Rationale
 
 Use a proportional business-and-technical case structure.
+Arrange or combine required decision content to fit the proposal without a
+fixed heading sequence, callout box, or document length.
 
-Capture objectives, options, benefits, and risks through the executive summary, context, goals, options, recommendation, and open engineering decisions sections.
+Capture the decision, context, scope, options, recommendation, benefits, and
+risks in headings that make those subjects clear to the reader.
 
-Capture traceable requirements and acceptance criteria in the requirements section.
+Capture traceable requirements and acceptance criteria as distinct content,
+whether they are separate subsections or clearly labeled parts of one section.
 
-Capture material objections and their disposition in the decision record.
+Capture material objections and their disposition, assumptions, evidence gaps,
+and only unresolved engineer decisions in the decision record.
 
 Keep researchable uncertainty in analysis and evidence rather than presenting it as an engineering decision.
 

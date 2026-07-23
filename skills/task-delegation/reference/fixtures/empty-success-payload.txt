@@ -1,0 +1,28 @@
+## Worker Result
+
+| Field | Value |
+| --- | --- |
+| Status | COMPLETE |
+| What was done | Loaded the requested skill. |
+| Accomplishments | None |
+| Files modified | None |
+| Skills loaded | generic-analysis |
+| Deviations | None |
+| Blocker | None |
+| Unblock condition | None |
+
+## File Changes
+
+| Path | Action | Details |
+| --- | --- | --- |
+| None | none | No files changed. |
+
+## Verification
+
+| Check | Result | Details |
+| --- | --- | --- |
+| Required check | PASS | Reported as complete. |
+
+## Deliverable
+
+None

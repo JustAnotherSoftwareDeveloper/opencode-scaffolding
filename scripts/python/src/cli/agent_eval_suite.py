@@ -112,7 +112,7 @@ def main(
     tb_no_rebuild: bool,
     tb_no_cleanup: bool,
 ) -> None:
-    """Run OpenCode-focused evals using Inspect AI and Terminal-Bench."""
+    """Run OpenCode-focused evals, including generic worker contract cases."""
     try:
         status = preflight_frameworks()
     except Exception as exc:
