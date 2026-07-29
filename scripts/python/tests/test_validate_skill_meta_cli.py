@@ -114,7 +114,10 @@ def test_valid_file_format_text(runner: CliRunner) -> None:
         assert result.output.startswith("VALID SKILL.md")
 
 
-def test_multiple_valid_files_json(runner: CliRunner, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_multiple_valid_files_json(
+    runner: CliRunner,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Multiple files produce a JSON array after one frequency calculation."""
     monkeypatch.setattr("cli.validate_skill_meta.compute_tag_frequencies", lambda: {})
     with runner.isolated_filesystem():

@@ -203,7 +203,10 @@ def test_validate_skill_file_checks_cross_skill_tag_rules(tmp_path: Path) -> Non
     result = validate_skill_file(path, {"test-capability": 6})
 
     assert result["valid"] is False
-    assert any("Tag 'test-capability' appears in 6 skills" in error for error in result["errors"])
+    assert any(
+        "Tag 'test-capability' appears in 6 skills" in error
+        for error in result["errors"]
+    )
 
 
 def test_validate_skill_file_accepts_analysis_as_deliverable(tmp_path: Path) -> None:
@@ -213,7 +216,8 @@ def test_validate_skill_file_accepts_analysis_as_deliverable(tmp_path: Path) -> 
         "---\n"
         "name: analysis-skill\n"
         "description: Use when analysing an artifact\n"
-        "tags: [evidence-analysis, problem-framing, decision-assessment, root-cause-analysis]\n"
+        "tags: [evidence-analysis, problem-framing, decision-assessment, "
+        "root-cause-analysis]\n"
         "class: planning\n"
         "---\n",
     )

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "profile": "q8",
+  "model": {
+    "name": "Qwen/Qwen3-Reranker-4B",
+    "upstream_revision": "22e683669bc0f0bd69640a1354a6d0aebcfeede5",
+    "license": "Apache-2.0"
+  },
+  "artifact": {
+    "repository": "QuantFactory/Qwen3-Reranker-4B-GGUF",
+    "revision": "2a42c7aa9c702165da87b09dec164a54d973123b",
+    "filename": "Qwen3-Reranker-4B.Q8_0.gguf",
+    "url": "https://huggingface.co/QuantFactory/Qwen3-Reranker-4B-GGUF/resolve/2a42c7aa9c702165da87b09dec164a54d973123b/Qwen3-Reranker-4B.Q8_0.gguf",
+    "sha256": "27feb99a25d2f9b6d305bef699ac74fecfeb66ff3c73ef2212aab71bdfe2fb8d"
+  },
+  "ollama": {
+    "model": "hf.co/QuantFactory/Qwen3-Reranker-4B-GGUF:Q8_0",
+    "manifest_digest": "78bbe0fc51686fcb75e1d6af3f957d24599b4a9aedb1adeed0f516e29768e25f",
+    "minimum_version": "0.31.1",
+    "architecture": "qwen3",
+    "parameter_count": 4410057216,
+    "parameter_size": "4.41B",
+    "quantization": "Q8_0"
+  },
+  "assets": {
+    "tokenizer": {"path": "assets/tokenizer.json", "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"},
+    "license": {"path": "assets/LICENSE-APACHE-2.0.txt", "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"}
+  },
+  "runtime": {"ollama_api": "http://127.0.0.1:11434", "num_ctx": 8192, "raw": true, "stream": false, "keep_alive": "30m", "temperature": 0, "seed": 0, "num_predict": 1, "num_batch": 128, "logprobs": true, "top_logprobs": 20},
+  "prompt": {"instruction": "Determine whether the candidate OpenCode skill contains procedures or reference material that are materially useful for executing the task. Rank direct owner skills above supporting references and unrelated skills.", "prompt_version": "qwen3-reranker-4b-classifier-v1", "render_version": "task-skill-fields-v1"},
+  "policy": {"missing_label_logprob": -10.0, "additional_skill_threshold": 0.8, "low_confidence_threshold": 0.8, "max_skills": 3},
+  "evaluation": {"report": "qwen3-reranker-4b-q8-ollama-evaluation.json", "sha256": "0d2caf7ced308fac4b2af0bdb8ba5d01921ff0f8b0d874f93a11b5c4a2c1c80e"}
+}

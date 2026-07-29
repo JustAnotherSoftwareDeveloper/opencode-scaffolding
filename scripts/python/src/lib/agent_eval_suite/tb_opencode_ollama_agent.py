@@ -1,5 +1,7 @@
 """Terminal-Bench OpenCode agent variant that permits local Ollama models."""
 
+# pyright: reportMissingImports=false
+
 from __future__ import annotations
 
 import inspect

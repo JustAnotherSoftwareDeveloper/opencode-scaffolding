@@ -2,7 +2,8 @@
 """Validate a generated skill directory against skill-writer rules.
 
 Usage:
-    uv run --directory ~/.config/opencode/scripts/python python -m src.cli.skill_validator <path/to/skill/dir>
+    uv run --directory ~/.config/opencode/scripts/python \
+        python -m src.cli.skill_validator <path/to/skill/dir>
 
 Returns structured JSON and exits 0 if all checks pass, 1 if any fail.
 """
@@ -13,10 +14,6 @@ import json
 from pathlib import Path
 
 import click
-
-from lib.shared._path_helper import setup_package_path
-
-setup_package_path()
 
 from lib.skill_validator import run_all
 

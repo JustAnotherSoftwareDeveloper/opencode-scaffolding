@@ -194,14 +194,22 @@ class TestSkillValidation:
     def test_tags_not_a_list(self) -> None:
         """``tags`` field that is not a list is rejected."""
         path = FIXTURES_DIR / "valid" / "ask-question" / "SKILL.md"
-        fm: dict[str, Any] = {"name": "test-skill", "description": "Use when testing", "tags": "not-a-list"}
+        fm: dict[str, Any] = {
+            "name": "test-skill",
+            "description": "Use when testing",
+            "tags": "not-a-list",
+        }
         errors = validate_skill_frontmatter(fm, "test-skill", path)
         assert any("tags" in e and "list" in e for e in errors)
 
     def test_tags_element_not_string(self) -> None:
         """A tag element that is not a string is rejected."""
         path = FIXTURES_DIR / "valid" / "ask-question" / "SKILL.md"
-        fm: dict[str, Any] = {"name": "test-skill", "description": "Use when testing", "tags": [42, "valid-tag", "test-validation", "python"]}
+        fm: dict[str, Any] = {
+            "name": "test-skill",
+            "description": "Use when testing",
+            "tags": [42, "valid-tag", "test-validation", "python"],
+        }
         errors = validate_skill_frontmatter(fm, "test-skill", path)
         assert any("element" in e and "string" in e for e in errors)
 
@@ -212,7 +220,10 @@ class TestSkillValidation:
             (["valid-tag", "test-validation", "python", "Bad Tag"], "kebab-case"),
             (["valid-tag", "test-validation", "python", "helper"], "filler"),
             (["valid-tag", "test-validation", "python", "valid-tag"], "duplicate"),
-            (["test-skill", "test-validation", "python", "yaml-frontmatter"], "skill name"),
+            (
+                ["test-skill", "test-validation", "python", "yaml-frontmatter"],
+                "skill name",
+            ),
         ],
     )
     def test_tags_require_descriptive_values(
@@ -1011,9 +1022,7 @@ class TestDiscoverSkillsFromRootEdgeCases:
         discover_skills_from_root(f, "project", index, verbose=False)
         assert index.resolve() == []
 
-    def test_permission_error_on_directory(
-        self, tmp_path: Path
-    ) -> None:
+    def test_permission_error_on_directory(self, tmp_path: Path) -> None:
         """PermissionError when listing directory is caught."""
         root = tmp_path / "no-list"
         root.mkdir()

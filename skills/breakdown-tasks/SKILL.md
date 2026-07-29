@@ -8,161 +8,134 @@ class: delegated
 # Breakdown Tasks
 
 Decompose a request into atomic work items suitable for serial worker delegation.
-Operates in four self-contained phases. Each phase loads its own dependencies —
-do not reference content loaded in an earlier phase. It will have been evicted
-from context by the large decomposition output.
+Operate in four self-contained phases.
+Load each phase's dependencies separately.
 
 ## Input Contract
 
 Read `## PURPOSE` and `## DETAILS`.
-Return `BLOCKED` envelope status with the missing section and unblock condition when either section is absent.
+Return `BLOCKED` when either section is absent.
 
 ## Phase A — Decomposition
 
-Goal: produce a TaskDraftList JSON object (no skills, no slug).
+Produce a schema-valid `TaskDraftList` JSON object without skills or a slug.
 
-Step A1. Invoke the bash tool with this command to collect planning skills:
-    ```bash
-    uv run --directory ~/.config/opencode/scripts/python collect-skills --class planning
-    ```
-    Read the JSON output. This gives you the available planning skills and their
-    descriptions — use these to understand what domain context is available for
-    shaping your decomposition.
+1. Collect planning skills with `collect-skills --class planning`.
+2. Read each materially relevant planning skill path from the returned metadata.
+3. Read `reference/authoring/core-rules.md`.
+4. Read `reference/authoring/task-granularity.md`.
+5. Read `reference/authoring/anti-patterns.md`.
+6. Read `reference/authoring/context-preservation.md`.
+7. Produce `{summary, tasks}` with every required task field.
+8. Keep each task atomic.
+9. Omit skills and summary slugs.
+10. Store the complete JSON in `TASK_DRAFT_JSON` for Phase B.
 
-Step A2. Read the `path` for each materially relevant planning skill from the
-    returned metadata.
-    Read these additional context files directly instead of using the skill tool.
-    Understand the class taxonomy, platform conventions, and authoring rules
-    they define. Use this knowledge to shape task boundaries.
+## Phase B — Frozen Inventory And Generation
 
-Step A3. Read the authoring reference docs:
-    `skills/breakdown-tasks/reference/authoring/core-rules.md`
-    `skills/breakdown-tasks/reference/authoring/task-granularity.md`
-    `skills/breakdown-tasks/reference/authoring/anti-patterns.md`
-    `skills/breakdown-tasks/reference/authoring/context-preservation.md`
+Freeze one caller-root inventory.
+Treat Python assignment as authoritative in `qwen` mode.
 
-Step A4. Produce a schema-valid `{summary, tasks}` object.
-    Each task must have: purpose, context, filesToRead, filesToWrite,
-    executionInstructions, expectedOutput, and optional verification.
-    Keep every task atomic — one logical change, one output artifact,
-    one action verb. Factor planning-skill context into task boundaries.
-    Copy relevant goals and constraints verbatim into each context.
-    Do not add skills. Do not derive a summary slug. Do not write files.
+1. Preserve the caller root in `CALLER_ROOT` before invoking `uv --directory`.
+2. Create one bounded run directory under `"$CALLER_ROOT/.tasks"`.
+3. Set `SKILL_INVENTORY` to `"$RUN_DIR/skills.json"`.
+4. Set `RANKING_DIAGNOSTICS` to `"$RUN_DIR/diagnostics.json"`.
+5. Initialize those paths with this command:
 
-Step A5. Store the complete JSON in `TASK_DRAFT_JSON` for Phase B.
+```bash
+CALLER_ROOT="$PWD"
+mkdir -p "$CALLER_ROOT/.tasks"
+RUN_DIR="$(mktemp -d "$CALLER_ROOT/.tasks/ranking.XXXXXX")"
+SKILL_INVENTORY="$RUN_DIR/skills.json"
+RANKING_DIAGNOSTICS="$RUN_DIR/diagnostics.json"
+```
 
-After Phase A, the planning skills and authoring refs will be evicted from
-context by the decomposition output. This is expected — later phases do not
-depend on them.
+6. Run this inventory command once:
 
-## Phase B — Script Assignment
+```bash
+uv run --directory ~/.config/opencode/scripts/python collect-skills \
+  --project-root "$CALLER_ROOT" \
+  --config-dir ~/.config/opencode \
+  --class operation \
+  --class documentation \
+  --output "$SKILL_INVENTORY"
+```
 
-Goal: pipe `TASK_DRAFT_JSON` through `generate-task-json` to assign skills,
-derive the slug, validate, and write the task file.
+7. Run authoritative Qwen assignment with the complete `TASK_DRAFT_JSON`:
 
-Step B1. Invoke the script through the bash tool with a quoted here-document.
-    Replace the body below with the complete JSON from `TASK_DRAFT_JSON`.
-    Do not rely on `TASK_DRAFT_JSON` being a shell environment variable.
-    ```bash
-    uv run --directory ~/.config/opencode/scripts/python generate-task-json --output-dir "$PWD/.tasks" <<'TASK_DRAFT_JSON'
-    <complete TaskDraftList JSON>
-    TASK_DRAFT_JSON
-    ```
-    The script derives the kebab-case slug from the summary field,
-    assigns operation and documentation class skills via deterministic
-    weighted scoring, validates against both schemas, and atomically
-    writes `.tasks/<epoch>-<slug>.json`.
+```bash
+uv run --directory ~/.config/opencode/scripts/python generate-task-json \
+  --project-root "$CALLER_ROOT" \
+  --skills-file "$SKILL_INVENTORY" \
+  --assignment-mode qwen \
+  --model-profile q8 \
+  --diagnostics-file "$RANKING_DIAGNOSTICS" \
+  --output-dir "$CALLER_ROOT/.tasks" <<'TASK_DRAFT_JSON'
+<complete TaskDraftList JSON>
+TASK_DRAFT_JSON
+```
 
-Step B2. Capture the stdout of the command above as `GENERATED_PATH`.
-    This is the relative path to the generated task file.
+8. Use `--assignment-mode shadow` with the same diagnostics boundary for comparison runs.
+9. Use `--assignment-mode lexical` only for explicit rollback.
+10. Omit ranker and diagnostics options in lexical mode.
+11. Capture stdout as `GENERATED_PATH`.
+12. Read `GENERATED_PATH` into `TASK_PACKET_JSON`.
+13. Preserve the inventory unchanged through Phases C and D.
 
-Step B3. Read `GENERATED_PATH` into `TASK_PACKET_JSON`.
-    This file now has skills arrays assigned by the deterministic scorer.
+## Phase C — Read-Only Audit
 
-## Phase C — Audit
+Audit the generated packet against the frozen inventory without mutating any skill array.
+Do not mutate any other task field.
 
-Goal: review every script-assigned skill for semantic correctness.
-You must load fresh dependencies here — Phase A's planning skills are gone.
+1. Read `SKILL_INVENTORY` from the Phase B path.
+2. Do not invoke `collect-skills` again.
+3. Check every assigned name against the frozen inventory.
+4. Check semantic fit, atomicity, circular references, and cross-task consistency.
+5. Require one to three assignments for `qwen` output.
+6. Preserve zero-to-three compatibility for historical and lexical packets.
+7. Treat unknown, duplicate, empty, excessive, or invalid Qwen assignments as blockers.
+8. Do not replace or remove assignments.
+9. Do not reorder or add assignments.
+10. Preserve every non-skill field byte-identically.
 
-Step C1. Invoke the bash tool with this command to collect the executable skill inventory:
-    ```bash
-    uv run --directory ~/.config/opencode/scripts/python collect-skills --class operation --class documentation
-    ```
-    Read the JSON output into `SKILL_INVENTORY`. This is a fresh load —
-    do not rely on any earlier skill data.
+## Phase D — Blocking Validation
 
-Step C2. For every task in `TASK_PACKET_JSON`, evaluate:
-    - **Inventory check**: does each assigned skill exist in `SKILL_INVENTORY`?
-    - **Skill-name reasonableness**: is each assigned skill genuinely appropriate
-      for the task's purpose and context, not merely present in the inventory?
-      A skill may be in the inventory but a poor semantic fit.
-    - **Atomicity check (no combined tasks)**: does the task's `purpose` contain
-      exactly one action verb? Multiple action verbs (e.g., "create and validate")
-      indicate an illegally combined task. Flag such tasks for the delegator.
-    - **Semantic fit**: does the skill's purpose match the task's purpose,
-      context, and expected output? Lexical overlap may mislead.
-    - **Circular self-references**: is the assigned skill the same as the
-      target being edited? (e.g., "breakdown-tasks" assigned to a task
-      editing breakdown-tasks/SKILL.md)
-    - **Cross-task consistency**: do related tasks (variants of the same work,
-      sequential pipeline steps) receive aligned skill assignments?
-    - **Empty-assignment scrutiny**: when no skill reached the threshold,
-      confirm direct packet execution is appropriate.
+Validate the generated file without repair.
 
-    Constraints:
-    - Only skills arrays may be modified.
-    - Every assigned skill must exist in `SKILL_INVENTORY`.
-    - Each task must retain 0–3 semantically appropriate skills.
-    - All other fields stay byte-identical.
+1. Run this command:
 
-    Do not reference planning skills — they are not available at this phase.
+```bash
+uv run --directory ~/.config/opencode/scripts/python validate-task-structure \
+  --state-file "$CALLER_ROOT/$GENERATED_PATH" \
+  --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
+```
 
-Step C3. Write the corrected `TASK_PACKET_JSON` back to `GENERATED_PATH`.
-
-## Phase D — Validation
-
-Goal: validate the corrected task file and prepare its path as the `Deliverable` payload.
-
-Step D1. Invoke the bash tool with this command to run validation with auto-fix:
-    ```bash
-    uv run --directory ~/.config/opencode/scripts/python validate-task-structure \
-      --state-file "$PWD/$GENERATED_PATH" \
-      --schema "$PWD/skills/breakdown-tasks/schema/task-packet.schema.json" \
-      --auto-fix
-    ```
-    The `--auto-fix` flag resolves skills-only errors deterministically
-    (trim to max 3, remove empty strings, and deduplicate).
-
-Step D2. If validation reports errors that `--auto-fix` cannot resolve:
-    - Fix only the skills arrays in `TASK_PACKET_JSON`.
-    - Re-write to `GENERATED_PATH`.
-    - Re-run validation.
-    - Repeat until success or an unrecoverable error is identified.
-    If unrecoverable, return `BLOCKED` envelope status with the validation reason and unblock condition.
-
-Step D3. Place `GENERATED_PATH` alone in the worker envelope's `Deliverable` section.
+2. Do not pass `--auto-fix`.
+3. Do not trim, deduplicate, remove, or reorder generated assignments.
+4. Treat every validation error as blocking.
+5. Require a new generator run after an assignment defect.
+6. Remove `SKILL_INVENTORY` after validation succeeds.
+7. Preserve `RANKING_DIAGNOSTICS` with the generated packet evidence.
+8. Place `GENERATED_PATH` alone under `Deliverable`.
 
 ## Output Contract
 
-Phase A produces TaskDraftList JSON on stdout (captured for piping to Phase B).
-Phase B produces `.tasks/<epoch>-<slug>.json` (the script writes it).
-Phase C writes corrections to the same file.
-Phase D validates `GENERATED_PATH` and uses it as the `Deliverable` payload.
-
-Final payload: `.tasks/<epoch>-<slug>.json` (the relative path emitted by
-`generate-task-json` in Phase B, validated in Phase D) under the worker result envelope's `Deliverable` section.
+- Produce `TaskDraftList` JSON in Phase A.
+- Produce `.tasks/<epoch>-<slug>.json` in Phase B.
+- Audit without mutation in Phase C.
+- Validate without auto-fix in Phase D.
+- Return `.tasks/<epoch>-<slug>.json` as the relative payload.
 
 ## Guardrails
 
-- Do not populate skills manually — `generate-task-json` assigns them.
-- Do not derive a summary slug — `generate-task-json` derives it from summary.
-- Do not read schema files — the scripts validate against them.
-- Each phase loads its own dependencies. Planning skills from Phase A
-  will be evicted by Phase C — do not reference them there.
-- In Phase C, change only skills arrays. All other fields are immutable.
-- Every assigned skill must exist in the Phase C `SKILL_INVENTORY`.
-- Return `BLOCKED` for malformed input, script failure, or unrecoverable
-  validation errors.
+- Do not populate or correct skills manually.
+- Do not derive a summary slug.
+- Do not read schema files during Phase A.
+- Do not recollect the executable inventory.
+- Do not mutate generated task fields.
+- Do not pass `--auto-fix`.
+- Do not load model configuration in lexical rollback mode.
+- Return `BLOCKED` for malformed input, script failure, audit failure, or validation failure.
 
 ## Docs
 

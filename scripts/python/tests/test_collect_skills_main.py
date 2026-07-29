@@ -54,9 +54,7 @@ class TestCollectSkillsMain:
         assert result.exit_code == 0
         assert output_path.read_text(encoding="utf-8") == "[]"
 
-    def test_main_verbose_with_warnings(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_main_verbose_with_warnings(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Verbose mode prints warnings to stderr."""
 
         def fake_discover(
@@ -68,9 +66,7 @@ class TestCollectSkillsMain:
             _index.add(Skill(name="test", description="test", source="project"))
             _index.add(Skill(name="test", description="override", source="global"))
 
-        monkeypatch.setattr(
-            "cli.collect_skills.discover_all_skills", fake_discover
-        )
+        monkeypatch.setattr("cli.collect_skills.discover_all_skills", fake_discover)
 
         runner = CliRunner()
         result = runner.invoke(main, ["--verbose"])
@@ -87,9 +83,7 @@ class TestCollectSkillsMain:
         ) -> None:
             raise RuntimeError("Something went wrong")
 
-        monkeypatch.setattr(
-            "cli.collect_skills.discover_all_skills", _raise_error
-        )
+        monkeypatch.setattr("cli.collect_skills.discover_all_skills", _raise_error)
 
         runner = CliRunner()
         result = runner.invoke(main, [])
@@ -129,9 +123,7 @@ class TestCollectSkillsMain:
                 )
             )
 
-        monkeypatch.setattr(
-            "cli.collect_skills.discover_all_skills", fake_discover
-        )
+        monkeypatch.setattr("cli.collect_skills.discover_all_skills", fake_discover)
 
         runner = CliRunner()
         result = runner.invoke(main, [])

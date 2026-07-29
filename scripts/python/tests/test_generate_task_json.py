@@ -10,6 +10,8 @@ import pytest
 
 from lib.collect_skills.models import Skill
 from lib.generate_task_json import core
+from lib.generate_task_json.ranker import RankingDiagnostics, RankingResult
+from lib.generate_task_json.ranking_diagnostics import AtomicDiagnosticSink
 
 VALID_CONTEXT = (
     "Add focused Python tests for the example CLI behavior and preserve the existing "
@@ -43,6 +45,54 @@ def _skill(name: str = "python-test", class_: str = "operation") -> Skill:
     )
 
 
+def _ranked_index(
+    tmp_path: Path, names: tuple[str, ...] = ("python-test",)
+) -> list[dict]:
+    records = []
+    for name in names:
+        path = tmp_path / name / "SKILL.md"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("---\nname: skill\n---\n", encoding="utf-8")
+        records.append(
+            {
+                "name": name,
+                "description": f"Description for {name}",
+                "tags": ["python", "tests"],
+                "class": "operation",
+                "source": "project",
+                "path": str(path),
+            }
+        )
+    return records
+
+
+class FakeRanker:
+    def __init__(self, names: tuple[str, ...]) -> None:
+        self.names = names
+        self.calls = []
+
+    def rank(self, task, candidates):
+        self.calls.append((task, candidates))
+        return RankingResult(
+            self.names,
+            RankingDiagnostics(
+                tuple((candidate.name, 0.9) for candidate in candidates),
+                self.names,
+                False,
+            ),
+        )
+
+    def diagnostic_identity(self):
+        return {
+            "model": "model-digest",
+            "runtime": "0.31.1",
+            "tokenizer": "tokenizer-digest",
+            "prompt": "prompt-v1",
+            "render": "render-v1",
+            "policy": "policy-v1",
+        }
+
+
 def test_generate_task_json_writes_assigned_output(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -64,6 +114,120 @@ def test_generate_task_json_writes_assigned_output(
     result = json.loads(output.read_text())
     assert output == tmp_path / ".tasks" / "1700000000123-generate-tests.json"
     assert result["tasks"][0]["skills"] == ["python-test"]
+
+
+def test_qwen_ranker_is_authoritative_and_preserves_task_fields(tmp_path: Path) -> None:
+    ranker = FakeRanker(("python-test",))
+    drafts = _drafts()
+    output = core.generate_task_json(
+        drafts,
+        "ranked",
+        project_root=tmp_path,
+        skills_index=_ranked_index(tmp_path),
+        ranker=ranker,
+        assignment_mode="qwen",
+    )
+    result = json.loads(output.read_text())
+    assert result["tasks"][0]["skills"] == ["python-test"]
+    assert result["tasks"][0]["filesToRead"] == drafts["tasks"][0]["filesToRead"]
+    assert len(ranker.calls) == 1
+    assert ranker.calls[0][1][0].description == "Description for python-test"
+
+
+def test_ranker_failure_leaves_no_task_file(tmp_path: Path) -> None:
+    class Broken:
+        def rank(self, *_args):
+            raise RuntimeError("model unavailable")
+
+    with pytest.raises(RuntimeError, match="model unavailable"):
+        core.generate_task_json(
+            _drafts(),
+            "ranked",
+            project_root=tmp_path,
+            skills_index=_ranked_index(tmp_path),
+            ranker=Broken(),
+            assignment_mode="qwen",
+        )
+    assert not (tmp_path / ".tasks").exists()
+
+
+def test_pair_preflight_runs_before_ranker_factory(tmp_path: Path) -> None:
+    calls: list[str] = []
+
+    def reject_pairs(_tasks, _candidates) -> None:
+        calls.append("preflight")
+        raise ValueError("pair too large")
+
+    def factory(_candidates):
+        calls.append("factory")
+        return FakeRanker(("python-test",))
+
+    with pytest.raises(ValueError, match="pair too large"):
+        core.generate_task_json(
+            _drafts(),
+            "ranked",
+            project_root=tmp_path,
+            skills_index=_ranked_index(tmp_path),
+            ranker_factory=factory,
+            assignment_mode="qwen",
+            pair_preflight=reject_pairs,
+        )
+    assert calls == ["preflight"]
+    assert not (tmp_path / ".tasks").exists()
+
+
+def test_shadow_requires_diagnostics_sink(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="diagnostics sink"):
+        core.generate_task_json(
+            _drafts(),
+            "shadow",
+            project_root=tmp_path,
+            skills_index=_ranked_index(tmp_path),
+            ranker=FakeRanker(("python-test",)),
+            assignment_mode="shadow",
+        )
+
+
+def test_packet_diagnostics_are_atomic_and_complete(tmp_path: Path) -> None:
+    drafts = _drafts()
+    drafts["tasks"].append(
+        {
+            **drafts["tasks"][0],
+            "purpose": "Write more Python tests.",
+        }
+    )
+    ranker = FakeRanker(("python-test",))
+    diagnostics = tmp_path / "diagnostics.json"
+    output = core.generate_task_json(
+        drafts,
+        "ranked",
+        project_root=tmp_path,
+        skills_index=_ranked_index(tmp_path),
+        ranker=ranker,
+        assignment_mode="qwen",
+        diagnostic_sink=AtomicDiagnosticSink(diagnostics),
+    )
+    payload = json.loads(diagnostics.read_text(encoding="utf-8"))
+    assert output.exists()
+    assert len(payload["records"]) == 2
+    assert payload["records"][0]["model_hash"] != payload["records"][0]["runtime_hash"]
+
+
+def test_existing_diagnostic_is_preserved_and_blocks_task(tmp_path: Path) -> None:
+    diagnostics = tmp_path / "diagnostics.json"
+    diagnostics.write_text("preserve", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="already exists"):
+        core.generate_task_json(
+            _drafts(),
+            "ranked",
+            project_root=tmp_path,
+            skills_index=_ranked_index(tmp_path),
+            ranker=FakeRanker(("python-test",)),
+            assignment_mode="qwen",
+            diagnostic_sink=AtomicDiagnosticSink(diagnostics),
+        )
+    assert diagnostics.read_text(encoding="utf-8") == "preserve"
+    assert not (tmp_path / ".tasks").exists()
 
 
 def test_generate_task_json_writes_to_explicit_output_directory(

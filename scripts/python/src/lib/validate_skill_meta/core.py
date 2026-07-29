@@ -46,42 +46,46 @@ _FILLER_TAGS: set[str] = {
     "tool",
     "utility",
 }
-_KNOWN_TOOLS: frozenset[str] = frozenset({
-    "bash",
-    "pytest",
-    "python",
-    "bats",
-    "bun",
-    "cleye",
-    "click",
-    "todowrite",
-    "makefile",
-    "shellcheck",
-    "biome",
-})
-_DELIVERABLE_SUFFIXES: frozenset[str] = frozenset({
-    "-analysis",
-    "-architecture",
-    "-config",
-    "-conventions",
-    "-generation",
-    "-guide",
-    "-creation",
-    "-output",
-    "-json",
-    "-workspace",
-    "-record",
-    "-reference",
-    "-registry",
-    "-dispatch",
-    "-pipeline",
-    "-rendering",
-    "-tool",
-    "-testing",
-    "-writing",
-    "-workflow",
-    "-authoring",
-})
+_KNOWN_TOOLS: frozenset[str] = frozenset(
+    {
+        "bash",
+        "pytest",
+        "python",
+        "bats",
+        "bun",
+        "cleye",
+        "click",
+        "todowrite",
+        "makefile",
+        "shellcheck",
+        "biome",
+    }
+)
+_DELIVERABLE_SUFFIXES: frozenset[str] = frozenset(
+    {
+        "-analysis",
+        "-architecture",
+        "-config",
+        "-conventions",
+        "-generation",
+        "-guide",
+        "-creation",
+        "-output",
+        "-json",
+        "-workspace",
+        "-record",
+        "-reference",
+        "-registry",
+        "-dispatch",
+        "-pipeline",
+        "-rendering",
+        "-tool",
+        "-testing",
+        "-writing",
+        "-workflow",
+        "-authoring",
+    }
+)
 _CLUSTER_OVERUSE_THRESHOLD: int = 6
 
 
@@ -273,8 +277,7 @@ def validate_skill_file(
             # 5. Tool / deliverable tag requirement
             if not _has_tool_or_deliverable_tag(tags):
                 errors.append(
-                    "Field 'tags' must include at least one tool or "
-                    "deliverable tag"
+                    "Field 'tags' must include at least one tool or deliverable tag"
                 )
 
             # 4. Cluster overuse — any tag in 6+ discovered skills

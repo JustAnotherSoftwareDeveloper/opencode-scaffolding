@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import inspect
 import json
 import os
 import re
@@ -13,6 +14,13 @@ from typing import Any
 
 from lib.collect_skills.discovery import discover_all_skills
 from lib.collect_skills.models import Skill, SkillIndex
+from lib.generate_task_json.ranker import RankingResult, SkillCandidate
+from lib.generate_task_json.ranking_diagnostics import (
+    RankingDiagnosticBundle,
+    RankingDiagnosticRecord,
+    canonical_hash,
+    publish_diagnostics,
+)
 from lib.schema import load_schema
 from lib.shared.schema import validate_json_schema
 from lib.shared.skill_class import SkillClass
@@ -72,11 +80,28 @@ def generate_task_json(
     summary_slug: str | None = None,
     *,
     project_root: Path | None = None,
+    inventory_project_root: Path | None = None,
     output_dir: Path | None = None,
     output_file: Path | None = None,
     skills_index: list[dict[str, Any]] | None = None,
+    ranker: Any | None = None,
+    ranker_factory: Any | None = None,
+    assignment_mode: str = "lexical",
+    diagnostic_sink: Any | None = None,
+    pair_preflight: Any | None = None,
 ) -> Path:
-    """Assign skills to *data* and write an epoch-prefixed local task file."""
+    """Assign skills to *data* and write an epoch-prefixed local task file.
+
+    ``lexical`` is deliberately an explicit rollback mode.  The other modes
+    require an injected ranker (or factory); they never construct a native
+    scorer implicitly and never fall back after a ranking failure.
+    """
+    if assignment_mode not in {"lexical", "shadow", "qwen"}:
+        raise ValueError("assignment_mode must be lexical, shadow, or qwen")
+    if ranker is not None and ranker_factory is not None:
+        raise ValueError("ranker and ranker_factory are mutually exclusive")
+    if assignment_mode == "shadow" and diagnostic_sink is None:
+        raise ValueError("shadow assignment requires a diagnostics sink")
     input_schema = load_schema(INPUT_SCHEMA_PATH)
     input_errors = validate_json_schema(data, input_schema)
     if input_errors:
@@ -85,35 +110,201 @@ def generate_task_json(
         )
 
     candidates = _candidate_skills(skills_index)
+    strict_candidates: tuple[SkillCandidate, ...] = ()
+    if assignment_mode != "lexical":
+        strict_candidates = _strict_candidates(
+            skills_index,
+            project_root=inventory_project_root or project_root,
+        )
+        if assignment_mode != "lexical" and not strict_candidates:
+            raise ValueError("ranked assignment requires a non-empty skill inventory")
+        if pair_preflight is not None:
+            if not callable(pair_preflight):
+                raise TypeError("pair_preflight must be callable")
+            pair_preflight(tuple(data["tasks"]), strict_candidates)
+    active_ranker = _make_ranker(ranker, ranker_factory, strict_candidates)
     tasks: list[dict[str, Any]] = []
-    for draft in data["tasks"]:
-        task = dict(draft)
-        task["skills"] = _select_skills(task, candidates)
-        tasks.append(task)
+    diagnostic_records: list[RankingDiagnosticRecord] = []
+    published_diagnostics: list[Path] = []
+    try:
+        for draft in data["tasks"]:
+            task = dict(draft)
+            if assignment_mode == "lexical":
+                task["skills"] = _select_skills(task, candidates)
+            else:
+                assert active_ranker is not None
+                result = _rank_once(active_ranker, task, strict_candidates)
+                if assignment_mode == "shadow":
+                    task["skills"] = _select_skills(task, candidates)
+                else:
+                    task["skills"] = list(result.names)
+                if diagnostic_sink is not None:
+                    diagnostic_records.append(
+                        _result_diagnostics(
+                            active_ranker,
+                            result,
+                            draft,
+                            strict_candidates,
+                            assignment_mode,
+                        )
+                    )
+            tasks.append(task)
+    except BaseException:
+        _cleanup_diagnostics(published_diagnostics)
+        raise
 
     result = {"summary": data["summary"], "tasks": tasks}
     output_schema = load_schema(OUTPUT_SCHEMA_PATH)
-    output_errors = validate_json_schema(result, output_schema)
-    if output_errors:
-        raise GenerationValidationError(
-            f"output failed BreakdownTasksOutput schema: {output_errors}"
-        )
-
-    if summary_slug is None and output_file is None:
-        summary_slug = _derive_slug(data["summary"])
-        if summary_slug is None:
-            raise SummarySlugError(
-                f"cannot derive a valid slug from summary: {data['summary']!r}"
+    try:
+        output_errors = validate_json_schema(result, output_schema)
+        if output_errors:
+            raise GenerationValidationError(
+                f"output failed BreakdownTasksOutput schema: {output_errors}"
             )
 
-    output_path = _resolve_output_path(
-        summary_slug,
-        project_root=project_root,
-        output_dir=output_dir,
-        output_file=output_file,
+        if summary_slug is None and output_file is None:
+            summary_slug = _derive_slug(data["summary"])
+            if summary_slug is None:
+                raise SummarySlugError(
+                    f"cannot derive a valid slug from summary: {data['summary']!r}"
+                )
+
+        output_path = _resolve_output_path(
+            summary_slug,
+            project_root=project_root,
+            output_dir=output_dir,
+            output_file=output_file,
+        )
+        if diagnostic_records:
+            diagnostic_path = getattr(diagnostic_sink, "path", None)
+            publish_diagnostics(
+                RankingDiagnosticBundle(tuple(diagnostic_records)),
+                diagnostic_sink,
+            )
+            if diagnostic_path is not None:
+                published_diagnostics.append(Path(diagnostic_path))
+        _write_json_new(output_path, result)
+        return output_path
+    except BaseException:
+        _cleanup_diagnostics(published_diagnostics)
+        raise
+
+
+def _strict_candidates(
+    skills_index: list[dict[str, Any]] | None,
+    *,
+    project_root: Path | None,
+) -> tuple[SkillCandidate, ...]:
+    """Validate and freeze collector metadata before ranker construction."""
+    if skills_index is None:
+        raise ValueError("ranked assignment requires an explicit skill inventory")
+    config_root = Path.home() / ".config" / "opencode"
+    source_roots: dict[str, tuple[Path, ...]] = {"global": (config_root,)}
+    if project_root is not None:
+        source_roots["project"] = (project_root,)
+    candidates = tuple(
+        SkillCandidate.from_metadata(
+            entry,
+            original_index=index,
+            approved_source_roots=source_roots,
+        )
+        for index, entry in enumerate(skills_index)
     )
-    _write_json_new(output_path, result)
-    return output_path
+    names = [candidate.name for candidate in candidates]
+    if len(names) != len(set(names)):
+        raise ValueError("skill inventory contains duplicate names")
+    return candidates
+
+
+def _make_ranker(
+    ranker: Any | None,
+    ranker_factory: Any | None,
+    candidates: tuple[SkillCandidate, ...],
+) -> Any | None:
+    if ranker is not None:
+        return ranker
+    if ranker_factory is None:
+        if candidates:
+            raise ValueError("ranker or ranker_factory is required")
+        return None
+    if not callable(ranker_factory):
+        raise TypeError("ranker_factory must be callable")
+    parameters = inspect.signature(ranker_factory).parameters
+    return ranker_factory(candidates) if parameters else ranker_factory()
+
+
+def _rank_once(
+    ranker: Any,
+    task: dict[str, Any],
+    candidates: tuple[SkillCandidate, ...],
+) -> RankingResult:
+    result = ranker.rank(task, candidates)
+    if not isinstance(result, RankingResult):
+        raise TypeError("ranker must return RankingResult")
+    allowed = {candidate.name for candidate in candidates}
+    if (
+        not result.names
+        or len(result.names) > MAX_SKILLS
+        or len(set(result.names)) != len(result.names)
+        or not set(result.names).issubset(allowed)
+    ):
+        raise ValueError("ranker returned names outside the frozen inventory")
+    return result
+
+
+def _result_diagnostics(
+    ranker: Any,
+    result: RankingResult,
+    task: Any,
+    candidates: tuple[SkillCandidate, ...],
+    mode: str,
+) -> RankingDiagnosticRecord:
+    """Build content-free evidence from concrete ranker identities."""
+    identity_provider = getattr(ranker, "diagnostic_identity", None)
+    raw_identity: Any = identity_provider() if callable(identity_provider) else {}
+    identity: dict[str, str] = (
+        {str(key): str(value) for key, value in raw_identity.items()}
+        if isinstance(raw_identity, dict)
+        else {}
+    )
+    ranker_name = f"{type(ranker).__module__}.{type(ranker).__qualname__}"
+    return RankingDiagnosticRecord(
+        model_hash=canonical_hash(identity.get("model", ranker_name)),
+        runtime_hash=canonical_hash(identity.get("runtime", ranker_name)),
+        tokenizer_hash=canonical_hash(identity.get("tokenizer", ranker_name)),
+        prompt_hash=canonical_hash(identity.get("prompt", ranker_name)),
+        render_hash=canonical_hash(identity.get("render", ranker_name)),
+        policy_hash=canonical_hash(identity.get("policy", ranker_name)),
+        inventory_hash=canonical_hash(
+            [
+                {
+                    "name": candidate.name,
+                    "description": candidate.description,
+                    "tags": candidate.tags,
+                    "class": candidate.skill_class,
+                    "source": candidate.source,
+                    "path_hash": canonical_hash(candidate.path),
+                    "index": candidate.original_index,
+                }
+                for candidate in candidates
+            ]
+        ),
+        task_hash=canonical_hash(task),
+        pair_prompt_hashes=result.diagnostics.pair_prompt_hashes,
+        candidate_scores=result.diagnostics.candidate_scores,
+        token_counts=result.diagnostics.token_counts,
+        clipped_labels=result.diagnostics.clipped_labels,
+        latencies_ms=result.diagnostics.latencies_ms,
+        selected_names=result.names,
+        assignment_mode=mode,
+        forced_low_confidence=result.diagnostics.forced_low_confidence,
+    )
+
+
+def _cleanup_diagnostics(paths: list[Path]) -> None:
+    for path in paths:
+        with contextlib.suppress(OSError):
+            path.unlink()
 
 
 def _resolve_output_path(

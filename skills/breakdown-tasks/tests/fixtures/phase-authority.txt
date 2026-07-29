@@ -1,0 +1,2 @@
+Phase C: frozen inventory and generated skill arrays are immutable.
+Phase D: validation is blocking and never uses --auto-fix.

@@ -12,12 +12,14 @@ dependencies = [
     "click>=8.4.2",
     "jsonschema>=4.0",
     "lxml>=6.1.0",
+    "tokenizers==0.22.1",
 ]
 
 [project.scripts]
 collect-skills = "cli.collect_skills:main"
 example = "cli.example:main"
 generate-task-json = "cli.generate_task_json:main"
+prepare-skill-ranker-model = "cli.prepare_skill_ranker_model:main"
 render-task-markdown = "cli.render_task_markdown:main"
 resolve-script-root = "cli.resolve_script_root:main"
 skill-validator = "cli.skill_validator:cli"
@@ -33,7 +35,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/cli", "src/lib", "src/lib/shared"]
+packages = ["src/cli", "src/lib"]
 
 [tool.uv]
 package = true
@@ -64,4 +66,3 @@ addopts = "--cov=cli --cov=lib --cov-report=term-missing --cov-fail-under=85"
 markers = [
     "skip_coverage: Skip coverage checks for this test",
 ]
-

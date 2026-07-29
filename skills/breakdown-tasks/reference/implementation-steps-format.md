@@ -66,6 +66,6 @@ This format supports the breakdown-tasks atomicity rules:
 
 ## Related Docs
 
-- [`core-rules.md`](./core-rules.md) — Atomicity rules for task decomposition
-- [`task-granularity.md`](./task-granularity.md) — Heuristics for splitting work
-- [`anti-patterns.md`](./anti-patterns.md) — Common mistakes and fixes
+- [`core-rules.md`](./authoring/core-rules.md) — Atomicity rules for task decomposition
+- [`task-granularity.md`](./authoring/task-granularity.md) — Heuristics for splitting work
+- [`anti-patterns.md`](./authoring/anti-patterns.md) — Common mistakes and fixes

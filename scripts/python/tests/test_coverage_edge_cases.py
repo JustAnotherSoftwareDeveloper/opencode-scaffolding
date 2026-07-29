@@ -94,9 +94,7 @@ class TestDiscoveryEdgeCases:
         assert len(index.resolve()) == 1
         assert index.resolve()[0].name == "valid"
 
-    def test_permission_error_on_entry(
-        self, tmp_path: Path
-    ) -> None:
+    def test_permission_error_on_entry(self, tmp_path: Path) -> None:
         """PermissionError accessing an entry (symlink) is caught (verbose)."""
         root = tmp_path / "root-entry-perm"
         root.mkdir()
@@ -636,7 +634,9 @@ class TestDiscoverAllSkillsDefaults:
         assert len(index.resolve()) >= 1
         assert any(s.name == "my-skill" for s in index.resolve())
 
-    def test_discover_all_skills_project_root_none(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_discover_all_skills_project_root_none(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Calling discover_all_skills with project_root=None triggers Path.cwd() default."""
         from lib.collect_skills.discovery import discover_all_skills
         from lib.collect_skills.models import SkillIndex

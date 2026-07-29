@@ -105,11 +105,11 @@ class TestClassFilter:
 
     @staticmethod
     def _inject_multi_class_skills(
-        index: object,  # noqa: ARG004
+        index: object,
         **_: object,
     ) -> None:
         """Inject skills across multiple classes into the SkillIndex."""
-        from lib.collect_skills.models import Skill
+        from lib.collect_skills.models import Skill, SkillIndex
 
         skills_data = [
             ("alpha", "operation"),
@@ -120,9 +120,9 @@ class TestClassFilter:
             ("foxtrot", "inline"),
         ]
         # Cast to SkillIndex — we control the injection.
-        idx = index  # type: ignore[assignment]
+        assert isinstance(index, SkillIndex)
         for name, class_ in skills_data:
-            idx.add(
+            index.add(
                 Skill(
                     name=name,
                     description=f"A {class_} skill named {name}",
@@ -134,9 +134,7 @@ class TestClassFilter:
 
     # -- tests -------------------------------------------------------------
 
-    def test_no_class_returns_all(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_no_class_returns_all(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Without ``--class``, all skills are returned."""
         monkeypatch.setattr(
             "cli.collect_skills.discover_all_skills",
@@ -150,9 +148,7 @@ class TestClassFilter:
         names = [item["name"] for item in data]
         assert names == sorted(names)
 
-    def test_single_class_filter(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_single_class_filter(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """``--class operation`` returns only operation skills, in order."""
         monkeypatch.setattr(
             "cli.collect_skills.discover_all_skills",
@@ -167,9 +163,7 @@ class TestClassFilter:
             assert item["class"] == "operation"
         assert [item["name"] for item in data] == ["alpha", "charlie"]
 
-    def test_multi_class_union(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_multi_class_union(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """``--class operation --class documentation`` returns the union."""
         monkeypatch.setattr(
             "cli.collect_skills.discover_all_skills",
@@ -235,9 +229,7 @@ class TestClassFilter:
         assert result.exit_code == 0
         assert "repeatable" in result.output.lower() or "--class" in result.output
 
-    def test_filter_on_empty_index(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_filter_on_empty_index(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """``--class`` on an empty index returns an empty JSON array."""
         monkeypatch.setattr(
             "cli.collect_skills.discover_all_skills",

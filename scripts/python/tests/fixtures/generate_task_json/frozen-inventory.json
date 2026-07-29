@@ -1,0 +1,9 @@
+[
+  {
+    "name": "python-test",
+    "description": "Write Python tests",
+    "tags": ["python", "tests"],
+    "class": "operation",
+    "source": "project"
+  }
+]

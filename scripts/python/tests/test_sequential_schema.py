@@ -296,9 +296,7 @@ class TestSchemaStructuralInvariants:
         assert props["executionInstructions"]["maxItems"] == 5
         assert props["skills"]["maxItems"] == 3
 
-    def test_dependencies_is_removed_from_properties(
-        self, schema_dict: dict
-    ) -> None:
+    def test_dependencies_is_removed_from_properties(self, schema_dict: dict) -> None:
         """``dependencies`` has been removed from TaskPacket properties."""
         props = schema_dict["definitions"]["TaskPacket"]["properties"]
         assert "dependencies" not in props

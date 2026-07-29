@@ -114,7 +114,7 @@ def check_name_matches_dir(skill_dir: Path) -> CheckResult:
 
 
 def check_description_prefix(skill_dir: Path) -> CheckResult:
-    """Check 3: description starts with 'Use when' (or 'Use as planning reference' for planning)."""
+    """Check that description uses the prefix required by its class."""
     content = _read_skill_md(skill_dir)
     if content is None:
         return CheckResult("description-prefix", False, "SKILL.md not found")
@@ -133,12 +133,14 @@ def check_description_prefix(skill_dir: Path) -> CheckResult:
             return CheckResult(
                 "description-prefix",
                 True,
-                f"Description starts with '{PLANNING_DESCRIPTION_PREFIX}' as required for planning class",
+                "Description starts with "
+                f"'{PLANNING_DESCRIPTION_PREFIX}' as required for planning class",
             )
         return CheckResult(
             "description-prefix",
             False,
-            f"Planning skill description must start with '{PLANNING_DESCRIPTION_PREFIX}', got: '{desc[:80]}...'",
+            "Planning skill description must start with "
+            f"'{PLANNING_DESCRIPTION_PREFIX}', got: '{desc[:80]}...'",
         )
 
     if desc.startswith(DEFAULT_DESCRIPTION_PREFIX):
@@ -150,7 +152,8 @@ def check_description_prefix(skill_dir: Path) -> CheckResult:
     return CheckResult(
         "description-prefix",
         False,
-        f"Description must start with '{DEFAULT_DESCRIPTION_PREFIX}', got: '{desc[:80]}...'",
+        f"Description must start with '{DEFAULT_DESCRIPTION_PREFIX}', "
+        f"got: '{desc[:80]}...'",
     )
 
 
@@ -226,7 +229,7 @@ def check_no_examples_section(skill_dir: Path) -> CheckResult:
 
 
 def check_one_sentence_per_line(skill_dir: Path) -> CheckResult:
-    """Check 8: Body sentences each start on a new line (one sentence per line) in .md files."""
+    """Check that Markdown body sentences each start on a new line."""
     violations: list[str] = []
     md_files = list(skill_dir.rglob("*.md"))
 
@@ -247,7 +250,7 @@ def check_one_sentence_per_line(skill_dir: Path) -> CheckResult:
         lines = text.split("\n")
         for i, line in enumerate(lines, 1):
             stripped = line.strip()
-            # Skip YAML frontmatter lines, headings, empty lines, list items, code fences
+            # Skip frontmatter, headings, empty lines, list items, and code fences.
             if not stripped:
                 continue
             if stripped.startswith("---"):
@@ -265,8 +268,7 @@ def check_one_sentence_per_line(skill_dir: Path) -> CheckResult:
             if stripped.startswith(">"):
                 continue
             # Check for multiple sentences on one line in prose paragraphs
-            # A line with more than one sentence-ending punctuation followed by space indicates
-            # multiple sentences joined
+            # Multiple sentence endings followed by spaces indicate joined sentences.
             matches = list(SENTENCE_END_PATTERN.finditer(stripped))
             if len(matches) > 1:
                 violations.append(f"{md_file.name}:{i}: multiple sentences on one line")
@@ -292,7 +294,7 @@ def check_no_declarative_voice(skill_dir: Path) -> CheckResult:
 
     for md_file in md_files:
         # Skip schemas/, templates/, and reference/ per style guide exceptions
-        # reference/*.md has explicit exception for declarative voice in fact definitions
+        # Reference facts have an explicit declarative-voice exception.
         if _is_in_skip_directory(
             md_file, skill_dir, frozenset({"schemas", "templates", "reference"})
         ):
@@ -337,7 +339,7 @@ def check_no_placeholders(skill_dir: Path) -> CheckResult:
 
     for md_file in md_files:
         # Skip templates/ — they intentionally contain <<placeholders>>.
-        # Also skip reference/ — contains example code blocks with intentional placeholders.
+        # Reference code blocks can contain intentional placeholders.
         if _is_in_skip_directory(
             md_file, skill_dir, frozenset({"templates", "reference"})
         ):
@@ -356,7 +358,7 @@ def check_no_placeholders(skill_dir: Path) -> CheckResult:
 
 
 def check_cross_references_exist(skill_dir: Path) -> CheckResult:
-    """Check 11: All relative cross-references point to existing files within the skill directory."""
+    """Check that relative cross-references point to existing skill files."""
     md_files = list(skill_dir.rglob("*.md"))
     broken_refs: list[str] = []
 

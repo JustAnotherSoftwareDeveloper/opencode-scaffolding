@@ -157,7 +157,8 @@ class SkillIndex:
         """Return resolved skills whose ``class_`` is in *class_filters*.
 
         Args:
-            class_filters: One or more SkillClass values (e.g. ``("operation", "documentation")``).
+            class_filters: One or more SkillClass values, such as
+                ``("operation", "documentation")``.
 
         Returns:
             List of matching Skill instances sorted alphabetically by name.

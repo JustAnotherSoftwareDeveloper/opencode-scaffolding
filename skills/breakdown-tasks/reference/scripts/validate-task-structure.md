@@ -74,12 +74,12 @@ echo '[...tasks...]' | uv run --directory ~/.config/opencode/scripts/python vali
 
 ## Integration Point
 
-Use after the Phase C audit writes corrected skill assignments.
+Use after the read-only Phase C audit accepts generated skill assignments.
 Use as the final validation gate before returning the task-file path.
 
 ## Auto-Fix
 
-Use `--auto-fix` only with `--state-file`.
+Keep `--auto-fix` outside the authoritative breakdown workflow.
 
 - Remove empty strings from `skills` arrays.
 - Deduplicate `skills` arrays while preserving first-occurrence order.
