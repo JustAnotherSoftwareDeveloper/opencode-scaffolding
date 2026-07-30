@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "evaluated_profiles": ["q8", "q4"],
+  "candidate_names": ["planning-pipeline-architecture", "skill-architect"],
+  "approved_policy": {
+    "absolute_inclusion_threshold": 0.95,
+    "minimum_cardinality": 0,
+    "max_cardinality": 3,
+    "decision_gate": "benchmark-approved"
+  },
+  "decision": {
+    "basis": "precision-first separation across both supported profiles",
+    "zero_cardinality_reason": "Nine labeled no-match cases require an empty successful result; one-to-three cannot satisfy that contract.",
+    "threshold_reason": "0.95 is above the highest negative score (0.913960203283) and below the lowest selected positive score (0.989565870426) across Q8 and Q4.",
+    "multi_reference_result": "Explicitly independent lifecycle-stage and skill-classification requests select both planning references under Q8 and Q4 without introducing false positives."
+  },
+  "metrics": {
+    "q8": {
+      "exact_set_accuracy": 1.0,
+      "per_skill_recall": 1.0,
+      "false_positive_names": 0,
+      "empty_result_accuracy": 1.0,
+      "multi_reference_accuracy": 1.0
+    },
+    "q4": {
+      "exact_set_accuracy": 1.0,
+      "per_skill_recall": 1.0,
+      "false_positive_names": 0,
+      "empty_result_accuracy": 1.0,
+      "multi_reference_accuracy": 1.0
+    }
+  },
+  "score_boundaries": {
+    "highest_negative": {
+      "profile": "q4",
+      "case": "proposal-boundary-analysis",
+      "candidate": "planning-pipeline-architecture",
+      "score": 0.913960203283
+    },
+    "lowest_direct_positive": {
+      "profile": "q4",
+      "case": "architect-direct",
+      "candidate": "skill-architect",
+      "score": 0.991731474046
+    }
+  }
+}

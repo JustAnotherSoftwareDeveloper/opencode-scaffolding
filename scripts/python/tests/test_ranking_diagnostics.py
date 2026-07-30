@@ -13,6 +13,7 @@ from lib.generate_task_json.ranking_diagnostics import (
     CompositeDiagnosticSink,
     DiagnosticPayload,
     NullDiagnosticSink,
+    PlanningSelectionDiagnosticRecord,
     RankingDiagnosticBundle,
     RankingDiagnosticRecord,
     canonical_hash,
@@ -53,6 +54,24 @@ def record(**overrides: object) -> RankingDiagnosticRecord:
     )
 
 
+def planning_record(**overrides: object) -> PlanningSelectionDiagnosticRecord:
+    values: Any = {
+        name: name + "-hash"
+        for name in (
+            "model_hash",
+            "runtime_hash",
+            "tokenizer_hash",
+            "prompt_hash",
+            "renderer_hash",
+            "policy_hash",
+            "metadata_snapshot_hash",
+            "query_hash",
+        )
+    }
+    values.update(overrides)
+    return PlanningSelectionDiagnosticRecord(**values)
+
+
 def test_hash_is_canonical_and_private_payload_is_redacted() -> None:
     assert canonical_hash({"b": 2, "a": 1}) == canonical_hash({"a": 1, "b": 2})
     payload = canonical_json(
@@ -74,6 +93,89 @@ def test_hash_is_canonical_and_private_payload_is_redacted() -> None:
         ]
         == {}
     )
+
+
+def test_planning_record_contains_complete_identity_and_selection_evidence() -> None:
+    item = planning_record(
+        candidate_scores=(("planner-a", 0.875), ("planner-b", 0.125)),
+        selected_names=("planner-a",),
+        latency_ms=12.5,
+    )
+    payload = json.loads(item.serialize())
+
+    assert {
+        "model_hash",
+        "runtime_hash",
+        "tokenizer_hash",
+        "prompt_hash",
+        "renderer_hash",
+        "policy_hash",
+        "metadata_snapshot_hash",
+        "query_hash",
+    } <= payload.keys()
+    assert payload["candidate_scores"] == [["planner-a", 0.875], ["planner-b", 0.125]]
+    assert payload["selected_names"] == ["planner-a"]
+    assert payload["latency_ms"] == 12.5
+
+
+def test_planning_identity_hashes_are_deterministic() -> None:
+    identity = {"query": "choose a planner", "metadata": {"b": 2, "a": 1}}
+    assert canonical_hash(identity) == canonical_hash(
+        {"metadata": {"a": 1, "b": 2}, "query": "choose a planner"}
+    )
+    assert canonical_hash(identity) == canonical_hash(identity)
+
+
+def test_planning_serialization_contains_no_raw_source_or_path_content() -> None:
+    raw_values = {
+        "query": "RAW_PLANNING_QUERY",
+        "prompt": "RAW_PLANNING_PROMPT",
+        "body": "RAW_PLANNER_BODY",
+        "path": "/private/raw/planner.py",
+        "filesToRead": "RAW_READ_PATH",
+        "filesToWrite": "RAW_WRITE_PATH",
+    }
+    payload = planning_record(extra=raw_values).serialize()
+
+    for value in raw_values.values():
+        assert value.encode() not in payload
+    assert b"extra" in payload
+
+
+def test_planning_atomic_sink_preserves_existing_file_and_cleans_failed_publish(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    destination = tmp_path / "planning" / "diagnostic.json"
+    sink = AtomicDiagnosticSink(destination)
+    sink.publish(planning_record(selected_names=("first",)))
+    original = destination.read_bytes()
+
+    with pytest.raises(RuntimeError, match="already exists"):
+        sink.publish(planning_record(selected_names=("replacement",)))
+    assert destination.read_bytes() == original
+    assert list(destination.parent.glob(".*")) == []
+
+    failed = AtomicDiagnosticSink(tmp_path / "failed-planning.json")
+    monkeypatch.setattr(
+        "lib.generate_task_json.ranking_diagnostics.os.link",
+        lambda *_: (_ for _ in ()).throw(OSError("planning boom")),
+    )
+    with pytest.raises(RuntimeError, match="publication failed"):
+        failed.publish(planning_record())
+    assert not failed.path.exists()
+    assert list(failed.path.parent.glob(".*")) == []
+
+
+def test_task_record_schema_and_publication_remain_unchanged() -> None:
+    payload = json.loads(
+        record(
+            candidate_scores=(("task-owner", 0.9),), selected_names=("task-owner",)
+        ).serialize()
+    )
+    assert payload["task_hash"] == "task-hash"
+    assert payload["candidate_scores"] == [["task-owner", 0.9]]
+    assert payload["selected_names"] == ["task-owner"]
+    assert "query_hash" not in payload
 
 
 @pytest.mark.parametrize("field", ["model_hash", "runtime_hash", "task_hash"])

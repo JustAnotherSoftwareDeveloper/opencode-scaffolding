@@ -30,6 +30,46 @@ def test_validate_frontmatter_valid() -> None:
     assert validate_frontmatter(data) == []
 
 
+def test_validate_frontmatter_accepts_planning_description_prefix() -> None:
+    """Planning references use their class-specific selection prefix."""
+    data = {
+        "name": "planning-reference",
+        "description": "Use as planning reference for lifecycle selection",
+        "tags": VALID_TAGS,
+        "class": "planning",
+    }
+    assert validate_frontmatter(data) == []
+
+
+@pytest.mark.parametrize(
+    ("description", "skill_class", "error"),
+    [
+        (
+            "Use when selecting a planning stage",
+            "planning",
+            "Field 'description' for planning class must start with "
+            "'Use as planning reference'",
+        ),
+        (
+            "Use as planning reference for execution",
+            "operation",
+            "Field 'description' must start with 'Use when'",
+        ),
+    ],
+)
+def test_validate_frontmatter_rejects_wrong_class_description_prefix(
+    description: str, skill_class: str, error: str
+) -> None:
+    """Description prefixes remain exact class-boundary signals."""
+    data = {
+        "name": "reference",
+        "description": description,
+        "tags": VALID_TAGS,
+        "class": skill_class,
+    }
+    assert error in validate_frontmatter(data)
+
+
 @pytest.mark.parametrize(
     ("tags", "error"),
     [
@@ -215,7 +255,7 @@ def test_validate_skill_file_accepts_analysis_as_deliverable(tmp_path: Path) -> 
         tmp_path,
         "---\n"
         "name: analysis-skill\n"
-        "description: Use when analysing an artifact\n"
+        "description: Use as planning reference for analysing an artifact\n"
         "tags: [evidence-analysis, problem-framing, decision-assessment, "
         "root-cause-analysis]\n"
         "class: planning\n"

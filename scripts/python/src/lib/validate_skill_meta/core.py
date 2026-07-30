@@ -179,12 +179,20 @@ def validate_frontmatter(data: object) -> list[str]:
     elif not isinstance(name, str) or not name.strip():
         errors.append("Field 'name' must be a non-empty string")
 
-    # Validate description
+    # Validate description. Planning references use a distinct, class-specific
+    # prefix so selectors can distinguish passive context from executable work.
     description = data.get("description")
+    class_val = data.get("class")
     if description is None:
         errors.append("Missing required frontmatter field: 'description'")
     elif not isinstance(description, str):
         errors.append("Field 'description' must be a string")
+    elif class_val == "planning":
+        if not description.startswith("Use as planning reference"):
+            errors.append(
+                "Field 'description' for planning class must start with "
+                "'Use as planning reference'"
+            )
     elif not description.startswith("Use when"):
         errors.append("Field 'description' must start with 'Use when'")
 
@@ -214,7 +222,6 @@ def validate_frontmatter(data: object) -> list[str]:
             errors.append("Field 'tags' must not repeat the skill name")
 
     # Validate class
-    class_val = data.get("class")
     if class_val is None:
         errors.append("Missing required frontmatter field: 'class'")
     elif not isinstance(class_val, str):

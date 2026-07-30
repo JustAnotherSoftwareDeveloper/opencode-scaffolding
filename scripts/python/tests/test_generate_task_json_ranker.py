@@ -11,10 +11,15 @@ import pytest
 from lib.generate_task_json.qwen_prompt import (
     ASSISTANT_SUFFIX,
     INSTRUCTION,
+    PLANNING_INSTRUCTION,
+    PLANNING_PROMPT_VERSION,
+    PLANNING_RENDER_VERSION,
     SYSTEM_PREFIX,
+    QwenPlanningPromptRenderer,
     QwenPromptRenderer,
     QwenTokenBudget,
     compose_qwen_prompt,
+    render_planning_request,
 )
 from lib.generate_task_json.qwen_prompt import (
     render_skill as render_prompt_skill,
@@ -33,6 +38,7 @@ from lib.generate_task_json.ranker import (
     render_skill,
     render_task,
 )
+from lib.shared.skill_class import SkillClass
 
 ROOT = Path(__file__).parents[1]
 TOKENIZER = ROOT / "src/lib/generate_task_json/assets/tokenizer.json"
@@ -111,6 +117,64 @@ def test_prompt_is_exact_and_excludes_trust_metadata(tmp_path: Path) -> None:
     result = QwenPromptRenderer().render(task(), skill)
     assert result.prompt == expected
     assert str(skill.path) not in result.prompt
+
+
+def test_planning_request_preserves_complete_description_text() -> None:
+    description = "  Plan this change.\n\nInclude every constraint and\tindentation.  "
+
+    assert render_planning_request(description) == f"Planning request: {description}"
+
+
+@pytest.mark.parametrize("bad", ["", "   ", "\n\t", None, 42])
+def test_planning_request_rejects_empty_and_malformed_input(bad: object) -> None:
+    with pytest.raises(SkillRankingInputError, match="non-empty string"):
+        render_planning_request(bad)  # type: ignore[arg-type]
+
+
+def test_planning_renderer_includes_metadata_and_excludes_source_and_path(
+    tmp_path: Path,
+) -> None:
+    skill = candidate(tmp_path, "planning-reference")
+    result = QwenPlanningPromptRenderer().render(
+        "Create an implementation plan.", skill
+    )
+
+    assert result.task == "Planning request: Create an implementation plan."
+    assert result.skill == (
+        "Skill name: planning-reference\n"
+        "Description: Write deterministic Python tests\n"
+        "Tags: python, testing\n"
+        "Class: operation"
+    )
+    assert skill.source not in result.skill
+    assert str(skill.path) not in result.skill
+    assert PLANNING_INSTRUCTION in result.prompt
+
+
+def test_planning_renderer_reports_planning_version_identities(tmp_path: Path) -> None:
+    result = QwenPlanningPromptRenderer().render(
+        "Plan the work.", candidate(tmp_path, "planning-reference")
+    )
+
+    assert result.task_render_version == PLANNING_RENDER_VERSION
+    assert result.prompt_version == PLANNING_PROMPT_VERSION
+    assert result.skill_render_version == "task-skill-fields-v1"
+
+
+def test_existing_task_rendering_remains_byte_identical() -> None:
+    expected = (
+        "Purpose: Write deterministic tests.\n"
+        "Context: The backend must be offline and reproducible.\n"
+        "Files to read: src/ranker.py\n"
+        "Files to write: tests/test_ranker.py\n"
+        "Execution instructions:\n"
+        "1. Implement tests. (Verification: pytest passes)\n"
+        "2. Review the fixture.\n"
+        "Expected output: A complete deterministic test suite.\n"
+        "Verification: Focused tests pass; No network is used"
+    )
+
+    assert render_prompt_task(task()) == expected
 
 
 def test_pinned_tokenizer_accepts_limit_and_rejects_overflow() -> None:
@@ -237,6 +301,132 @@ def test_candidate_source_must_match_its_authorized_root(tmp_path: Path) -> None
         )
 
 
+@pytest.mark.parametrize(
+    "skill_class", [SkillClass.OPERATION.value, SkillClass.DOCUMENTATION.value]
+)
+def test_candidate_default_classes_remain_authorized(
+    tmp_path: Path, skill_class: str
+) -> None:
+    path = tmp_path / "skill" / "SKILL.md"
+    path.parent.mkdir(parents=True)
+    path.write_text("skill", encoding="utf-8")
+
+    candidate = SkillCandidate.from_metadata(
+        {
+            "name": "valid-name",
+            "description": "desc",
+            "tags": ["Valid"],
+            "class": skill_class,
+            "source": "project",
+            "path": str(path),
+        },
+        approved_roots=[tmp_path],
+    )
+
+    assert candidate.skill_class == skill_class
+    assert candidate.tags == ("valid",)
+
+
+def test_candidate_planning_class_requires_explicit_authorization(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "planning" / "SKILL.md"
+    path.parent.mkdir(parents=True)
+    path.write_text("skill", encoding="utf-8")
+    metadata = {
+        "name": "planning-reference",
+        "description": "planning context",
+        "tags": ["Planning"],
+        "class": SkillClass.PLANNING.value,
+        "source": "project",
+        "path": str(path),
+    }
+
+    with pytest.raises(SkillRankingInputError, match="unsupported skill class"):
+        SkillCandidate.from_metadata(metadata, approved_roots=[tmp_path])
+
+    candidate = SkillCandidate.from_metadata(
+        metadata,
+        approved_roots=[tmp_path],
+        allowed_classes=(SkillClass.PLANNING.value,),
+    )
+    assert candidate.skill_class == SkillClass.PLANNING.value
+    assert candidate.tags == ("planning",)
+
+
+@pytest.mark.parametrize(
+    "skill_class",
+    [item.value for item in SkillClass if item is not SkillClass.PLANNING],
+)
+def test_planning_only_candidates_reject_nonplanning_classes(
+    tmp_path: Path, skill_class: str
+) -> None:
+    path = tmp_path / "skill" / "SKILL.md"
+    path.parent.mkdir(parents=True)
+    path.write_text("skill", encoding="utf-8")
+
+    with pytest.raises(SkillRankingInputError, match="unsupported skill class"):
+        SkillCandidate.from_metadata(
+            {
+                "name": "valid-name",
+                "description": "desc",
+                "tags": ["valid"],
+                "class": skill_class,
+                "source": "project",
+                "path": str(path),
+            },
+            approved_roots=[tmp_path],
+            allowed_classes=(SkillClass.PLANNING.value,),
+        )
+
+
+@pytest.mark.parametrize(
+    "field, value",
+    [
+        ("name", "Not Canonical"),
+        ("tags", ["bad tag"]),
+        ("source", "unknown"),
+    ],
+)
+def test_planning_class_authorization_preserves_candidate_controls(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    path = tmp_path / "planning" / "SKILL.md"
+    path.parent.mkdir(parents=True)
+    path.write_text("skill", encoding="utf-8")
+    metadata = {
+        "name": "planning-reference",
+        "description": "planning context",
+        "tags": ["planning"],
+        "class": SkillClass.PLANNING.value,
+        "source": "project",
+        "path": str(path),
+    }
+    metadata[field] = value
+
+    with pytest.raises(SkillRankingInputError):
+        SkillCandidate.from_metadata(
+            metadata,
+            approved_roots=[tmp_path],
+            allowed_classes=(SkillClass.PLANNING.value,),
+        )
+
+    outside = tmp_path.parent / "outside-skill.md"
+    outside.write_text("skill", encoding="utf-8")
+    metadata.update(
+        name="planning-reference",
+        tags=["planning"],
+        source="project",
+        path=str(outside),
+    )
+    with pytest.raises(SkillRankingInputError, match="outside"):
+        SkillCandidate.from_metadata(
+            metadata,
+            approved_roots=[tmp_path],
+            allowed_classes=(SkillClass.PLANNING.value,),
+        )
+
+
 def test_selection_ties_threshold_clipping_and_low_confidence(tmp_path: Path) -> None:
     skills = [
         candidate(tmp_path, name, index)
@@ -249,6 +439,90 @@ def test_selection_ties_threshold_clipping_and_low_confidence(tmp_path: Path) ->
     assert result.diagnostics.clipped_labels == ("yes",) * 4
     low = SkillRanker(FakeScorer([0.2, 0.1])).rank(task(), skills[:2])
     assert low.names == ("first",) and low.diagnostics.forced_low_confidence
+
+
+def test_legacy_selection_still_forces_one_qualifying_candidate(
+    tmp_path: Path,
+) -> None:
+    skills = [candidate(tmp_path, "first", 0), candidate(tmp_path, "second", 1)]
+
+    result = SkillRanker(FakeScorer([0.2, 0.1])).rank(task(), skills)
+
+    assert result.names == ("first",)
+    assert result.diagnostics.forced_low_confidence
+
+
+def test_optional_selection_can_return_empty_below_absolute_threshold(
+    tmp_path: Path,
+) -> None:
+    skills = [candidate(tmp_path, "first", 0), candidate(tmp_path, "second", 1)]
+
+    result = SkillRanker(FakeScorer([0.79, 0.78])).rank(
+        task(),
+        skills,
+        minimum_cardinality=0,
+        absolute_inclusion_threshold=0.8,
+    )
+
+    assert result.names == ()
+    assert result.diagnostics.selected_names == ()
+
+
+def test_optional_selection_uses_absolute_threshold_for_each_candidate(
+    tmp_path: Path,
+) -> None:
+    skills = [
+        candidate(tmp_path, "first", 0),
+        candidate(tmp_path, "second", 1),
+        candidate(tmp_path, "third", 2),
+    ]
+
+    result = SkillRanker(FakeScorer([0.91, 0.8, 0.79])).rank(
+        task(),
+        skills,
+        minimum_cardinality=0,
+        absolute_inclusion_threshold=0.8,
+    )
+
+    assert result.names == ("first", "second")
+
+
+def test_optional_selection_omits_task_owner_file_blocking(tmp_path: Path) -> None:
+    skills = [
+        candidate(tmp_path, "proposal", 0),
+        candidate(tmp_path, "skill-authoring-guide", 1),
+    ]
+    value = task()
+    value["filesToWrite"] = ["skills/proposal/SKILL.md"]
+
+    result = SkillRanker(FakeScorer([0.99, 0.9])).rank(
+        value,
+        skills,
+        minimum_cardinality=0,
+        absolute_inclusion_threshold=0.8,
+        selection_blocking=False,
+    )
+
+    assert result.names == ("proposal", "skill-authoring-guide")
+
+
+def test_optional_selection_preserves_original_order_for_score_ties(
+    tmp_path: Path,
+) -> None:
+    skills = [
+        candidate(tmp_path, "later", 8),
+        candidate(tmp_path, "earlier", 3),
+    ]
+
+    result = SkillRanker(FakeScorer([0.9, 0.9])).rank(
+        task(),
+        skills,
+        minimum_cardinality=0,
+        absolute_inclusion_threshold=0.9,
+        selection_blocking=False,
+    )
+
+    assert result.names == ("earlier", "later")
 
 
 def test_selection_blocks_circular_owner_and_update_factory(tmp_path: Path) -> None:

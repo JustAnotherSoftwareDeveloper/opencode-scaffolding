@@ -1,6 +1,6 @@
 ---
 name: skill-architect
-description: "Use when selecting skill classes, evaluating class boundaries, or referencing platform architecture."
+description: "Use as planning reference to classify a requested OpenCode skill using the six-class taxonomy, side-effect contract, delegation rules, execution shape, and class-boundary decision flow."
 tags: [skill-taxonomy, class-design, boundary-rules, platform-architecture, architecture-reference, class-selection]
 class: planning
 ---

@@ -1,7 +1,7 @@
 ---
 name: task-executor
 description: "Use when executing exactly one canonical task packet inline without worker delegation."
-tags: [task-execution, canonical-packet, inline-execution, file-boundaries, delegation-denial]
+tags: [task-execution, task-packet-json, inline-execution, file-boundaries, delegation-denial]
 class: inline
 ---
 

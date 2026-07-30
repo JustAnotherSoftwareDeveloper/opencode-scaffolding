@@ -20,16 +20,32 @@ Return `BLOCKED` when either section is absent.
 
 Produce a schema-valid `TaskDraftList` JSON object without skills or a slug.
 
-1. Collect planning skills with `collect-skills --class planning`.
-2. Read each materially relevant planning skill path from the returned metadata.
-3. Read `reference/authoring/core-rules.md`.
-4. Read `reference/authoring/task-granularity.md`.
-5. Read `reference/authoring/anti-patterns.md`.
-6. Read `reference/authoring/context-preservation.md`.
-7. Produce `{summary, tasks}` with every required task field.
-8. Keep each task atomic.
-9. Omit skills and summary slugs.
-10. Store the complete JSON in `TASK_DRAFT_JSON` for Phase B.
+1. Invoke `select-planning-skills` exactly once with the complete `PURPOSE` and `DETAILS` text on stdin.
+
+```bash
+uv run --directory ~/.config/opencode/scripts/python select-planning-skills \
+  --project-root "$CALLER_ROOT" \
+  --config-dir ~/.config/opencode \
+  --model-profile q8 \
+  --planning-policy '{"absolute_inclusion_threshold":0.95,"minimum_cardinality":0,"max_cardinality":3,"decision_gate":"benchmark-approved"}' \
+  <<'TASK_DESCRIPTION'
+<complete PURPOSE and DETAILS text>
+TASK_DESCRIPTION
+```
+
+2. Parse stdout as one strict bare JSON array. Reject commentary, wrappers, malformed JSON, non-string values, duplicates, unknown names, non-planning names, and more than three names.
+3. Reconcile every returned name against the selector's current planning-class result before loading it. Treat the selector's ordered array as authoritative.
+4. Load all and only the returned planning names through the skill tool, exactly once, in array order. Block on any selector, reconciliation, or skill-tool load failure.
+5. Continue without planning context when the successful array is `[]`. Do not add, remove, replace, reorder, deduplicate, or otherwise mutate the array.
+6. Do not pre-read candidate skill paths or bodies. Do not invoke `generic-analysis`, `proposal`, or `plan` for planning context.
+7. Read `reference/authoring/core-rules.md`.
+8. Read `reference/authoring/task-granularity.md`.
+9. Read `reference/authoring/anti-patterns.md`.
+10. Read `reference/authoring/context-preservation.md`.
+11. Produce `{summary, tasks}` with every required task field.
+12. Keep each task atomic.
+13. Omit skills and summary slugs.
+14. Store the complete JSON in `TASK_DRAFT_JSON` for Phase B.
 
 ## Phase B — Frozen Inventory And Generation
 

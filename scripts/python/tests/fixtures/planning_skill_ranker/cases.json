@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "candidate_filter": {
+    "class": "planning",
+    "description": "Cases rank the planning-class candidate inventory discovered by pytest; expected names are exact sets."
+  },
+  "case_families": [
+    "direct-match",
+    "adjacent-near-miss",
+    "multi-match",
+    "unrelated-no-match",
+    "misleading-generic-language"
+  ],
+  "cases": [
+    {
+      "id": "pipeline-direct",
+      "family": "direct-match",
+      "target": "planning-pipeline-architecture",
+      "input": "Use the planning pipeline architecture reference to distinguish analysis, proposal, and plan stages and choose the appropriate lifecycle path.",
+      "expected": ["planning-pipeline-architecture"],
+      "rationale": "Names the planning lifecycle and its three stage boundaries directly."
+    },
+    {
+      "id": "pipeline-adjacent-proposal",
+      "family": "adjacent-near-miss",
+      "target": "planning-pipeline-architecture",
+      "input": "Create an evidence-based decision proposal from explicit source documents, preserving sources in a proposal workspace.",
+      "expected": [],
+      "rationale": "This is proposal execution, not the passive planning-lifecycle reference."
+    },
+    {
+      "id": "pipeline-adjacent-plan-execution",
+      "family": "adjacent-near-miss",
+      "target": "planning-pipeline-architecture",
+      "input": "Generate an executable plan workspace, copy the source documents, and render validated task JSON and Markdown.",
+      "expected": [],
+      "rationale": "This requests the operational plan skill rather than lifecycle architecture guidance."
+    },
+    {
+      "id": "architect-direct",
+      "family": "direct-match",
+      "target": "skill-architect",
+      "input": "Select the correct OpenCode skill class by evaluating side effects, delegation, execution shape, and class-boundary rules.",
+      "expected": ["skill-architect"],
+      "rationale": "Directly asks for skill taxonomy and class-boundary architecture guidance."
+    },
+    {
+      "id": "architect-adjacent-authoring",
+      "family": "adjacent-near-miss",
+      "target": "skill-architect",
+      "input": "Author a new SKILL.md with valid frontmatter, progressive disclosure, tags, and trigger wording.",
+      "expected": [],
+      "rationale": "This is skill authoring guidance, not selection of classes or architectural boundaries."
+    },
+    {
+      "id": "architect-adjacent-maintenance",
+      "family": "adjacent-near-miss",
+      "target": "skill-architect",
+      "input": "Migrate an existing skill, run maintenance validation, and fix known skill-file compatibility pitfalls.",
+      "expected": [],
+      "rationale": "This is maintenance procedure work and should not select the architecture reference."
+    },
+    {
+      "id": "lifecycle-and-architecture",
+      "family": "multi-match",
+      "input": "Choose the correct analysis, proposal, or plan lifecycle stage, then select the correct OpenCode skill class using the six-class taxonomy, side-effect contract, delegation rules, and class-boundary decision flow.",
+      "expected": ["planning-pipeline-architecture", "skill-architect"],
+      "rationale": "The request combines lifecycle stage selection with skill-class architecture."
+    },
+    {
+      "id": "planning-reference-comparison",
+      "family": "multi-match",
+      "input": "Explain the analysis-to-proposal-to-plan lifecycle and independently classify the requested OpenCode skill using the six-class taxonomy, side-effect contract, delegation rules, execution shape, and class-boundary decision flow.",
+      "expected": ["planning-pipeline-architecture", "skill-architect"],
+      "rationale": "Both planning references are required to answer the cross-reference comparison."
+    },
+    {
+      "id": "unrelated-code-change",
+      "family": "unrelated-no-match",
+      "input": "Rename a local variable in the parser and add a regression test for an empty input file.",
+      "expected": [],
+      "rationale": "A small implementation and testing task has no planning-reference need."
+    },
+    {
+      "id": "unrelated-dependency-upgrade",
+      "family": "unrelated-no-match",
+      "input": "Upgrade the HTTP client dependency, regenerate the lockfile, and verify the existing integration suite.",
+      "expected": [],
+      "rationale": "Dependency maintenance is unrelated to lifecycle or skill-class architecture."
+    },
+    {
+      "id": "generic-decision-no-match",
+      "family": "misleading-generic-language",
+      "input": "Make a decision, assess the trade-offs, and recommend the best implementation option for the team.",
+      "expected": [],
+      "rationale": "Generic decision language alone does not require either planning reference."
+    },
+    {
+      "id": "generic-plan-no-match",
+      "family": "misleading-generic-language",
+      "input": "Plan the sprint, assign owners, estimate the work, and schedule the release for next month.",
+      "expected": [],
+      "rationale": "The ordinary project-management meaning of plan is not the plan-stage architecture reference."
+    },
+    {
+      "id": "proposal-boundary-analysis",
+      "family": "misleading-generic-language",
+      "input": "Analyze the evidence and recommend whether to approve the proposal; do not create a planning workspace or classify a skill.",
+      "expected": [],
+      "rationale": "Explicitly limits the task to analysis and approval, excluding both planning references."
+    }
+  ]
+}

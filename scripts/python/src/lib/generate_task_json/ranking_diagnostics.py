@@ -26,9 +26,30 @@ DEFAULT_MAX_BYTES = 64 * 1024
 _MAX_DEPTH = 8
 _MAX_ITEMS = 256
 _MAX_STRING = 512
+# Diagnostic callers pass identities, rather than source material.  Keep this
+# deny-list at the serialization boundary as a second line of defence for
+# optional ``extra`` values and future record types.
 _PRIVATE_KEYS = frozenset(
-    {"task", "context", "resolved_path", "path", "filesToRead", "filesToWrite"}
+    {
+        "task",
+        "context",
+        "query",
+        "prompt",
+        "description",
+        "body",
+        "skill",
+        "skills",
+        "resolved_path",
+        "path",
+        "filesToRead",
+        "filesToWrite",
+    }
 )
+
+
+def _is_private_key(key: object) -> bool:
+    """Match sensitive field names without allowing casing bypasses."""
+    return str(key).lower() in {item.lower() for item in _PRIVATE_KEYS}
 
 
 def canonical_hash(value: Any) -> str:
@@ -87,7 +108,7 @@ def _bounded(value: Any, depth: int = 0) -> Any:
             {
                 str(key)[:_MAX_STRING]: _bounded(item, depth + 1)
                 for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
-                if str(key) not in _PRIVATE_KEYS
+                if not _is_private_key(key)
             }
             if len(value) <= _MAX_ITEMS
             else {
@@ -95,7 +116,7 @@ def _bounded(value: Any, depth: int = 0) -> Any:
                 for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))[
                     :_MAX_ITEMS
                 ]
-                if str(key) not in _PRIVATE_KEYS
+                 if not _is_private_key(key)
             }
         )
     if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
@@ -191,6 +212,74 @@ class RankingDiagnosticRecord:
 
 
 @dataclass(frozen=True)
+class PlanningSelectionDiagnosticRecord:
+    """Content-free evidence for one dynamic planning selection.
+
+    Every value that could identify source content is represented by a hash.
+    The metadata snapshot is the run-scoped, dynamically discovered inventory;
+    it is not a cache of descriptions or skill bodies.
+    """
+
+    model_hash: str
+    runtime_hash: str
+    tokenizer_hash: str
+    prompt_hash: str
+    renderer_hash: str
+    policy_hash: str
+    metadata_snapshot_hash: str
+    query_hash: str
+    candidate_scores: tuple[tuple[str, float], ...] = ()
+    latency_ms: float = 0.0
+    selected_names: tuple[str, ...] = ()
+    schema_version: str = DIAGNOSTICS_VERSION
+    extra: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        for name in (
+            "model_hash",
+            "runtime_hash",
+            "tokenizer_hash",
+            "prompt_hash",
+            "renderer_hash",
+            "policy_hash",
+            "metadata_snapshot_hash",
+            "query_hash",
+        ):
+            _identity(getattr(self, name))
+        if (
+            not isinstance(self.latency_ms, (int, float))
+            or isinstance(self.latency_ms, bool)
+            or not math.isfinite(self.latency_ms)
+            or self.latency_ms < 0
+        ):
+            raise ValueError("latency must be a finite non-negative value")
+        if any(
+            not isinstance(score, (int, float))
+            or isinstance(score, bool)
+            or not math.isfinite(score)
+            or score < 0
+            or score > 1
+            for _, score in self.candidate_scores
+        ):
+            raise ValueError("candidate scores must be finite probabilities")
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return hashes and numeric evidence only; never source content."""
+        data = asdict(self)
+        data["candidate_scores"] = [list(item) for item in self.candidate_scores]
+        data["extra"] = dict(self.extra)
+        return _bounded(data)
+
+    def serialize(self, *, max_bytes: int = DEFAULT_MAX_BYTES) -> bytes:
+        return canonical_json(self.as_dict(), max_bytes=max_bytes)
+
+
+# Short name for callers that use the planning domain rather than the full
+# record name.  The alias keeps one schema and one publication implementation.
+PlanningDiagnosticRecord = PlanningSelectionDiagnosticRecord
+
+
+@dataclass(frozen=True)
 class RankingDiagnosticBundle:
     """One atomic diagnostic artifact for every task in a generated packet."""
 
@@ -211,7 +300,11 @@ class RankingDiagnosticBundle:
         return canonical_json(self.as_dict(), max_bytes=max_bytes)
 
 
-DiagnosticPayload = RankingDiagnosticRecord | RankingDiagnosticBundle
+DiagnosticPayload = (
+    RankingDiagnosticRecord
+    | PlanningSelectionDiagnosticRecord
+    | RankingDiagnosticBundle
+)
 
 
 class DiagnosticSink(Protocol):
@@ -278,3 +371,11 @@ def publish_diagnostics(
     if sink is None:
         raise RuntimeError("configured diagnostics sink is required before publication")
     sink.publish(record)
+
+
+def publish_planning_diagnostics(
+    record: PlanningSelectionDiagnosticRecord,
+    sink: DiagnosticSink | None,
+) -> None:
+    """Atomically publish planning evidence through the configured sink."""
+    publish_diagnostics(record, sink)

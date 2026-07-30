@@ -35,6 +35,23 @@ _MAX_RESPONSE_BYTES = 4 * 1024 * 1024
 _DEFAULT_TIMEOUT = 10.0
 
 
+def _identity_value(value: str | None, default: str, name: str) -> str:
+    """Validate an optional diagnostic identity without normalizing it."""
+    if value is None:
+        return default
+    if not isinstance(value, str) or not value.strip():
+        raise SkillRankingConfigurationError(f"{name} must be a non-empty string")
+    return value
+
+
+def _instruction_value(value: str | None, default: str) -> str:
+    if value is None:
+        return default
+    if not isinstance(value, str) or not value.strip():
+        raise SkillRankingConfigurationError("instruction must be a non-empty string")
+    return value
+
+
 class OllamaTransport(Protocol):
     def request(
         self, endpoint: str, payload: Mapping[str, Any] | None = None
@@ -240,6 +257,10 @@ class OllamaQwenScorer:
         transport: OllamaTransport | None = None,
         timeout: float = _DEFAULT_TIMEOUT,
         token_counter: Callable[[str], int] | None = None,
+        instruction: str | None = None,
+        prompt_identity: str | None = None,
+        render_identity: str | None = None,
+        policy_identity: str | None = None,
     ) -> None:
         if not math.isfinite(timeout) or timeout <= 0:
             raise SkillRankingConfigurationError("Ollama timeout must be positive")
@@ -247,6 +268,21 @@ class OllamaQwenScorer:
         self.host = _validate_host(host)
         self.timeout = timeout
         self.token_counter = token_counter
+        prompt = manifest.data["prompt"]
+        policy = manifest.data["policy"]
+        self.instruction = _instruction_value(instruction, prompt["instruction"])
+        self.prompt_identity = _identity_value(
+            prompt_identity, prompt["prompt_version"], "prompt_identity"
+        )
+        self.render_identity = _identity_value(
+            render_identity, prompt["render_version"], "render_identity"
+        )
+        default_policy_identity = hashlib.sha256(
+            json.dumps(policy, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
+        self.policy_identity = _identity_value(
+            policy_identity, default_policy_identity, "policy_identity"
+        )
         self.transport = transport or LoopbackHTTPTransport(
             self.host, read_timeout=timeout
         )
@@ -361,7 +397,7 @@ class OllamaQwenScorer:
         return compose_qwen_prompt(
             query,
             document,
-            instruction=self.manifest.data["prompt"]["instruction"],
+            instruction=self.instruction,
         )
 
     def diagnostic_identity(self) -> Mapping[str, str]:
@@ -370,8 +406,9 @@ class OllamaQwenScorer:
             "model": self.manifest.data["ollama"]["manifest_digest"],
             "runtime": self.runtime_version,
             "tokenizer": self.manifest.data["assets"]["tokenizer"]["sha256"],
-            "prompt": self.manifest.data["prompt"]["prompt_version"],
-            "render": self.manifest.data["prompt"]["render_version"],
+            "prompt": self.prompt_identity,
+            "render": self.render_identity,
+            "policy": self.policy_identity,
             "manifest": hashlib.sha256(
                 json.dumps(
                     self.manifest.data,

@@ -25,6 +25,7 @@ _MAX_TAGS = 32
 _MAX_TAG_LENGTH = 64
 _MAX_CANDIDATES = 128
 _DEFAULT_CLASSES = (SkillClass.OPERATION.value, SkillClass.DOCUMENTATION.value)
+_VALID_CLASSES = frozenset(item.value for item in SkillClass)
 
 
 class SkillRankingInputError(ValueError):
@@ -72,7 +73,13 @@ class SkillCandidate:
         approved_source_roots: Mapping[str, Sequence[Path | str]] | None = None,
         allowed_classes: Sequence[str] = _DEFAULT_CLASSES,
     ) -> SkillCandidate:
-        """Construct one authorized candidate from a collector record."""
+        """Construct one authorized candidate from a collector record.
+
+        ``allowed_classes`` is an explicit caller authorization boundary.  It
+        defaults to executable and documentation skills for the existing task
+        assignment flow; planning callers must opt in with
+        ``(SkillClass.PLANNING.value,)``.
+        """
         if not isinstance(metadata, Mapping):
             raise SkillRankingInputError("skill metadata must be an object")
         name = _text(metadata.get("name"), "name")
@@ -95,7 +102,22 @@ class SkillCandidate:
                 raise SkillRankingInputError(f"duplicate tag: {normalized!r}")
             tags.append(normalized)
         skill_class = _text(metadata.get("class", metadata.get("class_")), "class")
-        allowed = {str(item) for item in allowed_classes}
+        if isinstance(allowed_classes, (str, bytes)) or not isinstance(
+            allowed_classes, Sequence
+        ):
+            raise SkillRankingInputError("allowed_classes must be a sequence")
+        allowed: set[str] = set()
+        for authorized_class in allowed_classes:
+            if not isinstance(authorized_class, str):
+                raise SkillRankingInputError(
+                    "allowed_classes entries must be strings"
+                )
+            normalized_class = authorized_class.strip()
+            if normalized_class not in _VALID_CLASSES:
+                raise SkillRankingInputError(
+                    f"unsupported allowed skill class: {authorized_class!r}"
+                )
+            allowed.add(normalized_class)
         if skill_class not in allowed:
             raise SkillRankingInputError(f"unsupported skill class: {skill_class!r}")
         source = _text(metadata.get("source"), "source")
@@ -151,17 +173,35 @@ class RankingPolicy:
     max_skills: int = 3
     additional_skill_threshold: float = 0.8
     low_confidence_threshold: float = 0.8
+    minimum_cardinality: int = 1
+    absolute_inclusion_threshold: float | None = None
+    selection_blocking: bool = True
 
     def __post_init__(self) -> None:
         if self.max_skills < 1 or self.max_skills > 3:
             raise SkillRankingConfigurationError(
                 "max_skills must be between one and three"
             )
+        if not isinstance(self.minimum_cardinality, int) or isinstance(
+            self.minimum_cardinality, bool
+        ) or not 0 <= self.minimum_cardinality <= self.max_skills:
+            raise SkillRankingConfigurationError(
+                "minimum_cardinality must be between zero and max_skills"
+            )
         for value in (self.additional_skill_threshold, self.low_confidence_threshold):
             if not math.isfinite(value) or not 0 <= value <= 1:
                 raise SkillRankingConfigurationError(
                     "ranking thresholds must be finite probabilities"
                 )
+        if self.absolute_inclusion_threshold is not None and (
+            not math.isfinite(self.absolute_inclusion_threshold)
+            or not 0 <= self.absolute_inclusion_threshold <= 1
+        ):
+            raise SkillRankingConfigurationError(
+                "absolute_inclusion_threshold must be a finite probability"
+            )
+        if not isinstance(self.selection_blocking, bool):
+            raise SkillRankingConfigurationError("selection_blocking must be boolean")
 
     @classmethod
     def from_manifest(cls, manifest: Mapping[str, Any]) -> RankingPolicy:
@@ -268,15 +308,43 @@ class SkillRanker:
         return tuple(skills)
 
     def rank(
-        self, task: Mapping[str, Any], skills: Sequence[SkillCandidate]
+        self,
+        task: Mapping[str, Any] | None,
+        skills: Sequence[SkillCandidate],
+        *,
+        query: str | None = None,
+        minimum_cardinality: int | None = None,
+        absolute_inclusion_threshold: float | None = None,
+        selection_blocking: bool | None = None,
     ) -> RankingResult:
         inventory = self._validate_inventory(skills)
-        if not isinstance(task, Mapping):
+        if task is not None and not isinstance(task, Mapping):
             raise SkillRankingInputError("task must be an object")
-        query = render_task(task)
+        if query is None:
+            if task is None:
+                raise SkillRankingInputError("task is required when query is omitted")
+            rendered_query = render_task(task)
+        else:
+            rendered_query = _text(query, "query")
+        minimum = (
+            self.policy.minimum_cardinality
+            if minimum_cardinality is None
+            else minimum_cardinality
+        )
+        threshold = (
+            self.policy.absolute_inclusion_threshold
+            if absolute_inclusion_threshold is None
+            else absolute_inclusion_threshold
+        )
+        blocking = (
+            self.policy.selection_blocking
+            if selection_blocking is None
+            else selection_blocking
+        )
+        _validate_selection_options(minimum, threshold, blocking, self.policy.max_skills)
         try:
             results = self.scorer.score(
-                query, tuple(render_skill(item) for item in inventory)
+                rendered_query, tuple(render_skill(item) for item in inventory)
             )
         except SkillRankingInputError:
             raise
@@ -298,22 +366,29 @@ class SkillRanker:
         ordered_all = sorted(
             checked, key=lambda pair: (-pair[1].score, pair[0].original_index)
         )
-        blocked_names = _selection_blocked_names(task, inventory)
+        blocked_names = (
+            _selection_blocked_names(task or {}, inventory) if blocking else set()
+        )
         ordered = [item for item in ordered_all if item[0].name not in blocked_names]
-        if not ordered:
+        if not ordered and minimum:
             raise SkillRankingInputError(
                 "no selectable skills remain after assignment safety checks"
             )
-        selected = [ordered[0]]
-        for item in ordered[1 : self.policy.max_skills]:
-            if item[1].score < self.policy.additional_skill_threshold:
+        selected: list[tuple[SkillCandidate, ScoreResult]] = []
+        for item in ordered[: self.policy.max_skills]:
+            if len(selected) < minimum or item[1].score >= (
+                threshold
+                if threshold is not None
+                else self.policy.additional_skill_threshold
+            ):
+                selected.append(item)
+            elif len(selected) >= minimum:
                 break
-            selected.append(item)
         names = tuple(item[0].name for item in selected)
         diagnostics = RankingDiagnostics(
             tuple((item[0].name, item[1].score) for item in ordered_all),
             names,
-            ordered[0][1].score < self.policy.low_confidence_threshold,
+            bool(ordered) and ordered[0][1].score < self.policy.low_confidence_threshold,
             tuple(clipped),
             tuple(getattr(self.scorer, "last_token_counts", ())),
             tuple(
@@ -323,6 +398,31 @@ class SkillRanker:
             tuple(getattr(self.scorer, "last_prompt_hashes", ())),
         )
         return RankingResult(names, diagnostics)
+
+
+def _validate_selection_options(
+    minimum_cardinality: int,
+    absolute_inclusion_threshold: float | None,
+    selection_blocking: bool,
+    max_skills: int,
+) -> None:
+    if (
+        not isinstance(minimum_cardinality, int)
+        or isinstance(minimum_cardinality, bool)
+        or not 0 <= minimum_cardinality <= max_skills
+    ):
+        raise SkillRankingConfigurationError(
+            "minimum_cardinality must be between zero and max_skills"
+        )
+    if absolute_inclusion_threshold is not None and (
+        not math.isfinite(absolute_inclusion_threshold)
+        or not 0 <= absolute_inclusion_threshold <= 1
+    ):
+        raise SkillRankingConfigurationError(
+            "absolute_inclusion_threshold must be a finite probability"
+        )
+    if not isinstance(selection_blocking, bool):
+        raise SkillRankingConfigurationError("selection_blocking must be boolean")
 
 
 def _selection_blocked_names(

@@ -1,0 +1,32 @@
+{
+  "q8": {
+    "pipeline-direct": ["planning-pipeline-architecture"],
+    "pipeline-adjacent-proposal": [],
+    "pipeline-adjacent-plan-execution": [],
+    "architect-direct": ["skill-architect"],
+    "architect-adjacent-authoring": [],
+    "architect-adjacent-maintenance": [],
+    "lifecycle-and-architecture": ["planning-pipeline-architecture", "skill-architect"],
+    "planning-reference-comparison": ["planning-pipeline-architecture", "skill-architect"],
+    "unrelated-code-change": [],
+    "unrelated-dependency-upgrade": [],
+    "generic-decision-no-match": [],
+    "generic-plan-no-match": [],
+    "proposal-boundary-analysis": []
+  },
+  "q4": {
+    "pipeline-direct": ["planning-pipeline-architecture"],
+    "pipeline-adjacent-proposal": [],
+    "pipeline-adjacent-plan-execution": [],
+    "architect-direct": ["skill-architect"],
+    "architect-adjacent-authoring": [],
+    "architect-adjacent-maintenance": [],
+    "lifecycle-and-architecture": ["planning-pipeline-architecture", "skill-architect"],
+    "planning-reference-comparison": ["planning-pipeline-architecture", "skill-architect"],
+    "unrelated-code-change": [],
+    "unrelated-dependency-upgrade": [],
+    "generic-decision-no-match": [],
+    "generic-plan-no-match": [],
+    "proposal-boundary-analysis": []
+  }
+}

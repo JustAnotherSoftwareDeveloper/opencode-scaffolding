@@ -18,12 +18,18 @@ from lib.generate_task_json.ranker import SkillRankingInputError
 TASK_RENDER_VERSION = "task-skill-fields-v1"
 SKILL_RENDER_VERSION = "task-skill-fields-v1"
 QWEN_PROMPT_VERSION = "qwen3-reranker-4b-classifier-v1"
+PLANNING_RENDER_VERSION = "planning-request-v1"
+PLANNING_PROMPT_VERSION = "qwen3-reranker-4b-classifier-planning-v1"
 QWEN_MAX_TOKENS = 8192
 
 INSTRUCTION = (
     "Determine whether the candidate OpenCode skill contains procedures or reference "
     "material that are materially useful for executing the task. Rank direct owner "
     "skills above supporting references and unrelated skills."
+)
+PLANNING_INSTRUCTION = (
+    "Determine whether the candidate OpenCode skill contains passive planning "
+    "reference material that is materially useful for decomposing the planning request."
 )
 SYSTEM_PREFIX = (
     "<|im_start|>system\nJudge whether the Document meets the requirements based on "
@@ -79,6 +85,13 @@ def render_task(task: Mapping[str, Any]) -> str:
         f"Expected output: {task.get('expectedOutput', '')}\n"
         f"Verification: {'; '.join(str(value) for value in verification) or '(none)'}"
     )
+
+
+def render_planning_request(description: str) -> str:
+    """Render one complete planning description under the stable request label."""
+    if not isinstance(description, str) or not description.strip():
+        raise SkillRankingInputError("planning description must be a non-empty string")
+    return f"Planning request: {description}"
 
 
 def render_skill(candidate: Any) -> str:
@@ -200,6 +213,37 @@ class QwenPromptRenderer:
             else None
         )
         return QwenPromptResult(query, skill, prompt, token_count=count)
+
+
+class QwenPlanningPromptRenderer:
+    """Render a planning request and candidate without task-packet metadata."""
+
+    def __init__(
+        self,
+        token_budget: QwenTokenBudget | None = None,
+        *,
+        instruction: str = PLANNING_INSTRUCTION,
+    ) -> None:
+        self.token_budget = token_budget
+        self.instruction = instruction
+
+    def render(self, description: str, candidate: Any) -> QwenPromptResult:
+        query = render_planning_request(description)
+        skill = render_skill(candidate)
+        prompt = compose_qwen_prompt(query, skill, instruction=self.instruction)
+        count = (
+            self.token_budget.preflight(prompt).token_count
+            if self.token_budget
+            else None
+        )
+        return QwenPromptResult(
+            query,
+            skill,
+            prompt,
+            task_render_version=PLANNING_RENDER_VERSION,
+            prompt_version=PLANNING_PROMPT_VERSION,
+            token_count=count,
+        )
 
 
 class QwenPairPreflight:
