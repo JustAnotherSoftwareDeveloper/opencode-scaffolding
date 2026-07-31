@@ -1,55 +1,66 @@
 # Required Frontmatter
 
-Every `SKILL.md` must open with valid YAML frontmatter containing four required fields:
+Every `SKILL.md` must open with YAML frontmatter containing `name`, `description`, `schema_version`, `cues`, `relationships`, and `class`.
 
 ```yaml
 ---
 name: <<skill-name>>
 description: "Use when <<trigger description>>."
-tags:
-  - <<primary-capability>>
-  - <<domain-or-artifact>>
-  - <<tool-or-workflow-context>>
-  - <<additional-discriminator>>
+schema_version: "1.0"
+cues:
+  - facet: operation
+    value: <<primary-owned-operation>>
+    primary: true
+  - facet: subject
+    value: <<material-subject>>
+relationships:
+  - role: owner
+    rationale: <<why-this-skill-owns-the-request>>
 class: <<one-of-six-classes>>
 ---
 ```
 
-## `Name`
+## Name
 
-- **Regex**: `^[a-z][a-z0-9-]*$` — lowercase alphanumeric with hyphens, must start with a letter.
-- **Must match** the directory name under `skills/`. If the directory is `skills/foo-bar/`, the name is `foo-bar`.
-- **Stability**: Once published, renaming breaks skill references. Choose deliberately.
+- Match `name` to the skill directory.
+- Use lowercase letters, numbers, and hyphens.
+- Keep the name at most 128 characters.
+- Keep the name stable after publication.
 
-## `Description`
+## Description
 
-- **Must start** with `"Use when"` — this is the agent's primary selection signal.
-- **Exception**: For the `planning` class, the description must start with `"Use as planning reference"` instead.
-- **Must capture** the *trigger intent*, not a feature list. Bad: *"Use when needing to write files."* Good: *"Use when creating or rewriting all OpenCode skill files under skills/<name>/ (SKILL.md, reference/*.md, and templates/) from requirements and source material."*
-- **Length**: Under 1024 characters. Prefer 60–200 characters; shorter is sharper.
-- **Avoid** referencing specific filenames, paths, or future infrastructure.
-- For trigger evaluation guidance, see `./trigger-evaluation.md`.
+- Start an executable skill description with `Use when`.
+- Start a planning reference description with `Use as planning reference`.
+- Describe trigger intent rather than a feature inventory.
+- Keep the description trimmed, single-line, and at most 1024 characters.
 
-## `Class`
+## Class
 
-One of exactly six values:
+Use exactly one of `operation`, `delegated`, `inline`, `orchestrated`, `planning`, or `documentation`.
 
-- **`operation`**
-- **`delegated`**
-- **`inline`**
-- **`orchestrated`**
-- **`planning`**
-- **`documentation`**
+## Schema version
 
-- **No other classes** are valid. If uncertain, lean toward `operation`. If the skill is a passive data store consumed by other skills, choose `documentation`.
+Use exactly `schema_version: "1.0"` until a later contract version is implemented and published.
+Missing or unknown versions are hard validation failures.
 
-## `Tags`
+## Routing cues
 
-- **Type**: `list[str]`.
-- **Status**: Required. Do not omit or leave the list empty.
-- **Count**: Provide 4–7 tags.
-- **Format**: Use lowercase kebab-case strings with no spaces.
-- **Uniqueness**: Do not repeat a tag or use synonyms that add no distinct matching signal.
-- **Quality**: Select descriptive capability, domain, artifact, tool, and workflow-context terms.
-- **Prohibited values**: Do not use filler values such as `general`, `helper`, `tool`, `skill`, `misc`, `utility`, `common`, or `default`.
-- **Selection method**: Follow `./tagging-guide.md`.
+- Use structured entries with a canonical `value`, resolved `facet`, and optional aliases.
+- Declare one primary owned `operation` for every executable owner skill.
+- Add the smallest sufficient set of task-grounded cues; optional facets include subject, outcome, interface, environment, and constraint.
+- Resolve every non-built-in facet and value through a repository-owned namespaced registry.
+- Keep aliases and hierarchy in registry metadata rather than counting them as separate entries.
+- Reject undeclared facets, foreign namespaces, collisions, invalid shapes, and cues that fail the routing rubric in `./tagging-guide.md`.
+- Enforce the safety ceilings without treating them as targets: at most 32 cues and 32 relationships, with at most 16 aliases per cue.
+- Keep cue facets, values, and aliases at most 64 characters; relationship targets at most 128; and rationales at most 256.
+- Keep cue values, aliases, relationship targets, and rationales trimmed and on one line.
+
+## Relationships
+
+Represent `owner`, `support`, and `reference` relationships as explicit metadata rather than tag values.
+
+## Validation
+
+Run the same schema and registry validation for authoring, discovery, lexical scoring, and model rendering.
+Reject obsolete metadata shapes at the cutover boundary. Report the failed quality test or registry rule.
+The machine contracts are `scripts/python/src/lib/shared/skill-routing.schema.json` and `scripts/python/src/lib/shared/skill-facet-registry.schema.json`.

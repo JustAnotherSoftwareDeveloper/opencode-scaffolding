@@ -1,7 +1,13 @@
 ---
 name: skill-architect
 description: "Use as planning reference to classify a requested OpenCode skill using the six-class taxonomy, side-effect contract, delegation rules, execution shape, and class-boundary decision flow."
-tags: [skill-taxonomy, class-design, boundary-rules, platform-architecture, architecture-reference, class-selection]
+schema_version: "1.0"
+cues:
+  - {facet: subject, value: "skill class boundaries"}
+  - {facet: outcome, value: "skill architecture guidance"}
+  - {facet: constraint, value: "six-class taxonomy"}
+relationships:
+  - {role: reference, rationale: "provides passive class-selection architecture"}
 class: planning
 ---
 

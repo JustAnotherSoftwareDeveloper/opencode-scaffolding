@@ -1,15 +1,61 @@
 """CLI integration tests for generate-task-json."""
 
+# Structured fixtures intentionally keep routing records readable.
+# ruff: noqa: E501
+
 from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
+import pytest
 from click.testing import CliRunner
 
 from cli import generate_task_json
 from lib.generate_task_json.core import GenerationValidationError
 from lib.generate_task_json.ranker import ScoreResult
+
+
+def _manifest() -> SimpleNamespace:
+    return SimpleNamespace(
+        tokenizer_path=Path("unused-tokenizer"),
+        data={
+            "assets": {"tokenizer": {"sha256": "unused"}},
+            "prompt": {
+                "prompt_version": "qwen3-reranker-4b-classifier-v1",
+                "instruction": "test instruction",
+            },
+            "instruction": "test instruction",
+            "policy": {
+                "additional_skill_threshold": 0.8,
+                "low_confidence_threshold": 0.8,
+                "max_skills": 3,
+            },
+        },
+        num_ctx=4096,
+        profile="q8",
+    )
+
+
+class FakeGenerateBudget:
+    def __init__(self, *_args, **_kwargs):
+        pass
+
+    def count(self, text: str) -> int:
+        return len(text)
+
+    def preflight(self, prompt: str) -> SimpleNamespace:
+        return SimpleNamespace(token_count=len(prompt))
+
+
+@pytest.fixture(autouse=True)
+def manifest_without_transport(monkeypatch):
+    monkeypatch.setattr(
+        generate_task_json, "load_manifest", lambda *_args, **_kwargs: _manifest()
+    )
+    monkeypatch.setattr(generate_task_json, "QwenTokenBudget", FakeGenerateBudget)
+
 
 VALID_CONTEXT = (
     "Exercise the CLI task generator with a complete draft that identifies the test "
@@ -47,7 +93,12 @@ def _skills_file(tmp_path: Path) -> Path:
                 {
                     "name": "python-test",
                     "description": "Write Python tests",
-                    "tags": ["python", "tests"],
+                    "schema_version": "1.0",
+                    "cues": [
+                        {"facet": "operation", "value": "write-tests", "primary": True},
+                        {"facet": "subject", "value": "python"},
+                    ],
+                    "relationships": [{"role": "owner"}],
                     "class": "operation",
                     "source": "project",
                     "path": str(skill),

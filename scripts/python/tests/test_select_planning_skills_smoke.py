@@ -6,6 +6,9 @@ precedence, planning boundary, selector policy, and CLI serialization without
 requiring a model or a caller-managed inventory.
 """
 
+# Structured frontmatter fixtures intentionally stay compact.
+# ruff: noqa: E501
+
 from __future__ import annotations
 
 import json
@@ -73,12 +76,54 @@ def write_skill(
 ) -> None:
     path = root / name / "SKILL.md"
     path.parent.mkdir(parents=True, exist_ok=True)
+    planning = skill_class == "planning"
+    description = (
+        f"Use as planning reference for {name}"
+        if planning
+        else f"Use when executing {name}"
+    )
+    primary = "" if planning else "    primary: true\n"
+    relationship = "reference" if planning else "owner"
     path.write_text(
-        f"---\nname: {name}\ndescription: {name} context\n"
-        f"class: {skill_class}\ntags: [planning, context, smoke, reference]\n"
+        f"---\nname: {name}\ndescription: {description}\n"
+        f"class: {skill_class}\nschema_version: '1.0'\n"
+        f"cues:\n  - facet: operation\n    value: plan\n{primary}"
+        "  - facet: subject\n    value: planning\n"
+        f"relationships:\n  - role: {relationship}\n"
         f"---\n{body}\n",
         encoding="utf-8",
     )
+
+
+@pytest.fixture(autouse=True)
+def deterministic_cli_assets(monkeypatch: pytest.MonkeyPatch) -> None:
+    manifest = SimpleNamespace(
+        model="test-model",
+        tokenizer_path=Path("unused"),
+        data={
+            "assets": {"tokenizer": {"sha256": "unused"}},
+            "prompt": {
+                "prompt_version": "qwen3-reranker-4b-classifier-planning-v1",
+                "render_version": "planning-routing-signature-v2",
+                "instruction": "planning instruction",
+            },
+            "policy": {
+                "absolute_inclusion_threshold": 0.5,
+                "minimum_cardinality": 0,
+                "max_cardinality": 3,
+            },
+            "ollama": {
+                "model": "test-model",
+                "minimum_version": "0.31.1",
+                "manifest_digest": "d" * 64,
+            },
+            "model": {"name": "test-model"},
+        },
+        num_ctx=4096,
+    )
+    monkeypatch.setattr(cli, "load_manifest", lambda *_args, **_kwargs: manifest)
+    monkeypatch.setattr(cli, "QwenTokenBudget", FakeTokenBudget)
+    monkeypatch.setattr(cli, "OllamaQwenScorer", FakeCliScorer)
 
 
 def policy() -> PlanningSelectionPolicy:
@@ -111,8 +156,7 @@ def test_dynamic_collection_precedence_and_planning_boundary(tmp_path: Path) -> 
     assert len(scorer.calls) == 1
     documents = scorer.calls[0][1]
     document_names = {
-        document.splitlines()[0].removeprefix("Skill name: ")
-        for document in documents
+        document.splitlines()[0].removeprefix("Skill name: ") for document in documents
     }
     assert document_names.isdisjoint(
         {"generic-analysis", "proposal", "plan", "not-planning"}

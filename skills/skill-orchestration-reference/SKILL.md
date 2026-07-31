@@ -1,7 +1,13 @@
 ---
 name: skill-orchestration-reference
 description: "Use when referencing orchestrated/delegated worker patterns, collation format, or orchestration usage."
-tags: [orchestration, worker-patterns, collation, fan-out, delegation, orchestration-guide]
+schema_version: "1.0"
+cues:
+  - {facet: subject, value: "delegated workers"}
+  - {facet: outcome, value: "orchestration guidance"}
+  - {facet: interface, value: "worker result envelope"}
+relationships:
+  - {role: reference, rationale: "provides passive orchestration patterns"}
 class: documentation
 ---
 

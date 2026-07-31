@@ -1,11 +1,12 @@
 ---
 name: <<skill-name>>
 description: "Use when referencing <<domain-context>>."
-tags:
-  - <<primary-capability>>
-  - <<domain-or-artifact>>
-  - <<tool-or-workflow-context>>
-  - <<additional-discriminator>>
+schema_version: "1.0"
+cues:
+  - {facet: subject, value: "<<reference-subject>>"}
+  - {facet: outcome, value: "<<reference-outcome>>"}
+relationships:
+  - {role: reference, rationale: "<<reference rationale>>"}
 class: documentation
 ---
 

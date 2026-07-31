@@ -1,7 +1,13 @@
 ---
 name: skill-maintenance-reference
 description: "Use when referencing maintenance workflows, migration procedures, validation checks, or known pitfalls for skill maintenance."
-tags: [update-workflow, migration, troubleshooting, validation-checklist, maintenance-reference, maintenance-guidance]
+schema_version: "1.0"
+cues:
+  - {facet: subject, value: "skill maintenance"}
+  - {facet: outcome, value: "maintenance guidance"}
+  - {facet: constraint, value: "migration validation"}
+relationships:
+  - {role: reference, rationale: "provides passive maintenance procedures"}
 class: documentation
 ---
 

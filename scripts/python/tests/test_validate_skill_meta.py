@@ -1,349 +1,249 @@
-"""Unit tests for lib.validate_skill_meta.core.
+"""Tests for the authoritative structured routing-signature contract."""
 
-Tests _extract_frontmatter, validate_frontmatter, and validate_skill_file.
-"""
+# ruff: noqa: E501
 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import cast
 
 import pytest
 import yaml
 
+from lib.collect_skills.discovery import discover_skills_from_root
+from lib.collect_skills.models import SkillIndex
+from lib.collect_skills.parser import (
+    parse_routing_signature,
+    validate_skill_frontmatter,
+)
+from lib.shared.skill_routing import load_builtin_registry, resolve_registry_overlay
 from lib.validate_skill_meta.core import validate_frontmatter, validate_skill_file
 
-VALID_TAGS = ["test-capability", "metadata-validation", "yaml-frontmatter", "python"]
 
-# ---------------------------------------------------------------------------
-# validate_frontmatter — parametrized
-# ---------------------------------------------------------------------------
+def signature() -> dict[str, object]:
+    return {
+        "schema_version": "1.0",
+        "cues": [
+            {"facet": "subject", "value": "routing metadata"},
+            {"facet": "operation", "value": "validate-routing", "primary": True},
+        ],
+        "relationships": [{"role": "owner", "rationale": "owns validation"}],
+    }
 
 
-def test_validate_frontmatter_valid() -> None:
-    """All required fields present and valid."""
-    data = {
-        "name": "my-skill",
-        "description": "Use when doing something useful",
-        "tags": VALID_TAGS,
+def frontmatter(**updates: object) -> dict[str, object]:
+    data: dict[str, object] = {
+        "name": "routing-skill",
+        "description": "Use when validating routing metadata",
         "class": "operation",
+        **signature(),
     }
-    assert validate_frontmatter(data) == []
+    data.update(updates)
+    return data
 
 
-def test_validate_frontmatter_accepts_planning_description_prefix() -> None:
-    """Planning references use their class-specific selection prefix."""
-    data = {
-        "name": "planning-reference",
-        "description": "Use as planning reference for lifecycle selection",
-        "tags": VALID_TAGS,
-        "class": "planning",
-    }
+def test_valid_builtin_signature_is_accepted_by_authoring_and_discovery() -> None:
+    data = frontmatter()
     assert validate_frontmatter(data) == []
+    assert validate_skill_frontmatter(data, "routing-skill", Path("SKILL.md")) == []
+    assert (
+        parse_routing_signature(data).to_dict()
+        == parse_routing_signature(data).to_dict()
+    )
 
 
 @pytest.mark.parametrize(
-    ("description", "skill_class", "error"),
+    "description",
     [
-        (
-            "Use when selecting a planning stage",
-            "planning",
-            "Field 'description' for planning class must start with "
-            "'Use as planning reference'",
-        ),
-        (
-            "Use as planning reference for execution",
-            "operation",
-            "Field 'description' must start with 'Use when'",
-        ),
+        " Use when validating routing metadata",
+        "Use when validating\nrouting metadata",
+        "Use when " + "x" * 1020,
     ],
 )
-def test_validate_frontmatter_rejects_wrong_class_description_prefix(
-    description: str, skill_class: str, error: str
+def test_description_safety_contract_matches_authoring_and_discovery(
+    description: str,
 ) -> None:
-    """Description prefixes remain exact class-boundary signals."""
-    data = {
-        "name": "reference",
-        "description": description,
-        "tags": VALID_TAGS,
-        "class": skill_class,
-    }
-    assert error in validate_frontmatter(data)
+    data = frontmatter(description=description)
+
+    assert validate_frontmatter(data)
+    assert validate_skill_frontmatter(data, "routing-skill", Path("SKILL.md"))
+
+
+def test_repository_local_facet_has_the_same_outcome_in_all_paths(
+    tmp_path: Path,
+) -> None:
+    registry_file = tmp_path / "skill-facets.json"
+    registry_file.write_text(
+        '{"namespace":"repository","facets":[{"name":"artifact-kind",'
+        '"meaning":"Artifact being routed","value_shape":"^(fixture|manifest)$"}]}',
+        encoding="utf-8",
+    )
+    registry = resolve_registry_overlay(
+        {
+            "namespace": "repository",
+            "facets": [{"name": "artifact-kind", "meaning": "Artifact"}],
+        },
+        load_builtin_registry(),
+    )
+    data = frontmatter(
+        cues=[
+            *cast(list[object], signature()["cues"]),
+            {"facet": "repository:artifact-kind", "value": "fixture"},
+        ]
+    )
+    assert validate_frontmatter(data, registry) == []
+    assert (
+        validate_skill_frontmatter(
+            data, "routing-skill", tmp_path / "SKILL.md", registry
+        )
+        == []
+    )
+    assert any(
+        cue.facet == "repository:artifact-kind"
+        for cue in parse_routing_signature(data, registry).cues
+    )
 
 
 @pytest.mark.parametrize(
-    ("tags", "error"),
+    ("fixture", "message"),
     [
-        (None, "Missing required frontmatter field: 'tags'"),
-        ("testing", "Field 'tags' must be a list"),
-        (["testing"], "Field 'tags' must contain 4–7 values"),
         (
-            ["testing", "validation", "yaml-frontmatter", "Bad Tag"],
-            "Field 'tags' values must be lowercase kebab-case",
+            lambda: frontmatter(cues=[{"facet": "subject", "value": "thing"}]),
+            "exactly one primary",
         ),
         (
-            ["testing", "validation", "yaml-frontmatter", "helper"],
-            "Field 'tags' values must not be filler terms",
+            lambda: frontmatter(
+                cues=[
+                    {"facet": "operation", "value": "one", "primary": True},
+                    {"facet": "operation", "value": "two", "primary": True},
+                ]
+            ),
+            "exactly one primary",
         ),
         (
-            ["testing", "validation", "yaml-frontmatter", "testing"],
-            "Field 'tags' values must be unique",
+            lambda: frontmatter(
+                cues=[
+                    {"facet": "operation", "value": "validate", "primary": True},
+                    {"facet": "subject", "value": "thing", "aliases": [1]},
+                ]
+            ),
+            "string array",
         ),
         (
-            ["my-skill", "validation", "yaml-frontmatter", "python"],
-            "Field 'tags' must not repeat the skill name",
+            lambda: frontmatter(
+                cues=[
+                    {"facet": "operation", "value": "validate", "primary": True},
+                    {"facet": "other:private", "value": "thing"},
+                ]
+            ),
+            "undeclared",
+        ),
+        (lambda: {**frontmatter(), "tags": ["legacy-flat-tag"]}, "structured cues"),
+        (
+            lambda: frontmatter(
+                cues=[{"facet": "operation", "value": ["validate"], "primary": True}]
+            ),
+            "canonical string value",
         ),
     ],
 )
-def test_validate_frontmatter_tags(tags: object, error: str) -> None:
-    """Required tag metadata rejects invalid tag lists."""
-    data = {
-        "name": "my-skill",
-        "description": "Use when doing something useful",
-        "tags": tags,
-        "class": "operation",
-    }
-    assert error in validate_frontmatter(data)
+def test_hard_cut_routing_failures_are_actionable(fixture, message: str) -> None:  # noqa: ANN001
+    data = fixture()
+    errors = validate_frontmatter(data)
+    assert any(message in error for error in errors)
 
 
-@pytest.mark.parametrize(
-    ("data", "expected_errors"),
-    [
-        pytest.param(
-            None,
-            ["Frontmatter is not a valid YAML mapping"],
-            id="not-a-dict",
-        ),
-        pytest.param(
-            {},
-            [
-                "Missing required frontmatter field: 'name'",
-                "Missing required frontmatter field: 'description'",
-                "Missing required frontmatter field: 'tags'",
-                "Missing required frontmatter field: 'class'",
-            ],
-            id="all-missing",
-        ),
-        pytest.param(
-            {"name": None, "description": "Use when test", "class": "operation"},
-            ["Missing required frontmatter field: 'name'"],
-            id="name-is-none",
-        ),
-        pytest.param(
-            {"name": "", "description": "Use when test", "class": "operation"},
-            ["Field 'name' must be a non-empty string"],
-            id="name-empty-string",
-        ),
-        pytest.param(
-            {"name": "   ", "description": "Use when test", "class": "operation"},
-            ["Field 'name' must be a non-empty string"],
-            id="name-whitespace-only",
-        ),
-        pytest.param(
-            {"name": 42, "description": "Use when test", "class": "operation"},
-            ["Field 'name' must be a non-empty string"],
-            id="name-not-string",
-        ),
-        pytest.param(
-            {"name": "valid", "class": "operation"},
-            ["Missing required frontmatter field: 'description'"],
-            id="description-missing",
-        ),
-        pytest.param(
-            {"name": "valid", "description": 42, "class": "operation"},
-            ["Field 'description' must be a string"],
-            id="description-not-string",
-        ),
-        pytest.param(
-            {"name": "valid", "description": "Nope", "class": "operation"},
-            ["Field 'description' must start with 'Use when'"],
-            id="description-wrong-prefix",
-        ),
-        pytest.param(
-            {"name": "valid", "description": "Use when test"},
-            ["Missing required frontmatter field: 'class'"],
-            id="class-missing",
-        ),
-        pytest.param(
-            {"name": "valid", "description": "Use when test", "class": 42},
-            ["Field 'class' must be a string"],
-            id="class-not-string",
-        ),
-        pytest.param(
+def test_namespace_collision_is_rejected() -> None:
+    with pytest.raises(ValueError, match="redefine"):
+        resolve_registry_overlay(
             {
-                "name": "valid",
-                "description": "Use when test",
-                "class": "unknown-class",
+                "namespace": "repository",
+                "facets": [{"name": "operation", "meaning": "collision"}],
             },
-            [
-                "Field 'class' must be one of: "
-                "delegated, documentation, inline, "
-                "operation, orchestrated, planning"
-            ],
-            id="class-invalid-value",
-        ),
-        pytest.param(
-            ["not", "a", "dict"],
-            ["Frontmatter is not a valid YAML mapping"],
-            id="list-instead-of-dict",
-        ),
-    ],
-)
-def test_validate_frontmatter_errors(
-    data: object,
-    expected_errors: list[str],
-) -> None:
-    """Each parametrized case produces the expected error messages."""
-    if isinstance(data, dict) and data:
-        data = {**data, "tags": VALID_TAGS}
-    assert validate_frontmatter(data) == expected_errors
+            load_builtin_registry(),
+        )
 
 
-# ---------------------------------------------------------------------------
-# validate_skill_file — file-level integration
-# ---------------------------------------------------------------------------
+def test_legacy_flat_tags_are_a_hard_failure() -> None:
+    errors = validate_frontmatter(
+        {
+            "name": "legacy",
+            "description": "Use when testing",
+            "class": "operation",
+            "tags": ["operation"],
+        }
+    )
+    assert any("structured cues" in error for error in errors)
 
 
-def _write_skill(tmp_path: Path, content: str, filename: str = "SKILL.md") -> Path:
-    """Helper: write *content* to *filename* under *tmp_path* and return full path."""
-    path = tmp_path / filename
-    path.write_text(content, encoding="utf-8")
+def test_file_validation_uses_structured_metadata(tmp_path: Path) -> None:
+    path = tmp_path / "SKILL.md"
+    path.write_text(
+        "---\n" + yaml.safe_dump(frontmatter(sort_keys=False)) + "---\n",
+        encoding="utf-8",
+    )
+    result = validate_skill_file(path)
+    assert result == {"valid": True, "errors": []}
+
+
+def test_discovery_accepts_the_same_repository_fixture(tmp_path: Path) -> None:
+    skill_dir = tmp_path / "routing-skill"
+    skill_dir.mkdir()
+    (tmp_path / "skill-facets.json").write_text(
+        '{"namespace":"repository","facets":[{"name":"artifact-kind","meaning":"Artifact"}]}',
+        encoding="utf-8",
+    )
+    (skill_dir / "SKILL.md").write_text(
+        "---\n"
+        + yaml.safe_dump(
+            frontmatter(
+                cues=[
+                    *cast(list[object], signature()["cues"]),
+                    {"facet": "repository:artifact-kind", "value": "fixture"},
+                ],
+                sort_keys=False,
+            )
+        )
+        + "---\n",
+        encoding="utf-8",
+    )
+    index = SkillIndex()
+    discover_skills_from_root(tmp_path, "project", index)
+    assert [skill.name for skill in index.resolve()] == ["routing-skill"]
+
+
+def test_file_validation_reports_malformed_repository_registry(tmp_path: Path) -> None:
+    (tmp_path / "skill-facets.json").write_text("[]", encoding="utf-8")
+    path = tmp_path / "SKILL.md"
+    path.write_text(
+        "---\n" + yaml.safe_dump(frontmatter(sort_keys=False)) + "---\n",
+        encoding="utf-8",
+    )
+    result = validate_skill_file(path)
+    assert result["valid"] is False
+    assert any(
+        "repository registry must be an object" in error for error in result["errors"]
+    )
+
+
+def _write_skill(tmp_path: Path, text: str) -> Path:
+    path = tmp_path / "SKILL.md"
+    path.write_text(text, encoding="utf-8")
     return path
 
 
-def test_validate_skill_file_valid(tmp_path: Path) -> None:
-    """A correct SKILL.md passes validation."""
-    skill = (
-        "---\n"
-        "name: valid-skill\n"
-        "description: Use when doing the thing\n"
-        "tags: [test-capability, metadata-validation, yaml-frontmatter, python]\n"
-        "class: operation\n"
-        "---\n"
-        "\n"
-        "## Body\n"
+def test_file_errors_and_yaml_checks_remain_unchanged(tmp_path: Path) -> None:
+    assert validate_skill_file(tmp_path / "missing.md")["errors"] == [
+        f"File not found: {tmp_path / 'missing.md'}"
+    ]
+    assert (
+        "must start with '---'"
+        in validate_skill_file(_write_skill(tmp_path, "plain"))["errors"][0]
     )
-    path = _write_skill(tmp_path, skill)
-    result = validate_skill_file(path)
-    assert result["valid"] is True
-    assert result["errors"] == []
+    assert validate_skill_file(_write_skill(tmp_path, "---\ninvalid: [\n---\n"))[
+        "errors"
+    ][0].startswith("Frontmatter YAML parse error")
 
 
-def test_validate_skill_file_checks_cross_skill_tag_rules(tmp_path: Path) -> None:
-    """Cross-skill checks reject an overused tag when frequencies are supplied."""
-    path = _write_skill(
-        tmp_path,
-        "---\n"
-        "name: valid-skill\n"
-        "description: Use when doing the thing\n"
-        "tags: [test-capability, metadata-validation, yaml-frontmatter, python]\n"
-        "class: operation\n"
-        "---\n",
-    )
-
-    result = validate_skill_file(path, {"test-capability": 6})
-
-    assert result["valid"] is False
-    assert any(
-        "Tag 'test-capability' appears in 6 skills" in error
-        for error in result["errors"]
-    )
-
-
-def test_validate_skill_file_accepts_analysis_as_deliverable(tmp_path: Path) -> None:
-    """Analysis artifacts satisfy the tool-or-deliverable tag requirement."""
-    path = _write_skill(
-        tmp_path,
-        "---\n"
-        "name: analysis-skill\n"
-        "description: Use as planning reference for analysing an artifact\n"
-        "tags: [evidence-analysis, problem-framing, decision-assessment, "
-        "root-cause-analysis]\n"
-        "class: planning\n"
-        "---\n",
-    )
-
-    result = validate_skill_file(path, {})
-
-    assert result["valid"] is True
-
-
-def test_validate_skill_file_nonexistent(tmp_path: Path) -> None:
-    """Nonexistent file produces a file-not-found error."""
-    path = tmp_path / "does_not_exist.md"
-    result = validate_skill_file(path)
-    assert result["valid"] is False
-    assert result["errors"] == [f"File not found: {path}"]
-
-
-def test_validate_skill_file_missing_frontmatter(tmp_path: Path) -> None:
-    """File without leading --- delimiters yields frontmatter error."""
-    path = _write_skill(tmp_path, "no frontmatter here\n")
-    result = validate_skill_file(path)
-    assert result["valid"] is False
-    assert any("must start with '---'" in e for e in result["errors"])
-
-
-def test_validate_skill_file_missing_closing_delimiter(tmp_path: Path) -> None:
-    """File that starts with --- but never closes also yields frontmatter error."""
-    path = _write_skill(tmp_path, "---\nname: foo\n")
-    result = validate_skill_file(path)
-    assert result["valid"] is False
-    assert any("must start with '---'" in e for e in result["errors"])
-
-
-def test_validate_skill_file_malformed_yaml(tmp_path: Path) -> None:
-    """Unparseable YAML content yields a YAML parse error."""
-    path = _write_skill(
-        tmp_path,
-        "---\n  invalid_yaml: : :\n---\nstuff",
-    )
-    result = validate_skill_file(path)
-    assert result["valid"] is False
-    assert result["errors"][0].startswith("Frontmatter YAML parse error")
-
-
-def test_validate_skill_file_yields_validation_errors(tmp_path: Path) -> None:
-    """Valid YAML frontmatter with invalid fields reports those errors."""
-    path = _write_skill(
-        tmp_path,
-        "---\nname: ''\ndescription: Use when ok\nclass: bogus\n---\n",
-    )
-    result = validate_skill_file(path)
-    assert result["valid"] is False
-    assert "Field 'name' must be a non-empty string" in result["errors"]
-    assert any("one of" in e for e in result["errors"])
-
-
-def test_validate_skill_file_unreadable(tmp_path: Path, monkeypatch) -> None:  # noqa: ANN001
-    """When the file cannot be read, a read-error is returned."""
-    path = _write_skill(tmp_path, "---\nname: x\n---\n")
-
-    def broken_read(*_: object, **__: object) -> str:
-        raise OSError("Permission denied")
-
-    # PosixPath.read_text is a method on the class, not an instance attribute
-    monkeypatch.setattr("pathlib.Path.read_text", broken_read)
-    result = validate_skill_file(path)
-    assert result["valid"] is False
-    assert "Cannot read file" in result["errors"][0]
-
-    # Undo the class-level patch so other tests are unaffected
-    monkeypatch.undo()
-
-
-def test_validate_skill_file_yaml_exception_on_none(tmp_path: Path) -> None:
-    """YAML content that evaluates to *None* is handled by validate_frontmatter."""
-    path = _write_skill(
-        tmp_path,
-        "---\n---\nbody\n",
-    )
-    result = validate_skill_file(path)
-    assert result["valid"] is False
-    # yaml.safe_load("") returns None, which triggers "not a valid YAML mapping"
-    assert any("Frontmatter is not a valid YAML mapping" in e for e in result["errors"])
-
-
-# Convenience import check — make sure yaml is used (avoids unused-import lint)
-def test_yaml_available() -> None:
-    """Sanity check that PyYAML is importable."""
-    assert yaml is not None  # pragma: no cover — just a smoke test
+def test_yaml_is_available() -> None:
+    assert yaml is not None

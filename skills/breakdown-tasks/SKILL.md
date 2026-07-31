@@ -1,7 +1,14 @@
 ---
 name: breakdown-tasks
 description: "Use when decomposing a request into the smallest possible task-delegation work items. Separates planning from execution: the LLM decomposes, the script assigns skills."
-tags: [task-decomposition, atomic-tasks, task-planning, request-analysis, generate-task-json, delegation-pipeline]
+schema_version: "1.0"
+cues:
+  - {facet: operation, value: "decompose-task", primary: true}
+  - {facet: subject, value: "user request"}
+  - {facet: outcome, value: "delegation task JSON"}
+  - {facet: interface, value: "worker packet"}
+relationships:
+  - {role: owner, rationale: "owns atomic task decomposition"}
 class: delegated
 ---
 

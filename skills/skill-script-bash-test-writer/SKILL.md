@@ -1,7 +1,14 @@
 ---
 name: skill-script-bash-test-writer
 description: "Use when generating bats-core test files for existing bash scripts under scripts/shell/."
-tags: [bash-testing, bats, test-generation, shell-testing, bats-core]
+schema_version: "1.0"
+cues:
+  - {facet: operation, value: "generate-bash-tests", primary: true}
+  - {facet: subject, value: "Bash scripts"}
+  - {facet: interface, value: "bats-core"}
+  - {facet: outcome, value: "shell test files"}
+relationships:
+  - {role: owner, rationale: "owns bats-core test generation"}
 class: operation
 ---
 

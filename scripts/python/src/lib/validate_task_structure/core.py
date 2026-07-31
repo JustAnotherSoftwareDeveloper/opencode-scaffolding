@@ -84,7 +84,7 @@ def validate(
                 task,
                 task_schema,
                 cls=jsonschema.Draft7Validator,
-                format_checker=jsonschema.draft7_format_checker,
+                format_checker=jsonschema.Draft7Validator.FORMAT_CHECKER,
             )
         except jsonschema.ValidationError as exc:
             schema_errors.append(f"{path}: {exc.message}")

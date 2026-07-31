@@ -1,7 +1,13 @@
 ---
 name: skill-template-library
 description: "Use when referencing skill templates, schemas, or snippets for skill authoring."
-tags: [templates, schemas, snippets, boilerplate, template-registry]
+schema_version: "1.0"
+cues:
+  - {facet: subject, value: "skill templates"}
+  - {facet: subject, value: "skill schemas"}
+  - {facet: outcome, value: "authoring scaffolds"}
+relationships:
+  - {role: reference, rationale: "provides passive template and schema documentation"}
 class: documentation
 ---
 

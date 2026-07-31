@@ -16,7 +16,7 @@ from pathlib import Path
 
 import click
 
-from lib.validate_skill_meta.core import compute_tag_frequencies, validate_skill_file
+from lib.validate_skill_meta.core import validate_skill_file
 
 
 @click.command(name="validate-skill-meta")
@@ -45,13 +45,12 @@ def main(skill_paths: tuple[str, ...], format: str, verbose: bool) -> None:
     SKILL_PATHS are one or more paths to SKILL.md files.
     """
     paths = [Path(skill_path) for skill_path in skill_paths]
-    tag_frequencies = compute_tag_frequencies()
     results = []
 
     for path in paths:
         if verbose:
             click.echo(f"Validating: {path.resolve()}", err=True)
-        result = validate_skill_file(path, tag_frequencies)
+        result = validate_skill_file(path)
         results.append(result)
 
         if format == "text":

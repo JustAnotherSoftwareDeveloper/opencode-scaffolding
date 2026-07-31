@@ -1,13 +1,14 @@
 ---
 name: plan
 description: "Use when creating a source-document plan workspace that produces executable task JSON."
-tags:
-  - task-planning
-  - workspace-generation
-  - task-json
-  - source-documents
-  - skill-assignment
-  - plan-workspace
+schema_version: "1.0"
+cues:
+  - {facet: operation, value: "create-plan-workspace", primary: true}
+  - {facet: subject, value: "source documents"}
+  - {facet: outcome, value: "executable task JSON"}
+  - {facet: interface, value: "plan workspace"}
+relationships:
+  - {role: owner, rationale: "owns source-document planning"}
 class: operation
 ---
 

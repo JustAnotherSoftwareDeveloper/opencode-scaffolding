@@ -1,7 +1,14 @@
 ---
 name: skill-script-bash-writer
 description: "Use when generating deterministic bash scripts from skill requirements, including CLI entry points, library modules, test files, and Makefile registration."
-tags: [bash-code-generation, shell-scripting, cli, makefile, scripting, shell-cli]
+schema_version: "1.0"
+cues:
+  - {facet: operation, value: "generate-bash-script", primary: true}
+  - {facet: subject, value: "Bash scripts"}
+  - {facet: interface, value: "CLI entry point"}
+  - {facet: outcome, value: "tested shell implementation"}
+relationships:
+  - {role: owner, rationale: "owns deterministic Bash script generation"}
 class: operation
 ---
 

@@ -2,25 +2,29 @@
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 from typing import Any
 
 import yaml
 
+from lib.shared.git import find_git_root
+from lib.shared.skill_class import SkillClass
+from lib.shared.skill_routing import (
+    MAX_SKILL_DESCRIPTION_LENGTH,
+    MAX_SKILL_NAME_LENGTH,
+    RegistryResolution,
+    RoutingContractError,
+    RoutingSignature,
+    load_builtin_registry,
+    normalize_routing_signature,
+    resolve_registry_overlay,
+)
+
 # Matches kebab-case: lowercase letters and digits, hyphen-separated.
 SKILL_NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-TAG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-FILLER_TAGS = {
-    "common",
-    "default",
-    "general",
-    "helper",
-    "misc",
-    "skill",
-    "tool",
-    "utility",
-}
+_VALID_CLASSES = {item.value for item in SkillClass}
 
 
 def extract_frontmatter(file_path: Path) -> dict[str, Any] | None:
@@ -93,6 +97,7 @@ def validate_skill_frontmatter(
     frontmatter: dict[str, Any],
     dir_name: str,
     file_path: Path,
+    registry: RegistryResolution | None = None,
 ) -> list[str]:
     """Validate a parsed skill frontmatter dictionary.
 
@@ -124,7 +129,7 @@ def validate_skill_frontmatter(
     else:
         name_val: str = name.strip()
 
-        if not SKILL_NAME_RE.match(name_val):
+        if len(name_val) > MAX_SKILL_NAME_LENGTH or not SKILL_NAME_RE.match(name_val):
             errors.append(
                 f"{file_path}: 'name' ({name_val!r}) must match "
                 f"{SKILL_NAME_RE.pattern!r}"
@@ -143,35 +148,85 @@ def validate_skill_frontmatter(
         errors.append(f"{file_path}: missing 'description' field")
     elif not isinstance(description, str) or not description.strip():
         errors.append(f"{file_path}: 'description' must be a non-empty string")
+    elif (
+        description != description.strip()
+        or "\n" in description
+        or "\r" in description
+    ):
+        errors.append(f"{file_path}: 'description' must be trimmed and single-line")
+    elif len(description) > MAX_SKILL_DESCRIPTION_LENGTH:
+        errors.append(
+            f"{file_path}: 'description' must be at most "
+            f"{MAX_SKILL_DESCRIPTION_LENGTH} characters"
+        )
 
-    # --- tags ----------------------------------------------------------------
-    tags = frontmatter.get("tags")
+    class_value = frontmatter.get("class")
+    if class_value is None:
+        errors.append(f"{file_path}: missing 'class' field")
+    elif not isinstance(class_value, str) or class_value not in _VALID_CLASSES:
+        errors.append(
+            f"{file_path}: 'class' must be one of: {', '.join(sorted(_VALID_CLASSES))}"
+        )
+    elif isinstance(description, str):
+        expected_prefix = (
+            "Use as planning reference"
+            if class_value == SkillClass.PLANNING.value
+            else "Use when"
+        )
+        if not description.startswith(expected_prefix):
+            errors.append(
+                f"{file_path}: 'description' for class {class_value!r} "
+                f"must start with {expected_prefix!r}"
+            )
 
-    if tags is None:
-        errors.append(f"{file_path}: missing 'tags' field")
-    elif not isinstance(tags, list):
-        errors.append(f"{file_path}: 'tags' must be a list")
-    elif not 4 <= len(tags) <= 7:
-        errors.append(f"{file_path}: 'tags' must contain 4–7 values")
-    else:
-        normalized_tags: set[str] = set()
-        for i, tag in enumerate(tags):
-            if not isinstance(tag, str):
-                errors.append(f"{file_path}: 'tags' element {i} must be a string")
-                continue
-
-            tag_value = tag.strip()
-            if not TAG_RE.fullmatch(tag_value):
-                errors.append(
-                    f"{file_path}: 'tags' element {i} must be lowercase kebab-case"
-                )
-            if tag_value in FILLER_TAGS:
-                errors.append(f"{file_path}: 'tags' element {i} is a filler value")
-            if tag_value in normalized_tags:
-                errors.append(f"{file_path}: 'tags' contains duplicate {tag_value!r}")
-            normalized_tags.add(tag_value)
-
-        if isinstance(name, str) and name.strip() in normalized_tags:
-            errors.append(f"{file_path}: 'tags' must not repeat the skill name")
+    try:
+        normalize_routing_signature(frontmatter, registry)
+    except RoutingContractError as exc:
+        errors.append(f"{file_path}: routing metadata is invalid: {exc}")
 
     return errors
+
+
+def parse_routing_signature(
+    frontmatter: dict[str, Any], registry: RegistryResolution | None = None
+) -> RoutingSignature:
+    """Normalize the exact routing contract used by authoring and discovery."""
+    return normalize_routing_signature(frontmatter, registry)
+
+
+def load_repository_registry(context: Path | None = None) -> RegistryResolution:
+    """Load the built-in registry plus one repository-owned overlay.
+
+    The conventional repository files are checked in order.  Missing files are
+    normal; malformed or colliding declarations are deliberately propagated so
+    discovery cannot silently accept a different vocabulary.
+    """
+    registry = load_builtin_registry()
+    if context is None:
+        return registry
+    root = context if context.is_dir() else context.parent
+    git_root = find_git_root(root)
+    candidate_roots: list[Path] = [root]
+    if git_root is not None:
+        candidate_roots = []
+        for candidate_root in (root, *root.parents):
+            candidate_roots.append(candidate_root)
+            if candidate_root == git_root:
+                break
+    for candidate_root in candidate_roots:
+        candidates = (
+            candidate_root / "skill-facets.json",
+            candidate_root / ".skill-facets.json",
+            candidate_root / ".opencode" / "skill-facets.json",
+            candidate_root / ".opencode" / "facets.json",
+        )
+        existing = [path for path in candidates if path.is_file()]
+        if len(existing) > 1:
+            names = ", ".join(str(path) for path in existing)
+            raise RoutingContractError(
+                f"multiple facet registries declared at the same scope: {names}"
+            )
+        if existing:
+            data = json.loads(existing[0].read_text(encoding="utf-8"))
+            return resolve_registry_overlay(data, registry)
+    return registry

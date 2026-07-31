@@ -1,7 +1,14 @@
 ---
 name: skill-script-python-test-writer
 description: "Use when generating pytest test files for Python scripts under scripts/python/, covering CLI integration tests via CliRunner and unit tests for lib modules."
-tags: [python-testing, pytest, test-generation, click-testing, pytest-integration]
+schema_version: "1.0"
+cues:
+  - {facet: operation, value: "generate-python-tests", primary: true}
+  - {facet: subject, value: "Python scripts"}
+  - {facet: interface, value: "pytest"}
+  - {facet: outcome, value: "CLI and unit test files"}
+relationships:
+  - {role: owner, rationale: "owns pytest generation for Python scripts"}
 class: operation
 ---
 

@@ -16,6 +16,7 @@ import pytest
 from click.testing import CliRunner
 
 from cli.collect_skills import main
+from lib.shared.skill_routing import RoutingCue, RoutingRelationship
 
 # ============================================================================
 # Test Click CLI via CliRunner
@@ -126,6 +127,8 @@ class TestClassFilter:
                 Skill(
                     name=name,
                     description=f"A {class_} skill named {name}",
+                    cues=(RoutingCue("operation", "validate", primary=True),),
+                    relationships=(RoutingRelationship("owner"),),
                     class_=class_,
                     source="project",
                     location=f"/tmp/.opencode/skills/{name}/SKILL.md",
@@ -147,6 +150,7 @@ class TestClassFilter:
         assert len(data) == 6
         names = [item["name"] for item in data]
         assert names == sorted(names)
+        assert all(item["cues"][0]["value"] == "validate" for item in data)
 
     def test_single_class_filter(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """``--class operation`` returns only operation skills, in order."""

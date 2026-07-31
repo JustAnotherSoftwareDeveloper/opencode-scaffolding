@@ -213,7 +213,7 @@ def _validate(raw: dict[str, Any], expected_profile: str) -> None:
     if (
         not prompt["instruction"]
         or prompt["prompt_version"] != "qwen3-reranker-4b-classifier-v1"
-        or prompt["render_version"] != "task-skill-fields-v1"
+        or prompt["render_version"] != "task-skill-routing-signature-v2"
     ):
         raise ManifestError("invalid prompt pin")
     policy = _expect_keys(

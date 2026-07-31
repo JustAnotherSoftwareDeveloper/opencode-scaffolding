@@ -6,11 +6,18 @@ Used by:
 
 from __future__ import annotations
 
-import re
 from pathlib import Path
 from typing import TypedDict
 
 import yaml
+
+from lib.collect_skills.parser import SKILL_NAME_RE, load_repository_registry
+from lib.shared.skill_routing import (
+    MAX_SKILL_DESCRIPTION_LENGTH,
+    MAX_SKILL_NAME_LENGTH,
+    RoutingContractError,
+    normalize_routing_signature,
+)
 
 
 class ValidationResult(TypedDict):
@@ -33,108 +40,6 @@ _VALID_CLASSES: set[str] = {
     "planning",
     "documentation",
 }
-_TAG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-_FILLER_TAGS: set[str] = {
-    "common",
-    "default",
-    "general",
-    "helper",
-    "misc",
-    "miscellaneous",
-    "other",
-    "skill",
-    "tool",
-    "utility",
-}
-_KNOWN_TOOLS: frozenset[str] = frozenset(
-    {
-        "bash",
-        "pytest",
-        "python",
-        "bats",
-        "bun",
-        "cleye",
-        "click",
-        "todowrite",
-        "makefile",
-        "shellcheck",
-        "biome",
-    }
-)
-_DELIVERABLE_SUFFIXES: frozenset[str] = frozenset(
-    {
-        "-analysis",
-        "-architecture",
-        "-config",
-        "-conventions",
-        "-generation",
-        "-guide",
-        "-creation",
-        "-output",
-        "-json",
-        "-workspace",
-        "-record",
-        "-reference",
-        "-registry",
-        "-dispatch",
-        "-pipeline",
-        "-rendering",
-        "-tool",
-        "-testing",
-        "-writing",
-        "-workflow",
-        "-authoring",
-    }
-)
-_CLUSTER_OVERUSE_THRESHOLD: int = 6
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-
-def _has_tool_or_deliverable_tag(tags: list[str]) -> bool:
-    """Return *True* if *tags* includes at least one known tool or deliverable.
-
-    A tag matches if it is a known tool name *or* ends with one of the
-    recognised deliverable suffixes.
-    """
-    for tag in tags:
-        if tag in _KNOWN_TOOLS:
-            return True
-        for suffix in _DELIVERABLE_SUFFIXES:
-            if tag.endswith(suffix):
-                return True
-    return False
-
-
-def compute_tag_frequencies(
-    project_root: Path | None = None,
-    config_dir: Path | None = None,
-    extra_paths: list[Path] | None = None,
-) -> dict[str, int]:
-    """Compute frequency of each tag across all discovered skills.
-
-    Uses :func:`lib.collect_skills.discovery.discover_all_skills` to
-    enumerate all skills from the standard search roots and *extra_paths*.
-    Returns a ``{tag: count}`` mapping for all tags found.
-    """
-    from lib.collect_skills.discovery import discover_all_skills
-    from lib.collect_skills.models import SkillIndex
-
-    index = SkillIndex()
-    discover_all_skills(
-        index,
-        project_root=project_root,
-        config_dir=config_dir,
-        extra_paths=extra_paths,
-    )
-    freq: dict[str, int] = {}
-    for skill in index.resolve():
-        for tag in skill.tags:
-            freq[tag] = freq.get(tag, 0) + 1
-    return freq
 
 
 # ---------------------------------------------------------------------------
@@ -161,7 +66,7 @@ def _extract_frontmatter(text: str) -> str | None:
     return rest[:end_idx]
 
 
-def validate_frontmatter(data: object) -> list[str]:
+def validate_frontmatter(data: object, registry=None) -> list[str]:
     """Validate parsed frontmatter fields and return a list of error messages.
 
     Returns an empty list if all fields are valid.
@@ -178,6 +83,10 @@ def validate_frontmatter(data: object) -> list[str]:
         errors.append("Missing required frontmatter field: 'name'")
     elif not isinstance(name, str) or not name.strip():
         errors.append("Field 'name' must be a non-empty string")
+    elif name != name.strip():
+        errors.append("Field 'name' must be trimmed")
+    elif len(name) > MAX_SKILL_NAME_LENGTH or not SKILL_NAME_RE.fullmatch(name):
+        errors.append("Field 'name' has invalid syntax")
 
     # Validate description. Planning references use a distinct, class-specific
     # prefix so selectors can distinguish passive context from executable work.
@@ -187,6 +96,17 @@ def validate_frontmatter(data: object) -> list[str]:
         errors.append("Missing required frontmatter field: 'description'")
     elif not isinstance(description, str):
         errors.append("Field 'description' must be a string")
+    elif (
+        description != description.strip()
+        or "\n" in description
+        or "\r" in description
+    ):
+        errors.append("Field 'description' must be trimmed and single-line")
+    elif len(description) > MAX_SKILL_DESCRIPTION_LENGTH:
+        errors.append(
+            f"Field 'description' must be at most "
+            f"{MAX_SKILL_DESCRIPTION_LENGTH} characters"
+        )
     elif class_val == "planning":
         if not description.startswith("Use as planning reference"):
             errors.append(
@@ -196,30 +116,12 @@ def validate_frontmatter(data: object) -> list[str]:
     elif not description.startswith("Use when"):
         errors.append("Field 'description' must start with 'Use when'")
 
-    # Validate tags
-    tags = data.get("tags")
-    if tags is None:
-        errors.append("Missing required frontmatter field: 'tags'")
-    elif not isinstance(tags, list):
-        errors.append("Field 'tags' must be a list")
-    elif not 4 <= len(tags) <= 7:
-        errors.append("Field 'tags' must contain 4–7 values")
-    else:
-        normalized_tags: set[str] = set()
-        for tag in tags:
-            if not isinstance(tag, str):
-                errors.append("Field 'tags' values must be strings")
-                continue
-            tag_value = tag.strip()
-            if not _TAG_RE.fullmatch(tag_value):
-                errors.append("Field 'tags' values must be lowercase kebab-case")
-            if tag_value in _FILLER_TAGS:
-                errors.append("Field 'tags' values must not be filler terms")
-            if tag_value in normalized_tags:
-                errors.append("Field 'tags' values must be unique")
-            normalized_tags.add(tag_value)
-        if isinstance(name, str) and name.strip() in normalized_tags:
-            errors.append("Field 'tags' must not repeat the skill name")
+    # Routing metadata is intentionally delegated to the same normalizer used
+    # by discovery.  This also makes old and mixed formats hard failures.
+    try:
+        normalize_routing_signature(data, registry)
+    except RoutingContractError as exc:
+        errors.append(f"Routing metadata is invalid: {exc}")
 
     # Validate class
     if class_val is None:
@@ -233,18 +135,8 @@ def validate_frontmatter(data: object) -> list[str]:
     return errors
 
 
-def validate_skill_file(
-    path: Path,
-    tag_frequencies: dict[str, int] | None = None,
-) -> ValidationResult:
+def validate_skill_file(path: Path) -> ValidationResult:
     """Read and validate a SKILL.md file's frontmatter.
-
-    When *tag_frequencies* is provided (a ``{tag: count}`` mapping from
-    :func:`compute_tag_frequencies`), two additional checks are enforced:
-
-    * **Tool / deliverable tag** — at least one tag must name a known tool or
-      end with a recognised deliverable suffix.
-    * **Cluster overuse** — no tag may appear in 6 or more discovered skills.
 
     Returns a dict with keys:
       - ``valid`` (bool): *True* when no validation errors were found.
@@ -275,28 +167,10 @@ def validate_skill_file(
     except yaml.YAMLError as exc:
         return {"valid": False, "errors": [f"Frontmatter YAML parse error: {exc}"]}
 
-    errors = validate_frontmatter(parsed)
-
-    # --- Additional checks requiring cross-skill context -------------------
-    if tag_frequencies is not None and isinstance(parsed, dict):
-        tags = parsed.get("tags")
-        if isinstance(tags, list):
-            # 5. Tool / deliverable tag requirement
-            if not _has_tool_or_deliverable_tag(tags):
-                errors.append(
-                    "Field 'tags' must include at least one tool or deliverable tag"
-                )
-
-            # 4. Cluster overuse — any tag in 6+ discovered skills
-            for tag in tags:
-                if not isinstance(tag, str):
-                    continue
-                tag_val = tag.strip()
-                count = tag_frequencies.get(tag_val, 0)
-                if count >= _CLUSTER_OVERUSE_THRESHOLD:
-                    errors.append(
-                        f"Tag '{tag_val}' appears in {count} skills — "
-                        f"use a more specific alternative"
-                    )
+    try:
+        registry = load_repository_registry(path)
+        errors = validate_frontmatter(parsed, registry)
+    except (OSError, ValueError, RoutingContractError) as exc:
+        errors.append(f"Routing metadata is invalid: {exc}")
 
     return {"valid": len(errors) == 0, "errors": errors}

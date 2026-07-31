@@ -1,50 +1,39 @@
-# Validation / Manual Checklist Guidance
+# Validation Checklist
 
-Every authored skill must be verified against this checklist before declaring done:
+Verify every authored or migrated skill before publication.
 
-- **Name match**: `name` in frontmatter matches directory under `skills/`.
-- **Description prefix**: Starts with `"Use when"`, is specific, and captures trigger intent.
-- **Class validity**: One of the six allowed values (planning, documentation, operation, orchestrated, delegated, inline).
-- **Tags present**: `tags` is a non-empty list of 4–7 strings.
-- **Tags descriptive**: Tags are unique lowercase kebab-case terms that identify capability and material domain, artifact, tool, or workflow context.
-- **Tags specific**: Tags contain no filler values, redundant synonyms, or a value that only repeats the skill name.
-- **Original prose**: No text copied from templates or reference files.
-- **Body is procedural**: Steps, conditions, decisions.
-  Not a tutorial, not a reference (unless class is `documentation`).
-- **No examples**: Do not add an examples section or inline example commands.
-- **Reference links**: If internal reference files are referenced, they are linked by relative path but their content is not inlined.
-- **Valid YAML**: Frontmatter parses without errors.
-- **7-section layout (orchestrated only)**: Orchestrated skills use the canonical 7-section layout.
-  Verify all seven sections are present and in order.
-- **No stale Inline Skills section**: Orchestrated skills must not contain a standalone Inline Skills section.
-  Inline work goes into Execution Steps as `Inline:` steps.
-- **No Exit Criteria section**: Exit Criteria has been replaced by Verification Checklist.
-  Orchestrated skills must not contain an Exit Criteria section.
-- **No general breakdown instructions**: Breakdown logic belongs only in `Decompose` step types.
-  Do not add free-standing breakdown instructions elsewhere.
-- **Operation class**: If class is `operation`, "Normalize Input" is the first procedural step after the H1 intro.
-- **Documentation class**: If class is `documentation`, no execution steps or side effects; body is structured reference data only.
-- **No Markdown tables in supporting documentation files** (reference/ docs, guides, examples). Tables are only permitted in SKILL.md Output Format sections when the skill's deliverable is a table.
+## Metadata
 
-## Planning-Specific Checks
+- Confirm `name` matches the directory.
+- Confirm `description` uses the class-specific trigger prefix.
+- Confirm `class` is valid.
+- Confirm structured cues contain canonical values and resolved facets.
+- Confirm each executable owner has one primary operation.
+- Confirm owner, support, and reference relationships are explicit.
 
-Apply these additional checks when the skill class is `planning`:
+## Routing Rubric
 
-- **Frontmatter has `class: planning`** — Must be exactly `planning`.
-- **Description starts with `"Use when planning or architecting"`** — Planning descriptions follow this prefix pattern.
-- **Minimum sections exist** — At minimum, When to Use and Verification Criteria sections are present.
-- **No procedure steps** — Planning skills describe structure, not execution; no imperative procedural steps.
-- **No tool invocation instructions** — Planning skills are read-only references; they must not invoke tools.
-- **Domain-specific content** — Every section contains domain-specific content, not template scaffolding or placeholder text.
-- **Cross-references exist** — If internal reference files are referenced, those files must exist.
+- Confirm every cue is task-grounded, discriminative, atomic, stable, discoverable, non-redundant, and scoped.
+- Confirm the signature is the smallest sufficient evidence set.
+- Confirm aliases are vocabulary metadata and hierarchy is explicit.
+- Confirm deprecated values have replacement and lifecycle rules.
 
-## Node Script-Specific Checks
+## Registry
 
-Apply these additional checks when the skill includes Node scripts under `scripts/node/`:
+- Confirm local facets and values use the repository namespace.
+- Confirm declarations include meaning, shape, aliases, relations, and lifecycle status.
+- Reject built-in redefinition, foreign namespace use, and same-scope canonical collisions.
+- Confirm a valid local extension needs no core-code change.
 
-- **tsconfig.json exists with noEmit and strict** — `scripts/node/tsconfig.json` must set `compilerOptions.noEmit: true` and `compilerOptions.strict: true`.
-- **biome.json exists with lint and format rules** — `scripts/node/biome.json` must define both `linter` and `formatter` rule configurations.
-- **package.json has all required scripts** — `scripts/node/package.json` must define `test`, `lint`, and `typecheck` scripts.
-- **Scripts pass bun test and tsc --noEmit** — Running `bun test` and `tsc --noEmit` in `scripts/node/` must exit successfully.
-- **No bin entries in package.json** — `scripts/node/package.json` must not contain a `bin` field.
-- **All direct imports declared in dependencies** — Every direct import (e.g., `unist-util-visit`, `hast-util-raw`) in source files under `scripts/node/` must be listed in `scripts/node/package.json` `dependencies` or `devDependencies`.
+## Runtime And Evaluation
+
+- Run the same validator for authoring and discovery.
+- Confirm lexical and model renderers consume normalized cues directly.
+- Confirm the renderer safety cap protects context bounds.
+- Evaluate owner, neighbor, unrelated, paraphrased, and low-overlap tasks.
+- Record precision, recall, exact-set accuracy, clipping, and token impact.
+
+## Documentation Hygiene
+
+- Search related documentation for obsolete count, popularity, implementation, and metadata-shape instructions.
+- Confirm all related documents name the same required metadata and validation behavior.

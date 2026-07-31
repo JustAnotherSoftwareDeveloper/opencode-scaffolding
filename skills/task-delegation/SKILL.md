@@ -1,7 +1,14 @@
 ---
 name: task-delegation
 description: "Use when adapting loose task information into one worker packet and forwarding it via the task tool."
-tags: [delegation, packet-formatting, field-mapping, worker-dispatch, loose-input, packet-construction]
+schema_version: "1.0"
+cues:
+  - {facet: operation, value: "construct-worker-packet", primary: true}
+  - {facet: subject, value: "loose task information"}
+  - {facet: interface, value: "task tool"}
+  - {facet: outcome, value: "one worker packet"}
+relationships:
+  - {role: owner, rationale: "owns loose-input packet construction"}
 class: inline
 ---
 

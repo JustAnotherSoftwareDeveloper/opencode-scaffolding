@@ -17,13 +17,21 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
+from lib.collect_skills.parser import load_repository_registry
 from lib.shared.skill_class import SkillClass
+from lib.shared.skill_routing import (
+    MAX_CUE_TEXT_LENGTH,
+    MAX_ROUTING_CUES,
+    MAX_SKILL_CANDIDATES,
+    MAX_SKILL_DESCRIPTION_LENGTH,
+    MAX_SKILL_NAME_LENGTH,
+    RoutingContractError,
+    RoutingCue,
+    RoutingRelationship,
+    normalize_routing_signature,
+)
 
 _NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-_MAX_DESCRIPTION = 8_000
-_MAX_TAGS = 32
-_MAX_TAG_LENGTH = 64
-_MAX_CANDIDATES = 128
 _DEFAULT_CLASSES = (SkillClass.OPERATION.value, SkillClass.DOCUMENTATION.value)
 _VALID_CLASSES = frozenset(item.value for item in SkillClass)
 
@@ -47,16 +55,23 @@ class PairScorer(Protocol):
 
 
 def _text(value: Any, field: str, *, allow_empty: bool = False) -> str:
-    if not isinstance(value, str) or (not allow_empty and not value.strip()):
-        raise SkillRankingInputError(f"{field} must be a non-empty string")
-    return value.strip()
+    if (
+        not isinstance(value, str)
+        or (not allow_empty and not value)
+        or value != value.strip()
+        or "\n" in value
+        or "\r" in value
+    ):
+        raise SkillRankingInputError(f"{field} must be safe single-line text")
+    return value
 
 
 @dataclass(frozen=True)
 class SkillCandidate:
     name: str
     description: str
-    tags: tuple[str, ...]
+    cues: tuple[RoutingCue, ...]
+    relationships: tuple[RoutingRelationship, ...]
     skill_class: str
     source: str
     path: Path
@@ -83,24 +98,11 @@ class SkillCandidate:
         if not isinstance(metadata, Mapping):
             raise SkillRankingInputError("skill metadata must be an object")
         name = _text(metadata.get("name"), "name")
-        if not _NAME.fullmatch(name):
+        if len(name) > MAX_SKILL_NAME_LENGTH or not _NAME.fullmatch(name):
             raise SkillRankingInputError(f"noncanonical skill name: {name!r}")
         description = _text(metadata.get("description"), "description")
-        if len(description) > _MAX_DESCRIPTION:
+        if len(description) > MAX_SKILL_DESCRIPTION_LENGTH:
             raise SkillRankingInputError("skill description is oversized")
-        raw_tags = metadata.get("tags", ())
-        if isinstance(raw_tags, (str, bytes)) or not isinstance(raw_tags, Sequence):
-            raise SkillRankingInputError("tags must be a sequence of strings")
-        if len(raw_tags) > _MAX_TAGS:
-            raise SkillRankingInputError("too many tags")
-        tags: list[str] = []
-        for tag in raw_tags:
-            normalized = _text(tag, "tag").lower()
-            if len(normalized) > _MAX_TAG_LENGTH or not _NAME.fullmatch(normalized):
-                raise SkillRankingInputError(f"noncanonical tag: {tag!r}")
-            if normalized in tags:
-                raise SkillRankingInputError(f"duplicate tag: {normalized!r}")
-            tags.append(normalized)
         skill_class = _text(metadata.get("class", metadata.get("class_")), "class")
         if isinstance(allowed_classes, (str, bytes)) or not isinstance(
             allowed_classes, Sequence
@@ -109,15 +111,14 @@ class SkillCandidate:
         allowed: set[str] = set()
         for authorized_class in allowed_classes:
             if not isinstance(authorized_class, str):
-                raise SkillRankingInputError(
-                    "allowed_classes entries must be strings"
-                )
-            normalized_class = authorized_class.strip()
-            if normalized_class not in _VALID_CLASSES:
+                raise SkillRankingInputError("allowed_classes entries must be strings")
+            if authorized_class != authorized_class.strip():
+                raise SkillRankingInputError("allowed_classes entries must be trimmed")
+            if authorized_class not in _VALID_CLASSES:
                 raise SkillRankingInputError(
                     f"unsupported allowed skill class: {authorized_class!r}"
                 )
-            allowed.add(normalized_class)
+            allowed.add(authorized_class)
         if skill_class not in allowed:
             raise SkillRankingInputError(f"unsupported skill class: {skill_class!r}")
         source = _text(metadata.get("source"), "source")
@@ -151,10 +152,25 @@ class SkillCandidate:
             resolved == root or root in resolved.parents for root in roots
         ):
             raise SkillRankingInputError("skill path is outside approved roots")
+        try:
+            signature = normalize_routing_signature(
+                metadata, load_repository_registry(resolved)
+            )
+        except (OSError, ValueError, RoutingContractError) as exc:
+            raise SkillRankingInputError(str(exc)) from exc
+        if len(signature.cues) > MAX_ROUTING_CUES:
+            raise SkillRankingInputError("too many routing cues")
+        for cue in signature.cues:
+            if any(
+                len(value) > MAX_CUE_TEXT_LENGTH
+                for value in (cue.facet, cue.value, *cue.aliases)
+            ):
+                raise SkillRankingInputError("routing cue value is oversized")
         return cls(
             name,
             description,
-            tuple(tags),
+            signature.cues,
+            signature.relationships,
             skill_class,
             source,
             resolved,
@@ -182,9 +198,11 @@ class RankingPolicy:
             raise SkillRankingConfigurationError(
                 "max_skills must be between one and three"
             )
-        if not isinstance(self.minimum_cardinality, int) or isinstance(
-            self.minimum_cardinality, bool
-        ) or not 0 <= self.minimum_cardinality <= self.max_skills:
+        if (
+            not isinstance(self.minimum_cardinality, int)
+            or isinstance(self.minimum_cardinality, bool)
+            or not 0 <= self.minimum_cardinality <= self.max_skills
+        ):
             raise SkillRankingConfigurationError(
                 "minimum_cardinality must be between zero and max_skills"
             )
@@ -257,7 +275,7 @@ class SkillRanker:
         scorer: PairScorer,
         policy: RankingPolicy | None = None,
         *,
-        max_candidates: int = _MAX_CANDIDATES,
+        max_candidates: int = MAX_SKILL_CANDIDATES,
     ) -> None:
         if max_candidates < 1:
             raise SkillRankingConfigurationError("max_candidates must be positive")
@@ -341,7 +359,9 @@ class SkillRanker:
             if selection_blocking is None
             else selection_blocking
         )
-        _validate_selection_options(minimum, threshold, blocking, self.policy.max_skills)
+        _validate_selection_options(
+            minimum, threshold, blocking, self.policy.max_skills
+        )
         try:
             results = self.scorer.score(
                 rendered_query, tuple(render_skill(item) for item in inventory)
@@ -388,7 +408,8 @@ class SkillRanker:
         diagnostics = RankingDiagnostics(
             tuple((item[0].name, item[1].score) for item in ordered_all),
             names,
-            bool(ordered) and ordered[0][1].score < self.policy.low_confidence_threshold,
+            bool(ordered)
+            and ordered[0][1].score < self.policy.low_confidence_threshold,
             tuple(clipped),
             tuple(getattr(self.scorer, "last_token_counts", ())),
             tuple(

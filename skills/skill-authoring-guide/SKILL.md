@@ -1,7 +1,13 @@
 ---
 name: skill-authoring-guide
 description: "Use when referencing authoring style, frontmatter field rules, progressive disclosure, or trigger evaluation conventions for OpenCode skills."
-tags: [authoring-style, frontmatter-rules, tagging-guide, progressive-disclosure, trigger-design, authoring-guide]
+schema_version: "1.0"
+cues:
+  - {facet: subject, value: "skill authoring"}
+  - {facet: outcome, value: "valid skill documentation"}
+  - {facet: constraint, value: "frontmatter contract"}
+relationships:
+  - {role: reference, rationale: "provides passive authoring guidance"}
 class: documentation
 ---
 
@@ -17,7 +23,7 @@ The bulleted list provides the mapping of files to their purpose.
 
 - `authoring-style.md` — Defines prose style, tone, and formatting conventions for skill documentation.
 - `frontmatter-rules.md` — Specifies required frontmatter fields and their validation rules.
-- `tagging-guide.md` — Defines how to select descriptive, routable tags.
+- `tagging-guide.md` — Defines how to select structured routing cues.
 - `progressive-disclosure.md` — Guidelines for layering detail from summary to deep reference.
 - `trigger-evaluation.md` — Rules for evaluating when this skill's trigger conditions are met.
 

@@ -1,13 +1,13 @@
 ---
 name: generic-analysis
 description: "Use when analyzing a problem, request, artifact, or decision to produce an evidence-calibrated assessment and next actions."
-tags:
-  - evidence-analysis
-  - decision-assessment
-  - problem-framing
-  - root-cause-analysis
-  - trade-off-evaluation
-  - analytical-reasoning
+schema_version: "1.0"
+cues:
+  - {facet: operation, value: "analyze-problem", primary: true}
+  - {facet: subject, value: "problem or decision"}
+  - {facet: outcome, value: "evidence-calibrated assessment"}
+relationships:
+  - {role: owner, rationale: "owns general evidence-based analysis"}
 class: operation
 ---
 

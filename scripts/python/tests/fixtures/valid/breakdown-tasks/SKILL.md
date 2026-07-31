@@ -1,8 +1,13 @@
 ---
 name: breakdown-tasks
 description: Decompose a request into the smallest possible task-delegation work items.
-tags: [task-decomposition, task-planning, workflow, request-analysis]
-class: task
+schema_version: "1.0"
+cues:
+  - {facet: operation, value: decompose-request, primary: true}
+  - {facet: outcome, value: task-packets}
+relationships:
+  - {role: owner}
+class: operation
 ---
 # breakdown-tasks
 

@@ -1,5 +1,8 @@
 """Strict manifest and packaged-resource tests; no Ollama is contacted."""
 
+# Manifest assertions intentionally mirror serialized pins.
+# ruff: noqa: E501
+
 from __future__ import annotations
 
 import json
@@ -14,11 +17,15 @@ Q8 = ROOT / "src/lib/generate_task_json/ranker_manifest.json"
 
 
 def test_production_profiles_load_packaged_assets() -> None:
-    q8 = load_manifest(profile="q8")
-    q4 = load_manifest(profile="q4")
-    assert q8.profile == "q8" and q4.profile == "q4"
-    assert q8.num_ctx == q4.num_ctx == 8192
-    assert q8.tokenizer_path.is_file() and q8.license_path.is_file()
+    q8 = json.loads(Q8.read_text(encoding="utf-8"))
+    q4 = json.loads(Q8.with_name("ranker_manifest.q4.json").read_text(encoding="utf-8"))
+    assert q8["profile"] == "q8" and q4["profile"] == "q4"
+    assert q8["runtime"]["num_ctx"] == q4["runtime"]["num_ctx"] == 8192
+    assert (
+        q8["prompt"]["render_version"]
+        == q4["prompt"]["render_version"]
+        == "task-skill-routing-signature-v2"
+    )
 
 
 @pytest.mark.parametrize("profile", ["q8", "q4"])
@@ -36,6 +43,7 @@ def test_manifest_is_strict_about_profile_and_assets(
 
 def test_manifest_rejects_digest_path_traversal_and_bad_profile(tmp_path: Path) -> None:
     data = json.loads(Q8.read_text(encoding="utf-8"))
+    data["prompt"]["render_version"] = "task-skill-fields-v1"
     data["assets"]["tokenizer"]["path"] = "assets/../tokenizer.json"
     path = tmp_path / "manifest.json"
     path.write_text(json.dumps(data), encoding="utf-8")

@@ -1,100 +1,102 @@
-# Selecting Descriptive Tags
+# Routing Signature Guide
 
-Create tags that let routing distinguish the skill from related skills.
+Author routing cues from the task-to-owner relationship.
 
-## Selection Process
+## Authoring Procedure
 
-1. Read the trigger and expected output.
-2. Select one primary capability tag that names the main work.
-3. Add tags for the domain, artifact, tool, and workflow context that materially narrow selection.
-4. Replace generic terms with terms that a task request would contain.
-5. Remove duplicates and synonyms until 4–7 distinct tags remain.
+1. List the tasks the skill owns, including the operation, subject, constraints, and expected outcome that recur in its trigger.
+2. List the nearest competing skills and the task requests that belong to each competitor.
+3. Compare the owned and competing task sets.
+4. Add only cues whose presence or absence materially changes routing.
+5. Mark one owned `operation` cue as primary for every executable owner skill.
+6. Stop when the signature is sufficient to distinguish the skill from its nearest competitors.
+7. Resolve every cue through the built-in or repository-local registry before publishing.
 
-## Tag Taxonomy Categories
+## Quality Tests
 
-Select tags from the following categories. The minimum and maximum tag counts
-per category provide a starting framework; the 4–7 total tag limit remains the
-binding constraint.
+Apply every test to every cue.
 
-### 1. Primary capability (1 tag)
+- **Task-grounded:** Tie the cue to requested intent, input, output, constraint, audience, environment, or repository language.
+- **Discriminative:** Remove the cue and verify that a plausible neighboring skill becomes harder to distinguish.
+- **Atomic:** Express one routing concept per entry; split independent concepts.
+- **Stable:** Keep the cue when ordinary implementation details change; retain implementation cues only when selection requires that implementation.
+- **Discoverable:** Use request language, file language, repository vocabulary, or a declared alias.
+- **Non-redundant:** Remove synonyms, restatements, aliases entered as separate cues, and weaker duplicates.
+- **Scoped:** Avoid cues broad enough to select unrelated skills or narrow enough to describe one unrepeatable instance.
 
-The main action the skill performs. Use a verb-noun or concrete noun form.
+Facets organize evidence. They do not form a closed taxonomy. Use `operation`, `subject`, `outcome`, `interface`, `environment`, and `constraint` when they fit; introduce another facet when the task evidence requires it. Require only the primary operation for an owner skill.
 
-Examples: `task-decomposition`, `evidence-analysis`, `bash-code-generation`,
-`clarify`, `python-testing`, `markdown-linting`.
+## Registry Extensions
 
-### 2. Domain (1 tag)
+Declare repository vocabulary in a local registry owned by the repository.
+Use one of the discovered repository filenames: `skill-facets.json`, `.skill-facets.json`, `.opencode/skill-facets.json`, or `.opencode/facets.json`.
+Declare exactly one registry file at a repository scope; multiple recognized files at the same scope are an error.
+Discovery uses the nearest declaration up to the Git repository root and never inherits a registry from a parent repository.
 
-The subject area the skill operates in. Can be shared across closely related
-skills but must not appear in more than 5 skills total.
-
-Examples: `skill-authoring`, `tasking`, `testing`, `documentation`.
-
-### 3. Tool / platform (1–2 tags)
-
-The specific tools, runtimes, or platforms the skill uses.
-
-Examples: `pytest`, `bun`, `bats`, `cleye`, `todowrite-tool`, `typescript`,
-`click`.
-
-### 4. Deliverable / artifact (1–2 tags)
-
-What the skill produces.
-
-Examples: `task-json`, `workspace-generation`, `markdown-output`,
-`decision-record`, `code-generation`, `cli-output`.
-
-### 5. Workflow context (0–1 tag)
-
-How the skill fits into the pipeline. Use only when it materially
-discriminates between otherwise similar skills.
-
-Examples: `delegation-pipeline`, `stage-selection`, `worker-dispatch`.
-
-## Quality Rules
-
-1. Include a primary capability tag such as `task-decomposition`,
-   `markdown-linting`, or `python-testing`.
-2. Include material discriminators such as `yaml-frontmatter`,
-   `worker-dispatch`, `cli-integration`, `bun`, or `typescript`.
-3. Do not use a tag that only repeats the skill name.
-4. Do not use filler values (see Filler-Tag Blacklist below).
-5. Do not use duplicate concepts such as `node` and `nodejs` unless they
-   identify distinct supported targets.
-6. Do not use a tag found in more than 5 other skills within the same class or
-   across all classes. If a tag would appear in 6+ skills, replace it with a
-   more specific alternative.
-7. Verify tag uniqueness by comparing against `collect-skills` output for
-   sibling skills before finalizing.
-8. Ensure at least one tag directly names a tool, script, or deliverable the
-   skill uses or produces.
-
-## Filler-Tag Blacklist
-
-The following tags are too generic to aid routing and must not be used:
-
-`general`, `helper`, `tool`, `skill`, `misc`, `utility`, `common`, `default`,
-`other`, `miscellaneous`
-
-## Examples
-
-```yaml
-tags:
-  - node-script-generation
-  - typescript
-  - cli
-  - cleye
-  - bun
-  - code-generation
+```json
+{
+  "namespace": "acme",
+  "facets": [
+    {
+      "name": "release-train",
+      "meaning": "Release stage that changes task ownership",
+      "values": [
+        {
+          "value": "candidate-freeze",
+          "aliases": ["release freeze"]
+        }
+      ]
+    }
+  ]
+}
 ```
 
-```yaml
-tags:
-  - helper
-  - tool
-  - coding
-  - node
-  - nodejs
-```
+- Give each local facet a namespace, routing meaning, value shape, examples, aliases, and lifecycle status.
+- Reuse a built-in canonical value when its meaning matches; do not create a local synonym.
+- Keep local values under the repository namespace.
+- Reject a declaration that redefines a built-in facet, claims a foreign namespace, or collides with an existing canonical value at the same scope.
+- Treat aliases as lookup vocabulary, not additional cues.
+- Represent parent and child relations explicitly; do not treat hierarchy as synonymy.
+- Mark deprecated facets and values with an active replacement and migration date; reject new use after the declared cutoff while resolving existing metadata only through the published migration rule.
+- Keep each registry within 128 facets, each facet within 256 declared values, and registry lists within 32 entries; these are safety ceilings, not completeness targets.
+- Keep `value_shape` expressions within 256 characters and free of lookarounds, backreferences, or quantified groups so validation cannot trigger unbounded backtracking.
 
-Reject the second list because it is generic and redundant.
+The current machine contract supports `status: deprecated` plus a required declared, active `replacement` for facets and values.
+Record migration dates in repository documentation; the schema does not interpret dates.
+
+Adding a valid namespaced facet or value requires a registry declaration and validation only. It does not require a core-schema or core-code change.
+
+## Contrastive Examples
+
+### Software
+
+- Choose `operation:generate-node-script` for a skill that owns deterministic Node script creation, not for every skill that mentions Node.
+- Add `interface:cli` only when CLI behavior separates it from a library-only generator.
+- Reject `typescript` when it merely describes an implementation detail shared by the competing generators.
+
+### Document And Business
+
+- Choose `operation:analyze-contract` and `outcome:risk-findings` for a contract review skill.
+- Choose `operation:approve-expense` and `interface:finance-workflow` for an approval skill.
+- Reject `business` or `document` because those cues do not separate either owner from neighboring analysis or approval skills.
+
+### Scientific And Repository-Specific
+
+- Choose `operation:fit-calibration-model` and `subject:sensor-series` when those cues distinguish model fitting from data cleaning.
+- A repository can declare `acme:release-train` with values such as `candidate-freeze` when that lifecycle vocabulary routes work inside the repository.
+- Reject a local value that duplicates a built-in value under another name or describes one ticket number.
+
+## Routing Evaluation
+
+Evaluate the signature against owner tasks, nearest-neighbor tasks, unrelated tasks, paraphrases, and tasks with little lexical overlap.
+
+- Confirm owner tasks rank the skill above competitors.
+- Confirm neighbor tasks route to the distinct owner when the differentiating cue changes.
+- Confirm unrelated tasks do not select the skill from broad facets.
+- Confirm aliases improve discovery without changing canonical identity.
+- Record precision, recall, exact-set accuracy, context clipping, and token impact.
+- Treat cue frequency as a diagnostic for neighbor review, never as an invalidation rule.
+
+## Hard Rejections
+
+Reject a signature that relies on category completion, generic filler, global popularity, implementation-only details, undeclared vocabulary, or a cue that fails any quality test.

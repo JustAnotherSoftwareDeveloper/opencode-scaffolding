@@ -3,7 +3,7 @@
 Store reusable code blocks in `snippets/` for use by templates and generated skills.
 Include example entries such as:
 
-- Required frontmatter YAML skeleton with `name`, `description`, `tags`, and `class`
+- Required frontmatter YAML skeleton with `name`, `description`, `schema_version`, `cues`, `relationships`, and `class`
 - Collation JSON shape
 - Delegation packet template
 - `snippet-script-invocation.md` — Reusable Markdown block for invoking a Python script from a skill.

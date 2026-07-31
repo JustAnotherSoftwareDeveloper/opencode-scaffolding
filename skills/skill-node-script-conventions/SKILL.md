@@ -1,7 +1,14 @@
 ---
 name: skill-node-script-conventions
 description: Use when writing or maintaining Node/TypeScript scripts for the OpenCode platform and needing convention guidance on style, shared library rules, path layout, tooling, testing, and coverage.
-tags: [node, typescript, biome, bun, coverage, scripting-conventions]
+schema_version: "1.0"
+cues:
+  - {facet: subject, value: "Node TypeScript scripts"}
+  - {facet: environment, value: "OpenCode"}
+  - {facet: outcome, value: "script convention guidance"}
+  - {facet: constraint, value: "Bun tooling"}
+relationships:
+  - {role: reference, rationale: "provides passive Node script conventions"}
 class: documentation
 ---
 

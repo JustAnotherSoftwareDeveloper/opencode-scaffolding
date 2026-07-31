@@ -17,6 +17,7 @@ import pytest
 from click.testing import CliRunner
 
 from cli.collect_skills import main
+from lib.shared.skill_routing import RoutingCue, RoutingRelationship
 
 # ============================================================================
 # Test main() function via CliRunner
@@ -119,6 +120,8 @@ class TestCollectSkillsMain:
                 Skill(
                     name="alpha",
                     description="test skill",
+                    cues=(RoutingCue("operation", "validate", primary=True),),
+                    relationships=(RoutingRelationship("owner"),),
                     source="project",
                 )
             )

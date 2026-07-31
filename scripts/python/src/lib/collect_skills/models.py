@@ -1,10 +1,12 @@
-"""Skill data model, index, and flat JSON serialization."""
+"""Skill data model, index, and routing-signature JSON serialization."""
 
 from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
 from typing import Any
+
+from lib.shared.skill_routing import RoutingCue, RoutingRelationship
 
 # ---------------------------------------------------------------------------
 # Source precedence
@@ -42,7 +44,9 @@ class Skill:
 
     name: str
     description: str = ""
-    tags: list[str] = field(default_factory=list)
+    schema_version: str = "1.0"
+    cues: tuple[RoutingCue, ...] = ()
+    relationships: tuple[RoutingRelationship, ...] = ()
     class_: str = ""
     version: str = ""
     license: str = ""
@@ -64,7 +68,9 @@ class Skill:
         d: dict[str, Any] = {
             "name": self.name,
             "description": self.description,
-            "tags": self.tags,
+            "schema_version": self.schema_version,
+            "cues": [cue.to_dict() for cue in self.cues],
+            "relationships": [relation.to_dict() for relation in self.relationships],
             "class": self.class_,  # rename for JSON output
             "version": self.version,
             "license": self.license,

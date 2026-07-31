@@ -6,3 +6,31 @@ validate-skill-meta, resolve-script-root.
 """
 
 from __future__ import annotations
+
+from .skill_routing import (
+    FacetDeclaration,
+    FacetValueDeclaration,
+    RegistryResolution,
+    RoutingContractError,
+    RoutingCue,
+    RoutingRelationship,
+    RoutingSignature,
+    SchemaVersion,
+    load_builtin_registry,
+    normalize_routing_signature,
+    resolve_registry_overlay,
+)
+
+__all__ = [
+    "FacetDeclaration",
+    "FacetValueDeclaration",
+    "RegistryResolution",
+    "RoutingContractError",
+    "RoutingCue",
+    "RoutingRelationship",
+    "RoutingSignature",
+    "SchemaVersion",
+    "load_builtin_registry",
+    "normalize_routing_signature",
+    "resolve_registry_overlay",
+]

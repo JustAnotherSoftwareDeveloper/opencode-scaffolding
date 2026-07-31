@@ -116,7 +116,7 @@ def _bounded(value: Any, depth: int = 0) -> Any:
                 for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))[
                     :_MAX_ITEMS
                 ]
-                 if not _is_private_key(key)
+                if not _is_private_key(key)
             }
         )
     if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):

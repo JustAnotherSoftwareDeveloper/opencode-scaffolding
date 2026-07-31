@@ -1,5 +1,8 @@
 """Tests for the generate-task-json library."""
 
+# Structured fixtures intentionally keep routing records readable.
+# ruff: noqa: E501
+
 from __future__ import annotations
 
 import json
@@ -12,12 +15,20 @@ from lib.collect_skills.models import Skill
 from lib.generate_task_json import core
 from lib.generate_task_json.ranker import RankingDiagnostics, RankingResult
 from lib.generate_task_json.ranking_diagnostics import AtomicDiagnosticSink
+from lib.shared.skill_routing import RoutingCue, RoutingRelationship
 
 VALID_CONTEXT = (
     "Add focused Python tests for the example CLI behavior and preserve the existing "
     "test layout. Cover the supported input path, error handling, and output contract "
     "without changing unrelated production code or adding dependencies."
 )
+
+STRUCTURED_INDEX = {
+    "description": "Use when writing Python tests",
+    "schema_version": "1.0",
+    "cues": [{"facet": "operation", "value": "write-tests", "primary": True}],
+    "relationships": [{"role": "owner"}],
+}
 
 
 def _drafts() -> dict:
@@ -40,7 +51,11 @@ def _skill(name: str = "python-test", class_: str = "operation") -> Skill:
     return Skill(
         name=name,
         description="Write Python tests",
-        tags=["python", "tests"],
+        cues=(
+            RoutingCue("operation", "write-tests", primary=True),
+            RoutingCue("subject", "python"),
+        ),
+        relationships=(RoutingRelationship("owner"),),
         class_=class_,
     )
 
@@ -57,7 +72,12 @@ def _ranked_index(
             {
                 "name": name,
                 "description": f"Description for {name}",
-                "tags": ["python", "tests"],
+                "schema_version": "1.0",
+                "cues": [
+                    {"facet": "operation", "value": "write-tests", "primary": True},
+                    {"facet": "subject", "value": "python"},
+                ],
+                "relationships": [{"role": "owner"}],
                 "class": "operation",
                 "source": "project",
                 "path": str(path),
@@ -106,7 +126,12 @@ def test_generate_task_json_writes_assigned_output(
             {
                 "name": "python-test",
                 "description": "Write Python tests",
-                "tags": ["python", "tests"],
+                "schema_version": "1.0",
+                "cues": [
+                    {"facet": "operation", "value": "write-tests", "primary": True},
+                    {"facet": "subject", "value": "python"},
+                ],
+                "relationships": [{"role": "owner"}],
                 "class": "operation",
             }
         ],
@@ -240,7 +265,9 @@ def test_generate_task_json_writes_to_explicit_output_directory(
         _drafts(),
         "generate-tests",
         output_dir=output_dir,
-        skills_index=[{"name": "python-test", "class": "operation"}],
+        skills_index=[
+            {"name": "python-test", "class": "operation", **STRUCTURED_INDEX}
+        ],
     )
     assert output == output_dir / "1700000000123-generate-tests.json"
 
@@ -249,7 +276,9 @@ def test_generate_task_json_writes_to_explicit_output_file(tmp_path: Path) -> No
     output = core.generate_task_json(
         _drafts(),
         output_file=tmp_path / "plan" / "tasks.json",
-        skills_index=[{"name": "python-test", "class": "operation"}],
+        skills_index=[
+            {"name": "python-test", "class": "operation", **STRUCTURED_INDEX}
+        ],
     )
     assert output == tmp_path / "plan" / "tasks.json"
 
@@ -260,7 +289,9 @@ def test_generate_task_json_rejects_mixed_destination_modes(tmp_path: Path) -> N
             _drafts(),
             "generate-tests",
             output_file=tmp_path / "tasks.json",
-            skills_index=[{"name": "python-test", "class": "operation"}],
+            skills_index=[
+                {"name": "python-test", "class": "operation", **STRUCTURED_INDEX}
+            ],
         )
 
 
@@ -269,7 +300,9 @@ def test_generate_task_json_rejects_non_json_explicit_output(tmp_path: Path) -> 
         core.generate_task_json(
             _drafts(),
             output_file=tmp_path / "tasks.txt",
-            skills_index=[{"name": "python-test", "class": "operation"}],
+            skills_index=[
+                {"name": "python-test", "class": "operation", **STRUCTURED_INDEX}
+            ],
         )
 
 
@@ -296,7 +329,9 @@ def test_generate_task_json_rejects_context_below_minimum(tmp_path: Path) -> Non
             drafts,
             "generate-tests",
             project_root=tmp_path,
-            skills_index=[{"name": "python-test", "class": "operation"}],
+            skills_index=[
+                {"name": "python-test", "class": "operation", **STRUCTURED_INDEX}
+            ],
         )
     assert not (tmp_path / ".tasks").exists()
 
@@ -330,7 +365,7 @@ def test_generate_task_json_rejects_invalid_final_output(
             _drafts(),
             "generate-tests",
             project_root=tmp_path,
-            skills_index=[{"name": "test", "class": "operation"}],
+            skills_index=[{"name": "test", "class": "operation", **STRUCTURED_INDEX}],
         )
 
 
@@ -345,10 +380,59 @@ def test_candidate_skills_discovers_and_filters(
     assert [skill.name for skill in core._candidate_skills(None)] == ["python-test"]
 
 
-def test_parse_skills_preserves_defaults() -> None:
-    parsed = core._parse_skills([{"name": "minimal"}])
+def test_parse_skills_preserves_structured_signature() -> None:
+    parsed = core._parse_skills(
+        [
+            {
+                "name": "minimal",
+                "description": "Use when routing minimal tasks",
+                "class": "operation",
+                "schema_version": "1.0",
+                "cues": [{"facet": "subject", "value": "minimal routing"}],
+                "relationships": [{"role": "support"}],
+            }
+        ]
+    )
     assert parsed[0].name == "minimal"
-    assert parsed[0].tags == []
+    assert parsed[0].cues[0].value == "minimal routing"
+
+
+@pytest.mark.parametrize(
+    ("updates", "message"),
+    [
+        ({"name": "not canonical"}, "canonical kebab-case"),
+        ({"description": "unsafe\ntext"}, "safe single-line"),
+        ({"class": "unknown"}, "class is invalid"),
+    ],
+)
+def test_parse_skills_rejects_malformed_inventory_fields(updates, message) -> None:
+    entry = {
+        "name": "valid",
+        "description": "Use when validating inventory",
+        "class": "operation",
+        **STRUCTURED_INDEX,
+        **updates,
+    }
+
+    with pytest.raises(ValueError, match=message):
+        core._parse_skills([entry])
+
+
+def test_parse_skills_rejects_duplicate_inventory_names() -> None:
+    entry = {
+        "name": "duplicate",
+        "description": "Use when validating inventory",
+        "class": "operation",
+        **STRUCTURED_INDEX,
+    }
+
+    with pytest.raises(ValueError, match="duplicate skill inventory name"):
+        core._parse_skills([entry, entry.copy()])
+
+
+def test_parse_skills_rejects_oversized_inventory() -> None:
+    with pytest.raises(ValueError, match="128 entries"):
+        core._parse_skills([{} for _ in range(129)])
 
 
 def test_discover_skills_resolves_index() -> None:
@@ -359,7 +443,7 @@ def test_discover_skills_resolves_index() -> None:
 
 def test_select_skills_uses_threshold_without_fallback() -> None:
     matching = _skill()
-    weak = Skill(name="docs", description="", tags=[], class_="documentation")
+    weak = Skill(name="docs", description="", class_="documentation")
     task = _drafts()["tasks"][0]
     assert core._select_skills(task, [weak, matching]) == ["python-test"]
     assert core._select_skills(task, [weak]) == []
@@ -383,13 +467,21 @@ def test_select_skills_does_not_select_a_class_only_match() -> None:
     factory = Skill(
         name="skill-factory",
         description="Create and update OpenCode skill files",
-        tags=["skill-authoring", "frontmatter-validation"],
+        cues=(
+            RoutingCue("operation", "create-skill", primary=True),
+            RoutingCue("subject", "frontmatter"),
+        ),
+        relationships=(RoutingRelationship("owner"),),
         class_="operation",
     )
     bash_tests = Skill(
         name="skill-script-bash-test-writer",
-        description="Generate bats tests for bash scripts",
-        tags=["bash-testing", "bats", "test-generation"],
+        description="Operate unrelated shell deployments",
+        cues=(
+            RoutingCue("operation", "write-tests", primary=True),
+            RoutingCue("subject", "bash"),
+        ),
+        relationships=(RoutingRelationship("owner"),),
         class_="operation",
     )
 
@@ -414,7 +506,7 @@ def test_task_text_and_scoring_helpers() -> None:
     assert "scripts/python/src/cli/example.py" not in text
     assert "scripts/python/tests/test_example.py" not in text
     assert core._score_skill(_skill(), text) > core._score_skill(
-        Skill(name="docs", description="docs", tags=[], class_="documentation"), text
+        Skill(name="docs", description="docs", class_="documentation"), text
     )
     assert core._tokenize("Write WRITE tests!") == {"write", "tests"}
     assert core._infer_task_class({"document", "guide"}) == "documentation"
@@ -460,13 +552,21 @@ def test_skill_assignment_ignores_misleading_file_paths() -> None:
     skill_factory = Skill(
         name="skill-factory",
         description="Create and manage OpenCode skills",
-        tags=["skill", "factory", "create", "manage"],
+        cues=(
+            RoutingCue("operation", "create-skill", primary=True),
+            RoutingCue("subject", "opencode-skill"),
+        ),
+        relationships=(RoutingRelationship("owner"),),
         class_="operation",
     )
     readme_editor = Skill(
         name="readme-editor",
         description="Fix typo and formatting error in documentation and README file",
-        tags=["readme", "documentation", "fix", "typo", "docs"],
+        cues=(
+            RoutingCue("operation", "fix-typo", primary=True),
+            RoutingCue("subject", "readme"),
+        ),
+        relationships=(RoutingRelationship("owner"),),
         class_="documentation",
     )
     selected = core._select_skills(task, [skill_factory, readme_editor])
@@ -479,23 +579,22 @@ def test_score_skill_tokenizes_compound_tags() -> None:
     matching = Skill(
         name="workspace",
         description="",
-        tags=[
-            "plan-workspace",
-            "task-json",
-            "source-documents",
-            "workspace-generation",
-        ],
+        cues=(
+            RoutingCue("operation", "create-workspace", primary=True),
+            RoutingCue("subject", "plan-workspace", ("workspace",)),
+            RoutingCue("outcome", "task-json"),
+        ),
+        relationships=(RoutingRelationship("owner"),),
         class_="operation",
     )
     unrelated = Skill(
         name="proposal",
         description="",
-        tags=[
-            "decision-record",
-            "evidence-linking",
-            "proposal-authoring",
-            "workspace-creation",
-        ],
+        cues=(
+            RoutingCue("operation", "write-proposal", primary=True),
+            RoutingCue("subject", "decision-record"),
+        ),
+        relationships=(RoutingRelationship("owner"),),
         class_="operation",
     )
 
@@ -551,6 +650,7 @@ def test_generate_task_json_derives_slug_from_summary(
                 "name": "python-test",
                 "description": "Write Python tests",
                 "class": "operation",
+                **STRUCTURED_INDEX,
             }
         ],
     )

@@ -14,6 +14,7 @@ from typing import Any
 
 from lib.collect_skills.discovery import discover_all_skills
 from lib.collect_skills.models import Skill, SkillIndex
+from lib.collect_skills.parser import load_repository_registry
 from lib.generate_task_json.ranker import RankingResult, SkillCandidate
 from lib.generate_task_json.ranking_diagnostics import (
     RankingDiagnosticBundle,
@@ -24,6 +25,12 @@ from lib.generate_task_json.ranking_diagnostics import (
 from lib.schema import load_schema
 from lib.shared.schema import validate_json_schema
 from lib.shared.skill_class import SkillClass
+from lib.shared.skill_routing import (
+    MAX_SKILL_CANDIDATES,
+    MAX_SKILL_DESCRIPTION_LENGTH,
+    MAX_SKILL_NAME_LENGTH,
+    normalize_routing_signature,
+)
 
 OPENCODE_CONFIG_DIR = Path.home() / ".config" / "opencode"
 INPUT_SCHEMA_PATH = (
@@ -280,7 +287,10 @@ def _result_diagnostics(
                 {
                     "name": candidate.name,
                     "description": candidate.description,
-                    "tags": candidate.tags,
+                    "cues": [cue.to_dict() for cue in candidate.cues],
+                    "relationships": [
+                        relation.to_dict() for relation in candidate.relationships
+                    ],
                     "class": candidate.skill_class,
                     "source": candidate.source,
                     "path_hash": canonical_hash(candidate.path),
@@ -362,16 +372,65 @@ def _discover_skills() -> list[Skill]:
 
 
 def _parse_skills(index: list[dict[str, Any]]) -> list[Skill]:
-    """Convert a serialized skill index into Skill objects."""
-    return [
-        Skill(
-            name=entry.get("name", ""),
-            description=entry.get("description", ""),
-            tags=entry.get("tags", []),
-            class_=entry.get("class", ""),
+    """Convert structured routing-signature inventory records into Skills.
+
+    Inventory records are normalized at this boundary so lexical assignment
+    never has to reconstruct routing cues (or accept the removed tag-list
+    projection).  ``normalize_routing_signature`` deliberately rejects any
+    record containing ``tags`` and validates local facets through the shared
+    routing contract.
+    """
+    if len(index) > MAX_SKILL_CANDIDATES:
+        raise ValueError(f"skill inventory exceeds {MAX_SKILL_CANDIDATES} entries")
+    skills: list[Skill] = []
+    names: set[str] = set()
+    for entry in index:
+        if not isinstance(entry, dict):
+            raise TypeError("skill inventory entries must be objects")
+        name = entry.get("name")
+        if (
+            not isinstance(name, str)
+            or name != name.strip()
+            or len(name) > MAX_SKILL_NAME_LENGTH
+            or not SUMMARY_SLUG_PATTERN.fullmatch(name)
+        ):
+            raise ValueError("skill inventory name must be canonical kebab-case")
+        if name in names:
+            raise ValueError(f"duplicate skill inventory name: {name}")
+        names.add(name)
+        description = entry.get("description")
+        if (
+            not isinstance(description, str)
+            or not description
+            or description != description.strip()
+            or "\n" in description
+            or "\r" in description
+            or len(description) > MAX_SKILL_DESCRIPTION_LENGTH
+        ):
+            raise ValueError(
+                "skill inventory description must be safe single-line text"
+            )
+        skill_class = entry.get("class")
+        if skill_class not in {item.value for item in SkillClass}:
+            raise ValueError("skill inventory class is invalid")
+        registry_context = entry.get("path", entry.get("location"))
+        registry = (
+            load_repository_registry(Path(registry_context))
+            if isinstance(registry_context, (str, Path)) and registry_context
+            else None
         )
-        for entry in index
-    ]
+        signature = normalize_routing_signature(entry, registry)
+        skills.append(
+            Skill(
+                name=name,
+                description=description,
+                schema_version=signature.schema_version.value,
+                cues=signature.cues,
+                relationships=signature.relationships,
+                class_=skill_class,
+            )
+        )
+    return skills
 
 
 def _select_skills(task: dict[str, Any], candidates: list[Skill]) -> list[str]:
@@ -412,21 +471,29 @@ def _score_skill(skill: Skill, task_text: str) -> float:
     """Return the weighted lexical and class-match score for one skill."""
     task_tokens = _tokenize(task_text)
     skill_tokens = _tokenize(f"{skill.name} {skill.description}")
-    tag_tokens = _tokenize(" ".join(skill.tags))
+    # Every registered facet follows the same path: normalized canonical
+    # values and request-language aliases are lexical evidence.  The facet
+    # name is intentionally not a scoring policy or a hard-coded branch.
+    cue_tokens = _tokenize(" ".join(_routing_cue_text(skill)))
     keyword_overlap = len(task_tokens & skill_tokens) / max(
         len(task_tokens | skill_tokens),
         1,
     )
-    tag_similarity = len(task_tokens & tag_tokens) / max(
-        len(task_tokens | tag_tokens),
+    cue_similarity = len(task_tokens & cue_tokens) / max(
+        len(task_tokens | cue_tokens),
         1,
     )
     class_match = float(skill.class_ == _infer_task_class(task_tokens))
     return (
         DEFAULT_WEIGHTS["keyword_overlap"] * keyword_overlap
         + DEFAULT_WEIGHTS["class_match"] * class_match
-        + DEFAULT_WEIGHTS["tag_similarity"] * tag_similarity
+        + DEFAULT_WEIGHTS["tag_similarity"] * cue_similarity
     )
+
+
+def _routing_cue_text(skill: Skill) -> tuple[str, ...]:
+    """Return normalized cue values and aliases for lexical scoring."""
+    return tuple(value for cue in skill.cues for value in (cue.value, *cue.aliases))
 
 
 def _tokenize(text: str) -> set[str]:

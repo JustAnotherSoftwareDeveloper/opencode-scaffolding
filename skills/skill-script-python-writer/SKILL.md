@@ -1,7 +1,14 @@
 ---
 name: skill-script-python-writer
 description: "Use when generating deterministic Python scripts from skill requirements, including CLI entry points, library modules, tests, and pyproject.toml registration."
-tags: [python-code-generation, click, cli, pyproject-toml, scripting, python-scripting]
+schema_version: "1.0"
+cues:
+  - {facet: operation, value: "generate-python-script", primary: true}
+  - {facet: subject, value: "Python scripts"}
+  - {facet: interface, value: "CLI entry point"}
+  - {facet: outcome, value: "registered Python implementation"}
+relationships:
+  - {role: owner, rationale: "owns deterministic Python script generation"}
 class: operation
 ---
 

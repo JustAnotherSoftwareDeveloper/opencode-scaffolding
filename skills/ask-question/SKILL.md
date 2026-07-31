@@ -1,7 +1,14 @@
 ---
 name: ask-question
 description: Use when the user request is ambiguous in a way that would materially change execution output, and asking 2-5 clarifying questions would resolve the ambiguity.
-tags: [clarify, user-interaction, ambiguity-resolution, question-tool, interactive-prompt]
+schema_version: "1.0"
+cues:
+  - {facet: operation, value: "clarify-ambiguous-request", primary: true}
+  - {facet: subject, value: "user request"}
+  - {facet: constraint, value: "material ambiguity"}
+  - {facet: outcome, value: "clarifying questions"}
+relationships:
+  - {role: owner, rationale: "owns ambiguity resolution through questions"}
 class: inline
 ---
 

@@ -1,7 +1,14 @@
 ---
 name: dispatch-decompose
 description: "Use when the delegator must send the full user request to a breakdown-tasks worker and return the relative .tasks path unchanged."
-tags: [request-forwarding, worker-invocation, packet-construction, breakdown-dispatch, worker-launch]
+schema_version: "1.0"
+cues:
+  - {facet: operation, value: "dispatch-decomposition", primary: true}
+  - {facet: subject, value: "full user request"}
+  - {facet: interface, value: "delegation task"}
+  - {facet: outcome, value: "relative tasks path"}
+relationships:
+  - {role: owner, rationale: "owns decomposition dispatch forwarding"}
 class: inline
 ---
 

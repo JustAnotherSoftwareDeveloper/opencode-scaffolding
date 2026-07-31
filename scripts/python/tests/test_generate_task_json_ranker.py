@@ -1,7 +1,11 @@
 """Offline contract tests for the deterministic ranker and prompt renderer."""
 
+# Exact prompt fixtures intentionally remain byte-oriented.
+# ruff: noqa: E501
+
 from __future__ import annotations
 
+import json
 import math
 from collections.abc import Sequence
 from pathlib import Path
@@ -39,6 +43,7 @@ from lib.generate_task_json.ranker import (
     render_task,
 )
 from lib.shared.skill_class import SkillClass
+from lib.shared.skill_routing import RoutingCue, RoutingRelationship
 
 ROOT = Path(__file__).parents[1]
 TOKENIZER = ROOT / "src/lib/generate_task_json/assets/tokenizer.json"
@@ -69,7 +74,12 @@ def candidate(
         {
             "name": name,
             "description": "Write deterministic Python tests",
-            "tags": ["Python", "testing"],
+            "schema_version": "1.0",
+            "cues": [
+                {"facet": "operation", "value": "write-tests", "primary": True},
+                {"facet": "subject", "value": "python", "aliases": ["py"]},
+            ],
+            "relationships": [{"role": "owner"}],
             "class": "operation",
             "source": "project",
             "path": str(path),
@@ -99,8 +109,17 @@ def test_rendering_is_complete_and_semantic_only(tmp_path: Path) -> None:
     semantic = render_skill(skill)
     assert all(
         value in semantic
-        for value in ("python-tests", "deterministic", "python", "operation")
+        for value in (
+            "python-tests",
+            "deterministic",
+            "python",
+            "operation",
+            "write-tests",
+            "py",
+        )
     )
+    assert "Routing relationships:\n- role=owner" in semantic
+    assert "Routing cues:" in semantic
     assert str(skill.path) not in semantic and skill.source not in semantic
 
 
@@ -143,7 +162,8 @@ def test_planning_renderer_includes_metadata_and_excludes_source_and_path(
     assert result.skill == (
         "Skill name: planning-reference\n"
         "Description: Write deterministic Python tests\n"
-        "Tags: python, testing\n"
+        "Routing relationships:\n- role=owner\n"
+        "Routing cues:\n- facet=operation; value=write-tests; primary=true\n- facet=subject; value=python; aliases=py\n"
         "Class: operation"
     )
     assert skill.source not in result.skill
@@ -158,7 +178,7 @@ def test_planning_renderer_reports_planning_version_identities(tmp_path: Path) -
 
     assert result.task_render_version == PLANNING_RENDER_VERSION
     assert result.prompt_version == PLANNING_PROMPT_VERSION
-    assert result.skill_render_version == "task-skill-fields-v1"
+    assert result.skill_render_version == "task-skill-routing-signature-v2"
 
 
 def test_existing_task_rendering_remains_byte_identical() -> None:
@@ -206,7 +226,11 @@ def _complete_prompt_with_exact_tokens(
                 {
                     "name": "python-tests",
                     "description": "Write deterministic Python tests",
-                    "tags": ("python", "testing"),
+                    "cues": (
+                        RoutingCue("operation", "write-tests", primary=True),
+                        RoutingCue("subject", "python", ("py",)),
+                    ),
+                    "relationships": (RoutingRelationship("owner"),),
                     "skill_class": "operation",
                 },
             )
@@ -242,8 +266,9 @@ def test_inventory_rejects_duplicates_and_bounds(tmp_path: Path) -> None:
     "field, value",
     [
         ("name", "Not Canonical"),
+        ("name", " valid-name"),
         ("description", ""),
-        ("tags", ["bad tag"]),
+        ("cues", []),
         ("class", "planning"),
         ("source", "unknown"),
     ],
@@ -257,7 +282,8 @@ def test_candidate_authorization_and_bounds(
     metadata = {
         "name": "valid-name",
         "description": "desc",
-        "tags": [],
+        "cues": [{"facet": "operation", "value": "write-tests", "primary": True}],
+        "relationships": [{"role": "owner"}],
         "class": "operation",
         "source": "project",
         "path": str(path),
@@ -269,7 +295,7 @@ def test_candidate_authorization_and_bounds(
     outside.write_text("skill", encoding="utf-8")
     metadata["name"] = "valid-name"
     metadata["description"] = "desc"
-    metadata["tags"] = []
+    metadata["cues"] = [{"facet": "operation", "value": "write-tests", "primary": True}]
     metadata["class"] = "operation"
     metadata["source"] = "project"
     metadata["path"] = str(outside)
@@ -286,7 +312,8 @@ def test_candidate_source_must_match_its_authorized_root(tmp_path: Path) -> None
     metadata = {
         "name": "valid-name",
         "description": "desc",
-        "tags": ["valid"],
+        "cues": [{"facet": "operation", "value": "write-tests", "primary": True}],
+        "relationships": [{"role": "owner"}],
         "class": "operation",
         "source": "global",
         "path": str(path),
@@ -298,6 +325,24 @@ def test_candidate_source_must_match_its_authorized_root(tmp_path: Path) -> None
                 "project": (project_root,),
                 "global": (global_root,),
             },
+        )
+
+
+def test_old_flat_candidate_metadata_is_rejected(tmp_path: Path) -> None:
+    path = tmp_path / "skill" / "SKILL.md"
+    path.parent.mkdir()
+    path.write_text("skill", encoding="utf-8")
+    with pytest.raises(SkillRankingInputError, match="structured cues"):
+        SkillCandidate.from_metadata(
+            {
+                "name": "legacy",
+                "description": "legacy metadata",
+                "tags": ["operation"],
+                "class": "operation",
+                "source": "project",
+                "path": str(path),
+            },
+            approved_roots=[tmp_path],
         )
 
 
@@ -315,7 +360,9 @@ def test_candidate_default_classes_remain_authorized(
         {
             "name": "valid-name",
             "description": "desc",
-            "tags": ["Valid"],
+            "schema_version": "1.0",
+            "cues": [{"facet": "operation", "value": "write-tests", "primary": True}],
+            "relationships": [{"role": "owner"}],
             "class": skill_class,
             "source": "project",
             "path": str(path),
@@ -324,7 +371,7 @@ def test_candidate_default_classes_remain_authorized(
     )
 
     assert candidate.skill_class == skill_class
-    assert candidate.tags == ("valid",)
+    assert candidate.cues[0].value == "write-tests"
 
 
 def test_candidate_planning_class_requires_explicit_authorization(
@@ -336,7 +383,9 @@ def test_candidate_planning_class_requires_explicit_authorization(
     metadata = {
         "name": "planning-reference",
         "description": "planning context",
-        "tags": ["Planning"],
+        "schema_version": "1.0",
+        "cues": [{"facet": "operation", "value": "plan", "primary": True}],
+        "relationships": [{"role": "owner"}],
         "class": SkillClass.PLANNING.value,
         "source": "project",
         "path": str(path),
@@ -351,7 +400,49 @@ def test_candidate_planning_class_requires_explicit_authorization(
         allowed_classes=(SkillClass.PLANNING.value,),
     )
     assert candidate.skill_class == SkillClass.PLANNING.value
-    assert candidate.tags == ("planning",)
+    assert candidate.cues[0].value == "plan"
+
+
+def test_candidate_resolves_repository_local_facets_after_path_authorization(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / ".git").mkdir()
+    (tmp_path / "skill-facets.json").write_text(
+        json.dumps(
+            {
+                "namespace": "repo",
+                "facets": [
+                    {
+                        "name": "audience",
+                        "meaning": "Audience that changes ownership",
+                        "values": [{"value": "operators", "aliases": ["ops team"]}],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    path = tmp_path / "skill" / "SKILL.md"
+    path.parent.mkdir()
+    path.write_text("skill", encoding="utf-8")
+    candidate = SkillCandidate.from_metadata(
+        {
+            "name": "local-routing",
+            "description": "Use when routing operations work",
+            "schema_version": "1.0",
+            "cues": [
+                {"facet": "operation", "value": "route", "primary": True},
+                {"facet": "repo:audience", "value": "operators"},
+            ],
+            "relationships": [{"role": "owner"}],
+            "class": "operation",
+            "source": "project",
+            "path": str(path),
+        },
+        approved_roots=[tmp_path],
+    )
+    local = next(cue for cue in candidate.cues if cue.facet == "repo:audience")
+    assert local.aliases == ("ops team",)
 
 
 @pytest.mark.parametrize(
@@ -370,7 +461,8 @@ def test_planning_only_candidates_reject_nonplanning_classes(
             {
                 "name": "valid-name",
                 "description": "desc",
-                "tags": ["valid"],
+                "cues": [{"facet": "operation", "value": "plan", "primary": True}],
+                "relationships": [{"role": "owner"}],
                 "class": skill_class,
                 "source": "project",
                 "path": str(path),
@@ -384,7 +476,7 @@ def test_planning_only_candidates_reject_nonplanning_classes(
     "field, value",
     [
         ("name", "Not Canonical"),
-        ("tags", ["bad tag"]),
+        ("cues", []),
         ("source", "unknown"),
     ],
 )
@@ -397,7 +489,8 @@ def test_planning_class_authorization_preserves_candidate_controls(
     metadata = {
         "name": "planning-reference",
         "description": "planning context",
-        "tags": ["planning"],
+        "cues": [{"facet": "operation", "value": "plan", "primary": True}],
+        "relationships": [{"role": "owner"}],
         "class": SkillClass.PLANNING.value,
         "source": "project",
         "path": str(path),
@@ -415,7 +508,7 @@ def test_planning_class_authorization_preserves_candidate_controls(
     outside.write_text("skill", encoding="utf-8")
     metadata.update(
         name="planning-reference",
-        tags=["planning"],
+        cues=[{"facet": "operation", "value": "plan", "primary": True}],
         source="project",
         path=str(outside),
     )

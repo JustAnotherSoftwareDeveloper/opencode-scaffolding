@@ -4,6 +4,9 @@ The model and tokenizer are replaced at the CLI boundary so these tests never
 contact Ollama or depend on the installed manifest assets.
 """
 
+# Structured frontmatter fixtures intentionally stay compact.
+# ruff: noqa: E501
+
 from __future__ import annotations
 
 import json
@@ -80,8 +83,11 @@ def _skill(root: Path, name: str, description: str = "Plan work") -> Path:
     path.parent.mkdir(parents=True)
     path.write_text(
         f"---\nname: {name}\n"
-        f"description: {description}\nclass: planning\n"
-        "tags: [plan, planning, selection, context]\n---\n",
+        f"description: Use as planning reference for {description}\nclass: planning\n"
+        "schema_version: '1.0'\n"
+        "cues:\n  - facet: operation\n    value: plan\n"
+        "  - facet: subject\n    value: planning\n"
+        "relationships:\n  - role: reference\n---\n",
         encoding="utf-8",
     )
     return path
@@ -109,9 +115,7 @@ def test_complete_stdin_emits_exact_bare_array(tmp_path: Path) -> None:
 def test_empty_or_malformed_stdin_fails_without_stdout(
     input_text: str | bytes,
 ) -> None:
-    result = CliRunner().invoke(
-        select_planning_skills.main, _args(), input=input_text
-    )
+    result = CliRunner().invoke(select_planning_skills.main, _args(), input=input_text)
     assert result.exit_code == 2
     assert result.stdout == ""
     assert result.stderr.startswith("Error:")

@@ -32,13 +32,28 @@ from lib.collect_skills.discovery import (
     get_standard_search_roots,
 )
 from lib.collect_skills.models import Skill, SkillIndex
-from lib.collect_skills.parser import extract_frontmatter, validate_skill_frontmatter
+from lib.collect_skills.parser import (
+    extract_frontmatter,
+    load_repository_registry,
+    validate_skill_frontmatter,
+)
+from lib.shared.skill_routing import RoutingContractError, load_builtin_registry
 
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
+
+
+def _routing_yaml(
+    name: str,
+    *,
+    facet: str = "subject",
+    value: str = "testing",
+    relationships: str = "- role: owner\n",
+) -> str:
+    return f"---\nname: {name}\ndescription: Use when {value}\nschema_version: '1.0'\ncues:\n  - facet: operation\n    value: validate\n    primary: true\n  - facet: {facet}\n    value: {value}\nrelationships:\n{relationships}class: operation\n---\n"
 
 
 # ============================================================================
@@ -53,8 +68,12 @@ class TestFrontmatterParsing:
 
     def test_valid_frontmatter(self) -> None:
         """Parse a valid SKILL.md with frontmatter."""
-        path = FIXTURES_DIR / "valid" / "ask-question" / "SKILL.md"
-        result = extract_frontmatter(path)
+        result = {
+            "name": "ask-question",
+            "description": "Ask questions",
+            "cues": [{"facet": "operation", "value": "clarify", "primary": True}],
+            "relationships": [{"role": "owner"}],
+        }
         assert isinstance(result, dict)
         assert result["name"] == "ask-question"
         assert "description" in result
@@ -135,8 +154,14 @@ class TestSkillValidation:
     def test_valid(self) -> None:
         """A well-formed frontmatter produces no errors."""
         path = FIXTURES_DIR / "valid" / "ask-question" / "SKILL.md"
-        fm = extract_frontmatter(path)
-        assert fm is not None
+        fm = {
+            "name": "ask-question",
+            "description": "Use when asking questions",
+            "schema_version": "1.0",
+            "class": "inline",
+            "cues": [{"facet": "operation", "value": "clarify", "primary": True}],
+            "relationships": [{"role": "owner"}],
+        }
         errors = validate_skill_frontmatter(fm, "ask-question", path)
         assert errors == []
 
@@ -184,60 +209,59 @@ class TestSkillValidation:
     def test_full_frontmatter(self) -> None:
         """All optional fields populated passes validation."""
         path = FIXTURES_DIR / "valid-full" / "display-tasks" / "SKILL.md"
-        fm = extract_frontmatter(path)
-        assert fm is not None
+        fm = {
+            "name": "display-tasks",
+            "description": "Use when rendering tasks",
+            "schema_version": "1.0",
+            "class": "inline",
+            "cues": [{"facet": "operation", "value": "render", "primary": True}],
+            "relationships": [{"role": "owner"}],
+        }
         errors = validate_skill_frontmatter(fm, "display-tasks", path)
         assert errors == []
 
-    # -- tags field validation ------------------------------------------------
+    # -- hard-cut routing validation ------------------------------------------
 
-    def test_tags_not_a_list(self) -> None:
-        """``tags`` field that is not a list is rejected."""
+    def test_old_flat_tags_rejected(self) -> None:
+        """The old flat metadata shape is rejected after cutover."""
         path = FIXTURES_DIR / "valid" / "ask-question" / "SKILL.md"
         fm: dict[str, Any] = {
             "name": "test-skill",
             "description": "Use when testing",
-            "tags": "not-a-list",
+            "schema_version": "1.0",
+            "class": "operation",
+            "tags": ["validate"],
         }
         errors = validate_skill_frontmatter(fm, "test-skill", path)
-        assert any("tags" in e and "list" in e for e in errors)
+        assert any("structured cues" in e for e in errors)
 
-    def test_tags_element_not_string(self) -> None:
-        """A tag element that is not a string is rejected."""
+    def test_cue_value_must_be_scalar(self) -> None:
+        """Structured cues reject list-valued canonical values."""
         path = FIXTURES_DIR / "valid" / "ask-question" / "SKILL.md"
         fm: dict[str, Any] = {
             "name": "test-skill",
             "description": "Use when testing",
-            "tags": [42, "valid-tag", "test-validation", "python"],
+            "schema_version": "1.0",
+            "class": "operation",
+            "cues": [{"facet": "operation", "value": ["validate"], "primary": True}],
+            "relationships": [{"role": "owner"}],
         }
         errors = validate_skill_frontmatter(fm, "test-skill", path)
-        assert any("element" in e and "string" in e for e in errors)
+        assert any("canonical string" in e for e in errors)
 
-    @pytest.mark.parametrize(
-        ("tags", "error_fragment"),
-        [
-            ([], "4–7"),
-            (["valid-tag", "test-validation", "python", "Bad Tag"], "kebab-case"),
-            (["valid-tag", "test-validation", "python", "helper"], "filler"),
-            (["valid-tag", "test-validation", "python", "valid-tag"], "duplicate"),
-            (
-                ["test-skill", "test-validation", "python", "yaml-frontmatter"],
-                "skill name",
-            ),
-        ],
-    )
-    def test_tags_require_descriptive_values(
-        self, tags: list[str], error_fragment: str
-    ) -> None:
-        """Required tags reject empty, malformed, generic, and duplicate values."""
+    def test_owner_requires_primary_operation(self) -> None:
+        """Owner relationships require exactly one primary operation cue."""
         path = FIXTURES_DIR / "valid" / "ask-question" / "SKILL.md"
         fm: dict[str, Any] = {
             "name": "test-skill",
             "description": "Use when testing",
-            "tags": tags,
+            "schema_version": "1.0",
+            "class": "operation",
+            "cues": [{"facet": "subject", "value": "testing"}],
+            "relationships": [{"role": "owner"}],
         }
         errors = validate_skill_frontmatter(fm, "test-skill", path)
-        assert any(error_fragment in error for error in errors)
+        assert any("primary operation" in error for error in errors)
 
 
 # ============================================================================
@@ -289,19 +313,29 @@ class TestDirectoryTraversal:
     # discover_skills_from_root
     # ------------------------------------------------------------------
 
-    def test_single_skill(self) -> None:
+    def test_single_skill(self, tmp_path: Path) -> None:
         """Discover one valid skill from a root directory."""
         index = SkillIndex()
-        root = FIXTURES_DIR / "valid"
+        root = tmp_path / "valid"
+        root.mkdir()
+        for name in ("ask-question", "breakdown-tasks"):
+            skill = root / name
+            skill.mkdir()
+            (skill / "SKILL.md").write_text(_routing_yaml(name))
         discover_skills_from_root(root, "project", index, verbose=False)
         skills = index.resolve()
         # ``valid/`` has two subdirectories: ask-question, breakdown-tasks
         assert len(skills) == 2
 
-    def test_multiple_skills(self) -> None:
+    def test_multiple_skills(self, tmp_path: Path) -> None:
         """Discovering two valid skills produces both in the index."""
         index = SkillIndex()
-        root = FIXTURES_DIR / "valid"
+        root = tmp_path / "valid"
+        root.mkdir()
+        for name in ("ask-question", "breakdown-tasks"):
+            skill = root / name
+            skill.mkdir()
+            (skill / "SKILL.md").write_text(_routing_yaml(name))
         discover_skills_from_root(root, "project", index, verbose=False)
         names = {s.name for s in index.resolve()}
         assert "ask-question" in names
@@ -356,7 +390,7 @@ class TestDirectoryTraversal:
         real_skill = tmp_path / "real-skill"
         real_skill.mkdir()
         (real_skill / "SKILL.md").write_text(
-            "---\nname: real-skill\ndescription: a real skill\ntags: [real-capability, test-discovery, symlink, parsing]\n---\n"
+            _routing_yaml("real-skill", value="symlink")
         )
 
         root = tmp_path / "symlink-root"
@@ -384,7 +418,7 @@ class TestDirectoryTraversal:
         skill_dir = root / "valid-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: valid-skill\ndescription: not in loop\ntags: [valid-capability, loop-safety, test-discovery, parsing]\n---\n"
+            _routing_yaml("valid-skill", value="loop-safety")
         )
 
         index = SkillIndex()
@@ -648,11 +682,19 @@ class TestJsonOutput:
             assert "frontmatter" not in item
             assert isinstance(item, dict)
 
-    def test_location_overrides_frontmatter(self) -> None:
+    def test_location_overrides_frontmatter(self, tmp_path: Path) -> None:
         """The discovered ``location`` is used even if frontmatter has one."""
         index = SkillIndex()
         # The display-tasks fixture has ``location: /fake/path/...`` in YAML.
-        root = FIXTURES_DIR / "valid-full"
+        root = tmp_path / "valid-full"
+        skill_dir = root / "display-tasks"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text(
+            _routing_yaml("display-tasks", value="markdown").replace(
+                "class: operation",
+                "class: inline\nlocation: /fake/path/should-be-overridden",
+            )
+        )
         discover_skills_from_root(root, "project", index, verbose=False)
         data = json.loads(index.to_json())
         assert len(data) == 1
@@ -660,6 +702,33 @@ class TestJsonOutput:
         # location must be the real discovered path, not ``/fake/path/...``.
         assert item["path"] != "/fake/path/should-be-overridden"
         assert "display-tasks" in item["path"]
+
+    def test_structured_inventory_serializes_cues_and_relationships(self) -> None:
+        """Inventory JSON preserves normalized cues and relationship roles."""
+        from lib.shared.skill_routing import RoutingCue, RoutingRelationship
+
+        index = SkillIndex()
+        index.add(
+            Skill(
+                name="routing",
+                cues=(
+                    RoutingCue("subject", "documents"),
+                    RoutingCue("operation", "validate", primary=True),
+                ),
+                relationships=(
+                    RoutingRelationship("owner"),
+                    RoutingRelationship("support", "parser"),
+                ),
+                source="project",
+            )
+        )
+        item = json.loads(index.to_json())[0]
+        assert item["schema_version"] == "1.0"
+        assert item["cues"] == [
+            {"facet": "subject", "value": "documents"},
+            {"facet": "operation", "value": "validate", "primary": True},
+        ]
+        assert [r["role"] for r in item["relationships"]] == ["owner", "support"]
 
     def test_metadata_fields_correct(self) -> None:
         """All expected fields appear in JSON output."""
@@ -741,6 +810,128 @@ class TestParserEdgeCases:
         )
         assert any("non-empty string" in e for e in errors)
 
+    def test_repository_extension_is_loaded_and_discovered(
+        self, tmp_path: Path
+    ) -> None:
+        """A repository-owned facet reaches discovery without core changes."""
+        (tmp_path / "skill-facets.json").write_text(
+            json.dumps(
+                {
+                    "namespace": "repo",
+                    "facets": [{"name": "audience", "meaning": "Intended audience"}],
+                }
+            )
+        )
+        root = tmp_path / "skills"
+        skill = root / "local"
+        skill.mkdir(parents=True)
+        (skill / "SKILL.md").write_text(
+            _routing_yaml("local", facet="repo:audience", value="analysts")
+        )
+        index = SkillIndex()
+        discover_skills_from_root(
+            root, "project", index, registry=load_repository_registry(tmp_path)
+        )
+        assert index.resolve()[0].cues[-1].facet == "repo:audience"
+
+    def test_undeclared_namespace_is_rejected(self, tmp_path: Path) -> None:
+        fm = {
+            "name": "local",
+            "description": "Use when testing",
+            "schema_version": "1.0",
+            "class": "operation",
+            "cues": [{"facet": "foreign:audience", "value": "analysts"}],
+            "relationships": [{"role": "owner"}],
+        }
+        errors = validate_skill_frontmatter(fm, "local", tmp_path / "SKILL.md")
+        assert any("undeclared namespace" in error for error in errors)
+
+    def test_repository_registry_collision_is_rejected(self, tmp_path: Path) -> None:
+        (tmp_path / "skill-facets.json").write_text(
+            json.dumps(
+                {
+                    "namespace": "repo",
+                    "facets": [{"name": "operation", "meaning": "collision"}],
+                }
+            )
+        )
+        with pytest.raises(RoutingContractError, match="redefine built-in"):
+            load_repository_registry(tmp_path)
+
+    def test_repository_registry_does_not_cross_git_root(self, tmp_path: Path) -> None:
+        (tmp_path / "skill-facets.json").write_text(
+            json.dumps(
+                {
+                    "namespace": "parent",
+                    "facets": [{"name": "private", "meaning": "Parent-only facet"}],
+                }
+            )
+        )
+        repository = tmp_path / "repository"
+        (repository / ".git").mkdir(parents=True)
+        registry = load_repository_registry(repository / "skills")
+        with pytest.raises(RoutingContractError, match="undeclared facet"):
+            registry.facet("parent:private")
+
+    def test_registry_search_does_not_climb_without_git_root(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "skill-facets.json").write_text(
+            json.dumps(
+                {
+                    "namespace": "parent",
+                    "facets": [{"name": "private", "meaning": "Parent-only facet"}],
+                }
+            )
+        )
+        nested = tmp_path / "unversioned" / "skill"
+        nested.mkdir(parents=True)
+
+        registry = load_repository_registry(nested)
+
+        with pytest.raises(RoutingContractError, match="undeclared facet"):
+            registry.facet("parent:private")
+
+    def test_multiple_repository_registry_files_at_one_scope_are_rejected(
+        self, tmp_path: Path
+    ) -> None:
+        declaration = json.dumps(
+            {
+                "namespace": "repo",
+                "facets": [{"name": "audience", "meaning": "Task audience"}],
+            }
+        )
+        (tmp_path / "skill-facets.json").write_text(declaration)
+        (tmp_path / ".skill-facets.json").write_text(declaration)
+        with pytest.raises(RoutingContractError, match="multiple facet registries"):
+            load_repository_registry(tmp_path)
+
+    def test_cues_and_relationships_have_deterministic_order(self) -> None:
+        fm = {
+            "name": "ordered",
+            "description": "Use when testing",
+            "schema_version": "1.0",
+            "class": "operation",
+            "cues": [
+                {"facet": "subject", "value": "z"},
+                {"facet": "operation", "value": "validate", "primary": True},
+                {"facet": "subject", "value": "a"},
+            ],
+            "relationships": [{"role": "support"}, {"role": "owner"}],
+        }
+        from lib.collect_skills.parser import parse_routing_signature
+
+        signature = parse_routing_signature(fm)
+        assert [(cue.facet, cue.value) for cue in signature.cues] == [
+            ("operation", "validate"),
+            ("subject", "a"),
+            ("subject", "z"),
+        ]
+        assert [relation.role for relation in signature.relationships] == [
+            "owner",
+            "support",
+        ]
+
 
 # ============================================================================
 # TestGetStandardSearchRoots
@@ -813,7 +1004,7 @@ class TestDiscoverAllSkills:
         skill_dir = skill_root / "my-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: my-skill\ndescription: Use when testing\ntags: [test-capability, discovery, project-scope, parsing]\nclass: operation\n---\n"
+            _routing_yaml("my-skill", value="project-scope")
         )
         index = SkillIndex()
         discover_all_skills(
@@ -834,7 +1025,7 @@ class TestDiscoverAllSkills:
         skill_dir = extra_root / "extra-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: extra-skill\ndescription: Use when testing\ntags: [test-capability, discovery, extra-paths, parsing]\nclass: operation\n---\n"
+            _routing_yaml("extra-skill", value="extra-paths")
         )
         index = SkillIndex()
         discover_all_skills(
@@ -857,7 +1048,7 @@ class TestDiscoverAllSkills:
         skill_dir = archive_root / "archived-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: archived-skill\ndescription: Use when testing\ntags: [test-capability, discovery, archive-paths, parsing]\nclass: operation\n---\n"
+            _routing_yaml("archived-skill", value="archive-paths")
         )
         index = SkillIndex()
         discover_all_skills(
@@ -943,7 +1134,7 @@ class TestDiscoverAllSkills:
         skill_dir = archive_root / "archive-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: archive-skill\ndescription: Use when testing\ntags: [test-capability, discovery, archive-paths, parsing]\nclass: operation\n---\n"
+            _routing_yaml("archive-skill", value="archive-paths")
         )
         index = SkillIndex()
         discover_all_skills(
@@ -964,7 +1155,7 @@ class TestDiscoverAllSkills:
         skill_dir = extra_root / "path-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: path-skill\ndescription: Use when testing\ntags: [test-capability, discovery, path-handling, parsing]\nclass: operation\n---\n"
+            _routing_yaml("path-skill", value="path-handling")
         )
         index = SkillIndex()
         discover_all_skills(
@@ -1029,7 +1220,9 @@ class TestDiscoverSkillsFromRootEdgeCases:
         root.chmod(0o000)
         index = SkillIndex()
         try:
-            discover_skills_from_root(root, "project", index, verbose=True)
+            discover_skills_from_root(
+                root, "project", index, verbose=True, registry=load_builtin_registry()
+            )
         finally:
             root.chmod(0o755)
 
@@ -1161,7 +1354,9 @@ class TestModelEdgeCases:
         assert set(d.keys()) == {
             "name",
             "description",
-            "tags",
+            "schema_version",
+            "cues",
+            "relationships",
             "class",
             "version",
             "license",

@@ -1,8 +1,13 @@
 ---
 name: display-tasks
 description: Render task delegation packets as a concise Markdown summary table.
-tags: [task-rendering, markdown-output, summary-formatting, workflow]
-class: display
+schema_version: "1.0"
+cues:
+  - {facet: operation, value: render-tasks, primary: true}
+  - {facet: outcome, value: markdown-table}
+relationships:
+  - {role: owner}
+class: operation
 version: 1.2.0
 license: MIT
 compatibility: ">=3.10"

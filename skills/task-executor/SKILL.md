@@ -1,7 +1,14 @@
 ---
 name: task-executor
 description: "Use when executing exactly one canonical task packet inline without worker delegation."
-tags: [task-execution, task-packet-json, inline-execution, file-boundaries, delegation-denial]
+schema_version: "1.0"
+cues:
+  - {facet: operation, value: "execute-task-packet", primary: true}
+  - {facet: subject, value: "canonical task packet"}
+  - {facet: constraint, value: "single inline execution"}
+  - {facet: outcome, value: "verified task result"}
+relationships:
+  - {role: owner, rationale: "owns single-packet inline execution"}
 class: inline
 ---
 

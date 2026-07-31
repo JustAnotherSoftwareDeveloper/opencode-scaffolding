@@ -30,6 +30,12 @@ from lib.collect_skills.discovery import (
     discover_skills_from_root,
 )
 from lib.collect_skills.models import SkillIndex
+from lib.shared.skill_routing import load_builtin_registry
+
+
+def _routing_yaml(name: str, value: str = "testing") -> str:
+    return f"---\nname: {name}\ndescription: Use when {value}\nschema_version: '1.0'\ncues:\n  - facet: operation\n    value: validate\n    primary: true\n  - facet: subject\n    value: {value}\nrelationships:\n  - role: owner\nclass: operation\n---\n"
+
 
 # ============================================================================
 # Test discovery edge cases
@@ -48,7 +54,9 @@ class TestDiscoveryEdgeCases:
         root.chmod(0o000)
         index = SkillIndex()
         try:
-            discover_skills_from_root(root, "project", index, verbose=True)
+            discover_skills_from_root(
+                root, "project", index, verbose=True, registry=load_builtin_registry()
+            )
             captured = capsys.readouterr()
             assert "permission denied" in captured.err
         finally:
@@ -61,7 +69,9 @@ class TestDiscoveryEdgeCases:
         root.chmod(0o000)
         index = SkillIndex()
         try:
-            discover_skills_from_root(root, "project", index, verbose=False)
+            discover_skills_from_root(
+                root, "project", index, verbose=False, registry=load_builtin_registry()
+            )
             assert index.resolve() == []
         finally:
             root.chmod(0o755)
@@ -75,9 +85,7 @@ class TestDiscoveryEdgeCases:
         # Create a valid skill alongside the loop
         skill_dir = root / "valid"
         skill_dir.mkdir()
-        (skill_dir / "SKILL.md").write_text(
-            "---\nname: valid\ndescription: Use when testing\ntags: [test-capability, discovery, symlink-handling, parsing]\nclass: operation\n---\n"
-        )
+        (skill_dir / "SKILL.md").write_text(_routing_yaml("valid", "symlink-handling"))
         # Create a symlink inside loop_dir that points to its parent (creating a loop)
         link = loop_dir / "back"
         link.symlink_to(root, target_is_directory=True)
@@ -102,7 +110,7 @@ class TestDiscoveryEdgeCases:
         skill_dir = root / "ok-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
-            "---\nname: ok-skill\ndescription: Use when testing\ntags: [test-capability, discovery, permission-handling, parsing]\nclass: operation\n---\n"
+            _routing_yaml("ok-skill", "permission-handling")
         )
         index = SkillIndex()
         discover_skills_from_root(root, "project", index, verbose=True)
@@ -557,7 +565,7 @@ class TestModuleMainGuards:
         d = tmp_path / "test-skill"
         d.mkdir()
         (d / "SKILL.md").write_text(
-            "---\nname: test-skill\ndescription: Use when testing\ntags: [test-capability, skill-validation, yaml-frontmatter, python]\nclass: operation\n---\n\n## Docs\n\nContent.\n"
+            _routing_yaml("test-skill") + "\n## Docs\n\nContent.\n"
         )
         ref = d / "reference"
         ref.mkdir()
@@ -617,9 +625,7 @@ class TestDiscoverAllSkillsDefaults:
         skill_root.mkdir(parents=True)
         skill_dir = skill_root / "my-skill"
         skill_dir.mkdir()
-        (skill_dir / "SKILL.md").write_text(
-            "---\nname: my-skill\ndescription: Use when testing\ntags: [test-capability, discovery, project-scope, parsing]\nclass: operation\n---\n"
-        )
+        (skill_dir / "SKILL.md").write_text(_routing_yaml("my-skill", "project-scope"))
 
         index = SkillIndex()
         # Call with None for config_dir and extra_paths to trigger defaults
@@ -648,9 +654,7 @@ class TestDiscoverAllSkillsDefaults:
         skill_root.mkdir(parents=True)
         skill_dir = skill_root / "my-skill"
         skill_dir.mkdir()
-        (skill_dir / "SKILL.md").write_text(
-            "---\nname: my-skill\ndescription: Use when testing\ntags: [test-capability, discovery, project-scope, parsing]\nclass: operation\n---\n"
-        )
+        (skill_dir / "SKILL.md").write_text(_routing_yaml("my-skill", "project-scope"))
 
         monkeypatch.setattr("lib.collect_skills.discovery.Path.cwd", lambda: project)
 

@@ -1,5 +1,8 @@
 """Offline unit tests for dynamic planning-class selection."""
 
+# Structured frontmatter fixtures intentionally stay compact.
+# ruff: noqa: E501
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -15,6 +18,7 @@ from lib.generate_task_json.ranker import (
     SkillRankingInputError,
 )
 from lib.select_planning_skills.policy import PlanningSelectionPolicy
+from lib.shared.skill_routing import RoutingCue, RoutingRelationship
 
 
 def policy(
@@ -29,10 +33,21 @@ def write_skill(
     skill_dir = root / name
     skill_dir.mkdir(parents=True, exist_ok=True)
     skill_file = skill_dir / "SKILL.md"
+    planning = skill_class == "planning"
+    description = (
+        f"Use as planning reference for {name}"
+        if planning
+        else f"Use when executing {name}"
+    )
+    primary = "" if planning else "    primary: true\n"
+    relationship = "reference" if planning else "owner"
     skill_file.write_text(
         f"---\nname: {name}\n"
-        f"description: {name} description\n"
-        "tags: [planning, context, reference, selection]\n"
+        f"description: {description}\n"
+        "schema_version: '1.0'\n"
+        f"cues:\n  - facet: operation\n    value: plan\n{primary}"
+        "  - facet: subject\n    value: planning\n"
+        f"relationships:\n  - role: {relationship}\n"
         f"class: {skill_class}\n---\n{body}\n",
         encoding="utf-8",
     )
@@ -85,7 +100,7 @@ def test_project_precedes_global_and_nonplanning_skills_are_filtered(
     scorer = InjectedScorer([0.9])
     assert select(project, config, scorer) == ("shared",)
     assert len(scorer.calls) == 1
-    assert "shared description" in scorer.calls[0][1][0]
+    assert "Use as planning reference for shared" in scorer.calls[0][1][0]
     assert "global body" not in scorer.calls[0][1][0]
 
 
@@ -213,8 +228,9 @@ def test_unknown_reconciliation_fails(
     class ChangingName:
         original_index = 0
         path = tmp_path / "candidate" / "SKILL.md"
-        description = "description"
-        tags = ("planning",)
+        description = "Use as planning reference for reconciliation"
+        cues = (RoutingCue("operation", "plan"),)
+        relationships = (RoutingRelationship("reference"),)
         skill_class = "planning"
         source = "project"
         _calls = 0
@@ -239,8 +255,13 @@ def make_candidate(tmp_path: Path, name: str, index: int) -> SkillCandidate:
     return SkillCandidate.from_metadata(
         {
             "name": name,
-            "description": "description",
-            "tags": ["planning", "context", "reference", "selection"],
+            "description": "Use as planning reference for testing",
+            "schema_version": "1.0",
+            "cues": [
+                {"facet": "operation", "value": "plan"},
+                {"facet": "subject", "value": "planning"},
+            ],
+            "relationships": [{"role": "reference"}],
             "class": "planning",
             "source": "project",
             "path": str(path),

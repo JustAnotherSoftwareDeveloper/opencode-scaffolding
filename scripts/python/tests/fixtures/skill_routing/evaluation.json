@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "render_version": "task-skill-routing-signature-v2",
+  "case_families": [
+    "owner-versus-reference",
+    "unrelated-domain",
+    "near-neighbor",
+    "absent-lexical-overlap",
+    "aliases",
+    "hierarchy",
+    "repository-local-facet",
+    "namespace-failure",
+    "multi-skill-task"
+  ],
+  "registry": {
+    "namespace": "orchard",
+    "facets": [
+      {
+        "name": "crop-stage",
+        "meaning": "Crop growth stage that changes routing",
+        "examples": ["postharvest"],
+        "values": [
+          {
+            "value": "postharvest",
+            "aliases": ["post-harvest"],
+            "parents": ["harvest"]
+          }
+        ]
+      }
+    ]
+  },
+  "skills": [
+    {
+      "name": "ledger-reconciliation",
+      "schema_version": "1.0",
+      "description": "Owns balancing commercial ledger discrepancies into a reconciled close.",
+      "class": "operation",
+      "domain": "business",
+      "cues": [
+        {"facet": "operation", "value": "reconcile", "aliases": ["balance ledger"], "primary": true},
+        {"facet": "subject", "value": "commercial ledger", "aliases": ["accounts payable"]},
+        {"facet": "outcome", "value": "reconciled close"}
+      ],
+      "relationships": [{"role": "owner"}]
+    },
+    {
+      "name": "ledger-audit-reference",
+      "schema_version": "1.0",
+      "description": "Reference material for checking controls around a commercial ledger close.",
+      "class": "documentation",
+      "domain": "business",
+      "cues": [
+        {"facet": "operation", "value": "audit", "aliases": ["check controls"]},
+        {"facet": "subject", "value": "commercial ledger"}
+      ],
+      "relationships": [{"role": "reference", "target": "ledger-reconciliation"}]
+    },
+    {
+      "name": "orchard-harvest-window",
+      "schema_version": "1.0",
+      "description": "Owns field recommendations for choosing a fruit harvest window.",
+      "class": "operation",
+      "domain": "agriculture",
+      "cues": [
+        {"facet": "operation", "value": "recommend", "aliases": ["choose"], "primary": true},
+        {"facet": "subject", "value": "fruit maturity"},
+        {"facet": "orchard:crop-stage", "value": "postharvest"}
+      ],
+      "relationships": [{"role": "owner"}]
+    },
+    {
+      "name": "orchard-irrigation-schedule",
+      "schema_version": "1.0",
+      "description": "Owns irrigation timing recommendations for growing orchard trees.",
+      "class": "operation",
+      "domain": "agriculture",
+      "cues": [
+        {"facet": "operation", "value": "schedule", "primary": true},
+        {"facet": "subject", "value": "orchard water"}
+      ],
+      "relationships": [{"role": "owner"}]
+    },
+    {
+      "name": "clinical-trial-safety-review",
+      "schema_version": "1.0",
+      "description": "Owns review of adverse-event evidence for clinical trial safety decisions.",
+      "class": "documentation",
+      "domain": "healthcare",
+      "cues": [
+        {"facet": "operation", "value": "review", "primary": true},
+        {"facet": "subject", "value": "adverse event"},
+        {"facet": "outcome", "value": "safety decision"}
+      ],
+      "relationships": [{"role": "owner"}]
+    },
+    {
+      "name": "museum-collection-catalog",
+      "schema_version": "1.0",
+      "description": "Owns cataloging provenance and conservation notes for museum collections.",
+      "class": "operation",
+      "domain": "arts",
+      "cues": [
+        {"facet": "operation", "value": "catalog", "aliases": ["inventory"], "primary": true},
+        {"facet": "subject", "value": "museum provenance"}
+      ],
+      "relationships": [{"role": "owner"}]
+    }
+  ],
+  "cases": [
+    {"id": "ledger-owner", "family": "owner-versus-reference", "input": "Balance ledger discrepancies and produce the reconciled close.", "expected": ["ledger-reconciliation"]},
+    {"id": "ledger-reference", "family": "owner-versus-reference", "input": "Check controls around the commercial ledger close without performing reconciliation.", "expected": ["ledger-audit-reference"]},
+    {"id": "orchard-neighbor", "family": "near-neighbor", "input": "Choose the post-harvest fruit maturity window, not an irrigation schedule.", "expected": ["orchard-harvest-window"]},
+    {"id": "orchard-irrigation", "family": "near-neighbor", "input": "Schedule orchard water for growing trees.", "expected": ["orchard-irrigation-schedule"]},
+    {"id": "clinical-no-overlap", "family": "absent-lexical-overlap", "input": "Decide if reported reactions make the study safe to continue.", "expected": ["clinical-trial-safety-review"]},
+    {"id": "museum-alias", "family": "aliases", "input": "Inventory the museum provenance notes.", "expected": ["museum-collection-catalog"]},
+    {"id": "orchard-hierarchy", "family": "hierarchy", "input": "Use the harvest-stage guidance for post-harvest fruit handling.", "expected": ["orchard-harvest-window"]},
+    {"id": "orchard-local-facet", "family": "repository-local-facet", "input": "Route a post-harvest crop-stage recommendation.", "expected": ["orchard-harvest-window"]},
+    {"id": "unrelated-finance-health", "family": "unrelated-domain", "input": "Schedule a hospital cafeteria menu and price the ingredients.", "expected": []},
+    {"id": "multi-domain", "family": "multi-skill-task", "input": "Reconcile the ledger, review trial safety evidence, and catalog museum provenance.", "expected": ["ledger-reconciliation", "clinical-trial-safety-review", "museum-collection-catalog"]}
+  ],
+  "invalid_metadata": [
+    {"id": "foreign-namespace", "facet": "foreign:secret", "reason": "undeclared namespace or facet"},
+    {"id": "builtin-redefinition", "facet": "operation", "reason": "cannot redefine built-in facet"}
+  ]
+}

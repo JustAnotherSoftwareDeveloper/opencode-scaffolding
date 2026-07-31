@@ -7,7 +7,13 @@ from pathlib import Path
 from typing import Any
 
 from lib.collect_skills.models import Skill, SkillIndex
-from lib.collect_skills.parser import extract_frontmatter, validate_skill_frontmatter
+from lib.collect_skills.parser import (
+    extract_frontmatter,
+    load_repository_registry,
+    parse_routing_signature,
+    validate_skill_frontmatter,
+)
+from lib.shared.skill_routing import RegistryResolution
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -106,6 +112,7 @@ def discover_skills_from_root(
     source: str,
     index: SkillIndex,
     verbose: bool = False,
+    registry: RegistryResolution | None = None,
 ) -> None:
     """Walk a single *root* directory and add discovered skills to *index*.
 
@@ -133,6 +140,9 @@ def discover_skills_from_root(
                 file=sys.stderr,
             )
         return
+
+    if registry is None:
+        registry = load_repository_registry(find_git_root(root) or root)
 
     if not root.is_dir():
         if verbose:
@@ -241,7 +251,9 @@ def discover_skills_from_root(
             continue
 
         # --- Validate ------------------------------------------------------
-        errors = validate_skill_frontmatter(frontmatter, dir_name, skill_file)
+        errors = validate_skill_frontmatter(
+            frontmatter, dir_name, skill_file, registry=registry
+        )
         if errors:
             if verbose:
                 for err in errors:
@@ -260,7 +272,7 @@ def discover_skills_from_root(
         compatibility: str = frontmatter.get("compatibility", "")
         metadata: dict[str, Any] = frontmatter.get("metadata", {})
         permission: str = frontmatter.get("permission", "")
-        tags: list[str] = frontmatter.get("tags", [])
+        signature = parse_routing_signature(frontmatter, registry)
 
         # Discovered location overrides any frontmatter `location` key.
         location: str = str(skill_file.resolve())
@@ -268,7 +280,9 @@ def discover_skills_from_root(
         skill = Skill(
             name=name,
             description=description,
-            tags=tags,
+            schema_version=signature.schema_version.value,
+            cues=signature.cues,
+            relationships=signature.relationships,
             class_=class_,
             version=version,
             license=license_,
@@ -311,6 +325,8 @@ def discover_all_skills(
     if extra_paths is None:
         extra_paths = []
 
+    registry = load_repository_registry(project_root)
+
     # --- 1. Standard search roots ------------------------------------------
     standard_roots = get_standard_search_roots(project_root, config_dir)
     for root, source in standard_roots:
@@ -319,7 +335,9 @@ def discover_all_skills(
                 f"[collect-skills] Scanning {source} root: {root}",
                 file=sys.stderr,
             )
-        discover_skills_from_root(root, source, index, verbose=verbose)
+        discover_skills_from_root(
+            root, source, index, verbose=verbose, registry=registry
+        )
 
     # --- 2. Extra paths ----------------------------------------------------
     for extra_root in extra_paths:
@@ -331,7 +349,9 @@ def discover_all_skills(
                 f"[collect-skills] Scanning extra root: {extra_path}",
                 file=sys.stderr,
             )
-        discover_skills_from_root(extra_path, "extra", index, verbose=verbose)
+        discover_skills_from_root(
+            extra_path, "extra", index, verbose=verbose, registry=registry
+        )
 
     # --- 3. Archive paths (optional) ---------------------------------------
     if include_archive:
@@ -354,5 +374,9 @@ def discover_all_skills(
                         file=sys.stderr,
                     )
                 discover_skills_from_root(
-                    archive_root, "archive", index, verbose=verbose
+                    archive_root,
+                    "archive",
+                    index,
+                    verbose=verbose,
+                    registry=registry,
                 )

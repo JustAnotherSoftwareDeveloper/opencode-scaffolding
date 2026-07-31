@@ -15,10 +15,10 @@ from typing import Any
 
 from lib.generate_task_json.ranker import SkillRankingInputError
 
-TASK_RENDER_VERSION = "task-skill-fields-v1"
-SKILL_RENDER_VERSION = "task-skill-fields-v1"
+TASK_RENDER_VERSION = "task-skill-routing-signature-v2"
+SKILL_RENDER_VERSION = "task-skill-routing-signature-v2"
 QWEN_PROMPT_VERSION = "qwen3-reranker-4b-classifier-v1"
-PLANNING_RENDER_VERSION = "planning-request-v1"
+PLANNING_RENDER_VERSION = "planning-routing-signature-v2"
 PLANNING_PROMPT_VERSION = "qwen3-reranker-4b-classifier-planning-v1"
 QWEN_MAX_TOKENS = 8192
 
@@ -37,6 +37,7 @@ SYSTEM_PREFIX = (
     '"no".<|im_end|>\n<|im_start|>user\n'
 )
 ASSISTANT_SUFFIX = "<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+_RESERVED_TOKEN_PREFIX = "<|"
 # Compatibility names used by the detached evaluation harness.
 PREFIX = SYSTEM_PREFIX
 SUFFIX = ASSISTANT_SUFFIX
@@ -94,14 +95,104 @@ def render_planning_request(description: str) -> str:
     return f"Planning request: {description}"
 
 
+def _structured_values(candidate: Any, field: str) -> Sequence[Any]:
+    values = _value(candidate, field)
+    if not isinstance(values, Sequence) or isinstance(values, (str, bytes)):
+        raise SkillRankingInputError(f"candidate {field} must be a sequence")
+    return values
+
+
+def _cue_value(cue: Any, field: str) -> Any:
+    return cue.get(field) if isinstance(cue, Mapping) else getattr(cue, field, None)
+
+
+def _render_text(value: Any, field: str) -> str:
+    if (
+        not isinstance(value, str)
+        or not value.strip()
+        or value != value.strip()
+        or "\n" in value
+        or "\r" in value
+    ):
+        raise SkillRankingInputError(
+            f"candidate {field} must be a trimmed single-line string"
+        )
+    return value
+
+
 def render_skill(candidate: Any) -> str:
-    """Render semantic candidate metadata; source and path are never included."""
-    tags = _value(candidate, "tags") or ()
+    """Render only normalized routing metadata; source and path are excluded."""
+    relationships = sorted(
+        _structured_values(candidate, "relationships"),
+        key=lambda relation: (
+            str(_cue_value(relation, "role") or ""),
+            str(_cue_value(relation, "target") or ""),
+            str(_cue_value(relation, "rationale") or ""),
+        ),
+    )
+    cues = sorted(
+        _structured_values(candidate, "cues"),
+        key=lambda cue: (
+            str(_cue_value(cue, "facet") or ""),
+            str(_cue_value(cue, "value") or ""),
+            tuple(str(alias) for alias in (_cue_value(cue, "aliases") or ())),
+        ),
+    )
+    if not relationships or not cues:
+        raise SkillRankingInputError(
+            "candidate cues and relationships must be non-empty"
+        )
+    relationship_lines = []
+    for relation in relationships:
+        role = _render_text(_cue_value(relation, "role"), "relationship role")
+        if role not in ("owner", "support", "reference"):
+            raise SkillRankingInputError("candidate relationship role is invalid")
+        fields = [f"role={role}"]
+        target = _cue_value(relation, "target")
+        rationale = _cue_value(relation, "rationale")
+        if target is not None:
+            fields.append(f"target={_render_text(target, 'relationship target')}")
+        if rationale is not None:
+            fields.append(
+                f"rationale={_render_text(rationale, 'relationship rationale')}"
+            )
+        relationship_lines.append("- " + "; ".join(fields))
+    cue_lines = []
+    for cue in cues:
+        facet = _render_text(_cue_value(cue, "facet"), "cue facet")
+        value = _render_text(_cue_value(cue, "value"), "cue value")
+        fields = [
+            f"facet={facet}",
+            f"value={value}",
+        ]
+        aliases = _cue_value(cue, "aliases") or ()
+        if not isinstance(aliases, Sequence) or isinstance(aliases, (str, bytes)):
+            raise SkillRankingInputError("candidate cue aliases must be a sequence")
+        if aliases:
+            fields.append(
+                "aliases="
+                + ", ".join(_render_text(alias, "cue alias") for alias in aliases)
+            )
+        primary = _cue_value(cue, "primary")
+        if primary is not None and not isinstance(primary, bool):
+            raise SkillRankingInputError("candidate cue primary must be a boolean")
+        if primary:
+            fields.append("primary=true")
+        cue_lines.append("- " + "; ".join(fields))
+    name = _render_text(_value(candidate, "name"), "name")
+    description = _render_text(_value(candidate, "description"), "description")
+    skill_class = _render_text(
+        _value(candidate, "skill_class") or _value(candidate, "class"), "class"
+    )
     return (
-        f"Skill name: {_value(candidate, 'name') or ''}\n"
-        f"Description: {_value(candidate, 'description') or ''}\n"
-        f"Tags: {_join(tags)}\n"
-        f"Class: {_value(candidate, 'skill_class') or _value(candidate, 'class') or ''}"
+        f"Skill name: {name}\n"
+        f"Description: {description}\n"
+        "Routing relationships:\n"
+        + "\n".join(relationship_lines)
+        + "\nRouting cues:\n"
+        + "\n".join(cue_lines)
+        + "\n"
+        f"Class: {skill_class}"
     )
 
 
@@ -112,6 +203,17 @@ def compose_qwen_prompt(
     instruction: str = INSTRUCTION,
 ) -> str:
     """Compose the exact raw prompt used by the evaluated Qwen classifier."""
+    for field, value in (
+        ("instruction", instruction),
+        ("query", query),
+        ("document", document),
+    ):
+        if not isinstance(value, str) or not value:
+            raise SkillRankingInputError(f"prompt {field} must be a non-empty string")
+        if _RESERVED_TOKEN_PREFIX in value:
+            raise SkillRankingInputError(
+                f"prompt {field} contains a reserved control-token prefix"
+            )
     return (
         SYSTEM_PREFIX
         + f"<Instruct>: {instruction}\n<Query>: {query}\n<Document>: {document}"

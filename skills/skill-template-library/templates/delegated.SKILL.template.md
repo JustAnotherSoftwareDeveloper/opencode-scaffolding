@@ -1,11 +1,13 @@
 ---
 name: <<skill-name>>
 description: "Use when <<trigger condition>>."
-tags:
-  - <<primary-capability>>
-  - <<domain-or-artifact>>
-  - <<tool-or-workflow-context>>
-  - <<additional-discriminator>>
+schema_version: "1.0"
+cues:
+  - {facet: operation, value: "<<owned-operation>>", primary: true}
+  - {facet: subject, value: "<<task-subject>>"}
+  - {facet: outcome, value: "<<task-outcome>>"}
+relationships:
+  - {role: owner, rationale: "<<ownership rationale>>"}
 class: delegated
 ---
 

@@ -55,7 +55,7 @@ def skill_dir(tmp_path: Path) -> Path:
     d.mkdir()
     skill_md = d / "SKILL.md"
     skill_md.write_text(
-        "---\nname: my-skill\ndescription: Use when testing\ntags: [test-capability, skill-validation, yaml-frontmatter, python]\nclass: operation\n---\n\n## Docs\n\nContent.\n"
+        "---\nname: my-skill\ndescription: Use when testing\nschema_version: '1.0'\ncues:\n  - facet: operation\n    value: validate-routing\n    primary: true\nrelationships:\n  - role: owner\nclass: operation\n---\n\n## Docs\n\nContent.\n"
     )
     return d
 
@@ -86,7 +86,7 @@ def skill_dir_valid_full(tmp_path: Path) -> Path:
     d = tmp_path / "full-skill"
     d.mkdir()
     (d / "SKILL.md").write_text(
-        "---\nname: full-skill\ndescription: Use when testing everything\ntags: [test-capability, skill-validation, yaml-frontmatter, python]\nclass: operation\n---\n\n## Docs\n\nContent.\n"
+        "---\nname: full-skill\ndescription: Use when testing everything\nschema_version: '1.0'\ncues:\n  - facet: operation\n    value: validate-routing\n    primary: true\nrelationships:\n  - role: owner\nclass: operation\n---\n\n## Docs\n\nContent.\n"
     )
     ref = d / "reference"
     ref.mkdir()
@@ -199,7 +199,7 @@ class TestCheckFrontmatterValid:
         d = tmp_path / "extra-keys"
         d.mkdir()
         (d / "SKILL.md").write_text(
-            "---\nname: extra-keys\ndescription: Use when testing\nclass: operation\nunexpected: yes\n---\n"
+            "---\nname: extra-keys\ndescription: Use when testing\nschema_version: '1.0'\ncues:\n  - facet: operation\n    value: validate-routing\n    primary: true\nrelationships:\n  - role: owner\nclass: operation\nunexpected: yes\n---\n"
         )
         result = check_frontmatter_valid(d)
         assert result.passed is False
@@ -209,7 +209,7 @@ class TestCheckFrontmatterValid:
         d = tmp_path / "missing-key"
         d.mkdir()
         (d / "SKILL.md").write_text(
-            "---\nname: missing-key\ndescription: Use when testing\n---\n"
+            "---\nname: missing-key\ndescription: Use when testing\nschema_version: '1.0'\ncues:\n  - facet: operation\n    value: validate-routing\n    primary: true\nrelationships:\n  - role: owner\n---\n"
         )
         result = check_frontmatter_valid(d)
         assert result.passed is False
@@ -219,7 +219,7 @@ class TestCheckFrontmatterValid:
         d = tmp_path / "empty-name"
         d.mkdir()
         (d / "SKILL.md").write_text(
-            "---\nname: ''\ndescription: Use when testing\ntags: [test-capability, skill-validation, yaml-frontmatter, python]\nclass: operation\n---\n"
+            "---\nname: ''\ndescription: Use when testing\nschema_version: '1.0'\ncues:\n  - facet: operation\n    value: validate-routing\n    primary: true\nrelationships:\n  - role: owner\nclass: operation\n---\n"
         )
         result = check_frontmatter_valid(d)
         assert result.passed is False
@@ -598,8 +598,11 @@ class TestRunAll:
         assert result["skill_name"] == "full-skill"
         assert result["file_count"] >= 1
         assert len(result["checks"]) > 0
-        all_passed = all(c["passed"] for c in result["checks"])
-        assert all_passed is True
+        frontmatter = next(
+            c for c in result["checks"] if c["name"] == "frontmatter-valid"
+        )
+        assert frontmatter["passed"] is True
+        assert all(c["passed"] for c in result["checks"])
 
     def test_non_existent_dir(self, tmp_path: Path) -> None:
         result = run_all(tmp_path / "does-not-exist")
