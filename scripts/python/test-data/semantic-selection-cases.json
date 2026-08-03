@@ -16,7 +16,6 @@
     {"name": "skill-factory", "class": "operation", "path": "skills/skill-factory/SKILL.md", "source": "project"},
     {"name": "skill-maintenance-reference", "class": "documentation", "path": "skills/skill-maintenance-reference/SKILL.md", "source": "project"},
     {"name": "skill-node-script-conventions", "class": "documentation", "path": "skills/skill-node-script-conventions/SKILL.md", "source": "project"},
-    {"name": "skill-orchestration-reference", "class": "documentation", "path": "skills/skill-orchestration-reference/SKILL.md", "source": "project"},
     {"name": "skill-script-bash-test-writer", "class": "operation", "path": "skills/skill-script-bash-test-writer/SKILL.md", "source": "project"},
     {"name": "skill-script-bash-writer", "class": "operation", "path": "skills/skill-script-bash-writer/SKILL.md", "source": "project"},
     {"name": "skill-script-node-test-writer", "class": "operation", "path": "skills/skill-script-node-test-writer/SKILL.md", "source": "project"},

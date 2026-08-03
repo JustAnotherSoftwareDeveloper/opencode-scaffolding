@@ -44,7 +44,7 @@ allowed by the shared validator.
 
 ## Class and Role
 
-- `operation`, `orchestrated`, `delegated`, and `inline` skills normally use
+- `operation`, `delegated`, and `inline` skills normally use
   `owner` because they perform or coordinate an owned operation.
 - `planning` and `documentation` skills normally use `reference` because they
   provide passive context without executing a workflow.

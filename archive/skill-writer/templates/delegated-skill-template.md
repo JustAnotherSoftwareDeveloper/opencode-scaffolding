@@ -1,6 +1,6 @@
 ---
 name: <skill-name>
-description: Use when a spawning orchestrator delegates a bounded worker objective for isolated execution with explicit input/output contracts.
+description: Use when a spawning skill delegates a bounded worker objective for isolated execution with explicit input/output contracts.
 class: delegated
 ---
 
@@ -10,7 +10,7 @@ Replace all `<placeholder>` values before using. Match `name` to the directory n
 
 ## Class Purpose
 
-**Delegated backing role:** Delegated skills are worker-executed specialists spawned by orchestrated skills or other orchestrators through delegation packets. They provide the execution backing for orchestrated procedures - performing the actual bounded work that coordinators manage and coordinate.
+**Delegated role:** Delegated skills are worker-executed specialists spawned through delegation packets. They perform the bounded work assigned by the spawning skill.
 
 ## When to Use This Template
 

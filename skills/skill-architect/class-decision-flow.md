@@ -33,15 +33,6 @@ Choose `inline` when the skill:
 - Has no worker or sub-skill orchestration as its own workflow.
 - Example: a complex data-mapping skill that transforms one schema to another in one pass.
 
-## Coordinates Phases, Workers, or Sub-Skills
-
-Choose `orchestrated` when the skill:
-
-- Coordinates sub-skills, workers, phases, or quality gates.
-- Owns sub-delegation and result collation.
-- Uses the 7-section canonical layout.
-- Example: a document-generation skill that dispatches section writers, then collates results.
-
 ## Passive Data Store for Shared Docs/Schemas/Templates
 
 Choose `documentation` when the skill:
@@ -65,7 +56,6 @@ Choose `planning` when the skill:
 - Single bounded procedure, independent, self-validating → `operation`
 - Receives delegation packet, returns structured output → `delegated`
 - Single-pass reasoning-heavy, main agent executes → `inline`
-- Coordinates phases, workers, sub-skills → `orchestrated`
 - Passive data store for shared reference content → `documentation`
 - Structural knowledge for planning activities → `planning`
 

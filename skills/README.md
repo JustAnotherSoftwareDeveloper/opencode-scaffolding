@@ -15,7 +15,6 @@ deeper contract details.
 - `skill-bash-conventions` — shared Bash conventions.
 - `skill-maintenance-reference` — maintenance and migration reference.
 - `skill-node-script-conventions` — shared Node and TypeScript conventions.
-- `skill-orchestration-reference` — delegated and orchestrated workflow reference.
 - `skill-template-library` — canonical profiles, templates, schemas, and snippets.
 
 ## Operations

@@ -2,7 +2,7 @@
 
 Consumers: collect-skills, generate-task-json.
 
-All six valid skill classes as defined in the skill-architect taxonomy.
+All five valid skill classes as defined in the skill-architect taxonomy.
 Used by ``collect-skills --class <value>`` for filtering and by
 ``generate-task-json`` for candidate discovery.
 """
@@ -13,7 +13,7 @@ from enum import StrEnum
 
 
 class SkillClass(StrEnum):
-    """Six canonical skill classes from the OpenCode skill taxonomy.
+    """Five canonical skill classes from the OpenCode skill taxonomy.
 
     Members:
         OPERATION: Skills that perform direct work (script writers,
@@ -22,8 +22,6 @@ class SkillClass(StrEnum):
             task tool (dispatch-decompose, task-delegation, etc.).
         INLINE: Skills loaded and executed in-process by the LLM
             (ask-question, generic-analysis, etc.).
-        ORCHESTRATED: Skills that coordinate multiple agents or
-            workers (breakdown-tasks, etc.).
         PLANNING: Skills used for planning and design decisions
             (skill-architect, etc.).
         DOCUMENTATION: Passive reference skills containing
@@ -34,6 +32,5 @@ class SkillClass(StrEnum):
     OPERATION = "operation"
     DELEGATED = "delegated"
     INLINE = "inline"
-    ORCHESTRATED = "orchestrated"
     PLANNING = "planning"
     DOCUMENTATION = "documentation"

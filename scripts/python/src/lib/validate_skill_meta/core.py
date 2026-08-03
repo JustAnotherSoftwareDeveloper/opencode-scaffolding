@@ -30,7 +30,6 @@ _VALID_CLASSES: set[str] = {
     "operation",
     "delegated",
     "inline",
-    "orchestrated",
     "planning",
     "documentation",
 }

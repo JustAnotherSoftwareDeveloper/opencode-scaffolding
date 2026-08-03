@@ -31,7 +31,7 @@ class: operation
 - `description` is one trimmed, single-line trigger statement of at most 1024 characters.
 - `selection.role` is `owner`, `support`, or `reference`.
 - `selection.tags` contains at least one non-empty group.
-- `class` is one of `operation`, `delegated`, `inline`, `orchestrated`, `planning`, or `documentation`.
+- `class` is one of `operation`, `delegated`, `inline`, `planning`, or `documentation`.
 
 ## Roles
 

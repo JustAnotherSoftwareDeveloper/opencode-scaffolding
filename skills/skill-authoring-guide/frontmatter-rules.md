@@ -34,7 +34,7 @@ class: <<one-of-six-classes>>
 
 ## Class
 
-Use exactly one of `operation`, `delegated`, `inline`, `orchestrated`, `planning`, or `documentation`.
+Use exactly one of `operation`, `delegated`, `inline`, `planning`, or `documentation`.
 
 ## Selection Profile
 

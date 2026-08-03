@@ -17,7 +17,6 @@ VALID_CLASSES = frozenset(
         "operation",
         "delegated",
         "inline",
-        "orchestrated",
         "planning",
         "documentation",
     }

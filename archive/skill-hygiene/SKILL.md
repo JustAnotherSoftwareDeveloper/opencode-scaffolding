@@ -13,7 +13,6 @@ Use this skill when creating, revising, or reviewing skills under `skills/<name>
 1. Confirm the work really needs a skill: repeated procedure, specialized domain knowledge, or reusable workflow.
 2. Choose exactly one class before drafting:
    - `operation` — one bounded procedure with independent validation.
-   - `orchestrated` — heavy-procedure coordinator that delegates execution to workers or delegated backing skills; does not perform worker tasks directly. Owns routing, state transitions, reconciliation, failure handling, and quality gates.
    - `delegated` — worker-executed backing specialist spawned by an orchestrator with explicit input/output contracts.
    - `planning` — proposal, plan, runbook, review, or lifecycle skill.
 3. Use OpenCode-compatible frontmatter plus the local framework class:
@@ -44,7 +43,6 @@ Use this skill when creating, revising, or reviewing skills under `skills/<name>
 The canonical class contracts are XSDs, one per class:
 
 - `schemas/operation.xsd`
-- `schemas/orchestrated.xsd`
 - `schemas/delegated.xsd`
 - `schemas/planning.xsd`
 

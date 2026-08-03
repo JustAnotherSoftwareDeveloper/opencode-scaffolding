@@ -25,7 +25,7 @@ Run this skill when you need to verify that an OpenCode skill artifact follows f
 - [ ] Frontmatter YAML block is present and properly formatted
 - [ ] `name` field matches the skill's parent directory name exactly (lowercase, hyphens)
 - [ ] `description` starts with "Use when" followed by trigger condition
-- [ ] `class` value is one of: operation, delegated, orchestrated, or planning
+- [ ] `class` value is one of: operation, delegated, or planning
 - [ ] No tabs found in YAML frontmatter block
 
 ## Example Usage

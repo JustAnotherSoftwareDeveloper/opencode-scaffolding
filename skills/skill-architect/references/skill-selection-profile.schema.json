@@ -8,7 +8,7 @@
   "properties": {
     "name": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$", "maxLength": 128},
     "description": {"$ref": "#/$defs/text", "maxLength": 1024},
-    "class": {"enum": ["operation", "delegated", "inline", "orchestrated", "planning", "documentation"]},
+    "class": {"enum": ["operation", "delegated", "inline", "planning", "documentation"]},
     "selection": {
       "type": "object", "additionalProperties": false,
       "required": ["role", "tags"],

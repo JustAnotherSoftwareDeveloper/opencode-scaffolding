@@ -1,7 +1,7 @@
 # Skill Class Taxonomy
 
 Every `SKILL.md` has a `class` field in its frontmatter.
-Exactly six classes are valid.
+Exactly five classes are valid.
 No other classes are valid.
 If uncertain, lean toward `operation`.
 If the skill is a passive data store consumed by other skills, choose `documentation`.
@@ -50,17 +50,6 @@ No worker or sub-skill orchestration as its own workflow.
 - **Execution steps**: Yes — numbered prefixes define the workflow.
 - **Lifetime**: Ephemeral — load it for one reasoning pass, then discard.
 
-## orchestrated
-
-**Template**: `./templates/orchestrated.SKILL.template.md`
-
-Coordinates sub-skills, workers, phases, or quality gates.
-Uses the 7-section canonical layout: Frontmatter, Purpose/Intro, Execution Steps, Worker Strategy, Verification Checklist, Self-Validation, Cross-References.
-
-- **Side effects**: Yes (file writes, tool calls, worker dispatch).
-- **Delegation**: Owns sub-delegation and result collation.
-- **Execution steps**: Yes — numbered prefixes define the workflow.
-
 ## planning
 
 **Template**: `./templates/planning.SKILL.template.md`
@@ -87,7 +76,7 @@ Consumed by other skills via relative-path references.
 
 ## Class Selection Rationale
 
-Each of the six classes has a distinct contract for side effects, delegation, and output shape, enabling the agent to load the correct behavior without ambiguity.
+Each of the five classes has a distinct contract for side effects, delegation, and output shape, enabling the agent to load the correct behavior without ambiguity.
 A skill whose behavior spans multiple classes must be split or rewritten.
 Hybrid classes are not supported.
 

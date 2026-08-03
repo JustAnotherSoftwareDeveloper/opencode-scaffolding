@@ -55,7 +55,7 @@ function validateSkillFile(file) {
   if (data && typeof data === 'object' && data.name && data.name !== path.basename(path.dirname(file))) errors.push(`name '${data.name}' does not match directory '${path.basename(path.dirname(file))}'`);
   const body = text.slice(end + 4);
   if (!body.trim()) errors.push('body must not be empty');
-  else if (classes.has(data.class)) { const numbered = /^\s*\d+[.)]\s+/m.test(body); if (['operation', 'delegated', 'inline', 'orchestrated'].includes(data.class) && !numbered) errors.push('active classes must define numbered execution steps'); if (['planning', 'documentation'].includes(data.class) && numbered) errors.push('planning and documentation classes must not define execution steps'); if (['planning', 'documentation'].includes(data.class) && data.selection?.role !== 'reference') errors.push('planning and documentation classes must use selection.role reference'); }
+  else if (classes.has(data.class)) { const numbered = /^\s*\d+[.)]\s+/m.test(body); if (['operation', 'delegated', 'inline'].includes(data.class) && !numbered) errors.push('active classes must define numbered execution steps'); if (['planning', 'documentation'].includes(data.class) && numbered) errors.push('planning and documentation classes must not define execution steps'); if (['planning', 'documentation'].includes(data.class) && data.selection?.role !== 'reference') errors.push('planning and documentation classes must use selection.role reference'); }
   return { valid: errors.length === 0, errors };
 }
 if (require.main === module) { const results = process.argv.slice(2).map(validateSkillFile); process.stdout.write(JSON.stringify(results.length === 1 ? results[0] : results) + '\n'); if (results.some(r => !r.valid)) process.exitCode = 1; }

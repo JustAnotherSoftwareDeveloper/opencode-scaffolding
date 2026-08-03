@@ -8,7 +8,7 @@
 ## Skill Classes
 
 Each skill has a `class` field in its frontmatter.
-The six valid classes are:
+The five valid classes are:
 
 - `operation` — See skill-template-library for the class template skeleton.
   Broad/default class for single bounded procedures that are independent and self-validating.
@@ -16,8 +16,6 @@ The six valid classes are:
   Receives delegation packets and performs bounded subtasks within a pipeline or orchestration.
 - `inline` — See skill-template-library for the class template skeleton.
   Single-pass reasoning-heavy skill executed directly by the main agent.
-- `orchestrated` — See skill-template-library for the class template skeleton.
-  Coordinates sub-skills, workers, phases, or quality gates.
 - `planning` — See skill-template-library for the class template skeleton.
   Reference sources loaded during planning or architecting activities.
   No side effects.
@@ -30,11 +28,11 @@ Template skeletons for each class are maintained in `skill-template-library`.
 
 ## Platform Rules by Class
 
-- **Side effects**: `operation`, `delegated`, `inline`, and `orchestrated` produce side effects (file writes, tool calls).
+- **Side effects**: `operation`, `delegated`, and `inline` produce side effects (file writes, tool calls).
   `planning` and `documentation` must not.
-- **Delegation**: `orchestrated` and `delegated` participate in delegation pipelines.
+- **Delegation**: `delegated` participates in delegation pipelines.
   `operation`, `inline`, `planning`, and `documentation` do not sub-delegate.
-- **Execution steps**: All classes except `planning` and `documentation` define execution steps with numbered prefixes.
+- **Execution steps**: `operation`, `delegated`, and `inline` define execution steps with numbered prefixes.
   `planning` and `documentation` use passive content sections instead.
 
 ## Discovery

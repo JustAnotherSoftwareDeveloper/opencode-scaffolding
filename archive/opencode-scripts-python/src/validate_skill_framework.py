@@ -12,7 +12,7 @@ import yaml
 from lxml import etree
 
 
-CLASSES = ("operation", "delegated", "orchestrated", "planning")
+CLASSES = ("operation", "delegated", "planning")
 NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 REPO_ROOT = Path(__file__).resolve().parents[3]
 

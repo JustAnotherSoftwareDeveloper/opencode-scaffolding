@@ -32,7 +32,6 @@ The bulleted list provides the mapping of files to their purpose.
 - `templates/documentation.SKILL.template.md` — Canonical documentation-class entry-point template.
 - `templates/inline.SKILL.template.md` — Canonical inline-class entry-point template.
 - `templates/operation.SKILL.template.md` — Canonical operation-class entry-point template.
-- `templates/orchestrated.SKILL.template.md` — Canonical orchestrated-class entry-point template.
 - `templates/planning.SKILL.template.md` — Canonical planning-class entry-point template.
 - `schemas/index.md` — Index of the shared metadata shape and class contracts.
 - `snippets/index.md` — Index of reusable profile and workflow snippets.

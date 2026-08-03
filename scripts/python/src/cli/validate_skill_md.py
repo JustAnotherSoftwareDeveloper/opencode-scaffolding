@@ -12,7 +12,7 @@ import yaml
 
 from lib.shared.skill_metadata import SkillMetadataError, normalize_skill_metadata
 
-_ACTIVE = {"operation", "delegated", "inline", "orchestrated"}
+_ACTIVE = {"operation", "delegated", "inline"}
 _PASSIVE = {"planning", "documentation"}
 
 

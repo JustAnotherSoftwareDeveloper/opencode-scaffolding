@@ -7,7 +7,7 @@ selection:
     inputs: [skill requirements]
     outputs: [skill architecture guidance]
     topics: [skill class boundaries]
-    constraints: [six-class taxonomy]
+    constraints: [current class taxonomy]
   use_when: [a requested skill needs class or platform-boundary guidance]
   not_for: [authoring skill files or executing a skill workflow]
 class: planning
@@ -21,11 +21,11 @@ It answers "what skill classes exist, how to choose one, what boundaries separat
 
 ## Domain Context
 
-- Six skill classes govern all OpenCode skills: `operation`, `delegated`, `inline`, `orchestrated`, `planning`, and `documentation`.
+- Five skill classes govern all OpenCode skills: `operation`, `delegated`, `inline`, `planning`, and `documentation`.
   Each class has a distinct contract for side effects, delegation, and output shape.
 - The `planning` and `documentation` classes are passive reference sources.
   They produce no side effects, modify no files, and invoke no tools.
-- The `operation`, `delegated`, `inline`, and `orchestrated` classes are active procedure classes.
+- The `operation`, `delegated`, and `inline` classes are active procedure classes.
   They produce side effects and define execution steps.
 - Skill selection is driven by the `description` field in frontmatter.
   The `class` field further constrains behavior.
@@ -53,7 +53,6 @@ It answers "what skill classes exist, how to choose one, what boundaries separat
 
 - skill-factory: Use when creating or updating all OpenCode skill files under `skills/<name>/` (SKILL.md, reference/, templates/, schemas/, and snippets/) from user requirements and source material, including executing the CREATE/UPDATE workflow.
 - skill-authoring-guide: Use as documentation reference for authoring style, frontmatter field rules, and progressive disclosure.
-- skill-orchestration-reference: Use as documentation reference for orchestrated and delegated worker patterns, collation format, and orchestration usage.
 - skill-maintenance-reference: Use as documentation reference for update workflows, migration guides, and validation checklists.
 - skill-template-library: Use as documentation reference for all skill templates, schemas, and snippets.
 

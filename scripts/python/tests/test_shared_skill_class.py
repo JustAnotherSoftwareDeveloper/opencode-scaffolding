@@ -7,13 +7,12 @@ import pytest
 from lib.shared.skill_class import SkillClass
 
 
-def test_all_six_members_present() -> None:
-    """Verify all six canonical values exist."""
-    assert len(SkillClass) == 6
+def test_all_five_members_present() -> None:
+    """Verify all five canonical values exist."""
+    assert len(SkillClass) == 5
     assert SkillClass.OPERATION == "operation"
     assert SkillClass.DELEGATED == "delegated"
     assert SkillClass.INLINE == "inline"
-    assert SkillClass.ORCHESTRATED == "orchestrated"
     assert SkillClass.PLANNING == "planning"
     assert SkillClass.DOCUMENTATION == "documentation"
 
@@ -24,7 +23,6 @@ def test_all_six_members_present() -> None:
         "operation",
         "delegated",
         "inline",
-        "orchestrated",
         "planning",
         "documentation",
     ],

@@ -81,7 +81,7 @@ Always start with `worker` for text tasks.
 ## Skill Framework Rules
 
 - Load `skill-hygiene` when creating or reviewing skills.
-- Choose one class before drafting a framework-authored skill: `operation`, `delegated`, `orchestrated`, or `planning`.
+- Choose one class before drafting a framework-authored skill: `operation`, `delegated`, or `planning`.
 - Use top-level local `class` frontmatter for framework-authored skills; treat it as harness-owned metadata, not native OpenCode routing.
 - Keep `SKILL.md` concise and place long references, schemas, examples, or scripts in supporting files.
 - Validate new or changed framework skills with `uv run --project scripts/python validate-skill-framework ...`.

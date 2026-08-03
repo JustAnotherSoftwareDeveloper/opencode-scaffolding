@@ -11,7 +11,7 @@ from typing import Any, Literal
 
 SkillRole = Literal["owner", "support", "reference"]
 SkillClass = Literal[
-    "operation", "delegated", "inline", "orchestrated", "planning", "documentation"
+    "operation", "delegated", "inline", "planning", "documentation"
 ]
 TAG_GROUPS = ("actions", "inputs", "outputs", "topics", "environments", "constraints")
 OPTIONAL_FIELDS = ("version", "license", "compatibility", "metadata", "permission")
@@ -141,7 +141,6 @@ def normalize_skill_metadata(data: Mapping[str, Any]) -> SkillMetadata:
         "operation",
         "delegated",
         "inline",
-        "orchestrated",
         "planning",
         "documentation",
     ):

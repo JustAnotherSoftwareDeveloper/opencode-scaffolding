@@ -8,7 +8,6 @@ Use this checklist when drafting or reviewing any new framework-authored skill.
 - The skill has one clear primary job and a short list of explicit non-goals.
 - The selected class matches the actual behavior:
   - `operation`: small and independently verifiable.
-  - `orchestrated`: procedural coordinator that delegates/works through workers; does not execute worker tasks directly, only coordinates state/quality gates/failure handling.
   - `delegated`: worker-executed backing specialist spawned by an orchestrator with explicit input/output contracts.
   - `planning`: artifact/lifecycle creation or review.
 - The skill does not duplicate always-on agent prompts or base model knowledge.
@@ -17,7 +16,7 @@ Use this checklist when drafting or reviewing any new framework-authored skill.
 
 - `name` matches `skills/<name>/`.
 - `description` is specific, action-oriented, and under 1024 characters.
-- `class` is one of `operation`, `orchestrated`, `delegated`, or `planning` for framework-authored skills.
+- `class` is one of `operation`, `delegated`, or `planning` for framework-authored skills.
 - Optional frontmatter stays compatible with OpenCode conventions.
 
 ## Body

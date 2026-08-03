@@ -6,12 +6,12 @@ Hybrid classes are not supported.
 
 ## Side Effects
 
-- `operation`, `delegated`, `inline`, and `orchestrated` produce side effects (file writes, tool calls).
+- `operation`, `delegated`, and `inline` produce side effects (file writes, tool calls).
 - `planning` and `documentation` must not produce side effects, modify files, or invoke tools.
 
 ## Delegation
 
-- `orchestrated` and `delegated` participate in delegation pipelines.
+- `delegated` participates in delegation pipelines.
 - `operation`, `inline`, `planning`, and `documentation` do not sub-delegate.
 
 ## Execution Steps
@@ -29,8 +29,6 @@ Hybrid classes are not supported.
   Delegated skills are not autonomous — they depend on a delegator for context and invocation.
 - **An inline skill is ephemeral** — load it for one reasoning pass, then discard.
   Inline skills are not designed for repeated invocation across multiple task phases.
-- **An orchestrated skill owns sub-delegation and result collation.**
-  Orchestrated skills define the worker strategy, dispatch workers, and collate results into a single output.
 - **A documentation skill is a passive data store** consumed by other skills via relative-path references.
   It must not define execution steps or produce side effects.
 
@@ -39,16 +37,16 @@ Hybrid classes are not supported.
 Trace the proposed skill's contract by asking three questions:
 
 1. **Does it produce side effects?**
-   - Yes → `operation`, `delegated`, `inline`, or `orchestrated`.
+    - Yes → `operation`, `delegated`, or `inline`.
    - No → `planning` or `documentation`.
 
 2. **Does it delegate work to other skills or workers?**
-   - Yes → `orchestrated` or `delegated`.
+    - Yes → `delegated`.
    - No → `operation`, `inline`, `planning`, or `documentation`.
 
 3. **Does it run in a single pass or coordinate multiple phases?**
    - Single pass → `operation`, `inline`, or `delegated`.
-   - Multiple phases → `orchestrated`.
+    - Multiple phases must be represented by the delegator and bounded delegated workers.
 
 The answers to these three questions map to exactly one class.
 

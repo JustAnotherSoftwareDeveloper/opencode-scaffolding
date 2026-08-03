@@ -1,6 +1,6 @@
 ---
 name: "skill-manager"
-description: "Directly manages skill items using all skill-* skills: skill-architect, skill-authoring-guide, skill-bash-conventions, skill-factory, skill-maintenance-reference, skill-node-script-conventions, skill-orchestration-reference, skill-script-bash-test-writer, skill-script-bash-writer, skill-script-node-test-writer, skill-script-node-writer, skill-script-python-test-writer, skill-script-python-writer, and skill-template-library."
+description: "Directly manages skill items using the skill-management skills for architecture, authoring, maintenance, templates, and script conventions."
 mode: "primary"
 permission:
   "*": "allow"
@@ -24,7 +24,6 @@ Use the following skills for direct skill-management work:
 - `skill-factory` - Create or update OpenCode skill artifacts.
 - `skill-maintenance-reference` - Apply skill maintenance and validation procedures.
 - `skill-node-script-conventions` - Apply Node and TypeScript script conventions.
-- `skill-orchestration-reference` - Apply delegated and orchestrated worker patterns.
 - `skill-script-bash-test-writer` - Write Bats tests for Bash scripts.
 - `skill-script-bash-writer` - Write deterministic Bash scripts.
 - `skill-script-node-test-writer` - Write Bun tests for Node scripts.

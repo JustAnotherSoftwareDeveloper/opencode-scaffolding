@@ -16,7 +16,6 @@ Guidance for using local reference files alongside canonical harness schemas wit
 Canonical XSD schemas are in `skills/skill-hygiene/schemas/`:
 
 - `delegated.xsd` — Delegated skill class contract  
-- `orchestrated.xsd` — Orchestrated skill class contract
 - `operation.xsd` — Operation skill class contract  
 - `planning.xsd` — Planning skill class contract
 

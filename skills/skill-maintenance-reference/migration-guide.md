@@ -11,7 +11,6 @@ It has been decomposed into six focused skills:
 
 - **skill-architect** (planning) — Class taxonomy, class decision flow, class boundary rules, platform layout/context.
 - **skill-authoring-guide** (documentation) — Authoring style, frontmatter field rules, progressive disclosure, trigger evaluation.
-- **skill-orchestration-reference** (documentation) — Orchestrated/delegated worker patterns, collation format, orchestration usage.
 - **skill-maintenance-reference** (documentation) — Update workflow, migration guide, validation checklist, gotchas.
 - **skill-template-library** (documentation) — All skill templates, common workflow template, schemas/snippets indices.
 - **skill-factory** (operation) — Actual CREATE/UPDATE workflow for skills.
@@ -21,7 +20,6 @@ It has been decomposed into six focused skills:
 - **Platform Context**: `skill-architect` (platform-layout-context) — Planning-level content moved to architect skill.
 - **Class Taxonomy & Decision Flow**: `skill-architect` (class-taxonomy, class-decision-flow) — Class definitions separated into dedicated planning skill.
 - **Authoring Style & Frontmatter Rules**: `skill-authoring-guide` (authoring-style, frontmatter-rules) — Editorial conventions in dedicated documentation skill.
-- **Orchestration Patterns**: `skill-orchestration-reference` — Orchestration reference in dedicated skill.
 - **Update Workflow**: `skill-maintenance-reference/update-workflow.md` — Maintenance reference in this skill.
 - **Migration Procedures**: `skill-maintenance-reference/migration-guide.md` — Migration guide in this skill.
 - **Validation Checklist**: `skill-maintenance-reference/validation-checklist.md` — Validation checks in this skill.
@@ -65,7 +63,6 @@ After a partial migration update, verify:
 - [ ] Remove old `templates/` directory (moved to skill-template-library)
 - [ ] Create `skill-architect/` with planning content
 - [ ] Create `skill-authoring-guide/` with authoring content
-- [ ] Create `skill-orchestration-reference/` with orchestration content
 - [ ] Create `skill-maintenance-reference/` with maintenance content
 - [ ] Create `skill-template-library/` with template content
 - [ ] Create `skill-factory/` with operational workflow

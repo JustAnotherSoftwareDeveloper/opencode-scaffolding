@@ -17,7 +17,7 @@ selection:
   use_when: [positive condition]
   not_for: [explicit boundary]
   supports: [skill-name]
-class: inline | planning | operation | documentation | orchestrated | delegated
+ class: inline | planning | operation | documentation | delegated
 ```
 
 `name`, `description`, `selection`, and `class` are required. Optional profile
