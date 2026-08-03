@@ -1,13 +1,15 @@
 ---
 name: customize-opencode
-description: "Use when reference is needed for packet execution engine behavior in opencode worker agents."
-schema_version: "1.0"
-cues:
-  - {facet: subject, value: "worker packet execution"}
-  - {facet: environment, value: "OpenCode"}
-  - {facet: outcome, value: "execution engine reference"}
-relationships:
-  - {role: reference, rationale: "documents packet-engine behavior"}
+description: "Use when reference is needed for OpenCode worker packet execution-engine behavior."
+selection:
+  role: reference
+  tags:
+    inputs: [worker packet]
+    outputs: [execution engine reference]
+    topics: [OpenCode packet execution]
+    environments: [OpenCode]
+  use_when: [the packet execution engine contract needs reference]
+  not_for: [modifying an OpenCode configuration]
 class: documentation
 ---
 

@@ -26,19 +26,35 @@ READ`, `FILES TO WRITE`, `SKILLS`, `EXECUTION INSTRUCTIONS`, `VERIFICATION`, and
    completed.
 3. Read all required inputs, then perform bounded task-related discovery only when
    necessary.
-4. Execute every required outcome. Write only to declared literal paths or bounded
+4. If the packet is the scoped `breakdown-tasks` workflow, load the uncapped set of
+   materially relevant planning-class profiles from that run's single collector
+   snapshot before making decomposition decisions. These are passive planning loads:
+   they add context only, grant no tool, write, execution, or transitive authority,
+   and are reported separately from executable skills. No other workflow may
+   dynamically load a skill name.
+5. Resolve one to three executable task assignments from the frozen
+   operation/documentation snapshot. Each assignment must name a collector-winning
+   skill and use its winning, existing `SKILL.md` path; inspect the selected task
+   contracts before execution. Do not infer an assignment from a stale path,
+   filename or fallback.
+6. Reconcile in two passes: first reconcile requested names, classes, cardinality,
+   and winning paths against the frozen inventory before execution; then reconcile
+   every loaded/assigned name and path against that same inventory after execution.
+   A missing snapshot identity, stale path, path mismatch, class mismatch, load
+   failure, or unresolved assignment is fail-closed and blocks the packet.
+7. Execute every required outcome. Write only to declared literal paths or bounded
    patterns, and reconcile every declared target as created, modified, deleted,
    unchanged, or not completed.
-5. Run applicable verification and remediate within the boundaries.
-6. Self-validate before returning: every declared skill must have a completed
+8. Run applicable verification and remediate within the boundaries.
+9. Self-validate before returning: every declared skill must have a completed
    skill-tool call. Skills loaded must list exactly the declared skills that succeeded.
    No undeclared skill may be loaded. No side effect may precede required skill
    completion. Do not substitute prior knowledge or prompt context for a skill load.
-7. Select status from the actual result: `COMPLETE` needs a usable non-empty payload
+10. Select status from the actual result: `COMPLETE` needs a usable non-empty payload
    and passing applicable checks; `PARTIAL` needs a usable non-empty payload with
    incomplete non-critical work; `BLOCKED` needs a material blocker and has no usable
    payload.
-8. Only then return the standardized envelope below.
+11. Only then return the standardized envelope below.
 
 ## Boundaries
 
@@ -80,6 +96,7 @@ Return these sections in this order. Keep table cells on one physical line, use
 | Accomplishments | Concrete outcomes, or None |
 | Files modified | Created, modified, or deleted path list or count, or None |
 | Skills loaded | Exact successfully loaded skill names, or None |
+| Planning context loaded | Exact successful dynamic planning names from the collector snapshot, or None |
 | Deviations | Material interpretations or execution deviations, or None |
 | Blocker | Blocking reason, or None |
 | Unblock condition | Required condition, or None |
@@ -100,3 +117,20 @@ Return these sections in this order. Keep table cells on one physical line, use
 
 The exact payload required by `EXPECTED OUTPUT`, or `None` for `BLOCKED`.
 ```
+
+## Capability Contract
+
+`Skills loaded` is the executable capability set and must equal the packet's
+declared `SKILLS` exactly, in the packet's order. `Planning context loaded` is a
+separate, run-scoped report and may contain only planning-class names selected from
+the collector-winning snapshot for `breakdown-tasks`; it is `None` for every other
+packet. A planning load never counts as an executable assignment.
+
+The planning snapshot is uncapped: load every materially relevant planning profile,
+not a fixed number and not every discovered profile. The operation/documentation
+snapshot is bounded: activate no fewer than one and no more than three task skills,
+or block with no-match evidence. Both snapshots are frozen for the run. A path is
+valid only when it is the collector-winning absolute path, exists, remains within
+its declared source root, and ends in `SKILL.md`; stale or substituted paths block
+before execution. Reconciliation must prove both the pre-execution selection and
+the post-execution loads/assignments against the same snapshot.

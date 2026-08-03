@@ -1,37 +1,33 @@
 ---
 name: skill-authoring-guide
-description: "Use when referencing authoring style, frontmatter field rules, progressive disclosure, or trigger evaluation conventions for OpenCode skills."
-schema_version: "1.0"
-cues:
-  - {facet: subject, value: "skill authoring"}
-  - {facet: outcome, value: "valid skill documentation"}
-  - {facet: constraint, value: "frontmatter contract"}
-relationships:
-  - {role: reference, rationale: "provides passive authoring guidance"}
+description: "Use when authoring or reviewing a readable, discriminative skill selection profile."
+selection:
+  role: reference
+  tags:
+    topics:
+      - skill selection profiles
+      - skill authoring
+    outputs:
+      - valid skill metadata
+  use_when:
+    - creating or reviewing direct-selection metadata
+  not_for:
+    - creating or updating skill implementation files
 class: documentation
 ---
 
-# Skill Authoring Guide — Documentation Store
+# Skill Authoring Guide
 
-This skill is a passive data store for authoring-guide shared reference content.
-It does not auto-read any files when loaded.
+Use this guide to author one valid, readable profile for direct semantic selection.
+Factory and template maintenance are separate operations.
 
-## Documentation Files
+## Reference Files
 
-Read the documentation files listed below as needed for your current task.
-The bulleted list provides the mapping of files to their purpose.
+- `./reference/frontmatter-rules.md` — Required fields, roles, groups, optionals, and bounds.
+- `./reference/tagging-guide.md` — How to write grouped tags, aliases, conditions, and supports.
+- `./reference/trigger-evaluation.md` — How to test positive, negative, and neighboring requests.
+- `./reference/authoring-style.md` — Prose, headings, examples, and discrimination rules.
+- `./reference/progressive-disclosure.md` — How to keep the entry point compact.
 
-- `authoring-style.md` — Defines prose style, tone, and formatting conventions for skill documentation.
-- `frontmatter-rules.md` — Specifies required frontmatter fields and their validation rules.
-- `tagging-guide.md` — Defines how to select structured routing cues.
-- `progressive-disclosure.md` — Guidelines for layering detail from summary to deep reference.
-- `trigger-evaluation.md` — Rules for evaluating when this skill's trigger conditions are met.
-
-Choose the relevant files based on what you need to learn or reference.
-Read only those files.
-Do not read every file — read as needed.
-
-## Docs
-
-All reference files are listed in the Documentation Files section above and reside directly under `skills/skill-authoring-guide/`.
-No separate `reference/` subdirectory exists.
+Read the relevant reference before editing. Validate the completed profile and examples
+with the repository skill validator.

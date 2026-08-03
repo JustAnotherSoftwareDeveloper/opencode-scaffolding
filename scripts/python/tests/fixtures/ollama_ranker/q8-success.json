@@ -1,6 +1,0 @@
-{
-  "version": {"version": "0.31.1"},
-  "tags": {"models": [{"name": "hf.co/QuantFactory/Qwen3-Reranker-4B-GGUF:Q8_0", "digest": "78bbe0fc51686fcb75e1d6af3f957d24599b4a9aedb1adeed0f516e29768e25f"}]},
-  "show": {"model": "hf.co/QuantFactory/Qwen3-Reranker-4B-GGUF:Q8_0", "details": {"family": "qwen3", "parameter_size": "4.41B", "quantization_level": "Q8_0"}, "model_info": {"general.parameter_count": 4410057216}},
-  "generate": {"response": " yes\n", "logprobs": [{"top_logprobs": [{"token": "yes", "logprob": -0.1}, {"token": "no", "logprob": -2.3}]}]}
-}

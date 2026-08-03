@@ -1,39 +1,23 @@
-# Skill Assignment Procedure
+# Direct Skill Selection
 
-Use one frozen inventory and one explicit assignment mode.
+Both planning and plan workflows use this contract.
 
-## Candidate Evidence
+## One Frozen Inventory
 
-Render each candidate's name, description, normalized structured cues, relationships, and class.
-Render canonical values with relevant aliases and facet identities.
-Keep owner, support, and reference relationships distinct from cue values.
-Exclude candidate source and path from model text.
+Collect one complete inventory before selection. It is the sole authority for names, classes, profiles, source roots, and collector-winning absolute `SKILL.md` paths. Do not recollect or infer identity from filenames, paths, scores, or stale metadata.
 
-## Qwen Mode
+## Planning Selection
 
-1. Validate the complete draft, frozen inventory, registries, and candidate metadata before model initialization.
-2. Render complete task fields and candidates in stable order.
-3. Count every complete pair with the pinned tokenizer.
-4. Reject pairs above the configured context bound before HTTP access.
-5. Score candidates sequentially with the checked local profile.
-6. Stable-sort finite scores by descending value and inventory order.
-7. Select the top candidate and apply the configured confidence policy for additional candidates.
-8. Publish only names supplied by the frozen inventory.
+Show the request and all planning-class profiles to the LLM. Load every materially relevant profile, with no numeric cap. Load only selected names, exactly once, through the skill tool. A planning load is passive context and does not grant execution or write authority. An empty selection is valid when no planning concern exists.
 
-## Lexical Mode
+## Task Assignment
 
-Use normalized canonical values and aliases directly.
-Apply lexical mode only through an explicit assignment decision.
-Keep selection policy separate from cue validation.
+Show the complete draft and operation/documentation profiles to the LLM. Select one to three semantically fitting skills per task. A no-match decision blocks rather than inventing a name or using a fallback. Inspect selected contracts and reconcile each name, class, cardinality, and winning path before generation.
 
-## Read-Only Audit
+## Prohibited Semantics
 
-1. Reuse the frozen inventory.
-2. Verify canonical names, registry membership, relationship roles, semantic fit, atomicity, and cross-task consistency.
-3. Block invalid assignments without rewriting generated assignments.
+Do not use a selector, reranker, lexical or path fallback, score, rank, threshold, confidence policy, clipping, popularity, or model-specific assignment mode. Do not manually add, remove, reorder, or repair assignments.
 
-## Output
+## Audit And Publication
 
-Write one schema-valid `BreakdownTasksOutput` object.
-Preserve every non-skill draft field.
-Record routing evidence and confidence diagnostics without mutating the task after generation.
+Reconcile the generated packet against the unchanged snapshot and selected contracts. Preserve every non-skill field and authored order. The generator validates final membership and publishes atomically; any mismatch, schema error, or publication error fails closed.

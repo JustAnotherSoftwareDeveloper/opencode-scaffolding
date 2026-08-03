@@ -2,28 +2,17 @@
 
 from __future__ import annotations
 
-import json
 import re
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-from lib.shared.git import find_git_root
 from lib.shared.skill_class import SkillClass
-from lib.shared.skill_routing import (
-    MAX_SKILL_DESCRIPTION_LENGTH,
-    MAX_SKILL_NAME_LENGTH,
-    RegistryResolution,
-    RoutingContractError,
-    RoutingSignature,
-    load_builtin_registry,
-    normalize_routing_signature,
-    resolve_registry_overlay,
-)
+from lib.shared.skill_metadata import SkillMetadataError, normalize_skill_metadata
 
 # Matches kebab-case: lowercase letters and digits, hyphen-separated.
-SKILL_NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+SKILL_NAME_RE = re.compile(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$")
 _VALID_CLASSES = {item.value for item in SkillClass}
 
 
@@ -54,15 +43,12 @@ def extract_frontmatter(file_path: Path) -> dict[str, Any] | None:
     text = file_path.read_text(encoding="utf-8")
     lines = text.splitlines()
 
-    # Locate the first --- delimiter.
-    start_idx: int | None = None
-    for i, line in enumerate(lines):
-        if line.rstrip() == "---":
-            start_idx = i
-            break
-
-    if start_idx is None:
+    # Frontmatter is valid only when it starts the file.  Keeping this rule
+    # identical to the authoring and validator readers prevents body content
+    # that happens to contain a delimiter from becoming metadata.
+    if not lines or lines[0].rstrip() != "---":
         return None
+    start_idx = 0
 
     # Locate the second --- delimiter after start_idx.
     end_idx: int | None = None
@@ -97,7 +83,7 @@ def validate_skill_frontmatter(
     frontmatter: dict[str, Any],
     dir_name: str,
     file_path: Path,
-    registry: RegistryResolution | None = None,
+    registry: object | None = None,
 ) -> list[str]:
     """Validate a parsed skill frontmatter dictionary.
 
@@ -117,6 +103,7 @@ def validate_skill_frontmatter(
         A list of human-readable error messages.  An empty list means the
         frontmatter is valid.
     """
+    del registry
     errors: list[str] = []
 
     # --- name ----------------------------------------------------------------
@@ -129,7 +116,7 @@ def validate_skill_frontmatter(
     else:
         name_val: str = name.strip()
 
-        if len(name_val) > MAX_SKILL_NAME_LENGTH or not SKILL_NAME_RE.match(name_val):
+        if not SKILL_NAME_RE.fullmatch(name_val):
             errors.append(
                 f"{file_path}: 'name' ({name_val!r}) must match "
                 f"{SKILL_NAME_RE.pattern!r}"
@@ -154,11 +141,6 @@ def validate_skill_frontmatter(
         or "\r" in description
     ):
         errors.append(f"{file_path}: 'description' must be trimmed and single-line")
-    elif len(description) > MAX_SKILL_DESCRIPTION_LENGTH:
-        errors.append(
-            f"{file_path}: 'description' must be at most "
-            f"{MAX_SKILL_DESCRIPTION_LENGTH} characters"
-        )
 
     class_value = frontmatter.get("class")
     if class_value is None:
@@ -180,53 +162,8 @@ def validate_skill_frontmatter(
             )
 
     try:
-        normalize_routing_signature(frontmatter, registry)
-    except RoutingContractError as exc:
-        errors.append(f"{file_path}: routing metadata is invalid: {exc}")
+        normalize_skill_metadata(frontmatter)
+    except SkillMetadataError as exc:
+        errors.append(f"{file_path}: selection metadata is invalid: {exc}")
 
     return errors
-
-
-def parse_routing_signature(
-    frontmatter: dict[str, Any], registry: RegistryResolution | None = None
-) -> RoutingSignature:
-    """Normalize the exact routing contract used by authoring and discovery."""
-    return normalize_routing_signature(frontmatter, registry)
-
-
-def load_repository_registry(context: Path | None = None) -> RegistryResolution:
-    """Load the built-in registry plus one repository-owned overlay.
-
-    The conventional repository files are checked in order.  Missing files are
-    normal; malformed or colliding declarations are deliberately propagated so
-    discovery cannot silently accept a different vocabulary.
-    """
-    registry = load_builtin_registry()
-    if context is None:
-        return registry
-    root = context if context.is_dir() else context.parent
-    git_root = find_git_root(root)
-    candidate_roots: list[Path] = [root]
-    if git_root is not None:
-        candidate_roots = []
-        for candidate_root in (root, *root.parents):
-            candidate_roots.append(candidate_root)
-            if candidate_root == git_root:
-                break
-    for candidate_root in candidate_roots:
-        candidates = (
-            candidate_root / "skill-facets.json",
-            candidate_root / ".skill-facets.json",
-            candidate_root / ".opencode" / "skill-facets.json",
-            candidate_root / ".opencode" / "facets.json",
-        )
-        existing = [path for path in candidates if path.is_file()]
-        if len(existing) > 1:
-            names = ", ".join(str(path) for path in existing)
-            raise RoutingContractError(
-                f"multiple facet registries declared at the same scope: {names}"
-            )
-        if existing:
-            data = json.loads(existing[0].read_text(encoding="utf-8"))
-            return resolve_registry_overlay(data, registry)
-    return registry

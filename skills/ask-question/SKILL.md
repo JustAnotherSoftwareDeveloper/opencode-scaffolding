@@ -1,14 +1,15 @@
 ---
 name: ask-question
-description: Use when the user request is ambiguous in a way that would materially change execution output, and asking 2-5 clarifying questions would resolve the ambiguity.
-schema_version: "1.0"
-cues:
-  - {facet: operation, value: "clarify-ambiguous-request", primary: true}
-  - {facet: subject, value: "user request"}
-  - {facet: constraint, value: "material ambiguity"}
-  - {facet: outcome, value: "clarifying questions"}
-relationships:
-  - {role: owner, rationale: "owns ambiguity resolution through questions"}
+description: "Use when ambiguity in a request would materially change the execution output and focused clarifying questions can resolve it."
+selection:
+  role: owner
+  tags:
+    actions: [clarify]
+    inputs: [ambiguous request]
+    outputs: [clarifying questions]
+    constraints: [material ambiguity]
+  use_when: [the request has unresolved ambiguity that changes execution]
+  not_for: [requests that are already sufficiently specified]
 class: inline
 ---
 

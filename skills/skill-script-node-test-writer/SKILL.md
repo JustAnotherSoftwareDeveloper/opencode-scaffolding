@@ -1,14 +1,16 @@
 ---
 name: skill-script-node-test-writer
-description: "Use when generating bun test files for Node scripts under scripts/node/, covering CLI integration tests via Bun.spawnSync and unit tests for lib modules."
-schema_version: "1.0"
-cues:
-  - {facet: operation, value: "generate-node-tests", primary: true}
-  - {facet: subject, value: "Node scripts"}
-  - {facet: interface, value: "Bun test"}
-  - {facet: outcome, value: "CLI and unit test files"}
-relationships:
-  - {role: owner, rationale: "owns Bun test generation for Node scripts"}
+description: "Use when generating Bun test files for existing Node scripts under scripts/node/, including CLI and library tests."
+selection:
+  role: owner
+  tags:
+    actions: [generate tests]
+    inputs: [existing Node script]
+    outputs: [CLI and unit test files]
+    topics: [Node scripts]
+    environments: [Bun test]
+  use_when: [an existing Node script needs Bun tests]
+  not_for: [creating the Node implementation]
 class: operation
 ---
 

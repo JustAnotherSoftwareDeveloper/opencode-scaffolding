@@ -1,13 +1,18 @@
 ---
 name: skill-template-library
 description: "Use when referencing skill templates, schemas, or snippets for skill authoring."
-schema_version: "1.0"
-cues:
-  - {facet: subject, value: "skill templates"}
-  - {facet: subject, value: "skill schemas"}
-  - {facet: outcome, value: "authoring scaffolds"}
-relationships:
-  - {role: reference, rationale: "provides passive template and schema documentation"}
+selection:
+  role: reference
+  tags:
+    actions: [reference, scaffold, select]
+    inputs: [skill requirements, source material]
+    outputs: [selection profile, skill scaffold]
+    topics: [skill authoring, templates, schemas, snippets]
+    environments: [OpenCode]
+    constraints: [documentation-only, canonical examples]
+  use_when: [an author needs a class-aware skill profile or canonical template]
+  not_for: [executing a skill workflow, maintaining an existing skill, assigning task skills]
+  supports: [skill-factory]
 class: documentation
 ---
 
@@ -21,15 +26,16 @@ It does not auto-read any files when loaded.
 Read the documentation files listed below as needed for your current task.
 The bulleted list provides the mapping of files to their purpose.
 
-- `templates/common-workflow.md` — Reusable workflow template for documenting a multi-step skill workflow.
-- `templates/delegated.SKILL.template.md` — Canonical SKILL.md template for delegated-class skills (single-purpose workers dispatched by orchestration).
-- `templates/documentation.SKILL.template.md` — Canonical SKILL.md template for documentation-class skills (passive reference data stores).
-- `templates/inline.SKILL.template.md` — Canonical SKILL.md template for inline-class skills (single-pass, no delegation).
-- `templates/operation.SKILL.template.md` — Canonical SKILL.md template for operation-class skills (imperative procedures with side effects).
-- `templates/orchestrated.SKILL.template.md` — Canonical SKILL.md template for orchestrated-class skills (multi-step, multi-worker coordination).
-- `templates/planning.SKILL.template.md` — Canonical SKILL.md template for planning-class skills (domain context reference, no side effects).
-- `schemas/index.md` — Reference for per-skill schema patterns and class-contract documentation (see also `skills/skill-architect/class-taxonomy.md`).
-- `snippets/index.md` — Index of reusable code blocks (frontmatter YAML, collation JSON, delegation packet template) for use by templates.
+- `reference/selection-profile.md` — Field-by-field profile contract and class-role rules.
+- `templates/common-workflow.md` — Reference-only workflow documentation template.
+- `templates/delegated.SKILL.template.md` — Canonical delegated-class entry-point template.
+- `templates/documentation.SKILL.template.md` — Canonical documentation-class entry-point template.
+- `templates/inline.SKILL.template.md` — Canonical inline-class entry-point template.
+- `templates/operation.SKILL.template.md` — Canonical operation-class entry-point template.
+- `templates/orchestrated.SKILL.template.md` — Canonical orchestrated-class entry-point template.
+- `templates/planning.SKILL.template.md` — Canonical planning-class entry-point template.
+- `schemas/index.md` — Index of the shared metadata shape and class contracts.
+- `snippets/index.md` — Index of reusable profile and workflow snippets.
 
 Choose the relevant files based on what you need to learn or reference.
 Read only those files.

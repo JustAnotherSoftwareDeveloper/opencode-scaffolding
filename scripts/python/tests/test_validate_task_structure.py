@@ -413,7 +413,8 @@ class TestAutoFix:
 
         result = auto_fix_task_structure(state_file, schema_dict)
 
-        assert result == {"valid": True, "fixed": False}
+        assert result["valid"] is False
+        assert "errors" in result
 
     def test_cli_auto_fix_writes_state_file(
         self, valid_task_1: dict, tmp_path: Path

@@ -12,18 +12,17 @@ dependencies = [
     "click>=8.4.2",
     "jsonschema>=4.0",
     "lxml>=6.1.0",
-    "tokenizers==0.22.1",
 ]
 
 [project.scripts]
 collect-skills = "cli.collect_skills:main"
+evaluate-semantic-selection = "cli.evaluate_semantic_selection:main"
 example = "cli.example:main"
 generate-task-json = "cli.generate_task_json:main"
-prepare-skill-ranker-model = "cli.prepare_skill_ranker_model:main"
 render-task-markdown = "cli.render_task_markdown:main"
 resolve-script-root = "cli.resolve_script_root:main"
-select-planning-skills = "cli.select_planning_skills:main"
 skill-validator = "cli.skill_validator:cli"
+validate-skill-md = "cli.validate_skill_md:main"
 validate-skill-meta = "cli.validate_skill_meta:main"
 validate-task-structure = "cli.validate_task_structure:main"
 
@@ -37,6 +36,7 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cli", "src/lib"]
+include = ["src/lib/generate_task_json/assets/task-packet.schema.json"]
 
 [tool.uv]
 package = true

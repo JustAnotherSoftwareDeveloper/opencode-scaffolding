@@ -1,4 +1,4 @@
-"""Generate skill-assigned task packets from task drafts."""
+"""Generate skill-assigned task packets from a frozen inventory."""
 
 from __future__ import annotations
 

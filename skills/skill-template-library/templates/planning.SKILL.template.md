@@ -1,12 +1,18 @@
 ---
 name: <<skill-name>>
 description: "Use as planning reference for <<domain>>."
-schema_version: "1.0"
-cues:
-  - {facet: subject, value: "<<reference-subject>>"}
-  - {facet: outcome, value: "<<planning-guidance>>"}
-relationships:
-  - {role: reference, rationale: "<<reference rationale>>"}
+selection:
+  role: reference
+  tags:
+    actions: [explain, plan]
+    inputs: [<<domain request>>]
+    outputs: [planning context]
+    topics: [<<reference-subject>>]
+    environments: [<<environment>>]
+    constraints: [no side effects]
+  aliases: [<<alias>>]
+  use_when: [the request needs <<domain>> planning context]
+  not_for: [executing or editing the planned artifact]
 class: planning
 ---
 

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opencode.ai/schemas/skill-selection-profile.json",
+  "title": "OpenCode skill selection profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "description", "selection", "class"],
+  "properties": {
+    "name": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$", "maxLength": 128},
+    "description": {"$ref": "#/$defs/text", "maxLength": 1024},
+    "class": {"enum": ["operation", "delegated", "inline", "orchestrated", "planning", "documentation"]},
+    "selection": {
+      "type": "object", "additionalProperties": false,
+      "required": ["role", "tags"],
+      "properties": {
+        "role": {"enum": ["owner", "support", "reference"]},
+        "tags": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "actions": {"$ref": "#/$defs/strings"},
+            "inputs": {"$ref": "#/$defs/strings"},
+            "outputs": {"$ref": "#/$defs/strings"},
+            "topics": {"$ref": "#/$defs/strings"},
+            "environments": {"$ref": "#/$defs/strings"},
+            "constraints": {"$ref": "#/$defs/strings"}
+          },
+          "minProperties": 1
+        },
+        "use_when": {"$ref": "#/$defs/strings"},
+        "not_for": {"$ref": "#/$defs/strings"},
+        "supports": {"$ref": "#/$defs/names"}
+      }
+    },
+    "version": {"$ref": "#/$defs/text", "maxLength": 64},
+    "license": {"$ref": "#/$defs/text", "maxLength": 128},
+    "compatibility": {"$ref": "#/$defs/text", "maxLength": 256},
+    "metadata": {"type": "object", "additionalProperties": true},
+    "permission": {"$ref": "#/$defs/text", "maxLength": 256}
+  },
+  "$defs": {
+    "text": {"type": "string", "minLength": 1, "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"},
+    "strings": {"type": "array", "minItems": 1, "maxItems": 32, "uniqueItems": true, "items": {"$ref": "#/$defs/text", "maxLength": 128}},
+    "names": {"type": "array", "minItems": 1, "maxItems": 32, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$", "maxLength": 128}}
+  }
+}

@@ -1,14 +1,16 @@
 ---
 name: proposal
 description: "Use when creating an evidence-based decision proposal from source documents."
-schema_version: "1.0"
-cues:
-  - {facet: operation, value: "author-decision-proposal", primary: true}
-  - {facet: subject, value: "source documents"}
-  - {facet: outcome, value: "evidence-based proposal"}
-  - {facet: interface, value: "proposal workspace"}
-relationships:
-  - {role: owner, rationale: "owns decision proposal authoring"}
+selection:
+  role: owner
+  tags:
+    actions: [author proposal]
+    inputs: [source documents]
+    outputs: [evidence-based proposal]
+    topics: [decision proposal]
+    constraints: [evidence preserving]
+  use_when: [source documents must become a durable decision proposal]
+  not_for: [general assessment or executable task planning]
 class: operation
 ---
 

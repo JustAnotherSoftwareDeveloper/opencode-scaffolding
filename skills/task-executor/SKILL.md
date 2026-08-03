@@ -1,14 +1,15 @@
 ---
 name: task-executor
 description: "Use when executing exactly one canonical task packet inline without worker delegation."
-schema_version: "1.0"
-cues:
-  - {facet: operation, value: "execute-task-packet", primary: true}
-  - {facet: subject, value: "canonical task packet"}
-  - {facet: constraint, value: "single inline execution"}
-  - {facet: outcome, value: "verified task result"}
-relationships:
-  - {role: owner, rationale: "owns single-packet inline execution"}
+selection:
+  role: owner
+  tags:
+    actions: [execute packet]
+    inputs: [canonical task packet]
+    outputs: [verified task result]
+    constraints: [single inline execution]
+  use_when: [one canonical task packet must be executed without delegation]
+  not_for: [delegating a task to another worker]
 class: inline
 ---
 
@@ -34,20 +35,39 @@ Return the deliverable defined by `expectedOutput`.
 - Return `PARTIAL: <deliverable and explanation>` when the deliverable exists but a declared verification check fails or remains incomplete.
 - Return `BLOCKED: <reason>` when validation, required input, or execution prevents producing the deliverable.
 
+## Capability Boundary
+
+The packet's `skills` are bounded executable assignments, not a planning corpus.
+Load exactly those declared skills and never dynamically add names. An inline task
+has no passive planning-load exception: planning profiles may be mentioned as
+input context, but cannot be loaded as authority or counted in the executable set.
+Assignments must be resolved before execution to collector-winning existing
+`SKILL.md` paths and must contain one to three skills when the packet schema
+requires assignments. Missing, stale, substituted, or non-winning paths block.
+
+Use two-pass reconciliation for assignments: before execution verify name, class,
+cardinality, and path against the frozen inventory; after execution verify every
+loaded assignment against that same inventory. A loaded skill is not completion
+evidence, and no score, rank, threshold, nearest-neighbor, or fallback may repair a
+failed path or assignment.
+
 ## Execution Plan
 
 1. Validate the input object against the canonical single-task contract.
 2. Reject contradictions and prohibited delegation skills before reading, writing, or executing.
-3. Load every skill named in `skills` in listed order.
+3. Load every skill named in `skills` in listed order, after pre-execution
+   assignment/path reconciliation.
 4. Return `BLOCKED: Skill '<name>' is unavailable` when a named skill cannot load.
 5. Read every path in `filesToRead` before execution.
 6. Return `BLOCKED: Required file '<path>' is unavailable` when a required path cannot read.
 7. Execute `executionInstructions` in ascending `step` order.
 8. Write every path in `filesToWrite` unless blocked.
-9. Run every declared `verification` check against the completed deliverable.
-10. Produce the result described by `expectedOutput`.
+9. Reconcile loaded assignments and paths in the post-execution pass.
+10. Run every declared `verification` check against the completed deliverable.
+11. Produce the result described by `expectedOutput`.
 
-This is a single-pass process.
+This remains a single-packet process; assignment reconciliation itself has two
+explicit passes.
 Treat direct loading of task-declared skills as inline context acquisition.
 Do not invoke the `task` tool.
 Do not delegate to workers, subagents, or delegation skills.

@@ -1,13 +1,18 @@
 ---
 name: <<skill-name>>
 description: "Use when <<trigger-condition>>."
-schema_version: "1.0"
-cues:
-  - {facet: operation, value: "<<owned-operation>>", primary: true}
-  - {facet: subject, value: "<<task-subject>>"}
-  - {facet: outcome, value: "<<task-outcome>>"}
-relationships:
-  - {role: owner, rationale: "<<ownership rationale>>"}
+selection:
+  role: owner
+  tags:
+    actions: [<<owned-action>>]
+    inputs: [<<input>>]
+    outputs: [<<output>>]
+    topics: [<<topic>>]
+    environments: [<<environment>>]
+    constraints: [<<safety boundary>>]
+  aliases: [<<alias>>]
+  use_when: [<<positive selection condition>>]
+  not_for: [<<nearby request not owned>>]
 class: operation
 ---
 

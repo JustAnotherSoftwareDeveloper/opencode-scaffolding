@@ -34,8 +34,8 @@ Preserve the source filename unless a deterministic suffix preserves a collision
 
 Require an epoch-millisecond prefix and lowercase kebab-case summary slug.
 
-Require `tasks.json` to validate through `generate-task-json`.
+Require `tasks.json` to validate through the shared generator against the frozen inventory.
 
 Require `tasks.md` to contain every final task purpose in order.
 
-Use relative source links only.
+Use relative source links only, and preserve copied sources when selection or publication fails by leaving no partial output.

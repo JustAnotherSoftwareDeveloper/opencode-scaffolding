@@ -1,12 +1,18 @@
 ---
 name: <<skill-name>>
 description: "Use when referencing <<domain-context>>."
-schema_version: "1.0"
-cues:
-  - {facet: subject, value: "<<reference-subject>>"}
-  - {facet: outcome, value: "<<reference-outcome>>"}
-relationships:
-  - {role: reference, rationale: "<<reference rationale>>"}
+selection:
+  role: reference
+  tags:
+    actions: [reference, explain]
+    inputs: [<<source material>>]
+    outputs: [reference context]
+    topics: [<<reference-subject>>]
+    environments: [<<environment>>]
+    constraints: [passive, no side effects]
+  aliases: [<<alias>>]
+  use_when: [the request needs <<domain-context>> reference material]
+  not_for: [executing a workflow or changing the referenced artifact]
 class: documentation
 ---
 

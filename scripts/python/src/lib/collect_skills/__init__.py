@@ -2,6 +2,21 @@
 
 from __future__ import annotations
 
-from .parser import load_repository_registry, parse_routing_signature
+from lib.shared.skill_metadata import (
+    SelectionProfile,
+    SelectionTags,
+    normalize_skill_metadata,
+)
 
-__all__ = ["load_repository_registry", "parse_routing_signature"]
+from .models import Skill, SkillIndex
+from .parser import extract_frontmatter, validate_skill_frontmatter
+
+__all__ = [
+    "SelectionProfile",
+    "SelectionTags",
+    "Skill",
+    "SkillIndex",
+    "extract_frontmatter",
+    "normalize_skill_metadata",
+    "validate_skill_frontmatter",
+]

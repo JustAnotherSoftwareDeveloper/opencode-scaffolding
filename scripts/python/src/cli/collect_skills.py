@@ -13,6 +13,9 @@ Exit codes:
 from __future__ import annotations
 
 import json
+import os
+import tempfile
+from contextlib import suppress
 from pathlib import Path
 
 import click
@@ -53,12 +56,6 @@ VALID_CLASS_NAMES = [c.value for c in SkillClass]
     help="Include archive/ directories in skill discovery",
 )
 @click.option(
-    "--builtins-manifest",
-    type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
-    default=None,
-    help="JSON file listing built-in skills",
-)
-@click.option(
     "--class",
     "class_filters",
     type=click.Choice(VALID_CLASS_NAMES),
@@ -85,7 +82,6 @@ def main(
     config_dir: str,
     extra_paths: tuple[str, ...],
     include_archive: bool,
-    builtins_manifest: str | None,  # noqa: ARG001
     class_filters: tuple[str, ...],
     verbose: bool,
     output: str | None,
@@ -111,18 +107,42 @@ def main(
         click.echo(f"Error: during discovery: {exc}", err=True)
         raise SystemExit(1) from exc
 
-    # --- Apply class filter if requested ---
-    if class_filters:
-        filtered = index.filter_by_classes(class_filters)
-        json_output = json.dumps([s.to_dict() for s in filtered])
-    else:
-        json_output = index.to_json()
+    # Discovery returns only after full-inventory finalization.  Do not publish
+    # or filter anything if a caller reports deferred discovery errors.
+    if getattr(index, "_discovery_errors", []):  # noqa: SLF001
+        click.echo("Error: discovery produced an invalid inventory", err=True)
+        raise SystemExit(1)
+
+    skills = (
+        index.filter_by_classes(class_filters)
+        if class_filters
+        else index.resolve()
+    )
+    json_output = json.dumps([skill.to_dict() for skill in skills])
 
     if output:
         output_path = Path(output)
+        temporary_path: Path | None = None
         try:
-            output_path.write_text(json_output, encoding="utf-8")
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=output_path.parent,
+                prefix=f".{output_path.name}.",
+                suffix=".tmp",
+                delete=False,
+            ) as temporary:
+                temporary_path = Path(temporary.name)
+                temporary.write(json_output)
+                temporary.write("\n")
+                temporary.flush()
+                os.fsync(temporary.fileno())
+            os.replace(temporary_path, output_path)
+            temporary_path = None
         except OSError as exc:
+            if temporary_path is not None:
+                with suppress(OSError):
+                    temporary_path.unlink()
             click.echo(f"Error: writing output: {exc}", err=True)
             raise SystemExit(1) from exc
     else:

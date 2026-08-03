@@ -1,14 +1,16 @@
 ---
 name: skill-script-bash-test-writer
-description: "Use when generating bats-core test files for existing bash scripts under scripts/shell/."
-schema_version: "1.0"
-cues:
-  - {facet: operation, value: "generate-bash-tests", primary: true}
-  - {facet: subject, value: "Bash scripts"}
-  - {facet: interface, value: "bats-core"}
-  - {facet: outcome, value: "shell test files"}
-relationships:
-  - {role: owner, rationale: "owns bats-core test generation"}
+description: "Use when generating bats-core test files for existing Bash scripts under scripts/shell/."
+selection:
+  role: owner
+  tags:
+    actions: [generate tests]
+    inputs: [existing Bash script]
+    outputs: [shell test files]
+    topics: [Bash scripts]
+    environments: [bats-core]
+  use_when: [an existing shell script needs bats-core tests]
+  not_for: [creating the Bash implementation]
 class: operation
 ---
 

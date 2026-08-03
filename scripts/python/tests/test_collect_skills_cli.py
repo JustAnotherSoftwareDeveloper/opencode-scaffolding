@@ -1,11 +1,4 @@
-"""test_collect_skills_cli.py — Tests for the collect-skills Click CLI.
-
-Covers the Click CLI command (via CliRunner).
-
-Run from ``scripts/python/``:
-
-    uv run pytest tests/test_collect_skills_cli.py -v
-"""
+"""Focused contract tests for the collect-skills publication boundary."""
 
 from __future__ import annotations
 
@@ -16,230 +9,113 @@ import pytest
 from click.testing import CliRunner
 
 from cli.collect_skills import main
-from lib.shared.skill_routing import RoutingCue, RoutingRelationship
-
-# ============================================================================
-# Test Click CLI via CliRunner
-# ============================================================================
+from lib.collect_skills.discovery import discover_skills_from_root
+from lib.collect_skills.models import Skill, SkillIndex
 
 
-class TestCli:
-    """Tests for the Click CLI command via CliRunner."""
-
-    def test_default_invocation(self) -> None:
-        """Running with no arguments succeeds and produces JSON output."""
-        runner = CliRunner()
-        result = runner.invoke(main, [])
-        assert result.exit_code == 0
-        assert result.output.startswith("[")
-
-    def test_with_project_root(self) -> None:
-        runner = CliRunner()
-        result = runner.invoke(main, ["--project-root", "/tmp"])
-        assert result.exit_code == 0
-        assert result.output.startswith("[")
-
-    def test_with_extra_paths(self) -> None:
-        runner = CliRunner()
-        result = runner.invoke(
-            main, ["--extra-paths", "/tmp/a", "--extra-paths", "/tmp/b"]
+def _populate(index: object, **_: object) -> None:
+    assert isinstance(index, SkillIndex)
+    index.add(
+        Skill(
+            name="alpha",
+            description="Alpha",
+            class_="operation",
+            path="/tmp/alpha/SKILL.md",
+            source="project",
         )
-        assert result.exit_code == 0
-        assert result.output.startswith("[")
-
-    def test_with_include_archive(self) -> None:
-        runner = CliRunner()
-        result = runner.invoke(main, ["--include-archive"])
-        assert result.exit_code == 0
-        assert result.output.startswith("[")
-
-    def test_with_all_options(self, tmp_path: Path) -> None:
-        manifest = tmp_path / "manifest.json"
-        manifest.write_text("[]")
-        runner = CliRunner()
-        result = runner.invoke(
-            main,
-            [
-                "--project-root",
-                str(tmp_path / "proj"),
-                "--config-dir",
-                str(tmp_path / "config"),
-                "--extra-paths",
-                str(tmp_path / "extra1"),
-                "--include-archive",
-                "--builtins-manifest",
-                str(manifest),
-                "--verbose",
-                "--output",
-                str(tmp_path / "out.json"),
-            ],
+    )
+    index.add(
+        Skill(
+            name="beta",
+            description="Beta",
+            class_="documentation",
+            path="/tmp/beta/SKILL.md",
+            source="project",
         )
+    )
+
+
+class TestCollectSkillsCli:
+    def test_stdout_is_json_only(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr("cli.collect_skills.discover_all_skills", _populate)
+        result = CliRunner().invoke(main, ["--verbose"])
         assert result.exit_code == 0
-
-    def test_help_text(self) -> None:
-        runner = CliRunner()
-        result = runner.invoke(main, ["--help"])
-        assert result.exit_code == 0
-        assert "collect-skills" in result.output
-        assert "project-root" in result.output
-        assert "config-dir" in result.output
-        assert "extra-paths" in result.output
-        assert "include-archive" in result.output
-        assert "builtins-manifest" in result.output
-        assert "verbose" in result.output
-        assert "output" in result.output
-
-
-# ============================================================================
-# TestClassFilter — repeatable --class option coverage
-# ============================================================================
-
-
-class TestClassFilter:
-    """Tests for the repeatable ``--class`` option.
-
-    Uses monkeypatch to inject known skills into the discovery layer so that
-    assertions are deterministic and independent of the global skill inventory.
-    """
-
-    # -- helpers -----------------------------------------------------------
-
-    @staticmethod
-    def _inject_multi_class_skills(
-        index: object,
-        **_: object,
-    ) -> None:
-        """Inject skills across multiple classes into the SkillIndex."""
-        from lib.collect_skills.models import Skill, SkillIndex
-
-        skills_data = [
-            ("alpha", "operation"),
-            ("bravo", "documentation"),
-            ("charlie", "operation"),
-            ("delta", "documentation"),
-            ("echo", "planning"),
-            ("foxtrot", "inline"),
-        ]
-        # Cast to SkillIndex — we control the injection.
-        assert isinstance(index, SkillIndex)
-        for name, class_ in skills_data:
-            index.add(
-                Skill(
-                    name=name,
-                    description=f"A {class_} skill named {name}",
-                    cues=(RoutingCue("operation", "validate", primary=True),),
-                    relationships=(RoutingRelationship("owner"),),
-                    class_=class_,
-                    source="project",
-                    location=f"/tmp/.opencode/skills/{name}/SKILL.md",
-                )
-            )
-
-    # -- tests -------------------------------------------------------------
-
-    def test_no_class_returns_all(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Without ``--class``, all skills are returned."""
-        monkeypatch.setattr(
-            "cli.collect_skills.discover_all_skills",
-            self._inject_multi_class_skills,
-        )
-        runner = CliRunner()
-        result = runner.invoke(main, [])
-        assert result.exit_code == 0
-        data = json.loads(result.output)
-        assert len(data) == 6
-        names = [item["name"] for item in data]
-        assert names == sorted(names)
-        assert all(item["cues"][0]["value"] == "validate" for item in data)
-
-    def test_single_class_filter(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """``--class operation`` returns only operation skills, in order."""
-        monkeypatch.setattr(
-            "cli.collect_skills.discover_all_skills",
-            self._inject_multi_class_skills,
-        )
-        runner = CliRunner()
-        result = runner.invoke(main, ["--class", "operation"])
-        assert result.exit_code == 0
-        data = json.loads(result.output)
-        assert len(data) == 2
-        for item in data:
-            assert item["class"] == "operation"
-        assert [item["name"] for item in data] == ["alpha", "charlie"]
-
-    def test_multi_class_union(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """``--class operation --class documentation`` returns the union."""
-        monkeypatch.setattr(
-            "cli.collect_skills.discover_all_skills",
-            self._inject_multi_class_skills,
-        )
-        runner = CliRunner()
-        result = runner.invoke(
-            main, ["--class", "operation", "--class", "documentation"]
-        )
-        assert result.exit_code == 0
-        data = json.loads(result.output)
-        assert len(data) == 4
-        for item in data:
-            assert item["class"] in ("operation", "documentation")
-        assert [item["name"] for item in data] == [
+        assert result.stderr == ""
+        assert [item["name"] for item in json.loads(result.output)] == [
             "alpha",
-            "bravo",
-            "charlie",
-            "delta",
+            "beta",
         ]
 
-    def test_multi_class_alphabetical_order(
+    def test_filter_runs_after_discovery_finalization(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """Multi-class output is sorted alphabetically regardless of filter order."""
-        monkeypatch.setattr(
-            "cli.collect_skills.discover_all_skills",
-            self._inject_multi_class_skills,
-        )
-        runner = CliRunner()
-        # Reverse the --class invocations to prove CLI order doesn't matter.
-        result = runner.invoke(
-            main, ["--class", "documentation", "--class", "operation"]
-        )
-        assert result.exit_code == 0
-        data = json.loads(result.output)
-        names = [item["name"] for item in data]
-        assert names == sorted(names)
+        calls: list[str] = []
 
-    def test_multi_class_repeated_flag_parses(
-        self, monkeypatch: pytest.MonkeyPatch
+        def discover(index: object, **kwargs: object) -> None:
+            calls.append("finalize")
+            _populate(index, **kwargs)
+
+        monkeypatch.setattr("cli.collect_skills.discover_all_skills", discover)
+        result = CliRunner().invoke(main, ["--class", "operation"])
+        assert result.exit_code == 0
+        assert calls == ["finalize"]
+        assert [item["name"] for item in json.loads(result.output)] == ["alpha"]
+
+    def test_failure_has_no_partial_destination(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
-        """Repeated ``--class`` flags are parsed as a tuple by Click."""
-        monkeypatch.setattr(
-            "cli.collect_skills.discover_all_skills",
-            self._inject_multi_class_skills,
-        )
-        runner = CliRunner()
-        result = runner.invoke(
-            main,
-            ["--class", "operation", "--class", "documentation"],
-        )
-        assert result.exit_code == 0
-        # Only operation and documentation classes present.
-        data = json.loads(result.output)
-        classes = {item["class"] for item in data}
-        assert classes == {"operation", "documentation"}
+        destination = tmp_path / "inventory.json"
 
-    def test_single_class_help_text(self) -> None:
-        """Help text documents that ``--class`` is repeatable."""
-        runner = CliRunner()
-        result = runner.invoke(main, ["--help"])
-        assert result.exit_code == 0
-        assert "repeatable" in result.output.lower() or "--class" in result.output
+        def fail(*_: object, **__: object) -> None:
+            raise ValueError("bad metadata")
 
-    def test_filter_on_empty_index(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """``--class`` on an empty index returns an empty JSON array."""
-        monkeypatch.setattr(
-            "cli.collect_skills.discover_all_skills",
-            lambda *_, **__: None,  # noqa: ARG005
-        )
-        runner = CliRunner()
-        result = runner.invoke(main, ["--class", "operation"])
+        monkeypatch.setattr("cli.collect_skills.discover_all_skills", fail)
+        result = CliRunner().invoke(main, ["--output", str(destination)])
+        assert result.exit_code == 1
+        assert result.stdout == ""
+        assert "Error:" in result.stderr
+        assert not destination.exists()
+
+    def test_output_replaces_atomically(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        monkeypatch.setattr("cli.collect_skills.discover_all_skills", _populate)
+        destination = tmp_path / "inventory.json"
+        destination.write_text("old", encoding="utf-8")
+
+        result = CliRunner().invoke(main, ["--output", str(destination)])
         assert result.exit_code == 0
-        assert result.output.strip() == "[]"
+        assert result.stdout == ""
+        assert [item["name"] for item in json.loads(destination.read_text())] == [
+            "alpha",
+            "beta",
+        ]
+        assert list(tmp_path.glob(".*.tmp")) == []
+
+    def test_builtin_manifest_option_is_removed(self) -> None:
+        result = CliRunner().invoke(main, ["--builtins-manifest", "manifest.json"])
+        assert result.exit_code != 0
+        assert "no such option" in result.output.lower()
+
+    def test_malformed_yaml_is_aggregated_without_stdout(self, tmp_path: Path) -> None:
+        skills = tmp_path / "skills"
+        skills.mkdir()
+        (skills / "broken").mkdir()
+        (skills / "broken" / "SKILL.md").write_text(
+            "---\nname: [unterminated\n---\n", encoding="utf-8"
+        )
+        result = CliRunner().invoke(main, ["--extra-paths", str(skills)])
+        assert result.exit_code == 1
+        assert result.stdout == ""
+        assert "discovery" in result.stderr.lower()
+
+    def test_frontmatter_must_start_at_file_beginning(self, tmp_path: Path) -> None:
+        root = tmp_path / "skills"
+        root.mkdir()
+        (root / "broken").mkdir()
+        (root / "broken" / "SKILL.md").write_text(
+            "comment\n---\nname: broken\n---\n", encoding="utf-8"
+        )
+        index = SkillIndex()
+        discover_skills_from_root(root, "extra", index)
+        assert not index.resolve()

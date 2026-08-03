@@ -1,13 +1,15 @@
 ---
 name: display-tasks
 description: "Use when rendering canonical breakdown-tasks output as a concise Markdown summary table."
-schema_version: "1.0"
-cues:
-  - {facet: operation, value: "render-task-summary", primary: true}
-  - {facet: subject, value: "canonical task JSON"}
-  - {facet: outcome, value: "Markdown summary table"}
-relationships:
-  - {role: owner, rationale: "owns concise task rendering"}
+selection:
+  role: owner
+  tags:
+    actions: [render]
+    inputs: [canonical task JSON]
+    outputs: [Markdown summary table]
+    topics: [task summaries]
+  use_when: [canonical task JSON needs a safe user-facing summary]
+  not_for: [changing task JSON or executing tasks]
 class: inline
 ---
 

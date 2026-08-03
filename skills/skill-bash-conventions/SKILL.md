@@ -1,14 +1,16 @@
 ---
 name: skill-bash-conventions
-description: "Use when referencing shared bash script conventions for the OpenCode platform, covering set flags, quoting, shellcheck rules, error handling, function naming, exit codes, JSON output format, and cross-platform portability."
-schema_version: "1.0"
-cues:
-  - {facet: subject, value: "Bash scripts"}
-  - {facet: environment, value: "OpenCode"}
-  - {facet: outcome, value: "portable shell conventions"}
-  - {facet: constraint, value: "shellcheck compliance"}
-relationships:
-  - {role: reference, rationale: "provides passive Bash convention guidance"}
+description: "Use when referencing shared Bash script conventions for OpenCode, including portability, ShellCheck, errors, and output."
+selection:
+  role: reference
+  tags:
+    inputs: [Bash script requirements]
+    outputs: [portable shell conventions]
+    topics: [Bash scripts]
+    environments: [OpenCode]
+    constraints: [ShellCheck compliance]
+  use_when: [Bash script authoring needs shared platform conventions]
+  not_for: [generating Bash scripts or tests]
 class: documentation
 ---
 

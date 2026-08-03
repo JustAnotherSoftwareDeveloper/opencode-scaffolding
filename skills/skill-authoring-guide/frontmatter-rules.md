@@ -1,21 +1,19 @@
 # Required Frontmatter
 
-Every `SKILL.md` must open with YAML frontmatter containing `name`, `description`, `schema_version`, `cues`, `relationships`, and `class`.
+Every `SKILL.md` must open with the current direct-selection profile containing
+`name`, `description`, `selection`, and `class`.
 
 ```yaml
 ---
 name: <<skill-name>>
 description: "Use when <<trigger description>>."
-schema_version: "1.0"
-cues:
-  - facet: operation
-    value: <<primary-owned-operation>>
-    primary: true
-  - facet: subject
-    value: <<material-subject>>
-relationships:
-  - role: owner
-    rationale: <<why-this-skill-owns-the-request>>
+selection:
+  role: owner
+  tags:
+    actions: [<<owned action>>]
+    topics: [<<material topic>>]
+  use_when: [<<positive request condition>>]
+  not_for: [<<nearby request not owned>>]
 class: <<one-of-six-classes>>
 ---
 ```
@@ -38,29 +36,16 @@ class: <<one-of-six-classes>>
 
 Use exactly one of `operation`, `delegated`, `inline`, `orchestrated`, `planning`, or `documentation`.
 
-## Schema version
+## Selection Profile
 
-Use exactly `schema_version: "1.0"` until a later contract version is implemented and published.
-Missing or unknown versions are hard validation failures.
-
-## Routing cues
-
-- Use structured entries with a canonical `value`, resolved `facet`, and optional aliases.
-- Declare one primary owned `operation` for every executable owner skill.
-- Add the smallest sufficient set of task-grounded cues; optional facets include subject, outcome, interface, environment, and constraint.
-- Resolve every non-built-in facet and value through a repository-owned namespaced registry.
-- Keep aliases and hierarchy in registry metadata rather than counting them as separate entries.
-- Reject undeclared facets, foreign namespaces, collisions, invalid shapes, and cues that fail the routing rubric in `./tagging-guide.md`.
-- Enforce the safety ceilings without treating them as targets: at most 32 cues and 32 relationships, with at most 16 aliases per cue.
-- Keep cue facets, values, and aliases at most 64 characters; relationship targets at most 128; and rationales at most 256.
-- Keep cue values, aliases, relationship targets, and rationales trimmed and on one line.
-
-## Relationships
-
-Represent `owner`, `support`, and `reference` relationships as explicit metadata rather than tag values.
+- Set `selection.role` to `owner`, `support`, or `reference`.
+- Use only grouped tags that materially distinguish the request: `actions`, `inputs`,
+  `outputs`, `topics`, `environments`, and `constraints`.
+- Add `aliases`, `use_when`, `not_for`, and directional `supports` only when they
+  improve direct semantic selection.
+- Keep values concise, unique within each group, and request-facing.
 
 ## Validation
 
-Run the same schema and registry validation for authoring, discovery, lexical scoring, and model rendering.
-Reject obsolete metadata shapes at the cutover boundary. Report the failed quality test or registry rule.
-The machine contracts are `scripts/python/src/lib/shared/skill-routing.schema.json` and `scripts/python/src/lib/shared/skill-facet-registry.schema.json`.
+Run both shared profile validators and Markdown lint on each changed `SKILL.md`.
+Validate the complete active inventory so `supports` targets resolve.

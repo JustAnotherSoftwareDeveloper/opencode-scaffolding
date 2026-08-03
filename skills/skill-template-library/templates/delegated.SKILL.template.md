@@ -1,13 +1,18 @@
 ---
 name: <<skill-name>>
 description: "Use when <<trigger condition>>."
-schema_version: "1.0"
-cues:
-  - {facet: operation, value: "<<owned-operation>>", primary: true}
-  - {facet: subject, value: "<<task-subject>>"}
-  - {facet: outcome, value: "<<task-outcome>>"}
-relationships:
-  - {role: owner, rationale: "<<ownership rationale>>"}
+selection:
+  role: owner
+  tags:
+    actions: [execute, verify]
+    inputs: [delegation packet]
+    outputs: [bounded deliverable]
+    topics: [<<task subject>>]
+    environments: [OpenCode worker]
+    constraints: [declared files, declared skills]
+  aliases: [<<alias>>]
+  use_when: [an orchestrator delegates <<owned-operation>>]
+  not_for: [interactive orchestration or unbounded discovery]
 class: delegated
 ---
 

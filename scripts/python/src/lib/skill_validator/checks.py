@@ -6,8 +6,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from lib.collect_skills.parser import SKILL_NAME_RE, load_repository_registry
-from lib.shared.skill_routing import RoutingContractError, normalize_routing_signature
+from lib.collect_skills.parser import SKILL_NAME_RE
+from lib.shared.skill_metadata import SkillMetadataError, normalize_skill_metadata
 
 from .helpers import (
     DEFAULT_DESCRIPTION_PREFIX,
@@ -50,37 +50,15 @@ def check_frontmatter_valid(skill_dir: Path) -> CheckResult:
         )
 
     try:
-        normalize_routing_signature(fm, load_repository_registry(skill_dir))
-    except RoutingContractError as exc:
+        normalize_skill_metadata(fm)
+    except SkillMetadataError as exc:
         return CheckResult(
             "frontmatter-valid",
             False,
-            f"Routing metadata is invalid (structural or registry rule): {exc}",
+            f"Selection metadata is invalid: {exc}",
         )
 
-    expected_keys = {
-        "name",
-        "description",
-        "class",
-        "schema_version",
-        "cues",
-        "relationships",
-    }
-    actual_keys = set(fm.keys())
-    required_keys = expected_keys - {"schema_version"}
-    if not actual_keys.issubset(expected_keys) or not required_keys.issubset(
-        actual_keys
-    ):
-        extra = actual_keys - expected_keys
-        missing = required_keys - actual_keys
-        parts = []
-        if extra:
-            parts.append(f"unexpected keys: {', '.join(sorted(extra))}")
-        if missing:
-            parts.append(f"missing keys: {', '.join(sorted(missing))}")
-        return CheckResult("frontmatter-valid", False, "; ".join(parts))
-
-    # Verify scalar required values. Routing arrays were validated above.
+    # Verify scalar required values.
     for key in {"name", "description", "class"}:
         val = fm.get(key)
         if not isinstance(val, str) or not val.strip():
@@ -89,12 +67,6 @@ def check_frontmatter_valid(skill_dir: Path) -> CheckResult:
                 False,
                 f"Field '{key}' is missing or empty",
             )
-    version = fm.get("schema_version")
-    if version is not None and (not isinstance(version, str) or not version.strip()):
-        return CheckResult(
-            "frontmatter-valid", False, "Field 'schema_version' must be a string"
-        )
-
     name = fm.get("name")
     if isinstance(name, str) and not SKILL_NAME_RE.fullmatch(name):
         return CheckResult(
@@ -104,7 +76,7 @@ def check_frontmatter_valid(skill_dir: Path) -> CheckResult:
     return CheckResult(
         "frontmatter-valid",
         True,
-        "Valid frontmatter with name, description, routing signature, class",
+        "Valid frontmatter with name, description, selection profile, class",
     )
 
 

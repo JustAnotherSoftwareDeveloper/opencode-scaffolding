@@ -1,13 +1,18 @@
 ---
 name: <<skill-name>>
 description: "Use when <<trigger condition>>."
-schema_version: "1.0"
-cues:
-  - {facet: operation, value: "<<owned-operation>>", primary: true}
-  - {facet: subject, value: "<<task-subject>>"}
-  - {facet: outcome, value: "<<task-outcome>>"}
-relationships:
-  - {role: owner, rationale: "<<ownership rationale>>"}
+selection:
+  role: owner
+  tags:
+    actions: [<<owned-action>>]
+    inputs: [<<input>>]
+    outputs: [<<output>>]
+    topics: [<<topic>>]
+    environments: [<<environment>>]
+    constraints: [single pass]
+  aliases: [<<alias>>]
+  use_when: [<<positive selection condition>>]
+  not_for: [<<nearby request not owned>>]
 class: inline
 ---
 
@@ -42,7 +47,7 @@ Concrete description of what this skill produces and in what format.
 
 1. <<Step 1>> — see [Input](#input).
 2. If the step involves deterministic data processing, delegate to a script:
-   Load `skill-architect` for path resolution rules per the global/project-local resolution order.
+    Load `skill-architect` for path resolution rules per the global/project-local resolution order.
    - **Python script:** `uv run --directory <scripts-python-dir> <entry-point> <args>`
    - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
    Incorporate script output into the reasoning context.
@@ -67,6 +72,7 @@ Do not loop or perform multi-phase orchestration.
 - Name matches directory name.
 - Description starts with "Use when".
 - Class is `inline`.
+- Selection role is `owner` and all used tag groups contain concrete values.
 - All `<<placeholders>>` are replaced.
 - No remaining old-template sections.
 - [ ] No Markdown tables in filled content (use bullet lists instead).

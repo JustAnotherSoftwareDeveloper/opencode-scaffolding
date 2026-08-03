@@ -1,487 +1,132 @@
-"""CLI integration tests for generate-task-json."""
-
-# Structured fixtures intentionally keep routing records readable.
-# ruff: noqa: E501
+"""CLI publication regression tests for generate-task-json."""
 
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
-from types import SimpleNamespace
+from zipfile import ZipFile
 
-import pytest
 from click.testing import CliRunner
 
-from cli import generate_task_json
-from lib.generate_task_json.core import GenerationValidationError
-from lib.generate_task_json.ranker import ScoreResult
+from cli.generate_task_json import main
 
 
-def _manifest() -> SimpleNamespace:
-    return SimpleNamespace(
-        tokenizer_path=Path("unused-tokenizer"),
-        data={
-            "assets": {"tokenizer": {"sha256": "unused"}},
-            "prompt": {
-                "prompt_version": "qwen3-reranker-4b-classifier-v1",
-                "instruction": "test instruction",
-            },
-            "instruction": "test instruction",
-            "policy": {
-                "additional_skill_threshold": 0.8,
-                "low_confidence_threshold": 0.8,
-                "max_skills": 3,
-            },
-        },
-        num_ctx=4096,
-        profile="q8",
-    )
+def _packet() -> dict[str, object]:
+    return {
+        "summary": "CLI publication",
+        "tasks": [
+            {
+                "purpose": "Publish the packet.",
+                "context": "x" * 200,
+                "filesToRead": [],
+                "filesToWrite": [],
+                "skills": ["demo"],
+                "executionInstructions": [{"step": 1, "action": "Publish it."}],
+                "expectedOutput": "A JSON packet.",
+            }
+        ],
+    }
 
 
-class FakeGenerateBudget:
-    def __init__(self, *_args, **_kwargs):
-        pass
-
-    def count(self, text: str) -> int:
-        return len(text)
-
-    def preflight(self, prompt: str) -> SimpleNamespace:
-        return SimpleNamespace(token_count=len(prompt))
-
-
-@pytest.fixture(autouse=True)
-def manifest_without_transport(monkeypatch):
-    monkeypatch.setattr(
-        generate_task_json, "load_manifest", lambda *_args, **_kwargs: _manifest()
-    )
-    monkeypatch.setattr(generate_task_json, "QwenTokenBudget", FakeGenerateBudget)
-
-
-VALID_CONTEXT = (
-    "Exercise the CLI task generator with a complete draft that identifies the test "
-    "scope, target behavior, expected output, and relevant constraints while avoiding "
-    "unrelated code changes or unsupported execution paths."
-)
-
-
-def _drafts() -> str:
-    return json.dumps(
-        {
-            "summary": "CLI test.",
-            "tasks": [
-                {
-                    "purpose": "Write tests.",
-                    "context": VALID_CONTEXT,
-                    "filesToRead": [],
-                    "filesToWrite": [],
-                    "executionInstructions": [{"step": 1, "action": "Write tests."}],
-                    "expectedOutput": "Tests.",
-                }
-            ],
-        }
-    )
-
-
-def _skills_file(tmp_path: Path) -> Path:
-    path = tmp_path / "skills.json"
-    skill = tmp_path / "python-test" / "SKILL.md"
+def _inventory(root: Path, *, path_root: Path | None = None) -> Path:
+    root.mkdir(parents=True, exist_ok=True)
+    skill = (path_root or root) / "demo" / "SKILL.md"
     skill.parent.mkdir(parents=True, exist_ok=True)
-    skill.write_text("skill", encoding="utf-8")
-    path.write_text(
+    skill.write_text("# Demo\n", encoding="utf-8")
+    inventory = root / "skills.json"
+    inventory.write_text(
         json.dumps(
             [
                 {
-                    "name": "python-test",
-                    "description": "Write Python tests",
-                    "schema_version": "1.0",
-                    "cues": [
-                        {"facet": "operation", "value": "write-tests", "primary": True},
-                        {"facet": "subject", "value": "python"},
-                    ],
-                    "relationships": [{"role": "owner"}],
+                    "name": "demo",
+                    "description": "Use when testing packets",
+                    "selection": {
+                        "role": "owner",
+                        "tags": {"actions": ["test"]},
+                    },
                     "class": "operation",
-                    "source": "project",
                     "path": str(skill),
+                    "source": "project",
                 }
             ]
-        )
-    )
-    return path
-
-
-def _with_skills(arguments: list[str], path: Path) -> list[str]:
-    return ["--skills-file", str(path), *arguments]
-
-
-def test_help() -> None:
-    result = CliRunner().invoke(generate_task_json.main, ["--help"])
-    assert result.exit_code == 0
-    assert "Assign skills" in result.output
-
-
-def test_skills_file_is_required() -> None:
-    result = CliRunner().invoke(
-        generate_task_json.main,
-        ["--assignment-mode", "lexical", "--output-dir", ".tasks"],
-        input=_drafts(),
-    )
-    assert result.exit_code == 2
-    assert "Missing option '--skills-file'" in result.output
-
-
-def test_skills_file_must_be_a_bare_array(tmp_path: Path) -> None:
-    skills = tmp_path / "skills.json"
-    skills.write_text(json.dumps({"skills": []}), encoding="utf-8")
-    result = CliRunner().invoke(
-        generate_task_json.main,
-        _with_skills(
-            ["--assignment-mode", "lexical", "--output-dir", ".tasks"], skills
         ),
-        input=_drafts(),
+        encoding="utf-8",
     )
-    assert result.exit_code == 2
-    assert "bare JSON array" in result.output
+    return inventory
 
 
-def test_success_prints_relative_output_path(tmp_path, monkeypatch) -> None:
-    monkeypatch.setattr(
-        generate_task_json,
-        "generate_task_json",
-        lambda _data, slug, *, output_dir, output_file, **_kwargs: (
-            output_file,
-            output_dir / f"1700000000123-{slug}.json",
-        )[1],
-    )
-    runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        skills = _skills_file(Path.cwd())
-        result = runner.invoke(
-            generate_task_json.main,
-            _with_skills(
-                [
-                    "--summary-slug",
-                    "cli-test",
-                    "--output-dir",
-                    str(Path.cwd() / ".tasks"),
-                ],
-                skills,
-            ),
-            input=_drafts(),
-        )
-    assert result.exit_code == 0
-    assert result.output == ".tasks/1700000000123-cli-test.json\n"
-
-
-def test_missing_summary_slug_is_derived_from_summary(tmp_path, monkeypatch) -> None:
-    from lib.generate_task_json.core import _derive_slug
-
-    monkeypatch.setattr(
-        generate_task_json,
-        "generate_task_json",
-        lambda _data, _slug, *, output_dir, **_kwargs: (
-            output_dir / f"1700000000123-{_derive_slug(_data['summary'])}.json"
-        ),
-    )
-    runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        skills = _skills_file(Path.cwd())
-        result = runner.invoke(
-            generate_task_json.main,
-            _with_skills(["--output-dir", str(Path.cwd() / ".tasks")], skills),
-            input=_drafts(),
-        )
-    assert result.exit_code == 0
-    assert result.output == ".tasks/1700000000123-cli-test.json\n"
-
-
-def test_success_uses_preserved_pwd_after_uv_directory_change(
-    tmp_path, monkeypatch
-) -> None:
-    workspace = tmp_path / "workspace"
-    output_dir = workspace / ".tasks"
-    workspace.mkdir()
-    monkeypatch.setenv("PWD", str(workspace))
-    monkeypatch.setattr(
-        generate_task_json,
-        "generate_task_json",
-        lambda _data, _slug, *, output_dir, **_kwargs: (
-            output_dir / "1700000000123-cli-test.json"
-        ),
-    )
-    skills = _skills_file(workspace)
-
-    result = CliRunner().invoke(
-        generate_task_json.main,
-        _with_skills(
-            ["--summary-slug", "cli-test", "--output-dir", str(output_dir)], skills
-        ),
-        input=_drafts(),
-    )
-
-    assert result.exit_code == 0, result.output
-    assert result.output == ".tasks/1700000000123-cli-test.json\n"
-
-
-def test_missing_output_dir_fails() -> None:
-    result = CliRunner().invoke(
-        generate_task_json.main, ["--summary-slug", "cli-test"], input=_drafts()
-    )
-    assert result.exit_code == 2
-
-
-def test_explicit_output_file_succeeds(tmp_path, monkeypatch) -> None:
-    monkeypatch.setattr(
-        generate_task_json,
-        "generate_task_json",
-        lambda _data, _slug, *, output_dir, output_file, **_kwargs: (
-            output_dir,
-            output_file,
-        )[1],
-    )
-    runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        output_file = Path.cwd() / "tasks.json"
-        skills = _skills_file(Path.cwd())
-        result = runner.invoke(
-            generate_task_json.main,
-            _with_skills(["--output-file", str(output_file)], skills),
-            input=_drafts(),
-        )
-    assert result.exit_code == 0
-    assert result.output == "tasks.json\n"
-
-
-def test_explicit_output_file_outside_cwd_fails(tmp_path: Path) -> None:
-    skills = _skills_file(tmp_path)
-    result = CliRunner().invoke(
-        generate_task_json.main,
-        _with_skills(["--output-file", str(tmp_path / "tasks.json")], skills),
-        input=_drafts(),
-    )
-    assert result.exit_code == 2
-    assert "within the current working directory" in result.output
-
-
-def test_partial_or_mixed_destination_options_fail() -> None:
-    runner = CliRunner()
-    for arguments in (
-        [],
-        ["--summary-slug", "cli-test"],
+def _invoke(
+    root: Path, inventory: Path, *output_args: str, project_root: Path | None = None
+):
+    return CliRunner().invoke(
+        main,
         [
-            "--summary-slug",
-            "cli-test",
-            "--output-dir",
-            ".tasks",
-            "--output-file",
-            "tasks.json",
+            "--skills-file",
+            str(inventory),
+            "--project-root",
+            str(project_root or root),
+            *output_args,
         ],
-    ):
-        result = runner.invoke(generate_task_json.main, arguments, input=_drafts())
-        assert result.exit_code == 2
-
-
-def test_invalid_summary_slug_fails() -> None:
-    # Click's required inventory check is covered separately.
-    from tempfile import TemporaryDirectory
-
-    with TemporaryDirectory() as directory:
-        skills = _skills_file(Path(directory))
-        result = CliRunner().invoke(
-            generate_task_json.main,
-            _with_skills(
-                [
-                    "--assignment-mode",
-                    "lexical",
-                    "--summary-slug",
-                    "Not a slug",
-                    "--output-dir",
-                    ".tasks",
-                ],
-                skills,
-            ),
-            input=_drafts(),
-        )
-    assert result.exit_code == 2
-    assert "kebab-case" in result.output
-
-
-def test_malformed_json_fails() -> None:
-    result = CliRunner().invoke(
-        generate_task_json.main,
-        ["--summary-slug", "cli-test", "--output-dir", ".tasks"],
-        input="not json",
+        input=json.dumps(_packet()),
     )
-    assert result.exit_code == 2
-    assert "Error:" in result.output
 
 
-def test_array_json_fails() -> None:
-    from tempfile import TemporaryDirectory
-
-    with TemporaryDirectory() as directory:
-        skills = _skills_file(Path(directory))
-        result = CliRunner().invoke(
-            generate_task_json.main,
-            _with_skills(
-                ["--summary-slug", "cli-test", "--output-dir", ".tasks"], skills
-            ),
-            input="[]",
-        )
-    assert result.exit_code == 2
-    assert "object" in result.output
-
-
-def test_validation_failure_has_no_stdout(monkeypatch) -> None:
-    monkeypatch.setattr(
-        generate_task_json,
-        "generate_task_json",
-        lambda *_, **__: (_ for _ in ()).throw(
-            GenerationValidationError("invalid draft")
-        ),
-    )
-    with __import__("tempfile").TemporaryDirectory() as directory:
-        skills = _skills_file(Path(directory))
-        result = CliRunner().invoke(
-            generate_task_json.main,
-            _with_skills(
-                ["--summary-slug", "cli-test", "--output-dir", ".tasks"], skills
-            ),
-            input=_drafts(),
-        )
-    assert result.exit_code == 2
-    assert result.output == "Error: invalid draft\n"
-
-
-def test_runtime_failure_fails(monkeypatch) -> None:
-    monkeypatch.setattr(
-        generate_task_json,
-        "generate_task_json",
-        lambda *_, **__: (_ for _ in ()).throw(RuntimeError("no skills")),
-    )
-    with __import__("tempfile").TemporaryDirectory() as directory:
-        skills = _skills_file(Path(directory))
-        result = CliRunner().invoke(
-            generate_task_json.main,
-            _with_skills(
-                ["--summary-slug", "cli-test", "--output-dir", ".tasks"], skills
-            ),
-            input=_drafts(),
-        )
-    assert result.exit_code == 1
-
-
-def test_output_error_fails(monkeypatch) -> None:
-    monkeypatch.setattr(
-        generate_task_json,
-        "generate_task_json",
-        lambda *_, **__: (_ for _ in ()).throw(OSError("bad path")),
-    )
-    with __import__("tempfile").TemporaryDirectory() as directory:
-        skills = _skills_file(Path(directory))
-        result = CliRunner().invoke(
-            generate_task_json.main,
-            _with_skills(
-                ["--assignment-mode", "lexical", "--output-dir", ".tasks"],
-                skills,
-            ),
-            input=_drafts(),
-        )
-    assert result.exit_code == 1
-
-
-def test_lexical_mode_does_not_load_ranker_manifest(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
-    monkeypatch.setattr(
-        generate_task_json,
-        "load_manifest",
-        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("loaded")),
-    )
-    result = CliRunner().invoke(
-        generate_task_json.main,
-        _with_skills(
-            [
-                "--assignment-mode",
-                "lexical",
-                "--project-root",
-                str(tmp_path),
-                "--output-file",
-                str(Path.cwd() / "lexical-test.json"),
-            ],
-            _skills_file(tmp_path),
-        ),
-        input=_drafts(),
-    )
+def test_cli_publishes_explicit_output_file(tmp_path: Path) -> None:
+    inventory = _inventory(tmp_path)
+    output = tmp_path / "packet.json"
+    result = _invoke(tmp_path, inventory, "--output-file", str(output))
     assert result.exit_code == 0, result.output
-    Path("lexical-test.json").unlink()
+    assert output.is_file()
 
 
-def test_shadow_requires_diagnostics_file(tmp_path: Path) -> None:
-    result = CliRunner().invoke(
-        generate_task_json.main,
-        _with_skills(
-            [
-                "--assignment-mode",
-                "shadow",
-                "--project-root",
-                str(tmp_path),
-                "--output-dir",
-                str(tmp_path / ".tasks"),
-            ],
-            _skills_file(tmp_path),
-        ),
-        input=_drafts(),
+def test_cli_publishes_output_directory_mode(tmp_path: Path) -> None:
+    inventory = _inventory(tmp_path)
+    output_dir = tmp_path / "tasks"
+    result = _invoke(tmp_path, inventory, "--output-dir", str(output_dir))
+    assert result.exit_code == 0, result.output
+    assert list(output_dir.glob("*.json"))
+
+
+def test_cli_rejects_existing_destination(tmp_path: Path) -> None:
+    inventory = _inventory(tmp_path)
+    output = tmp_path / "packet.json"
+    output.write_text("existing", encoding="utf-8")
+    result = _invoke(tmp_path, inventory, "--output-file", str(output))
+    assert result.exit_code == 2
+    assert "already exists" in result.output
+    assert output.read_text(encoding="utf-8") == "existing"
+
+
+def test_cli_rejects_inventory_path_outside_authorized_root(tmp_path: Path) -> None:
+    inventory_root = tmp_path / "inventory"
+    outside_root = tmp_path / "outside"
+    inventory = _inventory(inventory_root, path_root=outside_root)
+    result = _invoke(
+        tmp_path,
+        inventory,
+        "--output-file",
+        str(tmp_path / "packet.json"),
+        project_root=inventory_root,
     )
     assert result.exit_code == 2
-    assert "requires --diagnostics-file" in result.output
+    assert "outside its source root" in result.output
 
 
-def test_qwen_mode_accepts_external_project_inventory(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
-    class FakeScorer:
-        last_token_counts = (100,)
-        last_request_seconds = (0.01,)
-        last_prompt_hashes = ("a" * 64,)
-
-        def __init__(self, *_args, **_kwargs) -> None:
-            pass
-
-        def score(self, _query, documents):
-            return [ScoreResult(0.9) for _ in documents]
-
-        def diagnostic_identity(self):
-            return {
-                "model": "model",
-                "runtime": "runtime",
-                "tokenizer": "tokenizer",
-                "prompt": "prompt",
-                "render": "render",
-            }
-
-    monkeypatch.setattr(generate_task_json, "OllamaQwenScorer", FakeScorer)
-    output_dir = tmp_path / ".tasks"
-    diagnostics = tmp_path / "diagnostics.json"
-    result = CliRunner().invoke(
-        generate_task_json.main,
-        _with_skills(
-            [
-                "--assignment-mode",
-                "qwen",
-                "--project-root",
-                str(tmp_path),
-                "--diagnostics-file",
-                str(diagnostics),
-                "--output-dir",
-                str(output_dir),
-            ],
-            _skills_file(tmp_path),
-        ),
-        input=_drafts(),
+def test_built_wheel_contains_task_packet_schema(tmp_path: Path) -> None:
+    project = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        ["uv", "build", "--wheel", "--out-dir", str(tmp_path)],
+        cwd=project,
+        check=True,
+        capture_output=True,
+        text=True,
     )
-    assert result.exit_code == 0, result.output
-    output = next(output_dir.glob("*.json"))
-    assert json.loads(output.read_text())["tasks"][0]["skills"] == ["python-test"]
-    assert len(json.loads(diagnostics.read_text())["records"]) == 1
+    assert result.returncode == 0
+    wheels = list(tmp_path.glob("*.whl"))
+    assert len(wheels) == 1
+    with ZipFile(wheels[0]) as wheel:
+        assert (
+            "lib/generate_task_json/assets/task-packet.schema.json"
+            in wheel.namelist()
+        )

@@ -19,14 +19,14 @@ Apply these conventions to documentation under `skills/skill-authoring-guide/`.
 
 ## Metadata Documentation
 
-- Describe `cues` as structured routing evidence, not category slots or tags.
-- Require authors to begin with owned tasks and nearest competitors.
-- Refer to `./tagging-guide.md` as the authority for the routing rubric, registries, lifecycle, and evaluation.
-- Refer to `./frontmatter-rules.md` as the authority for metadata shape and validation boundaries.
+- Describe `selection` as the direct-selection profile, with grouped tags and request-facing conditions.
+- Require authors to begin with the owned request and its nearest neighbors.
+- Refer to `./tagging-guide.md` for grouped tags, aliases, and selection boundaries.
+- Refer to `./frontmatter-rules.md` for profile shape and validation boundaries.
 
 ## Completion Checks
 
 - Confirm headings, links, YAML, and code fences parse correctly.
-- Confirm every rule uses the open routing contract.
+- Confirm every rule uses the current direct-selection contract.
 - Confirm examples distinguish neighboring owners across unrelated domains.
 - Confirm no obsolete count, popularity, implementation, or metadata-shape rule remains.

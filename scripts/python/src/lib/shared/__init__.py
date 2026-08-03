@@ -1,36 +1,17 @@
-"""Shared utility modules consumed by multiple script CLI entry points and lib packages.
-
-Consumers: collect-skills, generate-task-json, generate-uuids, topological-sort,
-validate-dependencies, validate-task-structure,
-validate-skill-meta, resolve-script-root.
-"""
+"""Shared utility modules."""
 
 from __future__ import annotations
 
-from .skill_routing import (
-    FacetDeclaration,
-    FacetValueDeclaration,
-    RegistryResolution,
-    RoutingContractError,
-    RoutingCue,
-    RoutingRelationship,
-    RoutingSignature,
-    SchemaVersion,
-    load_builtin_registry,
-    normalize_routing_signature,
-    resolve_registry_overlay,
+from .skill_metadata import (
+    SelectionProfile,
+    SelectionTags,
+    SkillMetadataError,
+    normalize_skill_metadata,
 )
 
 __all__ = [
-    "FacetDeclaration",
-    "FacetValueDeclaration",
-    "RegistryResolution",
-    "RoutingContractError",
-    "RoutingCue",
-    "RoutingRelationship",
-    "RoutingSignature",
-    "SchemaVersion",
-    "load_builtin_registry",
-    "normalize_routing_signature",
-    "resolve_registry_overlay",
+    "SelectionProfile",
+    "SelectionTags",
+    "SkillMetadataError",
+    "normalize_skill_metadata",
 ]

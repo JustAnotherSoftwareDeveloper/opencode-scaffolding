@@ -1,14 +1,17 @@
 ---
 name: skill-script-node-writer
-description: "Use when generating deterministic TypeScript Node scripts from skill requirements, including cleye CLI entry points, library modules, shared lib modules, and package.json/biome.json/tsconfig registration."
-schema_version: "1.0"
-cues:
-  - {facet: operation, value: "generate-node-script", primary: true}
-  - {facet: subject, value: "TypeScript Node scripts"}
-  - {facet: interface, value: "CLI entry point"}
-  - {facet: outcome, value: "registered Node implementation"}
-relationships:
-  - {role: owner, rationale: "owns deterministic Node script generation"}
+description: "Use when generating deterministic TypeScript Node scripts from requirements, including CLI entry points, libraries, tests, and registration."
+selection:
+  role: owner
+  tags:
+    actions: [generate script]
+    inputs: [TypeScript Node requirements]
+    outputs: [registered Node implementation]
+    topics: [Node TypeScript scripts]
+    environments: [Bun]
+    constraints: [deterministic generation]
+  use_when: [a TypeScript Node script and its project registration must be created]
+  not_for: [adding tests to an existing Node script]
 class: operation
 ---
 

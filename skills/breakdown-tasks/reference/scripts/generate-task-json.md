@@ -1,33 +1,18 @@
 # Generate Task JSON
 
-Run `generate-task-json` with standard-input drafts and a frozen skill inventory.
+The generator receives final direct-LLM assignments and the one frozen collector inventory.
 
 ## Required Inputs
 
-- Pass `--skills-file` with one bare collector array.
-- Pass `--project-root` with the preserved caller root.
-- Pass either `--output-dir` or `--output-file`.
-- Provide one schema-valid `TaskDraftList` on standard input.
+- A schema-valid draft with final `skills` assignments.
+- One bare-array inventory from the caller root.
+- A safe output destination (`--output-dir` or `--output-file`).
 
-## Assignment Modes
+## Generator-Owned Guarantees
 
-- Use `--assignment-mode qwen` for authoritative checked-model assignment.
-- Use `--assignment-mode shadow` with `--diagnostics-file` for comparison.
-- Use `--assignment-mode lexical` for rollback without model initialization.
-- Select Q4 only through `--model-profile q4`.
-- Keep Q8 as the default checked profile.
+- Validate inventory, names, classes, profiles, source roots, winning paths, and one-to-three cardinality.
+- Preserve every supplied task field and skill order.
+- Derive a safe destination and publish atomically without replacing an existing output.
+- Emit no final output after invalid input, assignment mismatch, or publication failure.
 
-## Exit Codes
-
-- Exit `0` after atomic output publication and print the relative path.
-- Exit `1` for manifest, model, transport, scoring, diagnostics, or output failures.
-- Exit `2` for JSON, schema, inventory, token-budget, path, or argument failures.
-
-## Guarantees
-
-- Validate drafts and inventory before model initialization.
-- Reject oversized complete pairs before HTTP access.
-- Restrict normal model access to loopback Ollama.
-- Preserve non-skill task fields.
-- Validate final output before publication.
-- Never replace an existing task or diagnostics file.
+The generator does not discover skills, select skills, score candidates, rerank, infer classes, or repair assignments. Selection and contract inspection belong to the workflow.

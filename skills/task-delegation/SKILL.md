@@ -1,14 +1,16 @@
 ---
 name: task-delegation
 description: "Use when adapting loose task information into one worker packet and forwarding it via the task tool."
-schema_version: "1.0"
-cues:
-  - {facet: operation, value: "construct-worker-packet", primary: true}
-  - {facet: subject, value: "loose task information"}
-  - {facet: interface, value: "task tool"}
-  - {facet: outcome, value: "one worker packet"}
-relationships:
-  - {role: owner, rationale: "owns loose-input packet construction"}
+selection:
+  role: owner
+  tags:
+    actions: [construct packet]
+    inputs: [loose task information]
+    outputs: [one worker packet]
+    topics: [task delegation]
+    environments: [task tool]
+  use_when: [loose task information must become one delegated worker packet]
+  not_for: [decomposing a request into multiple tasks]
 class: inline
 ---
 
@@ -55,7 +57,7 @@ Reject a full `breakdown-tasks` JSON output object unless one task is clearly se
 `task-delegation` is the canonical constructor for ordinary eight-section worker packets and the validator for ordinary worker result envelopes. Return one complete, valid worker result envelope unchanged.
 Require the first non-whitespace content to be `## Worker Result`.
 Parse the first exact `## File Changes`, `## Verification`, and `## Deliverable` heading lines in that order.
-Require the `Worker Result` table to contain `Status`, `What was done`, `Accomplishments`, `Files modified`, `Skills loaded`, `Deviations`, `Blocker`, and `Unblock condition`.
+Require the `Worker Result` table to contain `Status`, `What was done`, `Accomplishments`, `Files modified`, `Skills loaded`, `Deviations`, `Blocker`, and `Unblock condition`; workers using the scoped planning capability must also report `Planning context loaded` as a separate field.
 Require `Status` to equal `COMPLETE`, `PARTIAL`, or `BLOCKED`.
 Require `File Changes` to contain `Path`, `Action`, and `Details` headers plus at least one data row.
 Require `Verification` to contain `Check`, `Result`, and `Details` headers plus at least one data row.
@@ -63,7 +65,7 @@ Require every file action to equal `created`, `modified`, `deleted`, `unchanged`
 Require every verification result to equal `PASS`, `FAIL`, or `NOT RUN`.
 Require every report-table value and data-table cell to be non-empty.
 Require `Files modified` to reconcile with every `created`, `modified`, and `deleted` row and remain `None` when no such row exists.
-Require `Skills loaded` to list exactly the successfully loaded skills declared in the packet; reject undeclared, missing, or sentinel skill names.
+Require `Skills loaded` to list exactly the successfully loaded executable skills declared in the packet; reject undeclared, missing, or sentinel skill names. Require a separate `Planning context loaded` field when present only for the scoped `breakdown-tasks` workflow: every name must be a successful planning-class load from that run's collector snapshot, and its collector-winning path must be reconciled separately. Reject planning names in `Skills loaded`, dynamic planning context for any other workflow, fixed planning-cap claims, missing snapshot evidence, stale paths, path mismatches, class mismatches, and unresolved two-pass reconciliation.
 Require every created, modified, deleted, or unchanged file row to be authorized by the packet's `FILES TO WRITE`, and require each authorized target to be reconciled by an outcome row.
 Require `BLOCKED` to contain non-`None` blocker fields and a `None` deliverable.
 Require `COMPLETE` and `PARTIAL` to contain `None` blocker fields and a non-empty, non-`None` deliverable.
@@ -101,6 +103,19 @@ Treat all content after the first `## Deliverable` heading as arbitrary Markdown
     Validate the report rows, table headers, data rows, blocker fields, reconciliation, and deliverable against the Output contract. A loaded skill alone is never evidence that the packet's required outcomes completed.
    Return `BLOCKED: task-delegation received a malformed worker result envelope.` when validation fails.
 9. **Return the worker result unchanged** — Preserve the complete valid envelope without rewrapping, extracting, or modifying `Deliverable`.
+
+### Scoped planning-context validation
+
+For a packet whose declared executable skill is `breakdown-tasks`, accept an
+uncapped, materially relevant planning set only when the worker reports exact
+names and collector-winning paths from one frozen run-scoped snapshot. Validate
+that set independently of `Skills loaded`; planning loads are passive and grant
+no execution, tool, or write authority. Validate the separate operation/documentation
+assignment set as one to three winning paths, with task-contract inspection and
+two-pass reconciliation (selection before execution and loaded paths after it).
+Any stale or substituted path, unavailable path identity, failed load, irrelevant
+planning name, non-planning dynamic name, or unresolved assignment is a blocked
+worker result rather than a repaired or fallback assignment.
 
 This is a single-pass process.
 Launch exactly one worker task per invocation.

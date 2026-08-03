@@ -1,4 +1,4 @@
-"""Skill data model, index, and routing-signature JSON serialization."""
+"""The collector's normalized skill record and deterministic index."""
 
 from __future__ import annotations
 
@@ -6,187 +6,106 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
-from lib.shared.skill_routing import RoutingCue, RoutingRelationship
-
-# ---------------------------------------------------------------------------
-# Source precedence
-# ---------------------------------------------------------------------------
+from lib.shared.skill_metadata import SelectionProfile
 
 SourcePriority: dict[str, int] = {
     "project": 5,
     "extra": 4,
     "global": 3,
     "archive": 2,
-    "builtin": 1,
 }
-
-# Directory-name ordering within the same source label.
-_LOCATION_PRIORITY: dict[str, int] = {
+_LOCATION_PRIORITY = {
     ".opencode/skills/": 3,
     ".claude/skills/": 2,
     ".agents/skills/": 1,
 }
 
-# ---------------------------------------------------------------------------
-# Skill dataclass
-# ---------------------------------------------------------------------------
-
 
 @dataclass
 class Skill:
-    """A single discovered skill with all parsed frontmatter fields.
+    """A normalized collector record.
 
-    Fields mirror the on-disk frontmatter keys except:
-    * ``class_`` stores the ``class`` key (Python keyword avoidance).
-    * ``location`` always holds the discovered path.
-    * No ``raw_frontmatter`` or ``frontmatter`` key is kept.
+    ``path`` and ``source`` are collector-owned values, never frontmatter
+    values.  The legacy constructor fields are retained only so callers from
+    the discovery migration can be upgraded independently; they are never
+    projected into JSON.
     """
 
     name: str
     description: str = ""
-    schema_version: str = "1.0"
-    cues: tuple[RoutingCue, ...] = ()
-    relationships: tuple[RoutingRelationship, ...] = ()
+    selection: SelectionProfile | None = None
     class_: str = ""
+    path: str = ""
+    source: str = ""
     version: str = ""
     license: str = ""
     compatibility: str = ""
     metadata: dict[str, Any] = field(default_factory=dict)
-    location: str = ""
-    source: str = ""
     permission: str = ""
-
-    # -- internal (not serialised) ----------------------------------------
-
     def to_dict(self) -> dict[str, Any]:
-        """Return a flat dict suitable for JSON output.
-
-        * ``class_`` is renamed to ``class``.
-        * ``raw_frontmatter`` / ``frontmatter`` are intentionally absent.
-        * ``location`` is always the discovered path.
-        """
-        d: dict[str, Any] = {
+        """Project exactly six required keys plus authored optionals."""
+        result: dict[str, Any] = {
             "name": self.name,
             "description": self.description,
-            "schema_version": self.schema_version,
-            "cues": [cue.to_dict() for cue in self.cues],
-            "relationships": [relation.to_dict() for relation in self.relationships],
-            "class": self.class_,  # rename for JSON output
-            "version": self.version,
-            "license": self.license,
-            "compatibility": self.compatibility,
-            "metadata": self.metadata,
-            "path": self.location,
+            "selection": self.selection.to_dict() if self.selection else {},
+            "class": self.class_,
+            "path": self.path,
             "source": self.source,
-            "permission": self.permission,
         }
-        return d
-
-
-# ---------------------------------------------------------------------------
-# SkillIndex – precedence-based dedup and serialisation
-# ---------------------------------------------------------------------------
+        for key in ("version", "license", "compatibility", "permission"):
+            value = getattr(self, key)
+            if value:
+                result[key] = value
+        if self.metadata:
+            result["metadata"] = self.metadata
+        return result
 
 
 class SkillIndex:
-    """Collects skills with source-precedence deduplication.
-
-    Precedence (highest wins):
-      ``project`` > ``extra`` > ``global`` > ``archive`` > ``builtin``
-
-    Within the same source label, skills under
-    ``.opencode/skills/`` > ``.claude/skills/`` > ``.agents/skills/``.
-    """
+    """A deterministic, precedence-aware collection of skill records."""
 
     def __init__(self) -> None:
         self._skills: dict[str, Skill] = {}
         self._warnings: list[str] = []
 
-    # -- public helpers ---------------------------------------------------
-
     @staticmethod
     def _source_priority(source: str, location: str = "") -> tuple[int, int]:
-        """Return a *source*, *location* priority tuple (larger = higher)."""
-        src = SourcePriority.get(source, 0)
-
-        # Find the best-matching location key (longest match wins).
-        loc = 0
-        if location:
-            for key, val in _LOCATION_PRIORITY.items():
-                if key in location and val > loc:
-                    loc = val
-
-        return src, loc
-
-    # -- add / resolve ----------------------------------------------------
+        source_rank = SourcePriority.get(source, 0)
+        location_rank = max(
+            (rank for marker, rank in _LOCATION_PRIORITY.items() if marker in location),
+            default=0,
+        )
+        return source_rank, location_rank
 
     def add(self, skill: Skill) -> None:
-        """Insert *skill*, respecting precedence-based deduplication.
-
-        If a skill with the same ``name`` does not exist it is inserted.
-        If it exists the higher-precedence entry wins (the lower one is
-        discarded).  A warning is recorded whenever a same-name entry is
-        shadowed.
-        """
-        name = skill.name
-        if name not in self._skills:
-            self._skills[name] = skill
+        existing = self._skills.get(skill.name)
+        if existing is None:
+            self._skills[skill.name] = skill
             return
-
-        existing = self._skills[name]
-        new_prio = self._source_priority(skill.source, skill.location)
-        old_prio = self._source_priority(existing.source, existing.location)
-
-        if new_prio > old_prio:
+        new_rank = self._source_priority(skill.source, skill.path)
+        old_rank = self._source_priority(existing.source, existing.path)
+        if new_rank > old_rank:
             self._warnings.append(
-                f"Shadowing '{name}': {existing.source}/{existing.location} "
-                f"replaced by {skill.source}/{skill.location}"
+                f"Shadowing '{skill.name}': {existing.source}/{existing.path} "
+                f"replaced by {skill.source}/{skill.path}"
             )
-            self._skills[name] = skill
-        elif new_prio < old_prio:
+            self._skills[skill.name] = skill
+        elif new_rank < old_rank:
             self._warnings.append(
-                f"Shadowing '{name}': {skill.source}/{skill.location} "
-                f"hidden by {existing.source}/{existing.location}"
+                f"Shadowing '{skill.name}': {skill.source}/{skill.path} "
+                f"hidden by {existing.source}/{existing.path}"
             )
-            # Keep the existing (higher-precedence) entry.
-        else:
-            # Equal priority – keep the existing entry silently.
-            pass
 
     def resolve(self) -> list[Skill]:
-        """Return all winning skills sorted alphabetically by name."""
-        return sorted(self._skills.values(), key=lambda s: s.name)
-
-    # -- filtering -------------------------------------------------------
+        return sorted(self._skills.values(), key=lambda skill: skill.name)
 
     def filter_by_classes(self, class_filters: tuple[str, ...]) -> list[Skill]:
-        """Return resolved skills whose ``class_`` is in *class_filters*.
-
-        Args:
-            class_filters: One or more SkillClass values, such as
-                ``("operation", "documentation")``.
-
-        Returns:
-            List of matching Skill instances sorted alphabetically by name.
-        """
-        resolved = self.resolve()
         allowed = set(class_filters)
-        return sorted(
-            [s for s in resolved if s.class_ in allowed],
-            key=lambda s: s.name,
-        )
-
-    # -- serialisation ----------------------------------------------------
+        return [skill for skill in self.resolve() if skill.class_ in allowed]
 
     def to_json(self) -> str:
-        """Serialise resolved skills as a bare JSON array.
-
-        Each element is the flat dict produced by ``Skill.to_dict()``.
-        """
-        resolved = self.resolve()
-        return json.dumps([s.to_dict() for s in resolved])
+        return json.dumps([skill.to_dict() for skill in self.resolve()])
 
     @property
     def warnings(self) -> list[str]:
-        """Read-only access to accumulated dedup warnings."""
         return list(self._warnings)

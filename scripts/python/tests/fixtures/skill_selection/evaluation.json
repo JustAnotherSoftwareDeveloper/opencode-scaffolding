@@ -1,0 +1,34 @@
+{
+  "inventory": [
+    {
+      "name": "skill-script-python-writer",
+      "path": "skills/skill-script-python-writer/SKILL.md"
+    },
+    {
+      "name": "skill-script-python-test-writer",
+      "path": "skills/skill-script-python-test-writer/SKILL.md"
+    }
+  ],
+  "cases": [
+    {
+      "id": "python-script",
+      "kind": "positive",
+      "mode": "task",
+      "request": "write a Python script",
+      "expected": {
+        "names": ["skill-script-python-writer"],
+        "paths": ["skills/skill-script-python-writer/SKILL.md"]
+      }
+    },
+    {
+      "id": "python-tests",
+      "kind": "positive",
+      "mode": "task",
+      "request": "write pytest coverage",
+      "expected": {
+        "names": ["skill-script-python-test-writer"],
+        "paths": ["skills/skill-script-python-test-writer/SKILL.md"]
+      }
+    }
+  ]
+}

@@ -1,14 +1,16 @@
 ---
 name: todo-writer
 description: "Use when writing or replacing todo entries from canonical breakdown-tasks output via the todowrite tool."
-schema_version: "1.0"
-cues:
-  - {facet: operation, value: "replace-todo-entries", primary: true}
-  - {facet: subject, value: "canonical task output"}
-  - {facet: interface, value: "todowrite tool"}
-  - {facet: outcome, value: "updated todo state"}
-relationships:
-  - {role: owner, rationale: "owns full todo replacement"}
+selection:
+  role: owner
+  tags:
+    actions: [replace todo entries]
+    inputs: [canonical task output]
+    outputs: [updated todo state]
+    topics: [todo management]
+    environments: [todowrite tool]
+  use_when: [canonical task output must replace the current todo entries]
+  not_for: [rendering task summaries or executing tasks]
 class: inline
 ---
 

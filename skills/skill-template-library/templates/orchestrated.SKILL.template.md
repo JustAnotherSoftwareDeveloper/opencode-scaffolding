@@ -1,13 +1,18 @@
 ---
 name: <<skill-name>>
 description: "Use when <<trigger description for multi-phase coordination>>."
-schema_version: "1.0"
-cues:
-  - {facet: operation, value: "<<owned-operation>>", primary: true}
-  - {facet: subject, value: "<<task-subject>>"}
-  - {facet: outcome, value: "<<task-outcome>>"}
-relationships:
-  - {role: owner, rationale: "<<orchestration ownership rationale>>"}
+selection:
+  role: owner
+  tags:
+    actions: [coordinate, delegate, verify]
+    inputs: [<<request>>]
+    outputs: [<<coordinated artifact>>]
+    topics: [<<task subject>>]
+    environments: [<<environment>>]
+    constraints: [bounded delegation]
+  aliases: [<<alias>>]
+  use_when: [the request requires multiple coordinated phases]
+  not_for: [a single-pass operation or passive reference lookup]
 class: orchestrated
 ---
 
