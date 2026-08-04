@@ -113,13 +113,15 @@ def main(
     tb_no_cleanup: bool,
 ) -> None:
     """Run OpenCode-focused evals, including generic worker contract cases."""
-    try:
-        status = preflight_frameworks()
-    except Exception as exc:
-        click.echo(f"Error: framework preflight failed: {exc}", err=True)
-        raise SystemExit(2) from exc
+    output: dict[str, Any] = {}
 
-    output: dict[str, Any] = {"frameworks": status.__dict__}
+    if run_inspect or run_terminal_bench:
+        try:
+            status = preflight_frameworks()
+        except Exception as exc:
+            click.echo(f"Error: framework preflight failed: {exc}", err=True)
+            raise SystemExit(2) from exc
+        output["frameworks"] = status.__dict__
 
     if list_cases:
         output["cases"] = list_eval_cases()

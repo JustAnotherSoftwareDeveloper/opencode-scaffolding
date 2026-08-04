@@ -1,5 +1,6 @@
-## Invalid Semantic Fixture
+## Minor Write-Deviation Fixture
 
 Packet write target: `docs/allowed.md`.
 Envelope file row: `docs/other.md | modified | Changed.`
-Expected rejection: file row is outside the authorized write boundary.
+Expected result: assess whether the adjacent path is a minor purpose-preserving
+deviation; require the displaced suggestion and reason to be reported.

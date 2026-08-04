@@ -1,33 +1,36 @@
 # Worker Agent Output Contract Template
 
-Workers return this envelope after executing the packet and running verification. The
-content below `## Deliverable` is the exact payload requested by `EXPECTED OUTPUT`.
+Workers return this list-based envelope after execution and verification. The content
+after the first `## Deliverable` heading is the exact payload requested by
+`EXPECTED OUTPUT` and is opaque to envelope parsing.
 
 ```markdown
 ## Worker Result
 
-| Field | Value |
-| --- | --- |
-| Status | COMPLETE, PARTIAL, or BLOCKED |
-| What was done | Concise execution summary |
-| Accomplishments | Concrete outcomes, or None |
-| Files modified | Created, modified, or deleted path list or count, or None |
-| Skills loaded | Exact successfully loaded skill names, or None |
-| Deviations | Material interpretations or execution deviations, or None |
-| Blocker | Blocking reason, or None |
-| Unblock condition | Required condition, or None |
+- **Status:** COMPLETE, PARTIAL, or BLOCKED
+- **What was done:** Concise execution summary; multiline Markdown is allowed.
+- **Accomplishments:** Concrete outcomes, or None.
+- **Files modified:** Actual created, modified, and deleted paths, or None.
+- **Skills loaded:** Every successfully loaded executable skill, including relevant extras, or None.
+- **Planning context loaded:** Successful materially relevant planning profiles from the frozen snapshot, or None.
+- **Reads relied on:** Listed and materially discovered sources, or None.
+- **Deviations:** Resource additions, superseded suggestions, or other material interpretations, or None.
+- **Blocker:** Blocking reason, or None.
+- **Unblock condition:** Required condition, or None.
 
 ## File Changes
 
-| Path | Action | Details |
-| --- | --- | --- |
-| relative/path, or None | created, modified, deleted, unchanged, not completed, or none | Concise result or reason |
+- **Path:** relative/path
+  - **Action:** created, modified, deleted, unchanged, not completed, or none
+  - **Details:** Result, reconciliation, and reason for any deviation.
+- **Path:** Repeat this record for each relevant suggested or actual target.
 
 ## Verification
 
-| Check | Result | Details |
-| --- | --- | --- |
-| check name, or None | PASS, FAIL, or NOT RUN | Concise evidence or reason |
+- **Check:** Check name
+  - **Result:** PASS, FAIL, or NOT RUN
+  - **Details:** Concise evidence or reason.
+- **Check:** Repeat this record for each applicable check.
 
 ## Deliverable
 
@@ -36,10 +39,13 @@ The exact payload required by `EXPECTED OUTPUT`, or `None` for `BLOCKED`.
 
 ## Status And Reconciliation Rules
 
-- `COMPLETE` requires a non-empty Deliverable and passing applicable checks.
-- `PARTIAL` requires a non-empty Deliverable and records incomplete or failed work.
-- `BLOCKED` requires a blocker and unblock condition; its Deliverable is `None`.
-- List every actual created, modified, or deleted path in both `File Changes` and
-  `Files modified`; use `None` when there were no such changes.
-- Keep report-table cells on one physical line; use `<br>` for line breaks and escape
-  literal pipes as `\|`.
+- `COMPLETE` requires a non-empty payload and passing applicable checks.
+- `PARTIAL` requires a non-empty payload and records incomplete non-critical work.
+- `BLOCKED` requires a material blocker, an unblock condition, and `None` payload.
+- Skills and reads are minimums; report successful additional skills and materially
+  relied-on purposeful reads.
+- Writes are suggestions. Reconcile every suggestion as used, superseded, unnecessary,
+  or not completed, and report every actual write. Explain minor deviations; seek
+  clarification for major, destructive, unrelated, or outcome-changing deviations.
+- The four headings are exact and ordered. Reject table envelopes and legacy status
+  prefixes. Preserve all Markdown after the first `## Deliverable` boundary verbatim.

@@ -1,11 +1,11 @@
 ---
 name: dispatch-decompose
-description: "Use when forwarding the full user request to a breakdown-tasks worker and returning its relative tasks path unchanged."
+description: "Use when forwarding an effective request or focused correction context to a breakdown-tasks worker and returning its relative tasks path."
 selection:
   role: owner
   tags:
-    actions: [dispatch decomposition]
-    inputs: [full user request]
+    actions: [dispatch decomposition, corrective decomposition]
+    inputs: [effective request context, focused correction feedback]
     outputs: [relative tasks path]
     topics: [task delegation]
   use_when: [a delegator must invoke breakdown-tasks and forward its path]
@@ -15,9 +15,12 @@ class: inline
 
 # Dispatch Decompose
 
-Construct the decomposition packet for `breakdown-tasks`.
+Construct one decomposition packet for `breakdown-tasks`. The effective context may
+be the full original request or the original request followed by concise feedback
+from a semantic review. Preserve the original outcome and make correction context
+explicit; do not provide implementation advice or silently change intent.
 Invoke exactly one worker with the packet.
-Extract and return a valid `.tasks/` path from the worker result envelope.
+Validate the hard-cutover list envelope and return a valid `.tasks/` path from it.
 Return `BLOCKED:` for incomplete, blocked, or malformed worker results.
 
 ## Input
@@ -33,7 +36,7 @@ Preserve the resolved context verbatim in the decomposition packet.
 Decompose the request into atomic task-delegation work items.
 
 ## DETAILS
-<full original user request, verbatim>
+<effective request context, including focused correction feedback when present>
 
 ## FILES TO READ
 <required source-document paths, or None>
@@ -59,7 +62,7 @@ A single string payload under Deliverable: the relative `.tasks/<epoch-milliseco
 
 ## Output
 
-First validate the complete worker envelope using the ordinary `task-delegation` envelope rules: section order, fields, actions, verification values, reconciliation, status invariants, and the first-`Deliverable` payload boundary. Then return the valid relative `.tasks/` path extracted from a `COMPLETE` envelope.
+First validate the complete worker envelope using the ordinary `task-delegation` list-envelope rules: exact heading order, bold routing labels, valid actions and verification values, reconciliation, status invariants, and the first-`Deliverable` payload boundary. Reject table syntax. Then return the valid relative `.tasks/` path extracted from a `COMPLETE` envelope.
 Return `BLOCKED:` for every non-complete or invalid result.
 
 ## Execution Plan
@@ -87,8 +90,8 @@ Return `BLOCKED:` for every non-complete or invalid result.
 6. **Validate the worker result envelope.**
    Require the first non-whitespace content to be `## Worker Result`.
    Parse the first exact `## File Changes`, `## Verification`, and `## Deliverable` heading lines in that order.
-   Require exactly one `Status` row before `File Changes` with `COMPLETE`, `PARTIAL`, or `BLOCKED`.
-    Require the worker-result fields plus valid `File Changes` and `Verification` tables, declared-skill and authorized-write reconciliation, and a non-empty payload for success statuses.
+    Require exactly one bold `Status` field before `File Changes` with `COMPLETE`, `PARTIAL`, or `BLOCKED`.
+     Require the list-based worker-result fields plus valid file and verification records, minimum-skill and suggested-write reconciliation, and a non-empty payload for success statuses.
    Return `BLOCKED: decomposition worker returned a malformed result envelope.` when validation fails.
 7. **Handle non-complete status.**
    Return `BLOCKED: decomposition worker was blocked — <Blocker>. Unblock condition: <Unblock condition>.` for `BLOCKED`.
@@ -105,14 +108,15 @@ Launch exactly one worker task per invocation.
 ## Guardrails
 
 - Always pass the complete original request into `## DETAILS`.
-- Never summarize, compress, omit, or reinterpret the request.
+- Never summarize, compress, omit, or reinterpret the original request. Focused
+  correction feedback may be appended only to explain a diagnosed decomposition defect.
 - Never construct a decomposition packet without `## SKILLS` set to `breakdown-tasks`.
 - Never replace the `## FILES TO WRITE` placeholders before worker execution.
 - Never invoke more than one worker.
 - Never call any subagent type other than `worker`.
 - Never rewrite a valid relative `.tasks/` payload before returning it.
 - Never treat `PARTIAL` or `BLOCKED` worker status as valid decomposition output.
-- Never accept a legacy raw worker payload without the result envelope.
+- Never accept a legacy raw worker payload or table envelope without the list result envelope.
 - Never write files outside the .tasks/ state file declared in ## FILES TO WRITE.
 
 ## Docs

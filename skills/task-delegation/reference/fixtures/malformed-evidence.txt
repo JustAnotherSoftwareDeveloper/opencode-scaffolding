@@ -1,0 +1,5 @@
+## Malformed Report Evidence Fixture
+
+The response is missing `## Verification`.
+Expected result: reject it as a deliverable while preserving the raw response and
+precise diagnostic for report-only repair.

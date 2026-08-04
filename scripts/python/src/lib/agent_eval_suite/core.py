@@ -250,42 +250,155 @@ CASES: tuple[EvalCase, ...] = (
         requires_json=True,
     ),
     EvalCase(
-        case_id="worker_read_only_payload",
+        case_id="delegator_semantic_review",
         category="worker_contract",
         prompt=(
-            "Execute a read-only worker packet. Require a non-empty Deliverable, "
-            "File Changes none, declared skill reconciliation, and verification "
-            "evidence."
+            "Review a syntactically valid but semantically wrong decomposition before "
+            "display. Compare it with the original request and correct or re-decompose "
+            "without reading repository files or doing worker work."
         ),
-        required_terms=("Deliverable", "non-empty", "none", "verification"),
+        required_terms=("semantic", "original request", "display", "re-decompose"),
     ),
     EvalCase(
-        case_id="worker_authorized_write",
+        case_id="delegator_in_memory_correction",
         category="worker_contract",
         prompt=(
-            "Evaluate a worker write packet: it may modify only FILES TO WRITE and "
-            "must reconcile each actual write in File Changes."
+            "Correct a task plan in memory by merging redundant work, fixing packet "
+            "wording, and preserving the requested outcome. Do not edit the task file."
         ),
-        required_terms=("FILES TO WRITE", "File Changes", "reconcile", "authorized"),
+        required_terms=("in memory", "merge", "packet", "outcome"),
+    ),
+    EvalCase(
+        case_id="delegator_feedback_redecomposition",
+        category="worker_contract",
+        prompt=(
+            "Re-decompose after a focused semantic review diagnosis. Preserve the full "
+            "original request, append concise feedback, and stop if attempts do not "
+            "converge."
+        ),
+        required_terms=("original request", "feedback", "converge"),
+    ),
+    EvalCase(
+        case_id="delegator_report_review",
+        category="worker_contract",
+        prompt=(
+            "Review a complete worker report rather than routing on status alone. Use "
+            "accomplishments, actual files, deviations, verification, payload, and "
+            "blockers to choose acceptance, repair, continuation, or clarification."
+        ),
+        required_terms=("status alone", "deviations", "verification", "continuation"),
+    ),
+    EvalCase(
+        case_id="delegator_non_convergence",
+        category="worker_contract",
+        prompt=(
+            "Handle repeated corrective attempts that reproduce the same failure or "
+            "have uncertain side effects. Avoid blind replay and stop or ask the user."
+        ),
+        required_terms=("same failure", "side effects", "blind replay", "stop"),
+    ),
+    EvalCase(
+        case_id="executor_plan_immutability",
+        category="worker_contract",
+        prompt=(
+            "Execute an already approved plan serially. Preserve task objects "
+            "unchanged while accepting minimum skills, greedy reads, suggested "
+            "writes, and full list-based reports."
+        ),
+        required_terms=("approved plan", "unchanged", "minimum skills", "list-based"),
+    ),
+    EvalCase(
+        case_id="worker_minimum_resources",
+        category="worker_contract",
+        prompt=(
+            "Execute a worker packet that loads every declared skill and begins with "
+            "all declared reads. Declared skills and reads are minimum starting sets."
+        ),
+        required_terms=("declared skill", "declared reads", "minimum", "starting"),
+    ),
+    EvalCase(
+        case_id="worker_flexible_resources",
+        category="worker_contract",
+        prompt=(
+            "Evaluate a worker that loads one relevant additional skill, reads "
+            "related context greedily, and makes a minor explained write-path "
+            "adjustment. Accept these changes when purpose and authoritative fields "
+            "remain unchanged."
+        ),
+        required_terms=(
+            "additional skill",
+            "greedily",
+            "minor",
+            "explained",
+            "unchanged",
+        ),
+    ),
+    EvalCase(
+        case_id="worker_authoritative_fields",
+        category="worker_contract",
+        prompt=(
+            "Reject a worker that changes purpose, details, execution instructions, "
+            "verification, or expected output. These non-resource fields are "
+            "authoritative after dispatch."
+        ),
+        required_terms=(
+            "authoritative",
+            "purpose",
+            "execution instructions",
+            "expected output",
+        ),
+    ),
+    EvalCase(
+        case_id="worker_malformed_evidence",
+        category="worker_contract",
+        prompt=(
+            "Reject malformed worker output as a deliverable but preserve the original "
+            "response and precise validation diagnostics for supervisory recovery."
+        ),
+        required_terms=("malformed", "original response", "diagnostics", "deliverable"),
+    ),
+    EvalCase(
+        case_id="worker_report_repair",
+        category="worker_contract",
+        prompt=(
+            "Repair a malformed report without repeating the completed task. Keep the "
+            "known attempt visible and request only a valid report when side effects "
+            "are known."
+        ),
+        required_terms=("repair", "without repeating", "known attempt", "valid report"),
+    ),
+    EvalCase(
+        case_id="worker_continuation",
+        category="worker_contract",
+        prompt=(
+            "Continue incomplete work using named known outputs and avoid duplicating "
+            "uncertain side effects. A PARTIAL report has a usable payload."
+        ),
+        required_terms=(
+            "known outputs",
+            "uncertain side effects",
+            "PARTIAL",
+            "payload",
+        ),
+    ),
+    EvalCase(
+        case_id="worker_list_envelope",
+        category="worker_contract",
+        prompt=(
+            "Accept the sole four-heading list envelope with multiline records and a "
+            "payload that may contain headings. Reject table envelopes and "
+            "status-only routing."
+        ),
+        required_terms=("four-heading", "multiline", "payload", "Reject table"),
     ),
     EvalCase(
         case_id="worker_no_op",
         category="worker_contract",
         prompt=(
-            "Evaluate an already-compliant worker packet. It must return a non-empty "
-            "payload and report the authorized target unchanged rather than inventing "
-            "a modification."
+            "Evaluate an already-compliant packet. Return a non-empty payload and "
+            "report a suggested target unchanged when no modification is needed."
         ),
-        required_terms=("non-empty", "unchanged", "payload", "authorized"),
-    ),
-    EvalCase(
-        case_id="worker_verification_payload",
-        category="worker_contract",
-        prompt=(
-            "Evaluate a verification-only worker packet. It must return requested "
-            "findings under Deliverable without requiring a file write."
-        ),
-        required_terms=("verification", "Deliverable", "findings", "file write"),
+        required_terms=("non-empty", "unchanged", "payload", "suggested"),
     ),
     EvalCase(
         case_id="worker_unavailable_skill",

@@ -76,6 +76,10 @@ describe('resolveTarget', () => {
     expect(resolveTarget(baseArgs)).toBeNull()
   })
 
+  test('returns null when every additional argument is a flag', () => {
+    expect(resolveTarget([...baseArgs, '--verbose', '--strict'])).toBeNull()
+  })
+
   test('skips flag arguments and returns the non-flag arg', () => {
     expect(resolveTarget([...baseArgs, '--flag', 'target.md'])).toBe('target.md')
   })

@@ -1,8 +1,6 @@
 ## Worker Result
 
-| Field | Value |
-| --- | --- |
-| Status | COMPLETE |
+- **Status:** COMPLETE
 
 ## Deliverable
 

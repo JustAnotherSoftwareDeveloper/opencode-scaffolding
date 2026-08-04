@@ -1,0 +1,21 @@
+## Worker Result
+
+| Field | Value |
+| --- | --- |
+| Status | COMPLETE |
+
+## File Changes
+
+| Path | Action | Details |
+| --- | --- | --- |
+| docs/example.md | modified | Changed. |
+
+## Verification
+
+| Check | Result | Details |
+| --- | --- | --- |
+| Markdown | PASS | Checked. |
+
+## Deliverable
+
+payload

@@ -4,139 +4,102 @@ description: "Use when adapting loose task information into one worker packet an
 selection:
   role: owner
   tags:
-    actions: [construct packet]
-    inputs: [loose task information]
-    outputs: [one worker packet]
-    topics: [task delegation]
+    actions: [construct packet, assess worker result]
+    inputs: [loose task information, worker report]
+    outputs: [one worker packet, validated result]
+    topics: [task delegation, resource reconciliation]
     environments: [task tool]
-  use_when: [loose task information must become one delegated worker packet]
+  use_when: [one selected task must be dispatched and its report assessed]
   not_for: [decomposing a request into multiple tasks]
 class: inline
 ---
 
 # Task Delegation
 
-Adapt loose task information into one worker packet and forward it via the task tool.
+Construct one worker packet from loose task information, dispatch exactly one worker,
+and assess the complete returned report. This skill supplies shared policy; the caller
+owns workflow decisions. A delegator may repair delegation metadata and replan its own
+work. An executor must preserve an already approved task plan unchanged.
 
-## Input
+## Packet Construction
 
-Accept any input format, including plaintext, freeform natural language, JSON, YAML, key-value lists, or mixed notes.
-Use loose field mapping to produce exactly one plaintext worker packet.
-Reject a full `breakdown-tasks` JSON output object unless one task is clearly selected.
-
-### Plaintext Packet Format
+Accept plaintext, JSON, YAML, key-value lists, or mixed notes. Map aliases to exactly
+these eight sections and mark genuinely uninferable values `UNKNOWN — not provided in
+input`; known-empty resource arrays become `None`:
 
 ```text
 ## PURPOSE
-<single sentence: what must be done>
-
 ## DETAILS
-<full task description, constraints, and context>
-
 ## FILES TO READ
-<comma-separated required file paths to read — purposeful related-file discovery remains permitted>
-
 ## FILES TO WRITE
-<comma-separated literal paths or bounded path patterns to create, modify, or delete, or "None">
-
 ## SKILLS
-<comma-separated skill names to load>
-
 ## EXECUTION INSTRUCTIONS
-<step-by-step instructions>
-
 ## VERIFICATION
-<how to check work completed correctly>
-
 ## EXPECTED OUTPUT
-<what the worker should produce>
 ```
 
-## Output
+Preserve explicit reads, writes, skills, and outcome requirements. Reads and skills are
+minimums for the worker, not closed sets. Writes are strong suggestions, not an exact
+authorization list: the worker may make a minor purpose-preserving adjustment and must
+explain it. Do not add broad or destructive patterns. Reject an ambiguous multi-task
+object unless one task is clearly selected.
 
-`task-delegation` is the canonical constructor for ordinary eight-section worker packets and the validator for ordinary worker result envelopes. Return one complete, valid worker result envelope unchanged.
-Require the first non-whitespace content to be `## Worker Result`.
-Parse the first exact `## File Changes`, `## Verification`, and `## Deliverable` heading lines in that order.
-Require the `Worker Result` table to contain `Status`, `What was done`, `Accomplishments`, `Files modified`, `Skills loaded`, `Deviations`, `Blocker`, and `Unblock condition`; workers using the scoped planning capability must also report `Planning context loaded` as a separate field.
-Require `Status` to equal `COMPLETE`, `PARTIAL`, or `BLOCKED`.
-Require `File Changes` to contain `Path`, `Action`, and `Details` headers plus at least one data row.
-Require `Verification` to contain `Check`, `Result`, and `Details` headers plus at least one data row.
-Require every file action to equal `created`, `modified`, `deleted`, `unchanged`, `not completed`, or `none`.
-Require every verification result to equal `PASS`, `FAIL`, or `NOT RUN`.
-Require every report-table value and data-table cell to be non-empty.
-Require `Files modified` to reconcile with every `created`, `modified`, and `deleted` row and remain `None` when no such row exists.
-Require `Skills loaded` to list exactly the successfully loaded executable skills declared in the packet; reject undeclared, missing, or sentinel skill names. Require a separate `Planning context loaded` field when present only for the scoped `breakdown-tasks` workflow: every name must be a successful planning-class load from that run's collector snapshot, and its collector-winning path must be reconciled separately. Reject planning names in `Skills loaded`, dynamic planning context for any other workflow, fixed planning-cap claims, missing snapshot evidence, stale paths, path mismatches, class mismatches, and unresolved two-pass reconciliation.
-Require every created, modified, deleted, or unchanged file row to be authorized by the packet's `FILES TO WRITE`, and require each authorized target to be reconciled by an outcome row.
-Require `BLOCKED` to contain non-`None` blocker fields and a `None` deliverable.
-Require `COMPLETE` and `PARTIAL` to contain `None` blocker fields and a non-empty, non-`None` deliverable.
-Treat all content after the first `## Deliverable` heading as arbitrary Markdown payload specified by `## EXPECTED OUTPUT`; do not parse later headings as envelope sections.
+Before dispatch, the caller may improve any section while preserving the intended
+outcome. After dispatch, `purpose`, `details`, `executionInstructions`, `verification`,
+and `expectedOutput` are authoritative. Only `skills`, `filesToRead`, and
+`filesToWrite` may vary during execution.
 
-## Execution Plan
+## Result Validation
 
-1. **Accept arbitrary input** — Accept plaintext, JSON, YAML, freeform natural language, key-value lists, or mixed notes.
-2. **Reject ambiguous multi-task input** — If input is an object with `summary` and `tasks` and no single task is clearly selected, return `BLOCKED: task-delegation requires exactly one selected task.`
-3. **Infer the 8 standard packet fields** — Analyze the input and infer content for PURPOSE, DETAILS, FILES TO READ, FILES TO WRITE, SKILLS, EXECUTION INSTRUCTIONS, VERIFICATION, and EXPECTED OUTPUT.
-   Use loose aliases:
-   - `purpose`, `goal`, `task`, `title` map to `## PURPOSE`.
-   - `context`, `details`, `background`, `description` map to `## DETAILS`.
-   - `filesToRead`, `read`, `sources` map to `## FILES TO READ`.
-   - `filesToWrite`, `write`, `outputs` map to `## FILES TO WRITE`.
-   - `skills`, `skill` map to `## SKILLS`.
-   - `executionInstructions`, `instructions`, `steps` map to `## EXECUTION INSTRUCTIONS`.
-   - `verification`, `checks` map to `## VERIFICATION`.
-   - `expectedOutput`, `deliverable`, `output` map to `## EXPECTED OUTPUT`.
-4. **Mark uninferable fields** — For any of the 8 fields that cannot be inferred from the input, set its value to the explicit marker: `UNKNOWN — not provided in input`.
-   Convert known empty `filesToRead`, `filesToWrite`, and `skills` arrays to `None` instead of the unknown marker.
-5. **Construct complete plaintext packet** — Build a well-formed plaintext delegation packet with all 8 sections present using the Packet Template.
-   Every section header (`## PURPOSE`, `## DETAILS`, etc.) must appear, even if its content is the UNKNOWN marker.
-   - **FILES TO READ: list required files only.** Include the files the worker must read before starting.
-     Leave purposeful related-file discovery to the worker contract.
-     Avoid unbounded patterns.
-     Include glob patterns only when the task explicitly requires broad file sets.
-   - **FILES TO WRITE: preserve all expected writes.** If the input provides multiple `filesToWrite` entries, include every literal path or bounded path pattern as a comma-separated list.
-     Do not collapse multiple outputs to one path.
-6. **Validate all sections present** — Confirm the constructed packet has exactly 8 sections and none are missing.
-   If sections are absent, report a clear error describing which sections are missing and stop.
-7. **Invoke the worker** — Invoke the `task` tool with `subagent_type: "worker"`, `description` set to the inferred PURPOSE content, `prompt` set to the full plaintext packet, and `command` set to the inferred PURPOSE content.
-8. **Validate the worker result** — Confirm the result starts with `Worker Result` and contains the remaining envelope sections in order. Validate the envelope against the original packet's declared skills, authorized writes, requested outcomes, and expected payload.
-   Require exactly one valid status row before `File Changes`.
-    Validate the report rows, table headers, data rows, blocker fields, reconciliation, and deliverable against the Output contract. A loaded skill alone is never evidence that the packet's required outcomes completed.
-   Return `BLOCKED: task-delegation received a malformed worker result envelope.` when validation fails.
-9. **Return the worker result unchanged** — Preserve the complete valid envelope without rewrapping, extracting, or modifying `Deliverable`.
+Accept only the sole list-based Markdown envelope. Require the first non-whitespace
+content to be `## Worker Result`, followed by the first exact headings
+`## File Changes`, `## Verification`, and `## Deliverable` in that order. Require
+bold `Status` with `COMPLETE`, `PARTIAL`, or `BLOCKED`, plus the routing and
+reconciliation labels described by the template. Use ordinary bullets; reject any
+table syntax or table-specific compatibility path.
 
-### Scoped planning-context validation
+Require file records to name actual paths and actions (`created`, `modified`, `deleted`,
+`unchanged`, `not completed`, or `none`). Require verification records to use `PASS`,
+`FAIL`, or `NOT RUN`. Reconcile every suggested target as used, superseded,
+unnecessary, or not completed, and every actual write as reported. Reconcile every
+declared skill as successfully loaded while allowing and reporting relevant extras;
+reconcile every attempted load truthfully. Material read additions must be reported.
+`COMPLETE` and `PARTIAL` require a usable non-empty payload. `BLOCKED` requires a
+material blocker and a `None` payload.
 
-For a packet whose declared executable skill is `breakdown-tasks`, accept an
-uncapped, materially relevant planning set only when the worker reports exact
-names and collector-winning paths from one frozen run-scoped snapshot. Validate
-that set independently of `Skills loaded`; planning loads are passive and grant
-no execution, tool, or write authority. Validate the separate operation/documentation
-assignment set as one to three winning paths, with task-contract inspection and
-two-pass reconciliation (selection before execution and loaded paths after it).
-Any stale or substituted path, unavailable path identity, failed load, irrelevant
-planning name, non-planning dynamic name, or unresolved assignment is a blocked
-worker result rather than a repaired or fallback assignment.
+If validation fails, the malformed report is not a deliverable, but do not discard it:
+return or expose the original response together with precise diagnostics (missing or
+misordered headings, invalid labels, malformed records, failed reconciliation, or
+status/payload contradiction). Never translate malformed output into a valid report
+and never use parser failure as evidence that the task itself was completed.
 
-This is a single-pass process.
-Launch exactly one worker task per invocation.
+Everything after the first `## Deliverable` heading is opaque payload and must not be
+parsed as metadata. Multiline narrative and repeated file or verification records are
+valid.
 
-## Guardrails
+## Scoped Planning Workflow
 
-- Accept any single-task input format without rejecting a format category.
-- Reject unresolved multi-task input.
-- Always produce exactly 8 sections in the output packet — no more, no less.
-- Mark any uninferable field with the explicit marker `UNKNOWN — not provided in input`; do not fill with default values, placeholder text, or guesses.
-- Use loose mapping; do not require exact field names.
-- Preserve every explicit required read and write target from the selected task.
-- Never add write targets.
-- Preserve explicit bounded write patterns without broadening them.
-- Reject recursive wildcards and repository-wide write patterns.
-- Permit the worker to discover task-related read context under the worker contract.
-- After construction, do not modify, re-encode, or further transform the plaintext packet.
-- If the constructed packet is missing sections, report a clear error describing which sections are absent and do not invoke the worker.
-- Reject legacy raw payloads and `PARTIAL:` or `BLOCKED:` worker prefixes as malformed worker result envelopes.
-- Never interpret `None` or `UNKNOWN — not provided in input` as a literal path or skill name.
+When the executable skill is `breakdown-tasks`, validate the uncapped materially
+relevant planning profiles from one frozen collector snapshot separately from one to
+three executable operation/documentation assignments. Require collector-winning
+absolute paths, existing `SKILL.md` files within their source roots, task-contract
+inspection, and two-pass reconciliation. Planning loads are passive and never grant
+execution or transitive authority. Stale paths, failed loads, irrelevant names,
+missing snapshot identity, class mismatch, or unresolved assignments block.
 
-## Docs
+## Dispatch Boundary
 
-See `./reference/README.md` for documentation of supporting files.
+Launch exactly one worker task per invocation with the complete plaintext packet. Do not
+rewrite the worker's valid envelope, extract only its status, or silently broaden the
+caller's authority. A caller may choose clarification, report repair, continuation,
+re-decomposition, focused re-dispatch, or stop after reviewing the full evidence.
+
+## Execution Steps
+
+1. Accept one selected task in any supported input format.
+2. Map its fields into the eight-section plaintext packet and mark only genuinely
+   unknown values with the explicit unknown marker.
+3. Validate the packet and dispatch exactly one worker.
+4. Validate the complete list envelope, resource reconciliation, status, and payload.
+5. If malformed, expose the original response and diagnostics without accepting it as
+   a deliverable; otherwise return the valid report unchanged.

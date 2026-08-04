@@ -53,13 +53,23 @@ def test_cases_have_required_fields() -> None:
 
 
 def test_worker_contract_cases_cover_required_categories() -> None:
-    """Verify generic worker cases include the completion regression coverage."""
+    """Verify smart supervision and flexible worker cases remain covered."""
     case_ids = {case.case_id for case in CASES}
     assert {
-        "worker_read_only_payload",
-        "worker_authorized_write",
+        "delegator_semantic_review",
+        "delegator_in_memory_correction",
+        "delegator_feedback_redecomposition",
+        "delegator_report_review",
+        "delegator_non_convergence",
+        "executor_plan_immutability",
+        "worker_minimum_resources",
+        "worker_flexible_resources",
+        "worker_authoritative_fields",
+        "worker_malformed_evidence",
+        "worker_report_repair",
+        "worker_continuation",
+        "worker_list_envelope",
         "worker_no_op",
-        "worker_verification_payload",
         "worker_unavailable_skill",
         "worker_blocked_input",
         "worker_decomposition_false_completion",

@@ -11,29 +11,37 @@ def read(relative: str) -> str:
 
 def test_worker_reports_planning_context_separately() -> None:
     content = read("agents/worker.md")
-    assert (
-        "load the uncapped set of\n   materially relevant planning-class profiles"
-        in content
-    )
-    assert "passive planning loads" in content
-    assert "Planning context loaded" in content
-    assert "Skills loaded` is the executable capability set" in content
+    assert "load every materially relevant planning" in content
+    assert "planning context when applicable" in content
+    assert "separately" in content
+    assert "every successful executable load" in content
 
 
 def test_worker_requires_bounded_assignments_and_two_pass_reconciliation() -> None:
     content = read("agents/worker.md")
-    assert "one to three executable task assignments" in content
-    assert "collector-winning\n   skill" in content
-    assert "Reconcile in two passes" in content
-    assert "stale or substituted paths block" in content
+    assert "one to three executable assignments" in content
+    assert "collector-winning existing `SKILL.md` path" in content
+    assert "reconcile one to three executable assignments" in content
+    assert "Any stale path" in content
 
 
-def test_delegation_rejects_stale_paths_and_dynamic_non_planning_loads() -> None:
+def test_delegation_uses_flexible_resource_semantics_and_list_envelope() -> None:
     content = read("skills/task-delegation/SKILL.md")
-    assert "stale paths" in content
-    assert "dynamic planning context for any other workflow" in content
-    assert "collector-winning paths" in content
-    assert "two-pass reconciliation" in content
+    assert "Stale paths" in content
+    assert "minimums" in content
+    assert "strong suggestions" in content
+    assert "relevant extras" in content
+    assert "table syntax" in content
+    assert "malformed report" in content
+
+
+def test_executor_preserves_approved_plan_without_status_only_routing() -> None:
+    content = read("agents/executor.md")
+    assert "approved `{summary, tasks}` plan" in content
+    assert "complete report" in content
+    assert "Status is a routing signal" in content
+    assert "sole acceptance criterion" in content
+    assert "Do not reorder, combine, or parallelize tasks" in content
 
 
 def test_inline_execution_does_not_turn_planning_into_authority() -> None:

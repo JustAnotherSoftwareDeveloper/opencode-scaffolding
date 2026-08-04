@@ -5,12 +5,9 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-import pytest
-
 
 def test_agent_eval_suite_list_cases() -> None:
     """Verify --list-cases outputs JSON with cases."""
-    pytest.skip("Requires Inspect AI to be installed")
     result = subprocess.run(
         ["python", "src/cli/agent_eval_suite.py", "--list-cases"],
         capture_output=True,
@@ -23,7 +20,6 @@ def test_agent_eval_suite_list_cases() -> None:
 
 def test_agent_eval_suite_write_inspect_task(tmp_path: Path) -> None:
     """Verify --write-inspect-task creates a file."""
-    pytest.skip("Requires Inspect AI to be installed")
     output_path = tmp_path / "inspect_task.py"
     result = subprocess.run(
         [

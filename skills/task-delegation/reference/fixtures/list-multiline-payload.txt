@@ -1,0 +1,33 @@
+## Worker Result
+
+- **Status:** COMPLETE
+- **What was done:** Completed the requested work.
+- **Accomplishments:** Several lines of evidence.
+- **Files modified:** docs/example.md
+- **Skills loaded:** generic-analysis
+- **Planning context loaded:** None
+- **Reads relied on:** docs/example.md, docs/related.md
+- **Deviations:** None
+- **Blocker:** None
+- **Unblock condition:** None
+
+## File Changes
+
+- **Path:** docs/example.md
+  - **Action:** modified
+  - **Details:** Updated the document.
+- **Path:** docs/optional.md
+  - **Action:** unnecessary
+  - **Details:** No change was needed.
+
+## Verification
+
+- **Check:** Markdown
+  - **Result:** PASS
+  - **Details:** Validated.
+
+## Deliverable
+
+## Nested heading is payload
+
+The payload remains opaque and is preserved exactly.

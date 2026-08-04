@@ -1,5 +1,5 @@
-## Invalid Semantic Fixture
+## Flexible Resource Fixture
 
 Packet skills: `generic-analysis`.
 Envelope `Skills loaded`: `skill-factory`.
-Expected rejection: loaded skills must exactly reconcile with declared skills.
+Expected result: accept the additional relevant load and require an explanation.

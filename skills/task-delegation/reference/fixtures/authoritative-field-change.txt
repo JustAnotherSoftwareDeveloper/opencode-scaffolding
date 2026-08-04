@@ -1,0 +1,4 @@
+## Invalid Authoritative-Field Fixture
+
+The worker changed `purpose` and `expectedOutput` after dispatch.
+Expected rejection: only skills, filesToRead, and filesToWrite are flexible.
