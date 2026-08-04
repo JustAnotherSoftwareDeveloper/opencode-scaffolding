@@ -9,7 +9,6 @@ import pytest
 from click.testing import CliRunner
 
 from cli.evaluate_semantic_selection import main as evaluate_main
-from cli.generate_task_json import main as generate_main
 from cli.skill_validator import cli as validator_main
 from cli.validate_skill_meta import main as meta_main
 from lib.collect_skills.discovery import (
@@ -21,14 +20,6 @@ from lib.collect_skills.discovery import (
 from lib.collect_skills.models import Skill, SkillIndex
 from lib.collect_skills.parser import extract_frontmatter, validate_skill_frontmatter
 from lib.collect_skills.skill_md import parse_skill_md
-from lib.generate_task_json.core import (
-    GenerationValidationError,
-    SummarySlugError,
-    _derive_slug,
-    _resolve_output_path,
-    generate_task_json,
-)
-from lib.generate_task_json.skill_inventory import validate_skill_inventory
 from lib.semantic_selection_evaluation.core import (
     EvaluationError,
     evaluate_fixture,
@@ -219,78 +210,6 @@ def test_discovery_failure_paths(
     assert any("invalid symlink" in item for item in vars(index)["_discovery_errors"])
 
 
-def test_inventory_and_output_contracts(tmp_path: Path) -> None:
-    path = write_skill(tmp_path)
-    record = {**profile(), "path": str(path), "source": "project"}
-    frozen = validate_skill_inventory([record], project_root=tmp_path)
-    assert frozen.names == ("demo-skill",)
-    assert _derive_slug("Hello, world!") == "hello-world"
-    assert _derive_slug("!!!") is None
-    assert _resolve_output_path("x", tmp_path, None, None).parent == tmp_path / ".tasks"
-    assert (
-        _resolve_output_path(None, None, tmp_path, tmp_path / "x.json")
-        == tmp_path / "x.json"
-    )
-    with pytest.raises(ValueError):
-        _resolve_output_path(None, None, None, None)
-    with pytest.raises(ValueError):
-        _resolve_output_path("x", tmp_path, tmp_path, None)
-    with pytest.raises(ValueError):
-        _resolve_output_path("x", None, None, tmp_path / "x.txt")
-
-
-def test_generate_packet_validation_and_atomic_output(tmp_path: Path) -> None:
-    path = write_skill(tmp_path)
-    record = {**profile(), "path": str(path), "source": "project"}
-    data = {"summary": "Test packet", "tasks": []}
-    # The published schema is intentionally exercised through a minimal invalid packet.
-    with pytest.raises(GenerationValidationError):
-        generate_task_json({}, skills_index=[record])
-    with pytest.raises(ValueError):
-        generate_task_json(data, skills_index=[record], provider=object())
-    output = tmp_path / "out.json"
-    with pytest.raises((GenerationValidationError, SummarySlugError)):
-        generate_task_json(data, skills_index=[record], output_file=output)
-
-
-def test_generate_packet_success_and_collision(tmp_path: Path) -> None:
-    path = write_skill(tmp_path)
-    record = {**profile(), "path": str(path), "source": "project"}
-    task = {
-        "purpose": "Run the direct selection contract tests",
-        "context": (
-            "This context is deliberately long enough to satisfy the packet schema "
-            "while describing the migration and its required validation behavior "
-            "for the worker. It explains the direct selection contract, frozen "
-            "inventory boundary, meaningful tests, and final lint and type "
-            "verification."
-        ),
-        "filesToRead": ["src/lib/shared/skill_metadata.py"],
-        "filesToWrite": ["tests/test_direct.py"],
-        "skills": ["skill-script-python-test-writer"],
-        "executionInstructions": [{"step": 1, "action": "Run the tests"}],
-        "expectedOutput": "A tested implementation",
-    }
-    data = {"summary": "Test packet", "tasks": [task]}
-    output = tmp_path / "out.json"
-    assert (
-        generate_task_json(
-            data,
-            skills_index=[record],
-            inventory_project_root=tmp_path,
-            output_file=output,
-        )
-        == output
-    )
-    with pytest.raises(OSError, match="already exists"):
-        generate_task_json(
-            data,
-            skills_index=[record],
-            inventory_project_root=tmp_path,
-            output_file=output,
-        )
-
-
 def test_semantic_loaders_and_contract_errors(tmp_path: Path) -> None:
     missing = tmp_path / "missing.json"
     with pytest.raises(EvaluationError):
@@ -322,17 +241,13 @@ def test_semantic_loaders_and_contract_errors(tmp_path: Path) -> None:
         evaluate_fixture(bad_case, root=tmp_path)
 
 
-def test_evaluation_cli_and_generation_cli(tmp_path: Path) -> None:
+def test_evaluation_cli(tmp_path: Path) -> None:
     fixture = tmp_path / "fixture.json"
     fixture.write_text(json.dumps({"inventory": [], "cases": []}), encoding="utf-8")
     result = CliRunner().invoke(evaluate_main, [str(fixture), "--root", str(tmp_path)])
     assert result.exit_code == 0 and '"passed": true' in result.output
     bad = CliRunner().invoke(evaluate_main, [str(tmp_path / "bad.json")])
     assert bad.exit_code != 0 and "Error:" in bad.stderr
-    inventory = tmp_path / "inventory.json"
-    inventory.write_text("[]", encoding="utf-8")
-    result = CliRunner().invoke(generate_main, ["--skills-file", str(inventory)])
-    assert result.exit_code != 0 and "output-file" in result.stderr
 
 
 def test_validate_skill_meta_core_and_cli(tmp_path: Path) -> None:

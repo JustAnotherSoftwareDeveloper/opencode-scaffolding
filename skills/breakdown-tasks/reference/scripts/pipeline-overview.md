@@ -1,20 +1,19 @@
 # Pipeline Overview
 
-Run both selection stages against one frozen inventory snapshot.
+Collect skills twice with phase-specific filters, assign inline, and publish.
 
 ## Sequence
 
-1. Preserve the caller root and collect the full inventory once.
-2. Select and load every materially relevant planning profile directly, without a cap.
-3. Produce a complete `{summary, tasks}` draft without `skills`.
-4. Select one to three operation/documentation skills per task directly from the same snapshot.
-5. Inspect winning task contracts and reconcile names, classes, paths, and cardinality.
-6. Pass the draft, final assignments, and unchanged inventory to the generator.
-7. Validate the packet without mutation or `--auto-fix`.
+1. Run `collect-skills --class planning`. Feed its stdout JSON into planning selection.
+2. Load every materially relevant planning skill. Draft tasks without `skills`.
+3. Run `collect-skills --class operation --class documentation`. Feed its stdout JSON into task-skill assignment.
+4. Select one to three skills per task inline. Inspect each contract at its collector-winning path.
+5. Write the completed draft and publish with `init-task-packet --output-dir .tasks`.
+6. Validate and fix with `validate-task-structure --auto-fix --state-file` in a retry loop.
 
 ## Failure Rules
 
-- No reranker, fallback, score, rank, threshold, or second collector call is permitted.
-- Missing or irrelevant selection, path mismatch, contract mismatch, invalid assignment, or generator failure blocks.
-- No task file or partial output is published after failure.
-- Sources and all non-skill task fields remain unchanged.
+- Non-zero collector exit blocks immediately.
+- Name absent from the relevant array blocks.
+- Stale path, contract mismatch, or invalid assignment blocks.
+- No partial output is published.

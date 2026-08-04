@@ -46,8 +46,8 @@ Assignments must be resolved before execution to collector-winning existing
 requires assignments. Missing, stale, substituted, or non-winning paths block.
 
 Use two-pass reconciliation for assignments: before execution verify name, class,
-cardinality, and path against the frozen inventory; after execution verify every
-loaded assignment against that same inventory. A loaded skill is not completion
+and cardinality against the received packet; after execution verify every
+loaded skill path still resolves. A loaded skill is not completion
 evidence, and no score, rank, threshold, nearest-neighbor, or fallback may repair a
 failed path or assignment.
 

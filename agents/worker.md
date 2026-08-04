@@ -45,12 +45,12 @@ outcome, or the caller's plan authority.
    packet. Do not draft the result until required calls complete.
 3. Read the listed inputs, then conduct only purposeful task-related discovery.
 4. For the scoped `breakdown-tasks` workflow, load every materially relevant planning
-   profile from that run's single collector snapshot. Planning loads are passive,
+   skill after the planning collector call completes. Planning loads are passive,
    separately reported, and grant no execution, tool, write, or transitive authority.
-5. For that workflow, reconcile one to three executable assignments against the same
-   frozen operation/documentation snapshot before and after execution. Each must use its
-   collector-winning existing `SKILL.md` path. Any stale path, identity mismatch,
-   class mismatch, failed load, or unresolved assignment blocks.
+5. For that workflow, reconcile one to three executable assignments against the
+   operation/documentation collector output. Each assignment must use a name present
+   in that collector array. Stale paths, name mismatch, class mismatch, failed load,
+   or unresolved assignment blocks.
 6. Execute the authoritative outcome with the resource rules above. Do not write
    outside declared literal targets or bounded patterns except for a minor explained
    purpose-preserving adjustment. Reconcile every suggested and actual target.

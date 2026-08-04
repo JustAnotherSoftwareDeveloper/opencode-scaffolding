@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "TaskDraftList",
-  "description": "Schema for LLM-produced task drafts before skill assignment. Contains zero skill information — skills are populated by the generate-task-json Python script which produces final TaskPacket objects.",
+  "description": "Schema for LLM-produced task drafts before skill assignment. Skills are assigned inline by the LLM after collecting operation and documentation profiles.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -11,7 +11,7 @@
       "maxLength": 2000
     },
     "tasks": {
-      "description": "An ordered list of TaskDraft objects. No skills field — that is added by the Python generate-task-json script.",
+      "description": "An ordered list of TaskDraft objects. No skills field — skills are assigned inline by the LLM.",
       "type": "array",
       "items": { "$ref": "#/definitions/TaskDraft" },
       "minItems": 1
@@ -22,7 +22,7 @@
     "TaskDraft": {
       "type": "object",
       "additionalProperties": false,
-      "description": "A single atomic task produced by the LLM during decomposition. Does NOT include skills — skills are assigned later by the Python generate-task-json script.",
+      "description": "A single atomic task produced by the LLM during decomposition. Does NOT include skills — skills are assigned inline after collection.",
       "properties": {
         "purpose": {
           "description": "Single sentence describing what this task accomplishes. Must be actionable and self-contained.",

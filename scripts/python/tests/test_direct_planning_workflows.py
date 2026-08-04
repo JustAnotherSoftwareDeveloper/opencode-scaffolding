@@ -1,4 +1,4 @@
-"""Contract checks for the shared direct-selection workflow semantics."""
+"""Contract checks for the shared procedural workflow semantics."""
 
 from pathlib import Path
 
@@ -7,27 +7,24 @@ BREAKDOWN = ROOT / "skills/breakdown-tasks/SKILL.md"
 PLAN = ROOT / "skills/plan/SKILL.md"
 
 
-def test_both_workflows_share_direct_selection_contract() -> None:
+def test_both_workflows_use_two_collector_calls_and_inline_assignment() -> None:
     breakdown = BREAKDOWN.read_text(encoding="utf-8")
     plan = PLAN.read_text(encoding="utf-8")
     for text in (breakdown, plan):
         lowered = text.lower()
-        assert (
-            "one frozen inventory" in lowered
-            or "one full inventory snapshot" in lowered
-        )
+        assert "collect-skills --class planning" in text
+        assert "--class operation" in text
+        assert "--class documentation" in text
         assert "one to three" in lowered
-        assert "no numeric cap" in lowered or "without a numeric cap" in lowered
-        assert "no score" in lowered or "never score" in lowered
-        assert "atomic" in lowered
-    assert "same direct-selection contract" in plan
+        assert "never score" in lowered or "do not score" in lowered
+        assert "init-task-packet" in text
 
 
-def test_breakdown_prohibits_obsolete_selection_execution() -> None:
+def test_breakdown_prohibits_obsolete_selection_patterns() -> None:
     text = BREAKDOWN.read_text(encoding="utf-8").lower()
-    assert "never score" in text
-    assert "fallback selector" in text
-    assert "collect-skills again" not in text
+    assert "do not score" in text
+    assert "do not recollect" in text
+    assert "do not manually populate" in text
 
 
 def test_plan_preserves_sources_and_fail_closed_publication() -> None:
@@ -35,3 +32,4 @@ def test_plan_preserves_sources_and_fail_closed_publication() -> None:
     assert "never modify source documents" in text
     assert "fail closed" in text
     assert "tasks.md" in text
+    assert "validate-task-structure" in text

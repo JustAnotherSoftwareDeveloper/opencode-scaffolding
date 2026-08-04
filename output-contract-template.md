@@ -12,7 +12,7 @@ after the first `## Deliverable` heading is the exact payload requested by
 - **Accomplishments:** Concrete outcomes, or None.
 - **Files modified:** Actual created, modified, and deleted paths, or None.
 - **Skills loaded:** Every successfully loaded executable skill, including relevant extras, or None.
-- **Planning context loaded:** Successful materially relevant planning profiles from the frozen snapshot, or None.
+- **Planning context loaded:** Successful materially relevant planning profiles from the planning collector call, or None.
 - **Reads relied on:** Listed and materially discovered sources, or None.
 - **Deviations:** Resource additions, superseded suggestions, or other material interpretations, or None.
 - **Blocker:** Blocking reason, or None.

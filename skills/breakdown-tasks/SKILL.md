@@ -16,67 +16,84 @@ class: delegated
 
 # Breakdown Tasks
 
-Decompose a request into atomic worker packets using direct LLM selection over one frozen inventory.
+Collect skills, select inline, and publish.
 
 ## Input Contract
 
-Read `PURPOSE` and `DETAILS`; block when either is absent. Preserve the complete request context in the draft tasks.
+Read `PURPOSE` and `DETAILS`. Block when either is absent.
 
-## Phase A — Direct Planning Selection
+## Execution
 
-1. Collect one full caller-root inventory containing planning, operation, and documentation profiles. Freeze its JSON and winning paths for the run.
-2. Present the request and planning profiles to the LLM. Select every materially relevant planning profile, with no numeric cap. An empty set is valid only when no planning concern is present.
-3. Load exactly the selected planning names through the skill tool, in selected order. These loads are passive context and are reported separately from executable skills.
-4. Reconcile names, classes, and collector-winning paths before loading; block on an unknown name, stale or substituted path, irrelevant load, or load failure.
-5. Use the selected planning context to produce schema-valid `{summary, tasks}` without `skills` or a slug. Read the authoring references linked below.
+1. **Collect planning skills.** Run:
 
-## Phase B — Direct Task Assignment And Publication
+   ```bash
+   uv run --directory ~/.config/opencode/scripts/python collect-skills --class planning
+   ```
 
-1. From the same frozen inventory, present only operation/documentation profiles and the complete draft to the LLM.
-2. Select one to three task skills per task, or block with explicit no-match evidence. Selection is semantic and direct: never score, rank, threshold, rerank, clip, or fall back to lexical/path matching.
-3. Inspect each selected collector-winning `SKILL.md` contract before generation. Reconcile names, class, cardinality, and paths against the same frozen snapshot.
-4. Invoke the generator with the complete draft, frozen inventory, and final assignments. The generator owns assignment validation, field/order preservation, destination derivation, and atomic no-replacement publication.
-5. Reconcile the generated packet after publication against the frozen inventory and task contracts. Do not repair or mutate assignments.
+   Capture stdout. It is a JSON array. Every record has `name`, `description`, `selection`, `class`, `path`, and `source`. Block on non-zero exit.
 
-## Phase C — Blocking Validation
+2. **Select and load planning skills.** Present the request and the planning array to the LLM. Select every materially relevant planning skill. Load each selected skill with the skill tool. Block on a name absent from the array, a stale path, or a load failure. An empty selection is valid only when no planning concern exists.
 
-1. Validate the generated packet against the task-packet schema and frozen inventory without `--auto-fix`.
-2. Treat assignment, schema, inventory, path, source, contract, or publication errors as blockers. Publish no partial output.
-3. Preserve copied/request source context and all non-skill task fields exactly. Do not repair or mutate assignments; return only the relative generated packet path.
+3. **Draft tasks.** Write a schema-valid `{summary, tasks}` object. Follow [the authoring references](reference/authoring/core-rules.md). Do not include `skills` in any task.
 
-## Phase D — Publication Reconciliation
+4. **Collect operation and documentation skills.** Run:
 
-1. Validate the published packet against the same frozen inventory and selected skill contracts.
-2. Do not pass `--auto-fix`; treat every validation error as blocking.
-3. Do not trim, deduplicate, replace, or remove assignments after publication.
+   ```bash
+   uv run --directory ~/.config/opencode/scripts/python collect-skills --class operation --class documentation
+   ```
+
+   Capture stdout. It is a JSON array with the same shape as step 1. Block on non-zero exit.
+
+5. **Assign skills to each task.** Present the complete draft and the operation/documentation array to the LLM. Select one to three skills per task. Block with explicit no-match evidence when no valid assignment exists. Reconcile every selected name against the array. A name absent from the array blocks. Do not score, rank, rerank, clip, or use lexical fallback.
+
+6. **Inspect contracts.** Read each selected skill's `SKILL.md` at its collector-winning `path` from the array. Verify the contract matches the task.
+
+7. **Write the completed draft.** Write the completed `{summary, tasks}` object with every task's `skills` populated to `/tmp/breakdown-draft.json`.
+
+8. **Publish.** Run:
+
+   ```bash
+   uv run --directory ~/.config/opencode/scripts/python init-task-packet \
+     --output-dir .tasks < /tmp/breakdown-draft.json
+   ```
+
+   Derives a safe filename from the summary, writes atomically, and prints the output path. Block on non-zero exit.
+
+9. **Validate and fix.** Run in a loop until valid:
+
+   ```bash
+   uv run --directory ~/.config/opencode/scripts/python validate-task-structure \
+     "$PUBLISHED_PATH" \
+     --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json \
+     --auto-fix --state-file
+   ```
+
+   - Exit 0 and no `"fixed": true` → already valid, done.
+   - Exit 0 and `"fixed": true` → script fixed the file in place. Read the fixed file back, then retry this step.
+   - Exit 1 → structural violations remain. Read errors from stderr, fix the JSON, retry.
+   - Exit 2 → unrecoverable error. Block.
 
 ## Output Contract
 
-Return the relative generated packet path only after atomic publication succeeds.
+Return the relative published packet path.
 
 ## Guardrails
 
-- One inventory snapshot serves both planning selection and task assignment; do not recollect.
-- Planning selection is uncapped and direct; task assignment is bounded to one through three skills.
-- Do not invoke a planning reranker, fallback selector, score/threshold policy, or obsolete assignment mode.
+- Run both collector commands exactly as shown.
+- Planning selection uses the planning array. Assignment uses the operation/documentation array. Do not swap.
+- Do not recollect, rebuild metadata from names, or substitute paths.
 - Do not manually populate, correct, reorder, or remove `skills`.
-- Dynamic planning loads are passive; executable task capabilities remain packet-declared.
-- Fail closed and publish atomically only after all reconciliation and validation passes.
+- Fail closed. Publish no partial output.
+- Planning loads are passive context. Only task-declared skills are executable.
 
 ## References
 
-- `reference/skill-assignment.md`
-- `reference/scripts/pipeline-overview.md`
-- `reference/scripts/generate-task-json.md`
-- `reference/scripts/error-handling-testing.md`
 - `reference/authoring/core-rules.md`
 - `reference/authoring/task-granularity.md`
 - `reference/authoring/anti-patterns.md`
 - `reference/authoring/context-preservation.md`
-
-## Self-Validation
-
-- One frozen inventory is used end to end.
-- No reranker or fallback path is invoked.
-- Planning loads are uncapped; assignments are one to three.
-- Sources, task fields, and atomic publication are preserved.
+- `reference/authoring/field-reference-table.md`
+- `reference/scripts/validate-task-structure.md`
+- `reference/scripts/error-handling-testing.md`
+- `reference/orchestration/task-validation.md`
+- `reference/maintenance/verification-best-practices.md`

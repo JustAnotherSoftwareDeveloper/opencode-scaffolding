@@ -18,7 +18,7 @@ dependencies = [
 collect-skills = "cli.collect_skills:main"
 evaluate-semantic-selection = "cli.evaluate_semantic_selection:main"
 example = "cli.example:main"
-generate-task-json = "cli.generate_task_json:main"
+init-task-packet = "cli.init_task_packet:main"
 render-task-markdown = "cli.render_task_markdown:main"
 resolve-script-root = "cli.resolve_script_root:main"
 skill-validator = "cli.skill_validator:cli"
@@ -36,7 +36,6 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cli", "src/lib"]
-include = ["src/lib/generate_task_json/assets/task-packet.schema.json"]
 
 [tool.uv]
 package = true

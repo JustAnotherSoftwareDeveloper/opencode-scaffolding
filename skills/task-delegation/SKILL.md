@@ -80,12 +80,13 @@ valid.
 ## Scoped Planning Workflow
 
 When the executable skill is `breakdown-tasks`, validate the uncapped materially
-relevant planning profiles from one frozen collector snapshot separately from one to
-three executable operation/documentation assignments. Require collector-winning
-absolute paths, existing `SKILL.md` files within their source roots, task-contract
-inspection, and two-pass reconciliation. Planning loads are passive and never grant
-execution or transitive authority. Stale paths, failed loads, irrelevant names,
-missing snapshot identity, class mismatch, or unresolved assignments block.
+relevant planning profiles from the planning collector call separately from one to
+three executable operation/documentation assignments from the operation collector
+call. Require names present in the relevant collector array, existing `SKILL.md`
+files within their source roots, task-contract inspection, and two-pass
+reconciliation. Planning loads are passive and never grant execution or transitive
+authority. Stale paths, failed loads, irrelevant names, name absent from the
+relevant array, class mismatch, or unresolved assignments block.
 
 ## Dispatch Boundary
 

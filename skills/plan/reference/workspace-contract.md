@@ -34,7 +34,7 @@ Preserve the source filename unless a deterministic suffix preserves a collision
 
 Require an epoch-millisecond prefix and lowercase kebab-case summary slug.
 
-Require `tasks.json` to validate through the shared generator against the frozen inventory.
+Require `tasks.json` to validate through `validate-task-structure` against the shared task-packet schema.
 
 Require `tasks.md` to contain every final task purpose in order.
 
