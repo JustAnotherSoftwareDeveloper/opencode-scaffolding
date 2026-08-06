@@ -37,7 +37,7 @@ Require a topic or summary and one or more source-document paths. Block when abs
 4. **Collect planning skills.** Run:
 
    ```bash
-   uv run --directory ~/.config/opencode/scripts/python collect-skills --class planning
+   uv run --project ~/.config/opencode/scripts/python collect-skills --class planning
    ```
 
    Capture stdout. Block on non-zero exit.
@@ -51,7 +51,7 @@ Require a topic or summary and one or more source-document paths. Block when abs
 7. **Collect operation and documentation skills.** Run:
 
    ```bash
-   uv run --directory ~/.config/opencode/scripts/python collect-skills --class operation --class documentation
+   uv run --project ~/.config/opencode/scripts/python collect-skills --class operation --class documentation
    ```
 
    Capture stdout. Block on non-zero exit.
@@ -65,7 +65,7 @@ Require a topic or summary and one or more source-document paths. Block when abs
 11. **Publish.** Run from the workspace directory:
 
     ```bash
-    uv run --directory ~/.config/opencode/scripts/python init-task-packet \
+    uv run --project ~/.config/opencode/scripts/python init-task-packet \
       --output-dir . < draft.json
     ```
 
@@ -74,7 +74,7 @@ Require a topic or summary and one or more source-document paths. Block when abs
 12. **Validate and fix.** Run in a loop until valid:
 
     ```bash
-    uv run --directory ~/.config/opencode/scripts/python validate-task-structure \
+    uv run --project ~/.config/opencode/scripts/python validate-task-structure \
       tasks.json \
       --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json \
       --auto-fix --state-file
@@ -90,7 +90,7 @@ Require a topic or summary and one or more source-document paths. Block when abs
 13. **Render tasks.md.** Run:
 
     ```bash
-    uv run --directory ~/.config/opencode/scripts/python render-task-markdown \
+    uv run --project ~/.config/opencode/scripts/python render-task-markdown \
       --input tasks.json \
       --output tasks.md
     ```

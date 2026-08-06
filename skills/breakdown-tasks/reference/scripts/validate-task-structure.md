@@ -5,7 +5,7 @@ Validate a JSON array of task objects against structural rules and the task-pack
 ## CLI
 
 ```
-uv run --directory ~/.config/opencode/scripts/python validate-task-structure [file-path | --stdin] --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
+uv run --project ~/.config/opencode/scripts/python validate-task-structure [file-path | --stdin] --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
 ```
 
 - `--stdin` reads the task JSON array from stdin.
@@ -63,13 +63,13 @@ Apply these structural rules.
 
 ```bash
 # Validate piped task list from stdin
-uv run --directory ~/.config/opencode/scripts/python validate-task-structure --stdin --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
+uv run --project ~/.config/opencode/scripts/python validate-task-structure --stdin --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
 
 # Validate from a file
-uv run --directory ~/.config/opencode/scripts/python validate-task-structure tasks.json --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
+uv run --project ~/.config/opencode/scripts/python validate-task-structure tasks.json --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
 
 # Pipe from a previous command
-echo '[...tasks...]' | uv run --directory ~/.config/opencode/scripts/python validate-task-structure --stdin --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
+echo '[...tasks...]' | uv run --project ~/.config/opencode/scripts/python validate-task-structure --stdin --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
 ```
 
 ## Integration Point

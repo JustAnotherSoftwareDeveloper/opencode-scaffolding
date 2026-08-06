@@ -48,7 +48,7 @@ Concrete description of what this skill produces and in what format.
 1. <<Step 1>> — see [Input](#input).
 2. If the step involves deterministic data processing, delegate to a script:
     Load `skill-architect` for path resolution rules per the global/project-local resolution order.
-   - **Python script:** `uv run --directory <scripts-python-dir> <entry-point> <args>`
+   - **Python script:** `uv run --project <scripts-python-dir> <entry-point> <args>`
    - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
    Incorporate script output into the reasoning context.
 3. <<Step 2>> — see [Output Format](#output-format).

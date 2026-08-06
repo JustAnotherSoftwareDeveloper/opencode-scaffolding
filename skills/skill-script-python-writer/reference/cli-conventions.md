@@ -48,7 +48,7 @@ The following example demonstrates all CLI conventions.
 """CLI entry point for count-tokens — count tokens in a text file.
 
 This script is invoked as:
-  uv run --directory <scripts-python-dir> count-tokens <input-path> [options]
+  uv run --project <scripts-python-dir> count-tokens <input-path> [options]
 
 Exit codes:
   0 — Success, token count written to stdout.

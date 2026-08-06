@@ -41,7 +41,7 @@ Use Shell for:
 ### Python Invocation
 
 ```shell
-uv run --directory ~/.config/opencode/scripts/python <entry-point> [args]
+uv run --project ~/.config/opencode/scripts/python <entry-point> [args]
 ```
 
 **Directory layout conventions:**

@@ -23,6 +23,11 @@ def test_publish_uses_init_task_packet() -> None:
     assert "--output-dir .tasks" in text
 
 
+def test_commands_select_project_without_changing_working_directory() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert text.count("uv run --project ~/.config/opencode/scripts/python") == 4
+
+
 def test_validate_step_uses_auto_fix_loop() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "validate-task-structure" in text

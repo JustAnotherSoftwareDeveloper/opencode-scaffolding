@@ -16,7 +16,7 @@
 
 ```sh
 node scripts/validate-skills.js skills/<name>/SKILL.md
-uv run --directory scripts/python python -m cli.validate_skill_md skills/<name>/SKILL.md
+uv run --project scripts/python python -m cli.validate_skill_md skills/<name>/SKILL.md
 ```
 
 - Run Markdown lint on every changed Markdown file and validate the full active

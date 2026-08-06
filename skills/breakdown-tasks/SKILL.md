@@ -27,7 +27,7 @@ Read `PURPOSE` and `DETAILS`. Block when either is absent.
 1. **Collect planning skills.** Run:
 
    ```bash
-   uv run --directory ~/.config/opencode/scripts/python collect-skills --class planning
+   uv run --project ~/.config/opencode/scripts/python collect-skills --class planning
    ```
 
    Capture stdout. It is a JSON array. Every record has `name`, `description`, `selection`, `class`, `path`, and `source`. Block on non-zero exit.
@@ -39,7 +39,7 @@ Read `PURPOSE` and `DETAILS`. Block when either is absent.
 4. **Collect operation and documentation skills.** Run:
 
    ```bash
-   uv run --directory ~/.config/opencode/scripts/python collect-skills --class operation --class documentation
+   uv run --project ~/.config/opencode/scripts/python collect-skills --class operation --class documentation
    ```
 
    Capture stdout. It is a JSON array with the same shape as step 1. Block on non-zero exit.
@@ -53,16 +53,16 @@ Read `PURPOSE` and `DETAILS`. Block when either is absent.
 8. **Publish.** Run:
 
    ```bash
-   uv run --directory ~/.config/opencode/scripts/python init-task-packet \
+   uv run --project ~/.config/opencode/scripts/python init-task-packet \
      --output-dir .tasks < /tmp/breakdown-draft.json
    ```
 
-   Derives a safe filename from the summary, writes atomically, and prints the output path. Block on non-zero exit.
+   Run from the workspace root so `.tasks` resolves there. The project option selects the scripts environment without changing the working directory. The command derives a safe filename from the summary, writes atomically, and prints the output path. Block on non-zero exit.
 
 9. **Validate and fix.** Run in a loop until valid:
 
    ```bash
-   uv run --directory ~/.config/opencode/scripts/python validate-task-structure \
+   uv run --project ~/.config/opencode/scripts/python validate-task-structure \
      "$PUBLISHED_PATH" \
      --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json \
      --auto-fix --state-file
@@ -80,6 +80,7 @@ Return the relative published packet path.
 ## Guardrails
 
 - Run both collector commands exactly as shown.
+- Run publication and validation from the workspace root. Use `--project` so relative packet paths remain workspace-relative.
 - Planning selection uses the planning array. Assignment uses the operation/documentation array. Do not swap.
 - Do not recollect, rebuild metadata from names, or substitute paths.
 - Do not manually populate, correct, reorder, or remove `skills`.

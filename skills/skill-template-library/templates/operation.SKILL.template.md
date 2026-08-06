@@ -33,7 +33,7 @@ Do not delegate sub-tasks.
 1. `<<step>>`.
 2. **Run script: `<script-entry-point>`** —
    Load `skill-architect` for path resolution rules per the global/project-local resolution order.
-   - **Python script:** `uv run --directory <scripts-python-dir> <entry-point> <args>`
+   - **Python script:** `uv run --project <scripts-python-dir> <entry-point> <args>`
    - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
    Capture stdout as structured output.
    Parse output and validate against expected schema.

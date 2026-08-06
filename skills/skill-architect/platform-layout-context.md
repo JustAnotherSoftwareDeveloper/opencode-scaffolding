@@ -66,7 +66,7 @@ The OpenCode platform recognizes three script runtimes:
 
 - `scripts/python/` — Python scripts managed by uv.
   Entry points registered in `pyproject.toml [project.scripts]`.
-  Invoked via `uv run --directory <path> <entry-point> [args]`.
+  Invoked via `uv run --project <path> <entry-point> [args]`.
 - `scripts/node/` — Node.js scripts managed by Bun.
   Invoked via `bun run --cwd <path> <script>`.
 - `scripts/shell/` — Shell scripts and Makefiles.
@@ -90,7 +90,7 @@ The OpenCode platform recognizes three script runtimes:
 **Resolution mechanism in skill invocation steps:**
 
 ```shell
-uv run --directory ~/.config/opencode/scripts/python <entry-point> [args]
+uv run --project ~/.config/opencode/scripts/python <entry-point> [args]
 ```
 
 If a project has no `.opencode/scripts/python/` directory, resolution falls through silently to the global root.
@@ -106,7 +106,7 @@ If a project has no `.opencode/scripts/python/` directory, resolution falls thro
 **Invocation pattern:**
 
 Skills invoke Python scripts via the canonical pattern:
-`uv run --directory <scripts-python-path> <entry-point> [args]`
+`uv run --project <scripts-python-path> <entry-point> [args]`
 
 ### Node Script Resolution
 

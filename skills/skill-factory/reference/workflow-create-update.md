@@ -45,7 +45,7 @@ Run the repository's shared validators against each changed skill file:
 
 ```sh
 node scripts/validate-skills.js skills/<name>/SKILL.md
-uv run --directory scripts/python python -m cli.validate_skill_md skills/<name>/SKILL.md
+uv run --project scripts/python python -m cli.validate_skill_md skills/<name>/SKILL.md
 ```
 
 Both validators must pass. The active skill class must have numbered execution

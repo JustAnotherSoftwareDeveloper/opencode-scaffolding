@@ -55,7 +55,7 @@ Each header defines a specific dimension of the task:
    If the work includes a deterministic subtask:
 a. Prepare input for the script (file path, CLI arguments, or stdin).
     b. Load `skill-architect` for path resolution rules to resolve `<scripts-python-dir>` or `<scripts-node-dir>`.
-       - **Python script:** `uv run --directory <scripts-python-dir> <entry-point> <args>`
+       - **Python script:** `uv run --project <scripts-python-dir> <entry-point> <args>`
        - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
     c. Capture and validate stdout output.
    d. On non-zero exit, return `BLOCKED` envelope status with the script failure and unblock condition.
