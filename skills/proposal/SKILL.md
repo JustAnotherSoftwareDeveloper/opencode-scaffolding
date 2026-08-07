@@ -4,11 +4,11 @@ description: "Use when creating an evidence-based decision proposal from source 
 selection:
   role: owner
   tags:
-    actions: [author proposal]
+    actions: [create decision proposal]
     inputs: [source documents]
-    outputs: [evidence-based proposal]
-    topics: [decision proposal]
-    constraints: [evidence preserving]
+    outputs: [decision proposal]
+    topics: [decision making]
+    constraints: [source grounded]
   use_when: [source documents must become a durable decision proposal]
   not_for: [general assessment or executable task planning]
 class: operation

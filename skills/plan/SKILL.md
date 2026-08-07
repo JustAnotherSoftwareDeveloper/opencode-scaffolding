@@ -4,11 +4,11 @@ description: "Use when creating a source-document plan workspace that produces e
 selection:
   role: owner
   tags:
-    actions: [create plan]
+    actions: [create executable plan]
     inputs: [source documents]
-    outputs: [executable task JSON]
-    topics: [task planning]
-    constraints: [evidence preserving]
+    outputs: [plan workspace, executable task JSON]
+    topics: [implementation planning]
+    constraints: [source grounded]
   use_when: [source documents must become an executable plan workspace]
   not_for: [general analysis or decision proposal authoring]
 class: operation

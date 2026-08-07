@@ -4,9 +4,10 @@ description: "Use as planning reference to classify an OpenCode skill using clas
 selection:
   role: reference
   tags:
+    actions: [classify skill]
     inputs: [skill requirements]
     outputs: [skill architecture guidance]
-    topics: [skill class boundaries]
+    topics: [skill architecture, skill class boundaries]
     constraints: [current class taxonomy]
   use_when: [a requested skill needs class or platform-boundary guidance]
   not_for: [authoring skill files or executing a skill workflow]
@@ -44,7 +45,7 @@ It answers "what skill classes exist, how to choose one, what boundaries separat
 
 ## Files
 
-- `class-taxonomy.md` — Defines all six skill classes with their contracts, side-effect rules, and template mappings.
+- `class-taxonomy.md` — Defines all five skill classes with their contracts, side-effect rules, and template mappings.
 - `class-decision-flow.md` — Documents the decision flow for selecting a skill class, from the default `operation` choice through specific alternative conditions.
 - `class-boundary-rules.md` — Documents the boundary rules between skill classes and how to disambiguate when a skill's behavior spans multiple classes.
 - `platform-layout-context.md` — Documents the filesystem layout for skills, the discovery mechanism, and platform-level rules organized by class.
@@ -58,7 +59,7 @@ It answers "what skill classes exist, how to choose one, what boundaries separat
 
 ## Cross-References
 
-- `./class-taxonomy.md` — Full definitions of all six skill classes.
+- `./class-taxonomy.md` — Full definitions of all five skill classes.
 - `./class-decision-flow.md` — Decision flow for selecting a skill class.
 - `./class-boundary-rules.md` — Boundary disambiguation rules between classes.
 - `./platform-layout-context.md` — Platform filesystem layout and discovery rules.

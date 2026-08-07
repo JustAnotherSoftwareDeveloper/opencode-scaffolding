@@ -4,10 +4,10 @@ description: "Use when generating Bun test files for existing Node scripts under
 selection:
   role: owner
   tags:
-    actions: [generate tests]
+    actions: [write Node tests]
     inputs: [existing Node script]
-    outputs: [CLI and unit test files]
-    topics: [Node scripts]
+    outputs: [Bun test suite]
+    topics: [script testing]
     environments: [Bun test]
   use_when: [an existing Node script needs Bun tests]
   not_for: [creating the Node implementation]

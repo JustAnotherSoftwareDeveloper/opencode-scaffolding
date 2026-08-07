@@ -4,10 +4,10 @@ description: "Use when generating deterministic TypeScript Node scripts from req
 selection:
   role: owner
   tags:
-    actions: [generate script]
-    inputs: [TypeScript Node requirements]
+    actions: [create Node script]
+    inputs: [Node or TypeScript script requirements]
     outputs: [registered Node implementation]
-    topics: [Node TypeScript scripts]
+    topics: [script implementation]
     environments: [Bun]
     constraints: [deterministic generation]
   use_when: [a TypeScript Node script and its project registration must be created]

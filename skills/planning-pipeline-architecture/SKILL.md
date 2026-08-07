@@ -4,8 +4,9 @@ description: "Use as planning reference for the analysis, proposal, and plan lif
 selection:
   role: reference
   tags:
-    topics: [planning lifecycle]
-    outputs: [pipeline stage guidance]
+    inputs: [planning workflow question]
+    outputs: [lifecycle and handoff guidance]
+    topics: [analysis proposal plan lifecycle]
     constraints: [planning reference]
   use_when: [planning work needs lifecycle or handoff guidance]
   not_for: [performing analysis, proposals, or plans directly]

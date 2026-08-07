@@ -4,10 +4,10 @@ description: "Use when generating pytest files for existing Python scripts under
 selection:
   role: owner
   tags:
-    actions: [generate tests]
+    actions: [write Python tests]
     inputs: [existing Python script]
-    outputs: [CLI and unit test files]
-    topics: [Python scripts]
+    outputs: [pytest test suite]
+    topics: [script testing]
     environments: [pytest]
   use_when: [an existing Python script needs pytest coverage]
   not_for: [creating the Python implementation]

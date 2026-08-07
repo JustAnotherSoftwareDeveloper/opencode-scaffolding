@@ -4,10 +4,10 @@ description: "Use when generating bats-core test files for existing Bash scripts
 selection:
   role: owner
   tags:
-    actions: [generate tests]
+    actions: [write Bash tests]
     inputs: [existing Bash script]
-    outputs: [shell test files]
-    topics: [Bash scripts]
+    outputs: [bats-core test suite]
+    topics: [script testing]
     environments: [bats-core]
   use_when: [an existing shell script needs bats-core tests]
   not_for: [creating the Bash implementation]

@@ -5,15 +5,17 @@ selection:
   role: owner
   tags:
     actions:
-      - create
-      - update
+      - create skill
+      - update skill
     inputs:
       - skill requirements
       - source material
     outputs:
       - validated skill workspace
     topics:
-      - OpenCode skill files
+      - OpenCode skills
+    constraints:
+      - direct selection profile
   use_when:
     - creating or updating the files of a skill under skills/<name>/
   not_for:

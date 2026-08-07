@@ -4,10 +4,10 @@ description: "Use when generating deterministic Bash scripts from requirements, 
 selection:
   role: owner
   tags:
-    actions: [generate script]
+    actions: [create Bash script]
     inputs: [Bash script requirements]
-    outputs: [tested shell implementation]
-    topics: [Bash scripts]
+    outputs: [registered Bash implementation]
+    topics: [script implementation]
     constraints: [deterministic generation]
   use_when: [a shell script and its registered implementation must be created]
   not_for: [adding tests to an existing Bash script]

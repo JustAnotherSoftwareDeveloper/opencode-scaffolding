@@ -4,10 +4,10 @@ description: "Use when analyzing a problem, request, artifact, or decision to pr
 selection:
   role: owner
   tags:
-    actions: [analyze]
-    inputs: [problem or decision]
-    outputs: [evidence-calibrated assessment]
-    topics: [cross-domain analysis]
+    actions: [analyze, assess]
+    inputs: [problem, request, artifact, decision]
+    outputs: [analysis, evidence-calibrated assessment]
+    topics: [cross-domain reasoning]
   use_when: [a problem or decision needs evidence-based analysis]
   not_for: [authoring a decision proposal or executable plan]
 class: operation

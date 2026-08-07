@@ -4,10 +4,10 @@ description: "Use when generating deterministic Python scripts from requirements
 selection:
   role: owner
   tags:
-    actions: [generate script]
+    actions: [create Python script]
     inputs: [Python script requirements]
     outputs: [registered Python implementation]
-    topics: [Python scripts]
+    topics: [script implementation]
     constraints: [deterministic generation]
   use_when: [a Python script and its project registration must be created]
   not_for: [adding tests to an existing Python script]
