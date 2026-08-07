@@ -1,27 +1,27 @@
 ## Worker Result
 
-| Field | Value |
-| --- | --- |
-| Status | DONE |
-| What was done | Produced an invalid status fixture. |
-| Accomplishments | None |
-| Files modified | None |
-| Skills loaded | None |
-| Deviations | None |
-| Blocker | None |
-| Unblock condition | None |
+- **Status:** DONE
+- **What was done:** Produced an invalid status fixture.
+- **Accomplishments:** None
+- **Files modified:** None
+- **Skills loaded:** None
+- **Planning context loaded:** None
+- **Reads relied on:** None
+- **Deviations:** None
+- **Blocker:** None
+- **Unblock condition:** None
 
 ## File Changes
 
-| Path | Action | Details |
-| --- | --- | --- |
-| None | none | No files changed. |
+- **Path:** None
+  - **Action:** none
+  - **Details:** No files changed.
 
 ## Verification
 
-| Check | Result | Details |
-| --- | --- | --- |
-| Envelope status | FAIL | DONE is not a valid status. |
+- **Check:** Envelope status
+  - **Result:** FAIL
+  - **Details:** DONE is not a valid status.
 
 ## Deliverable
 

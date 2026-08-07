@@ -36,44 +36,42 @@ outcome, or the caller's plan authority.
 
 ## Execution Sequence
 
-1. Confirm all eight sections exist. Treat `None` as explicitly empty and
+1. Read `output-contract-template.md` from the workspace root. It is the sole
+   authority for the complete result-envelope grammar, required fields, vocabularies,
+   reconciliation rules, status invariants, and payload boundary.
+2. Confirm all eight sections exist. Treat `None` as explicitly empty and
    `UNKNOWN — not provided in input` as missing, never as a path or skill. Block before
    side effects if missing purpose, instructions, or expected output prevents useful
    work.
-2. Parse `SKILLS` before any other task work. Complete skill-tool calls for every
+3. Parse `SKILLS` before any task work. Complete skill-tool calls for every
    listed skill as the first task actions. A failed or skipped required load blocks the
    packet. Do not draft the result until required calls complete.
-3. Read the listed inputs, then conduct only purposeful task-related discovery.
-4. For the scoped `breakdown-tasks` workflow, load every materially relevant planning
+4. Read the listed inputs, then conduct only purposeful task-related discovery.
+5. For the scoped `breakdown-tasks` workflow, load every materially relevant planning
    skill after the planning collector call completes. Planning loads are passive,
    separately reported, and grant no execution, tool, write, or transitive authority.
-5. For that workflow, reconcile one to three executable assignments against the
+6. For that workflow, reconcile one to three executable assignments against the
    operation/documentation collector output. Each assignment must use a name present
    in that collector array. Stale paths, name mismatch, class mismatch, failed load,
    or unresolved assignment blocks.
-6. Execute the authoritative outcome with the resource rules above. Do not write
+7. Execute the authoritative outcome with the resource rules above. Do not write
    outside declared literal targets or bounded patterns except for a minor explained
    purpose-preserving adjustment. Reconcile every suggested and actual target.
-7. Run applicable verification and remediate within scope.
-8. Self-validate the report. A usable `COMPLETE` or `PARTIAL` result needs a non-empty
-   deliverable; `BLOCKED` has a material blocker and `None` deliverable.
+8. Run applicable verification and remediate within scope.
+9. Self-validate the complete report against `output-contract-template.md`.
 
 ## Result Contract
 
-Return only the list-based envelope in `output-contract-template.md`, with the four
-headings in order: `## Worker Result`, `## File Changes`, `## Verification`, and the
-first `## Deliverable`. Use bold labels and ordinary bullets, not tables. File and
-verification records may repeat; narrative values may span lines. Everything after the
-first `## Deliverable` heading is the exact payload requested by `EXPECTED OUTPUT`.
+Return only the envelope defined by `output-contract-template.md`. Do not rely on a
+remembered or abbreviated version of the contract. Everything after its payload
+boundary is the exact payload requested by `EXPECTED OUTPUT`.
 
-Report `Skills loaded` as every successful executable load, including relevant extras,
-and separately report planning context when applicable. Preserve malformed-result
-constraints: never claim a malformed envelope is valid, and never invent evidence.
+Apply the canonical executable-skill and planning-context reporting rules. Never claim
+a malformed envelope is valid and never invent evidence.
 
 ## Boundaries
 
 - Do not invent facts, loads, outcomes, writes, or verification results.
 - Do not perform side effects before required skill calls complete.
 - Do not carry state across packets or silently vary authoritative fields.
-- Do not use legacy `PARTIAL:` or `BLOCKED:` prefixes.
-- Do not emit a table envelope; the list grammar is the sole result form.
+- Do not emit an envelope that differs from `output-contract-template.md`.

@@ -34,7 +34,7 @@ Field definitions extracted from `../../schema/task-packet.schema.json`. All fie
   - Type: `array` of `string`
   - Required: yes
   - Constraints: `uniqueItems`: true
-  - Description: Explicit list of file paths the worker must read before starting. Purposeful task-related discovery remains permitted under the worker contract.
+  - Description: Explicit list of file paths the worker must read before starting. Purposeful task-related discovery remains permitted under the worker contract. Use explicit file paths when known at decomposition time. Use bounded glob patterns (e.g., `.plans/*-<slug>/tasks.json`) when the exact path will be determined by an earlier task in the sequence. Never use template variables or placeholder syntax.
 
 - **`filesToWrite`**
   - Type: `array` of `string`

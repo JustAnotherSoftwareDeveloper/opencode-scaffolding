@@ -1,27 +1,27 @@
 ## Worker Result
 
-| Field | Value |
-| --- | --- |
-| Status | BLOCKED |
-| What was done | Validated the packet and stopped before execution. |
-| Accomplishments | None |
-| Files modified | None |
-| Skills loaded | None |
-| Deviations | None |
-| Blocker | A required skill was unavailable. |
-| Unblock condition | Make the required skill available. |
+- **Status:** BLOCKED
+- **What was done:** Validated the packet and stopped before execution.
+- **Accomplishments:** None
+- **Files modified:** None
+- **Skills loaded:** None
+- **Planning context loaded:** None
+- **Reads relied on:** None
+- **Deviations:** None
+- **Blocker:** A required skill was unavailable.
+- **Unblock condition:** Make the required skill available.
 
 ## File Changes
 
-| Path | Action | Details |
-| --- | --- | --- |
-| None | none | No files changed. |
+- **Path:** None
+  - **Action:** none
+  - **Details:** No files changed.
 
 ## Verification
 
-| Check | Result | Details |
-| --- | --- | --- |
-| Deliverable validation | NOT RUN | Execution was blocked. |
+- **Check:** Deliverable validation
+  - **Result:** NOT RUN
+  - **Details:** Execution was blocked.
 
 ## Deliverable
 

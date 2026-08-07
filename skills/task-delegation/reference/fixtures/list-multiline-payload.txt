@@ -17,8 +17,8 @@
   - **Action:** modified
   - **Details:** Updated the document.
 - **Path:** docs/optional.md
-  - **Action:** unnecessary
-  - **Details:** No change was needed.
+  - **Action:** unchanged
+  - **Details:** The suggestion was unnecessary because no change was needed.
 
 ## Verification
 

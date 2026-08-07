@@ -1,27 +1,27 @@
 ## Worker Result
 
-| Field | Value |
-| --- | --- |
-| Status | COMPLETE |
-| What was done | Loaded the requested skill. |
-| Accomplishments | None |
-| Files modified | None |
-| Skills loaded | generic-analysis |
-| Deviations | None |
-| Blocker | None |
-| Unblock condition | None |
+- **Status:** COMPLETE
+- **What was done:** Loaded the requested skill.
+- **Accomplishments:** None
+- **Files modified:** None
+- **Skills loaded:** generic-analysis
+- **Planning context loaded:** None
+- **Reads relied on:** None
+- **Deviations:** None
+- **Blocker:** None
+- **Unblock condition:** None
 
 ## File Changes
 
-| Path | Action | Details |
-| --- | --- | --- |
-| None | none | No files changed. |
+- **Path:** None
+  - **Action:** none
+  - **Details:** No files changed.
 
 ## Verification
 
-| Check | Result | Details |
-| --- | --- | --- |
-| Required check | PASS | Reported as complete. |
+- **Check:** Required check
+  - **Result:** PASS
+  - **Details:** Reported as complete.
 
 ## Deliverable
 

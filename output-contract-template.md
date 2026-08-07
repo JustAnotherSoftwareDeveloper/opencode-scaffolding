@@ -1,8 +1,13 @@
 # Worker Agent Output Contract Template
 
-Workers return this list-based envelope after execution and verification. The content
-after the first `## Deliverable` heading is the exact payload requested by
-`EXPECTED OUTPUT` and is opaque to envelope parsing.
+This file is the sole canonical source for the worker result envelope. Producers,
+validators, and specialized consumers must read and apply this contract rather than
+reproducing its grammar elsewhere.
+
+Workers return the list-based envelope below after execution and verification. Every
+shown field and nested record field is required. The content after the first
+`## Deliverable` heading is the exact payload requested by `EXPECTED OUTPUT` and is
+opaque to envelope parsing.
 
 ```markdown
 ## Worker Result
@@ -42,10 +47,18 @@ The exact payload required by `EXPECTED OUTPUT`, or `None` for `BLOCKED`.
 - `COMPLETE` requires a non-empty payload and passing applicable checks.
 - `PARTIAL` requires a non-empty payload and records incomplete non-critical work.
 - `BLOCKED` requires a material blocker, an unblock condition, and `None` payload.
+- Use `None` for required fields or records that have no applicable value. Do not omit
+  required fields.
 - Skills and reads are minimums; report successful additional skills and materially
   relied-on purposeful reads.
 - Writes are suggestions. Reconcile every suggestion as used, superseded, unnecessary,
-  or not completed, and report every actual write. Explain minor deviations; seek
-  clarification for major, destructive, unrelated, or outcome-changing deviations.
+  or not completed, and report every actual write. Use an allowed `Action` value for
+  the file state and state the suggestion disposition in `Details`. Explain minor
+  deviations; seek clarification for major, destructive, unrelated, or
+  outcome-changing deviations.
+- `Files modified` lists every `created`, `modified`, or `deleted` path and is `None`
+  when no files changed. `File Changes` contains one record for every suggested or
+  actual target; use a single `None`/`none` record when no targets apply.
+- `Planning context loaded` is `None` outside the scoped planning workflow.
 - The four headings are exact and ordered. Reject table envelopes and legacy status
   prefixes. Preserve all Markdown after the first `## Deliverable` boundary verbatim.

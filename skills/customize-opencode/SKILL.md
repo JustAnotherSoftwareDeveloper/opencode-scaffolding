@@ -51,7 +51,8 @@ class: documentation
 - Requires every dynamic output to match an authorized pattern.
 - Requires bounded patterns to identify a directory, filename structure, and extension.
 - Excludes recursive wildcards and repository-wide write patterns.
-- Records each listed path as created, modified, deleted, unchanged, or not completed.
+- Reports each listed path according to the workspace-root
+  `output-contract-template.md` reconciliation contract.
 - Permits an unchanged result when verification establishes that the path already satisfies the requested state.
 
 ### `## SKILLS`
@@ -71,7 +72,7 @@ class: documentation
 ### `## VERIFICATION`
 
 - Defines applicable quality checks.
-- Records every check as `PASS`, `FAIL`, or `NOT RUN`.
+- Reports every check according to workspace-root `output-contract-template.md`.
 - Permits remediation within the hard boundaries.
 
 ### `## EXPECTED OUTPUT`
@@ -98,45 +99,14 @@ class: documentation
 
 ## Status Values
 
-- `COMPLETE` identifies a full usable deliverable with every applicable required verification check passing.
-- `PARTIAL` identifies a usable deliverable with a non-critical instruction or verification check incomplete or failed.
-- `BLOCKED` identifies the absence of a usable deliverable because an essential requirement prevents completion.
-- Valid envelopes do not use legacy `PARTIAL:` or `BLOCKED:` prefixes.
+Status vocabulary and invariants are defined only in workspace-root
+`output-contract-template.md`.
 
 ## Output Format
 
-The worker returns these sections in order.
-
-```markdown
-## Worker Result
-
-| Field | Value |
-| --- | --- |
-| Status | COMPLETE, PARTIAL, or BLOCKED |
-| What was done | Concise execution summary |
-| Accomplishments | Concrete outcomes, or None |
-| Files modified | Created, modified, or deleted path list or count, or None |
-| Skills loaded | Exact loaded skill names, or None |
-| Deviations | Material interpretations or execution deviations, or None |
-| Blocker | Blocking reason, or None |
-| Unblock condition | Required condition, or None |
-
-## File Changes
-
-| Path | Action | Details |
-| --- | --- | --- |
-| relative/path, or None | created, modified, deleted, unchanged, not completed, or none | Concise result or reason |
-
-## Verification
-
-| Check | Result | Details |
-| --- | --- | --- |
-| check name, or None | PASS, FAIL, or NOT RUN | Concise evidence or reason |
-
-## Deliverable
-
-The exact payload required by `EXPECTED OUTPUT`, or `None` for `BLOCKED`.
-```
+`output-contract-template.md` at the workspace root is the sole canonical source for
+the worker result envelope. Read it when producing, validating, or consuming a worker
+report. This reference intentionally does not reproduce the envelope grammar.
 
 ## Consumer Contract
 
@@ -144,9 +114,8 @@ The exact payload required by `EXPECTED OUTPUT`, or `None` for `BLOCKED`.
 - Controllers read `Status` to continue after `COMPLETE` or `PARTIAL` and stop after `BLOCKED`.
 - Payload-specific consumers extract all content after `## Deliverable` and validate that content against their own contract.
 - Malformed envelopes fail before payload consumption.
-- Report-table cells remain on one physical line, use `<br>` for line breaks, and escape literal pipes as `\|`.
-- `Files modified` reconciles with every `created`, `modified`, or `deleted` row in `File Changes` and remains `None` for no-op results.
-- The first `## Deliverable` heading is the payload boundary; all following Markdown belongs to the payload.
+- Envelope parsing and reconciliation follow `output-contract-template.md` without a
+  local compatibility grammar.
 
 ## Docs
 

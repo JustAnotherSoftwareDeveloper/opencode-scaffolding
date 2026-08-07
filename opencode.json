@@ -94,6 +94,7 @@
         "*": "deny",
         "read": {
           "*": "deny",
+          "output-contract-template.md": "allow",
           ".plans/*/tasks.json": "allow",
           ".tasks/*.json": "allow"
         },
@@ -127,6 +128,7 @@
         "*": "deny",
         "read": {
           "*": "deny",
+          "output-contract-template.md": "allow",
           ".tasks/*.json": "allow"
         },
         "todowrite": "allow",

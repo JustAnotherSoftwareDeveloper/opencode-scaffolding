@@ -1,27 +1,27 @@
 ## Worker Result
 
-| Field | Value |
-| --- | --- |
-| Status | COMPLETE |
-| What was done | Produced a Markdown payload containing report-like headings. |
-| Accomplishments | Verified the first Deliverable heading remains the payload boundary. |
-| Files modified | None |
-| Skills loaded | None |
-| Deviations | None |
-| Blocker | None |
-| Unblock condition | None |
+- **Status:** COMPLETE
+- **What was done:** Produced a Markdown payload containing report-like headings.
+- **Accomplishments:** Verified the first Deliverable heading remains the payload boundary.
+- **Files modified:** None
+- **Skills loaded:** None
+- **Planning context loaded:** None
+- **Reads relied on:** None
+- **Deviations:** None
+- **Blocker:** None
+- **Unblock condition:** None
 
 ## File Changes
 
-| Path | Action | Details |
-| --- | --- | --- |
-| None | none | No files changed. |
+- **Path:** None
+  - **Action:** none
+  - **Details:** No files changed.
 
 ## Verification
 
-| Check | Result | Details |
-| --- | --- | --- |
-| Payload boundary | PASS | Report-like payload headings occur after the boundary. |
+- **Check:** Payload boundary
+  - **Result:** PASS
+  - **Details:** Report-like payload headings occur after the boundary.
 
 ## Deliverable
 

@@ -1,27 +1,27 @@
 ## Worker Result
 
-| Field | Value |
-| --- | --- |
-| Status | PARTIAL |
-| What was done | Produced a usable deliverable and ran available checks. |
-| Accomplishments | Completed the requested edit. |
-| Files modified | 1 |
-| Skills loaded | skill-factory |
-| Deviations | One non-critical check was unavailable. |
-| Blocker | None |
-| Unblock condition | None |
+- **Status:** PARTIAL
+- **What was done:** Produced a usable deliverable and ran available checks.
+- **Accomplishments:** Completed the requested edit.
+- **Files modified:** skills/example/SKILL.md
+- **Skills loaded:** skill-factory
+- **Planning context loaded:** None
+- **Reads relied on:** skills/example/SKILL.md
+- **Deviations:** One non-critical check was unavailable.
+- **Blocker:** None
+- **Unblock condition:** None
 
 ## File Changes
 
-| Path | Action | Details |
-| --- | --- | --- |
-| skills/example/SKILL.md | modified | Applied the requested edit. |
+- **Path:** skills/example/SKILL.md
+  - **Action:** modified
+  - **Details:** Applied the requested edit using the suggested target.
 
 ## Verification
 
-| Check | Result | Details |
-| --- | --- | --- |
-| External service check | NOT RUN | The service was unavailable. |
+- **Check:** External service check
+  - **Result:** NOT RUN
+  - **Details:** The service was unavailable.
 
 ## Deliverable
 

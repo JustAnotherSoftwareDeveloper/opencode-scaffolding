@@ -10,11 +10,12 @@ def read(relative: str) -> str:
 
 
 def test_worker_reports_planning_context_separately() -> None:
-    content = read("agents/worker.md")
-    assert "load every materially relevant planning" in content
-    assert "planning context when applicable" in content
-    assert "separately" in content
-    assert "every successful executable load" in content
+    worker = read("agents/worker.md")
+    contract = read("output-contract-template.md")
+    assert "load every materially relevant planning" in worker
+    assert "separately" in worker
+    assert "Planning context loaded" in contract
+    assert "successfully loaded executable skill" in contract
 
 
 def test_worker_requires_bounded_assignments_and_two_pass_reconciliation() -> None:
@@ -30,8 +31,9 @@ def test_delegation_uses_flexible_resource_semantics_and_list_envelope() -> None
     assert "Stale paths" in content
     assert "minimums" in content
     assert "strong suggestions" in content
-    assert "relevant extras" in content
-    assert "table syntax" in content
+    assert "output-contract-template.md" in content
+    assert "sole authority" in content
+    assert "do not maintain a second grammar" in content
     assert "malformed report" in content
 
 

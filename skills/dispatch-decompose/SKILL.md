@@ -20,7 +20,7 @@ be the full original request or the original request followed by concise feedbac
 from a semantic review. Preserve the original outcome and make correction context
 explicit; do not provide implementation advice or silently change intent.
 Invoke exactly one worker with the packet.
-Validate the hard-cutover list envelope and return a valid `.tasks/` path from it.
+Validate the canonical worker envelope and return a valid `.tasks/` path from it.
 Return `BLOCKED:` for incomplete, blocked, or malformed worker results.
 
 ## Input
@@ -62,7 +62,10 @@ A single string payload under Deliverable: the relative `.tasks/<epoch-milliseco
 
 ## Output
 
-First validate the complete worker envelope using the ordinary `task-delegation` list-envelope rules: exact heading order, bold routing labels, valid actions and verification values, reconciliation, status invariants, and the first-`Deliverable` payload boundary. Reject table syntax. Then return the valid relative `.tasks/` path extracted from a `COMPLETE` envelope.
+First read `output-contract-template.md` from the workspace root and validate the
+complete worker envelope against that canonical contract and the ordinary
+`task-delegation` reconciliation rules. Then return the valid relative `.tasks/` path
+extracted from a `COMPLETE` envelope.
 Return `BLOCKED:` for every non-complete or invalid result.
 
 ## Execution Plan
@@ -88,10 +91,8 @@ Return `BLOCKED:` for every non-complete or invalid result.
    Set `command` to `Decompose request into atomic tasks`.
    Set `prompt` to the complete decomposition packet.
 6. **Validate the worker result envelope.**
-   Require the first non-whitespace content to be `## Worker Result`.
-   Parse the first exact `## File Changes`, `## Verification`, and `## Deliverable` heading lines in that order.
-    Require exactly one bold `Status` field before `File Changes` with `COMPLETE`, `PARTIAL`, or `BLOCKED`.
-     Require the list-based worker-result fields plus valid file and verification records, minimum-skill and suggested-write reconciliation, and a non-empty payload for success statuses.
+   Read `output-contract-template.md` and validate the report against its complete
+   envelope grammar, status rules, reconciliation rules, and payload boundary.
    Return `BLOCKED: decomposition worker returned a malformed result envelope.` when validation fails.
 7. **Handle non-complete status.**
    Return `BLOCKED: decomposition worker was blocked — <Blocker>. Unblock condition: <Unblock condition>.` for `BLOCKED`.
@@ -116,7 +117,7 @@ Launch exactly one worker task per invocation.
 - Never call any subagent type other than `worker`.
 - Never rewrite a valid relative `.tasks/` payload before returning it.
 - Never treat `PARTIAL` or `BLOCKED` worker status as valid decomposition output.
-- Never accept a legacy raw worker payload or table envelope without the list result envelope.
+- Never accept an envelope that violates `output-contract-template.md`.
 - Never write files outside the .tasks/ state file declared in ## FILES TO WRITE.
 
 ## Docs

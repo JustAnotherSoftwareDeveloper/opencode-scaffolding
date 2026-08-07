@@ -25,6 +25,7 @@ Work-boundary and skill-assignment mistakes to avoid when decomposing tasks.
 - **"Compare all frontend frameworks and pick one"** — Multiple independent comparisons in one task.
   *Violates: Single Unit Of Work (each framework evaluation is an independent analysis question).*
   Split into evaluate framework A, evaluate framework B, compare findings and select.
+- **Using template variables or placeholders in `filesToRead` or `filesToWrite`** — `{{TASK_1_PATH}}`, `<output-from-task-1>`, or similar invented syntax. These are not file paths and will not resolve at execution time. Use a bounded glob pattern instead (e.g., `.plans/*-<slug>/tasks.json`).
 
 ## Skill-Assignment Anti-Patterns
 

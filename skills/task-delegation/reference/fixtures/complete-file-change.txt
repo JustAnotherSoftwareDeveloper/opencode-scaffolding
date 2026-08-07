@@ -5,6 +5,7 @@
 - **Accomplishments:** Applied the requested contract.
 - **Files modified:** skills/example/SKILL.md
 - **Skills loaded:** skill-factory, skill-authoring-guide
+- **Planning context loaded:** None
 - **Reads relied on:** skills/example/SKILL.md
 - **Deviations:** Additional relevant skill loaded for prose validation.
 - **Blocker:** None
@@ -14,7 +15,7 @@
 
 - **Path:** skills/example/SKILL.md
   - **Action:** modified
-  - **Details:** Updated the output contract.
+  - **Details:** Updated the output contract using the suggested target.
 
 ## Verification
 

@@ -24,18 +24,21 @@ Execute an existing task plan without performing task work directly.
 
 3. Execute Tasks Serially
    Process `tasks` in array order.
+   Read `output-contract-template.md` before the first dispatch.
    Load `task-delegation` and pass each task object unchanged.
     Wait for each worker before starting the next task.
-     `task-delegation` owns ordinary worker-envelope validation; preserve each validated envelope unchanged.
+     `task-delegation` owns ordinary worker-envelope validation; preserve each
+     validated envelope unchanged.
      Review the complete report, including file changes, resource additions, deviations,
      verification evidence, payload, and blockers. Status is a routing signal, not the
      sole acceptance criterion. Continue after a safe `COMPLETE` or `PARTIAL` report;
      preserve and stop on `BLOCKED`.
-   Stop when `task-delegation` returns a `BLOCKED:` validation error instead of an envelope.
+   Stop when `task-delegation` returns a `BLOCKED:` validation error instead of an
+   envelope.
 
 ## Guardrails
 
-- Read only the selected task JSON file.
+- Read only the selected task JSON file and `output-contract-template.md`.
 - Load only `display-tasks` and `task-delegation`.
 - Delegate all task work to `worker` through `task-delegation`.
 - Keep task data unchanged between display and delegation.
@@ -43,4 +46,5 @@ Execute an existing task plan without performing task work directly.
   reorder, merge, split, rewrite, or semantically replan it; only the smart delegator
   may correct a plan before approval.
 - Do not reorder, combine, or parallelize tasks.
-- Preserve `Worker Result`, `File Changes`, `Verification`, and `Deliverable` without extraction or rewriting.
+- Preserve the complete envelope defined by `output-contract-template.md` without
+  extraction or rewriting.

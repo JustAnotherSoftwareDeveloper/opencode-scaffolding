@@ -1,27 +1,27 @@
 ## Worker Result
 
-| Field | Value |
-| --- | --- |
-| Status | COMPLETE |
-| What was done | Analyzed the supplied artifact. |
-| Accomplishments | Produced the requested findings. |
-| Files modified | None |
-| Skills loaded | generic-analysis |
-| Deviations | None |
-| Blocker | None |
-| Unblock condition | None |
+- **Status:** COMPLETE
+- **What was done:** Analyzed the supplied artifact.
+- **Accomplishments:** Produced the requested findings.
+- **Files modified:** None
+- **Skills loaded:** generic-analysis
+- **Planning context loaded:** None
+- **Reads relied on:** supplied artifact
+- **Deviations:** None
+- **Blocker:** None
+- **Unblock condition:** None
 
 ## File Changes
 
-| Path | Action | Details |
-| --- | --- | --- |
-| None | none | No files changed. |
+- **Path:** None
+  - **Action:** none
+  - **Details:** No files changed.
 
 ## Verification
 
-| Check | Result | Details |
-| --- | --- | --- |
-| Required sections present | PASS | All sections are present. |
+- **Check:** Required sections present
+  - **Result:** PASS
+  - **Details:** All sections are present.
 
 ## Deliverable
 

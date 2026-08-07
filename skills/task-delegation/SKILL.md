@@ -51,21 +51,10 @@ and `expectedOutput` are authoritative. Only `skills`, `filesToRead`, and
 
 ## Result Validation
 
-Accept only the sole list-based Markdown envelope. Require the first non-whitespace
-content to be `## Worker Result`, followed by the first exact headings
-`## File Changes`, `## Verification`, and `## Deliverable` in that order. Require
-bold `Status` with `COMPLETE`, `PARTIAL`, or `BLOCKED`, plus the routing and
-reconciliation labels described by the template. Use ordinary bullets; reject any
-table syntax or table-specific compatibility path.
-
-Require file records to name actual paths and actions (`created`, `modified`, `deleted`,
-`unchanged`, `not completed`, or `none`). Require verification records to use `PASS`,
-`FAIL`, or `NOT RUN`. Reconcile every suggested target as used, superseded,
-unnecessary, or not completed, and every actual write as reported. Reconcile every
-declared skill as successfully loaded while allowing and reporting relevant extras;
-reconcile every attempted load truthfully. Material read additions must be reported.
-`COMPLETE` and `PARTIAL` require a usable non-empty payload. `BLOCKED` requires a
-material blocker and a `None` payload.
+Before assessing a result, read `output-contract-template.md` from the workspace root.
+It is the sole authority for the envelope grammar, required fields, vocabularies,
+reconciliation rules, status invariants, and payload boundary. Reject any report that
+does not conform to that contract; do not maintain a second grammar in this skill.
 
 If validation fails, the malformed report is not a deliverable, but do not discard it:
 return or expose the original response together with precise diagnostics (missing or
@@ -73,9 +62,8 @@ misordered headings, invalid labels, malformed records, failed reconciliation, o
 status/payload contradiction). Never translate malformed output into a valid report
 and never use parser failure as evidence that the task itself was completed.
 
-Everything after the first `## Deliverable` heading is opaque payload and must not be
-parsed as metadata. Multiline narrative and repeated file or verification records are
-valid.
+Treat the payload boundary defined by `output-contract-template.md` as opaque. Do not
+parse payload content as envelope metadata.
 
 ## Scoped Planning Workflow
 
@@ -92,8 +80,11 @@ relevant array, class mismatch, or unresolved assignments block.
 
 Launch exactly one worker task per invocation with the complete plaintext packet. Do not
 rewrite the worker's valid envelope, extract only its status, or silently broaden the
-caller's authority. A caller may choose clarification, report repair, continuation,
-re-decomposition, focused re-dispatch, or stop after reviewing the full evidence.
+caller's authority. When a result is malformed, the delegator does not stop at a
+fixed decision tree — troubleshoot the failure, infer the worker's intent from
+partial evidence, and choose whatever reasonable next step reaches the intended
+outcome. The only inviolable constraints are the task tool, one worker per
+invocation, and no silent authority creep.
 
 ## Execution Steps
 
@@ -101,6 +92,8 @@ re-decomposition, focused re-dispatch, or stop after reviewing the full evidence
 2. Map its fields into the eight-section plaintext packet and mark only genuinely
    unknown values with the explicit unknown marker.
 3. Validate the packet and dispatch exactly one worker.
-4. Validate the complete list envelope, resource reconciliation, status, and payload.
-5. If malformed, expose the original response and diagnostics without accepting it as
-   a deliverable; otherwise return the valid report unchanged.
+4. Read `output-contract-template.md`, then validate the complete envelope, resource
+   reconciliation, status, and payload against it.
+5. If malformed, troubleshoot and infer the narrowest correction; do not stop at the
+   first validation failure unless the evidence is genuinely insufficient.
+6. When valid, return the report unchanged.

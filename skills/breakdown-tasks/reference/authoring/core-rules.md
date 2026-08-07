@@ -30,6 +30,8 @@ When multiple changes to the same file or multiple analysis steps on the same su
 Each task lists the target file or subject in `## FILES TO READ` or `## FILES TO WRITE`.
 Run tasks in order so each sees the prior task's output.
 
+When the exact path of a prior task's output is not known at decomposition time, use a bounded glob pattern (e.g., `.plans/*-<slug>/tasks.json`) in `filesToRead`. The worker discovers the exact file by matching the pattern. Never use template variables such as `{{TASK_1_OUTPUT}}` or placeholder syntax.
+
 *Rationale: Concurrent edits to the same file cause merge conflicts. Serializing dependent work ensures each task sees a consistent state. Listing the target file in `## FILES TO READ` or `## FILES TO WRITE` makes the dependency explicit.*
 
 ## 5. Skill-Aware But Not Skill-Bound
