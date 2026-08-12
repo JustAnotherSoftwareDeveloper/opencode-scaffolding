@@ -1,47 +1,53 @@
 # Core Rules
 
-Five atomicity rules for decomposing work into delegation packets.
+The layered atomicity contract has one authoring result: a decomposition that is
+bounded, independently checkable, and ready for orchestration. These rules are
+authoring guidance; diagnostics and compatibility decisions are identified where
+they are not yet hard requirements.
 
-## 1. Single Unit Of Work
+## 1. Single boundary, single unit
 
-Each task performs exactly one logical change **or** answers exactly one analytical question.
-If a task modifies two files, makes two unrelated edits in one file, or answers two independent questions, split it.
+Each task performs exactly one logical change or answers exactly one analytical
+question. Define the task boundary before looking for a skill. A task may not hide
+independent concerns behind a broad purpose, context, or file list.
 
-*Rationale: A task with multiple logical changes cannot be verified against a single expected output, creates ambiguity about which change caused a failure, and prevents clean rollback or independent review. Atomicity ensures each task is independently verifiable, testable, and reversible.*
+## 2. Single purpose and single result
 
-## 2. Single Output Artifact
+Each task has one purpose sentence with one action and one expected output: one
+verifiable artifact or one documented finding. Verification is evidence about that
+result, not a second deliverable. Purpose, output, and verification must describe
+the same boundary; write the mapping explicitly when the result is a package.
 
-Each task produces exactly one verifiable result — either one output artifact **or** one documented finding.
-If a task produces two outputs (e.g., writes a file *and* runs a test, or produces two distinct findings), split verification from production.
+## 3. Dependencies are part of the boundary
 
-*Rationale: A task that produces two outputs (e.g., writes a file and runs a test) has two success/failure conditions. The delegator expects one verifiable result per packet; multiple outputs make the success signal ambiguous.*
+Represent dependencies with ordered tasks and explicit `filesToRead`/
+`filesToWrite` paths. Serialize dependent work; independent work may be parallel.
+A later task declares its dependency by listing the prior output in its
+`filesToRead`. Use bounded patterns only when a prior path is genuinely unknown;
+never use invented output variables. Explicit `dependencies` edges (in the packet
+schema) make these relationships machine-readable for the validator.
 
-## 3. Logical Step Pipeline
+## 4. Coupled-file exception
 
-Tasks form a pipeline where each is one discrete step in a sequence.
-Independent steps become separate parallel-capable tasks.
-Dependent steps remain sequential but still individually atomic.
+The default heuristic is one task per file and one conceptual change. Multiple
+files are allowed when they jointly form one tightly coupled result with one shared
+verification signal. The exception rationale must be inspectable in purpose,
+expected output, `couplingRationale`, and verification. It does not authorize
+combining implementation with tests, analysis with planning, or unrelated edits,
+and it does not establish a universal one-file rule.
 
-*Rationale: A pipeline model (vs. a flat list) communicates dependency order to the delegator. Independent steps can run in parallel; dependent steps must run sequentially. Without this structure, the orchestrator cannot parallelize safely.*
+## 5. Skill-aware, not skill-bound
 
-## 4. Dependent Work Serialization
+Candidate decomposition comes before skill assignment. Skills inform execution but
+never define task boundaries; do not merge or split work to fit a skill. Assign only
+after the candidate tasks and dependencies are stable, and assign the matching skill
+to the matching task.
 
-When multiple changes to the same file or multiple analysis steps on the same subject are needed, serialize them as separate sequential tasks.
-Each task lists the target file or subject in `## FILES TO READ` or `## FILES TO WRITE`.
-Run tasks in order so each sees the prior task's output.
+## 6. Staged enforcement and capacity
 
-When the exact path of a prior task's output is not known at decomposition time, use a bounded glob pattern (e.g., `.plans/*-<slug>/tasks.json`) in `filesToRead`. The worker discovers the exact file by matching the pattern. Never use template variables such as `{{TASK_1_OUTPUT}}` or placeholder syntax.
-
-*Rationale: Concurrent edits to the same file cause merge conflicts. Serializing dependent work ensures each task sees a consistent state. Listing the target file in `## FILES TO READ` or `## FILES TO WRITE` makes the dependency explicit.*
-
-## 5. Skill-Aware But Not Skill-Bound
-
-Available skills inform task decomposition but do not override atomicity.
-Use the discovered skill list to assign matching skills, shape task boundaries, and identify missing capabilities.
-Never merge or split tasks to match skill scope.
-If a skill covers two adjacent concerns, keep them as separate atomic packets.
-Assign the skill to the matching packet only.
-Do not adjust task granularity to fit a skill's scope.
-Atomicity rules take precedence.
-
-*Rationale: Skills are tools for executing work, not boundaries that define work. Merging tasks to match a skill's scope destroys atomicity and makes verification ambiguous. Atomicity rules take precedence because verifiability is more important than skill convenience.*
+Treat actionable atomicity defects as warnings first when they can be repaired by
+clarifying evidence. Escalate to a hard failure when the defect remains ambiguous,
+violates a declared boundary, or cannot be verified. If a task is split or migrated,
+revalidate the resulting task(s), dependencies, purpose/output mapping, and skill
+assignment. Retain the three-task ceiling. A mandatory extra review phase is a
+deferred compatibility decision, not a current requirement.

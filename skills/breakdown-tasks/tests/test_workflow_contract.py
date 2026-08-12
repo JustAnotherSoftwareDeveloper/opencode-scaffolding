@@ -32,7 +32,7 @@ def test_validate_step_uses_auto_fix_loop() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "validate-task-structure" in text
     assert "--auto-fix" in text
-    assert "--state-file" in text
+    assert '--state-file "$PUBLISHED_PATH"' in text
     assert "retry" in text
 
 
@@ -41,3 +41,27 @@ def test_guardrails_prohibit_swap_and_recollection() -> None:
     assert "Do not swap" in text
     assert "Do not recollect" in text
     assert "Do not manually populate" in text
+
+
+def test_candidate_boundaries_precede_skill_assignment() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    draft = text.index("Establish candidate boundaries")
+    assignment = text.index("Assign skills to each task")
+    assert draft < assignment
+    assert "without changing the established boundaries" in text
+    assert "Give each task a unique `taskId`" in text
+    assert "populate `verificationCoverage`" in text
+
+
+def test_split_or_migration_is_revalidated_before_publication() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "after any split or migration" in text
+    assert "revalidate boundaries, mappings, dependencies, and skills" in text
+    assert text.index("Validate and fix") < text.index("Output Contract")
+
+
+def test_staged_diagnostics_are_actionable() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "warnings before hard failure" in text
+    assert "Exit 0 with diagnostics" in text
+    assert "Exit 1" in text and "fix the JSON, retry" in text

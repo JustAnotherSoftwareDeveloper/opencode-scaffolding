@@ -26,6 +26,11 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "taskId": {
+          "description": "Stable optional identity for this task. Legacy packets may omit it; validators use the ordered task position as a migration identity.",
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+        },
         "purpose": {
           "description": "Single sentence describing what this task accomplishes. Must be actionable and self-contained.",
           "type": "string",
@@ -50,7 +55,7 @@
           "uniqueItems": true
         },
           "skills": {
-          "description": "Zero to three skills the worker must load before executing. Each entry must match an available skill name exactly. An empty array authorizes direct packet execution without specialized skill guidance.",
+          "description": "One to three skills the worker must load before executing. Each entry must match an available skill name exactly.",
             "type": "array",
             "items": { "type": "string" },
             "uniqueItems": true,
@@ -92,6 +97,75 @@
           "description": "Precise description of the Deliverable payload this task produces. Use concrete language such as file paths, function names, and data formats.",
           "type": "string",
           "maxLength": 2000
+        },
+        "verificationCoverage": {
+          "description": "Optional publication metadata describing observable checks for this task. Omission is migration-compatible and is diagnosed as a warning.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "observable": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "coverage": {
+              "type": "string",
+              "enum": ["complete", "partial", "unknown"]
+            }
+          },
+          "required": ["observable"]
+        },
+        "couplingRationale": {
+          "description": "Optional inspectable exception for multiple files that publish one tightly coupled result.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "group": { "type": "string", "minLength": 1 },
+            "rationale": { "type": "string", "minLength": 1 },
+            "sharedResult": { "type": "string", "minLength": 1 },
+            "verification": { "type": "string", "minLength": 1 }
+          },
+          "required": ["rationale", "sharedResult", "verification"]
+        },
+        "dependencies": {
+          "description": "Optional directed dependency edges. References use taskId when present, or the migration identities task-1, task-2, and task-3.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "taskId": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$" },
+              "reason": { "type": "string", "minLength": 1 }
+            },
+            "required": ["taskId"]
+          }
+        },
+        "antiPatternSignals": {
+          "description": "Optional documented signals considered during authoring; signals are not proof of conceptual independence.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "none",
+              "implementation-plus-tests",
+              "multiple-helpers",
+              "analysis-plus-planning",
+              "multiple-comparisons"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "purposeOutputAlignment": {
+          "description": "Optional explicit authoring assessment connecting the purpose to the expected output.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": { "type": "string", "enum": ["aligned", "needs-review", "not-aligned"] },
+            "evidence": { "type": "string", "minLength": 1 }
+          },
+          "required": ["status", "evidence"]
         }
       },
       "required": ["purpose", "context", "filesToRead", "filesToWrite", "skills", "executionInstructions", "expectedOutput"]

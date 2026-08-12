@@ -61,3 +61,5 @@ coverage
 .prompts/
 .analysis/
 .opencode/
+# Evidence artifacts (operational, not code)
+.evidence/

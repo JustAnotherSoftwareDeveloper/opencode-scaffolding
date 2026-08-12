@@ -296,10 +296,14 @@ class TestSchemaStructuralInvariants:
         assert props["executionInstructions"]["maxItems"] == 5
         assert props["skills"]["maxItems"] == 3
 
-    def test_dependencies_is_removed_from_properties(self, schema_dict: dict) -> None:
-        """``dependencies`` has been removed from TaskPacket properties."""
+    def test_dependencies_are_optional_task_references(self, schema_dict: dict) -> None:
+        """``dependencies`` contains optional task-reference edges."""
         props = schema_dict["definitions"]["TaskPacket"]["properties"]
-        assert "dependencies" not in props
+        dependencies = props["dependencies"]
+        assert dependencies["type"] == "array"
+        assert dependencies["uniqueItems"] is True
+        assert dependencies["items"]["required"] == ["taskId"]
+        assert dependencies["items"]["additionalProperties"] is False
 
     def test_task_packet_has_summary_at_root_only(self, schema_dict: dict) -> None:
         """``summary`` exists only at root, not in TaskPacket."""
@@ -310,6 +314,7 @@ class TestSchemaStructuralInvariants:
         """TaskPacket has exactly the expected number of properties."""
         props = schema_dict["definitions"]["TaskPacket"]["properties"]
         expected_properties = {
+            "taskId",
             "purpose",
             "context",
             "filesToRead",
@@ -318,6 +323,11 @@ class TestSchemaStructuralInvariants:
             "executionInstructions",
             "verification",
             "expectedOutput",
+            "verificationCoverage",
+            "couplingRationale",
+            "dependencies",
+            "antiPatternSignals",
+            "purposeOutputAlignment",
         }
         assert set(props.keys()) == expected_properties
 

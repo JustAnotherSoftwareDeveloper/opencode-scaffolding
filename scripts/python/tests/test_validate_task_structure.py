@@ -4,8 +4,8 @@ Covers the Click CLI (via CliRunner) and the lib validation module
 (direct function calls), achieving 100% coverage of both
 ``cli.validate_task_structure`` and ``lib.validate_task_structure``.
 
-Also verifies that a task packet containing a ``dependencies`` field
-is rejected by schema ``additionalProperties: false``.
+Also verifies staged atomicity diagnostics, dependency validation, coupled-file
+exceptions, and representative compound-task signals.
 
 Run from ``scripts/python/``:
 
@@ -68,6 +68,7 @@ def schema_dict() -> dict:
 @pytest.fixture
 def valid_task_1() -> dict:
     return {
+        "taskId": "task-one",
         "purpose": "Task one purpose",
         "context": VALID_CONTEXT,
         "filesToRead": ["src/file1.py"],
@@ -78,12 +79,22 @@ def valid_task_1() -> dict:
             {"step": 2, "action": "Do step two"},
         ],
         "expectedOutput": "Output for task one",
+        "verificationCoverage": {
+            "observable": ["Output exists"],
+            "coverage": "complete",
+        },
+        "antiPatternSignals": ["none"],
+        "purposeOutputAlignment": {
+            "status": "aligned",
+            "evidence": "The purpose maps to the single output.",
+        },
     }
 
 
 @pytest.fixture
 def valid_task_2() -> dict:
     return {
+        "taskId": "task-two",
         "purpose": "Task two purpose",
         "context": VALID_CONTEXT,
         "filesToRead": ["src/file2.py"],
@@ -93,12 +104,22 @@ def valid_task_2() -> dict:
             {"step": 1, "action": "Do step one"},
         ],
         "expectedOutput": "Output for task two",
+        "verificationCoverage": {
+            "observable": ["Output exists"],
+            "coverage": "complete",
+        },
+        "antiPatternSignals": ["none"],
+        "purposeOutputAlignment": {
+            "status": "aligned",
+            "evidence": "The purpose maps to the single output.",
+        },
     }
 
 
 @pytest.fixture
 def valid_task_3() -> dict:
     return {
+        "taskId": "task-three",
         "purpose": "Task three purpose",
         "context": VALID_CONTEXT,
         "filesToRead": ["src/file3a.py", "src/file3b.py"],
@@ -110,6 +131,15 @@ def valid_task_3() -> dict:
             {"step": 3, "action": "Do third thing"},
         ],
         "expectedOutput": "Output for task three",
+        "verificationCoverage": {
+            "observable": ["Output exists"],
+            "coverage": "complete",
+        },
+        "antiPatternSignals": ["none"],
+        "purposeOutputAlignment": {
+            "status": "aligned",
+            "evidence": "The purpose maps to the single output.",
+        },
     }
 
 
@@ -378,6 +408,10 @@ class TestAutoFix:
         """Leave an already normalized skills array unchanged."""
         assert auto_fix([valid_task_1]) is False
 
+    def test_auto_fix_ignores_non_array_skills(self, valid_task_1: dict) -> None:
+        valid_task_1["skills"] = "python"
+        assert auto_fix([valid_task_1]) is False
+
     def test_auto_fix_state_file_writes_valid_normalized_tasks(
         self, valid_task_1: dict, schema_dict: dict, tmp_path: Path
     ) -> None:
@@ -440,25 +474,316 @@ class TestAutoFix:
         assert result.exit_code == 0, result.output
         assert json.loads(result.output) == {"valid": True, "fixed": True}
 
+    def test_auto_fix_state_returns_migration_diagnostics(
+        self, valid_task_1: dict, schema_dict: dict, tmp_path: Path
+    ) -> None:
+        for key in (
+            "taskId",
+            "verificationCoverage",
+            "antiPatternSignals",
+            "purposeOutputAlignment",
+        ):
+            valid_task_1.pop(key)
+        state_file = tmp_path / "state.json"
+        state_file.write_text(json.dumps({"tasks": [valid_task_1]}))
+        result = auto_fix_task_structure(state_file, schema_dict)
+        assert result["valid"] is True
+        assert result["fixed"] is False
+        assert result["diagnostics"]
 
-class TestRejectDependencies:
-    """Tests that task packets with a ``dependencies`` field are rejected.
+    def test_auto_fix_state_rejects_non_array_tasks(
+        self, schema_dict: dict, tmp_path: Path
+    ) -> None:
+        state_file = tmp_path / "state.json"
+        state_file.write_text(json.dumps({"tasks": "not-an-array"}))
+        with pytest.raises(ValueError, match="tasks.*array"):
+            auto_fix_task_structure(state_file, schema_dict)
 
-    The task-packet schema uses ``additionalProperties: false``, so any
-    property not explicitly listed (including ``dependencies``) causes a
-    validation error.
-    """
+    def test_auto_fix_state_rejects_non_object_task(
+        self, schema_dict: dict, tmp_path: Path
+    ) -> None:
+        state_file = tmp_path / "state.json"
+        state_file.write_text(json.dumps({"tasks": ["not-an-object"]}))
+        with pytest.raises(ValueError, match="JSON objects"):
+            auto_fix_task_structure(state_file, schema_dict)
 
-    def test_rejects_task_with_dependencies_field(
+    def test_auto_fix_state_stops_after_three_changed_invalid_passes(
+        self, valid_task_1: dict, schema_dict: dict, tmp_path: Path
+    ) -> None:
+        state_file = tmp_path / "state.json"
+        state_file.write_text(json.dumps({"tasks": [valid_task_1]}))
+        with (
+            unittest.mock.patch(
+                "lib.validate_task_structure.core.auto_fix", return_value=True
+            ),
+            unittest.mock.patch(
+                "lib.validate_task_structure.core.validate",
+                return_value=(False, ["still invalid"]),
+            ),
+        ):
+            result = auto_fix_task_structure(state_file, schema_dict)
+        assert result == {"valid": False, "errors": ["still invalid"]}
+
+
+class TestAtomicityDiagnostics:
+    """Regression fixtures for staged atomicity publication behavior."""
+
+    @pytest.mark.parametrize(
+        "signal,purpose",
+        [
+            ("implementation-plus-tests", "Implement checkout and run tests"),
+            ("multiple-helpers", "Write three independent helpers"),
+            ("analysis-plus-planning", "Analyze checkout and propose a plan"),
+            ("multiple-comparisons", "Compare framework A and framework B"),
+        ],
+    )
+    def test_compound_patterns_enter_split_review(
+        self, valid_task_1, schema_dict, signal, purpose
+    ) -> None:
+        """Emit a named warning for every declared compound-task signal."""
+        task = dict(valid_task_1)
+        task["purpose"] = purpose
+        task["antiPatternSignals"] = [signal]
+        task["purposeOutputAlignment"] = {
+            "status": "needs-review",
+            "evidence": "The named compound signal requires a split decision.",
+        }
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is True
+        assert any(
+            item.startswith(f"WARNING [anti-pattern-{signal}]") for item in diagnostics
+        )
+
+    def test_missing_verification_is_a_migration_warning(
         self, valid_task_1, schema_dict
     ) -> None:
-        """Adding ``dependencies`` to a valid task yields an invalid result."""
         task = dict(valid_task_1)
-        task["dependencies"] = []
-        valid, errors = validate([task], schema_dict)
+        task.pop("verificationCoverage")
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is True
+        assert any("WARNING [verification-coverage]" in item for item in diagnostics)
+
+    def test_ambiguous_output_is_actionable_warning(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        task = dict(valid_task_1)
+        task["expectedOutput"] = "Updated source, test results"
+        task["antiPatternSignals"] = []
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is True
+        assert any("WARNING [compound-task-signal]" in item for item in diagnostics)
+
+    def test_compound_purpose_is_actionable_warning(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        task = dict(valid_task_1)
+        task["purpose"] = "Implement checkout and add its tests"
+        task["antiPatternSignals"] = []
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is True
+        assert any("WARNING [compound-task-signal]" in item for item in diagnostics)
+
+    def test_invalid_dependency_reference_is_hard_error(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        task = dict(valid_task_1)
+        task["dependencies"] = [{"taskId": "missing-task", "reason": "prior output"}]
+        valid, diagnostics = validate([task], schema_dict)
         assert valid is False
-        assert any("dependencies" in e for e in errors), f"errors={errors}"
-        assert any("Additional properties" in e for e in errors), f"errors={errors}"
+        assert any("ERROR [dependency-reference]" in item for item in diagnostics)
+
+    def test_dependency_cycle_is_hard_error(
+        self, valid_task_1, valid_task_2, schema_dict
+    ) -> None:
+        first = dict(valid_task_1)
+        second = dict(valid_task_2)
+        first["dependencies"] = [{"taskId": "task-two"}]
+        second["dependencies"] = [{"taskId": "task-one"}]
+        valid, diagnostics = validate([first, second], schema_dict)
+        assert valid is False
+        assert any("ERROR [dependency-cycle]" in item for item in diagnostics)
+
+    def test_tightly_coupled_multi_file_result_is_accepted(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        task = dict(valid_task_1)
+        task["filesToWrite"] = ["docs/contract.md", "docs/reference.md"]
+        task["couplingRationale"] = {
+            "group": "publication-contract",
+            "rationale": "Both files publish one inseparable contract.",
+            "sharedResult": "One reviewed contract package.",
+            "verification": "One documentation review covers both files.",
+        }
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is True
+        assert not any("coupling-rationale" in item for item in diagnostics)
+
+    def test_unrelated_multi_file_result_requires_split_review(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        task = dict(valid_task_1)
+        task["filesToWrite"] = ["src/feature.py", "docs/unrelated.md"]
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is True
+        assert any("WARNING [coupling-rationale]" in item for item in diagnostics)
+
+    def test_legacy_identity_and_metadata_emit_migration_warnings(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        task = dict(valid_task_1)
+        keys = (
+            "taskId",
+            "verificationCoverage",
+            "purposeOutputAlignment",
+            "antiPatternSignals",
+        )
+        for key in keys:
+            task.pop(key)
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is True
+        for criterion in (
+            "identity",
+            "verification-coverage",
+            "purpose-output-alignment",
+            "anti-pattern-signals",
+        ):
+            assert any(f"WARNING [{criterion}]" in item for item in diagnostics)
+
+    def test_legacy_verification_supplies_observable_coverage(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        task = dict(valid_task_1)
+        task.pop("verificationCoverage")
+        task["verification"] = ["Output exists"]
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is True
+        assert not any("verification-coverage" in item for item in diagnostics)
+
+    def test_conflicting_id_is_rejected_as_additional_property(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        """Reject the unsupported ``id`` alias as an additional property."""
+        task = dict(valid_task_1)
+        task["id"] = "some-legacy-id"
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is False
+        assert any(
+            "Additional properties" in item or "id" in item for item in diagnostics
+        )
+
+    def test_empty_verification_coverage_is_hard_error(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        task = dict(valid_task_1)
+        task["verificationCoverage"] = {"observable": []}
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is False
+        assert any("ERROR [verification-coverage]" in item for item in diagnostics)
+
+    def test_not_aligned_is_hard_error(self, valid_task_1, schema_dict) -> None:
+        task = dict(valid_task_1)
+        task["purposeOutputAlignment"] = {
+            "status": "not-aligned",
+            "evidence": "The output does not match the purpose.",
+        }
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is False
+        assert any("ERROR [purpose-output-alignment]" in item for item in diagnostics)
+
+    def test_non_array_signals_are_hard_error(self, valid_task_1, schema_dict) -> None:
+        task = dict(valid_task_1)
+        task["antiPatternSignals"] = "implementation-plus-tests"
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is False
+        assert any("ERROR [anti-pattern-signals]" in item for item in diagnostics)
+
+    def test_unknown_signal_is_schema_error(self, valid_task_1, schema_dict) -> None:
+        task = dict(valid_task_1)
+        task["antiPatternSignals"] = ["unknown-signal"]
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is False
+        assert diagnostics
+
+    def test_none_cannot_be_combined_with_named_signal(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        task = dict(valid_task_1)
+        task["antiPatternSignals"] = ["none", "multiple-helpers"]
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is False
+        assert any("cannot combine 'none'" in item for item in diagnostics)
+
+    def test_non_object_dependency_is_schema_error(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        task = dict(valid_task_1)
+        task["dependencies"] = ["task-one"]
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is False
+        assert diagnostics
+
+    def test_self_dependency_is_hard_error(self, valid_task_1, schema_dict) -> None:
+        task = dict(valid_task_1)
+        task["dependencies"] = [{"taskId": "task-one"}]
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is False
+        assert any("self-reference creates a cycle" in item for item in diagnostics)
+
+    def test_non_string_write_is_schema_error(self, valid_task_1, schema_dict) -> None:
+        task = dict(valid_task_1)
+        task["filesToWrite"] = [1]
+        valid, diagnostics = validate([task], schema_dict)
+        assert valid is False
+        assert diagnostics
+
+    def test_write_conflict_is_hard_error(
+        self, valid_task_1, valid_task_2, schema_dict
+    ) -> None:
+        first = dict(valid_task_1)
+        second = dict(valid_task_2)
+        second["filesToWrite"] = first["filesToWrite"]
+        valid, diagnostics = validate([first, second], schema_dict)
+        assert valid is False
+        assert any("ERROR [write-target-conflict]" in item for item in diagnostics)
+
+    def test_serialized_shared_write_is_accepted(
+        self, valid_task_1, valid_task_2, schema_dict
+    ) -> None:
+        first = dict(valid_task_1)
+        second = dict(valid_task_2)
+        second["filesToWrite"] = first["filesToWrite"]
+        second["dependencies"] = [{"taskId": "task-one"}]
+        valid, diagnostics = validate([first, second], schema_dict)
+        assert valid is True
+        assert not any("write-target-conflict" in item for item in diagnostics)
+
+    def test_duplicate_task_identity_is_hard_error(
+        self, valid_task_1, valid_task_2, schema_dict
+    ) -> None:
+        first = dict(valid_task_1)
+        second = dict(valid_task_2)
+        second["taskId"] = first["taskId"]
+        valid, diagnostics = validate([first, second], schema_dict)
+        assert valid is False
+        assert any("is duplicated" in item for item in diagnostics)
+
+    def test_shared_coupling_group_allows_shared_write(
+        self, valid_task_1, valid_task_2, schema_dict
+    ) -> None:
+        first = dict(valid_task_1)
+        second = dict(valid_task_2)
+        second["filesToWrite"] = first["filesToWrite"]
+        rationale = {
+            "group": "shared-publication",
+            "rationale": "Both tasks contribute to one serialized publication.",
+            "sharedResult": "One shared publication.",
+            "verification": "One publication check.",
+        }
+        first["couplingRationale"] = rationale
+        second["couplingRationale"] = rationale
+        valid, diagnostics = validate([first, second], schema_dict)
+        assert valid is True
+        assert not any("write-target-conflict" in item for item in diagnostics)
 
 
 # ===========================================================================
@@ -500,6 +825,27 @@ class TestCliValid:
         assert result.exit_code == 0, result.output
         data = json.loads(result.output)
         assert data["valid"] is True
+
+    def test_migration_warnings_are_returned(
+        self, valid_task_1, tmp_path: Path
+    ) -> None:
+        task = dict(valid_task_1)
+        for key in (
+            "taskId",
+            "verificationCoverage",
+            "antiPatternSignals",
+            "purposeOutputAlignment",
+        ):
+            task.pop(key)
+        input_file = tmp_path / "migration.json"
+        input_file.write_text(json.dumps([task]))
+        result = CliRunner().invoke(
+            main, [str(input_file), "--schema", str(SCHEMA_PATH)]
+        )
+        assert result.exit_code == 0, result.output
+        data = json.loads(result.output)
+        assert data["valid"] is True
+        assert data["diagnostics"]
 
     def test_empty_files_to_read_passes(self, valid_task_1, tmp_path: Path) -> None:
         """Empty filesToRead is allowed and passes validation."""
@@ -578,10 +924,10 @@ class TestCliInvalid:
         data = json.loads(result.output)
         assert data["valid"] is False
 
-    def test_cli_rejects_dependencies_field(self, valid_task_1, tmp_path: Path) -> None:
-        """A task with ``dependencies`` field produces validation errors."""
+    def test_cli_rejects_unknown_dependency(self, valid_task_1, tmp_path: Path) -> None:
+        """An unresolved dependency produces a hard validation error."""
         task = dict(valid_task_1)
-        task["dependencies"] = []
+        task["dependencies"] = [{"taskId": "missing-task"}]
         input_file = tmp_path / "bad.json"
         input_file.write_text(json.dumps([task]))
         runner = CliRunner()
@@ -589,7 +935,7 @@ class TestCliInvalid:
         assert result.exit_code == 1, result.output
         data = json.loads(result.output)
         assert data["valid"] is False
-        assert any("dependencies" in error for error in data["errors"]), (
+        assert any("dependency-reference" in error for error in data["errors"]), (
             f"errors={data['errors']}"
         )
 
@@ -751,6 +1097,67 @@ class TestCliErrors:
         )
         assert result.exit_code == 2
         assert "must be a JSON array" in result.output
+
+    def test_state_file_missing_tasks(self, tmp_path: Path) -> None:
+        runner = CliRunner()
+        state_file = tmp_path / "state.json"
+        state_file.write_text("{}")
+        result = runner.invoke(
+            main,
+            ["--state-file", str(state_file), "--schema", str(SCHEMA_PATH)],
+        )
+        assert result.exit_code == 2
+        assert "must contain a JSON object" in result.output
+
+    def test_auto_fix_requires_state_file(self, tmp_path: Path) -> None:
+        input_file = tmp_path / "tasks.json"
+        input_file.write_text("[]")
+        result = CliRunner().invoke(
+            main,
+            [str(input_file), "--auto-fix", "--schema", str(SCHEMA_PATH)],
+        )
+        assert result.exit_code == 2
+        assert "requires --state-file" in result.output
+
+    def test_auto_fix_failure_is_reported(self, tmp_path: Path) -> None:
+        state_file = tmp_path / "state.json"
+        state_file.write_text(json.dumps({"tasks": []}))
+        with unittest.mock.patch(
+            "cli.validate_task_structure.auto_fix_task_structure",
+            side_effect=RuntimeError("fix crash"),
+        ):
+            result = CliRunner().invoke(
+                main,
+                [
+                    "--state-file",
+                    str(state_file),
+                    "--auto-fix",
+                    "--schema",
+                    str(SCHEMA_PATH),
+                ],
+            )
+        assert result.exit_code == 2
+        assert "auto-fix failed" in result.output
+
+    def test_auto_fix_invalid_result_exits_one(self, tmp_path: Path) -> None:
+        state_file = tmp_path / "state.json"
+        state_file.write_text(json.dumps({"tasks": []}))
+        with unittest.mock.patch(
+            "cli.validate_task_structure.auto_fix_task_structure",
+            return_value={"valid": False, "errors": ["invalid"]},
+        ):
+            result = CliRunner().invoke(
+                main,
+                [
+                    "--state-file",
+                    str(state_file),
+                    "--auto-fix",
+                    "--schema",
+                    str(SCHEMA_PATH),
+                ],
+            )
+        assert result.exit_code == 1
+        assert json.loads(result.output)["valid"] is False
 
 
 class TestCliHelp:

@@ -174,7 +174,10 @@ def main(
 
     # --- Output ---
     if valid:
-        click.echo(json.dumps({"valid": True}))
+        result: dict[str, object] = {"valid": True}
+        if errors:
+            result["diagnostics"] = errors
+        click.echo(json.dumps(result))
     else:
         click.echo(json.dumps({"valid": False, "errors": errors}))
         raise SystemExit(1)
