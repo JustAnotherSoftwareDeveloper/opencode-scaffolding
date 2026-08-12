@@ -53,6 +53,13 @@ def test_candidate_boundaries_precede_skill_assignment() -> None:
     assert "populate `verificationCoverage`" in text
 
 
+def test_task_count_is_uncapped_and_skill_count_is_separate() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert "regardless of task count" in text
+    assert "Do not cap, target, or pad the number of tasks" in text
+    assert "one-to-three limit applies to `skills` within each task" in text
+
+
 def test_split_or_migration_is_revalidated_before_publication() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "after any split or migration" in text

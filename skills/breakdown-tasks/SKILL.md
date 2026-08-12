@@ -34,7 +34,7 @@ Read `PURPOSE` and `DETAILS`. Block when either is absent.
 
 2. **Select and load planning skills.** Present the request and the planning array to the LLM. Select every materially relevant planning skill. Load each selected skill with the skill tool. Block on a name absent from the array, a stale path, or a load failure. An empty selection is valid only when no planning concern exists.
 
-3. **Draft tasks.** Write a candidate `{summary, tasks}` object that is schema-ready except for `skills`. Follow [the authoring references](reference/authoring/core-rules.md). Establish candidate boundaries, single results, purpose/output mappings, and dependency order before assigning skills. Give each task a unique `taskId`; populate `verificationCoverage`, `dependencies`, `antiPatternSignals`, and `purposeOutputAlignment`; add `couplingRationale` for a justified multi-file result. Do not include `skills` yet.
+3. **Draft tasks.** Write a candidate `{summary, tasks}` object that is schema-ready except for `skills`. Follow [the authoring references](reference/authoring/core-rules.md). First inventory every independently decidable question, change, and produced deliverable in the request. Create one task for each independent item, regardless of task count; never use workflow phases, available skills, or a desired packet size as substitute boundaries. Apply the split test to every candidate: if part of it could be completed, rejected, retried, assigned, or verified without the rest, split it. Do not split verification evidence from the result it verifies unless the verification itself is an explicitly requested deliverable. Establish candidate boundaries, single results, purpose/output mappings, and dependency order before assigning skills. Give each task a unique `taskId`; populate `verificationCoverage`, `dependencies`, `antiPatternSignals`, and `purposeOutputAlignment`; add `couplingRationale` for a justified multi-file result. Do not include `skills` yet.
 
 4. **Collect operation and documentation skills.** Run:
 
@@ -85,6 +85,7 @@ Return the relative published packet path.
 - Planning selection uses the planning array. Assignment uses the operation/documentation array. Do not swap.
 - Do not recollect, rebuild metadata from names, or substitute paths.
 - Do not manually populate, correct, reorder, or remove `skills`.
+- Do not cap, target, or pad the number of tasks. The one-to-three limit applies to `skills` within each task, not to tasks within a packet.
 - Fail closed. Publish no partial output.
 - Planning loads are passive context. Only task-declared skills are executable.
 

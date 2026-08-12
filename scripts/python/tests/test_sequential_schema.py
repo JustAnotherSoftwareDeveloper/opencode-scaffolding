@@ -32,6 +32,13 @@ SCHEMA_PATH = (
     / "schema"
     / "task-packet.schema.json"
 )
+TASK_INPUT_SCHEMA_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "skills"
+    / "breakdown-tasks"
+    / "schema"
+    / "task-input.schema.json"
+)
 
 VALID_CONTEXT = (
     "Validate the task packet schema using the declared inputs and expected output. "
@@ -295,6 +302,59 @@ class TestSchemaStructuralInvariants:
         assert props["context"]["minLength"] == 200
         assert props["executionInstructions"]["maxItems"] == 5
         assert props["skills"]["maxItems"] == 3
+
+    def test_task_list_has_no_maximum(self, schema_dict: dict) -> None:
+        """Task count is uncapped while skills remain capped per task."""
+        tasks = schema_dict["properties"]["tasks"]
+        assert tasks["minItems"] == 1
+        assert "maxItems" not in tasks
+
+        task = {
+            "purpose": "Create one bounded result",
+            "context": "Create one independently verifiable result while preserving "
+            "the stated contract and restricting all work to the listed target file. "
+            "Run the named verification before returning the completed deliverable.",
+            "filesToRead": [],
+            "filesToWrite": ["out/result.txt"],
+            "skills": ["generic-analysis"],
+            "executionInstructions": [{"step": 1, "action": "Create the result"}],
+            "expectedOutput": "One result file",
+        }
+        packet = {
+            "summary": "Verify an uncapped task packet.",
+            "tasks": [dict(task) for _ in range(6)],
+        }
+        jsonschema.validate(packet, schema_dict)
+
+    def test_task_list_requires_at_least_one_task(self, schema_dict: dict) -> None:
+        """The packet schema rejects an empty task list."""
+        with pytest.raises(jsonschema.ValidationError):
+            jsonschema.validate(
+                {"summary": "An empty packet is invalid.", "tasks": []}, schema_dict
+            )
+
+    def test_candidate_schema_matches_packet_metadata_without_skills(self) -> None:
+        """The pre-assignment schema accepts all authored boundary metadata."""
+        packet_schema = load_schema(SCHEMA_PATH)
+        input_schema = load_schema(TASK_INPUT_SCHEMA_PATH)
+        packet_properties = set(
+            packet_schema["definitions"]["TaskPacket"]["properties"]
+        )
+        draft = input_schema["definitions"]["TaskDraft"]
+        assert set(draft["properties"]) == packet_properties - {"skills"}
+        assert set(draft["required"]) == {
+            "taskId",
+            "purpose",
+            "context",
+            "filesToRead",
+            "filesToWrite",
+            "executionInstructions",
+            "expectedOutput",
+            "verificationCoverage",
+            "dependencies",
+            "antiPatternSignals",
+            "purposeOutputAlignment",
+        }
 
     def test_dependencies_are_optional_task_references(self, schema_dict: dict) -> None:
         """``dependencies`` contains optional task-reference edges."""

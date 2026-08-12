@@ -25,6 +25,19 @@ Work-boundary and skill-assignment mistakes to avoid when decomposing tasks.
 - **"Compare all frontend frameworks and pick one"** — Multiple independent comparisons in one task.
   *Violates: Single Unit Of Work (each framework evaluation is an independent analysis question).*
   Split into evaluate framework A, evaluate framework B, compare findings and select.
+- **"Analyze architecture, style, workflow rules, and migration"** — A lifecycle
+  label hides several independently decidable analytical questions.
+  *Violates: Single Unit Of Work and the split test.*
+  Split into one task per analytical question, then add a dependent synthesis task
+  only when the request requires a consolidated conclusion.
+- **"Create the proposal" as one task for a multi-concern proposal** — A shared final
+  document is being used to merge independent research or decisions.
+  *Violates: Single Unit Of Work; output packaging does not define atomicity.*
+  Split the independent findings first and reserve one dependent task for synthesis.
+- **Choosing a fixed task count before inventorying concerns** — Packet size dictates
+  boundaries instead of the work.
+  *Violates: Boundary Before Assignment.* There is no task-count ceiling or target;
+  the one-to-three constraint applies to skills per task.
 - **Using template variables or placeholders in `filesToRead` or `filesToWrite`** — `{{TASK_1_PATH}}`, `<output-from-task-1>`, or similar invented syntax. These are not file paths and will not resolve at execution time. Use a bounded glob pattern instead (e.g., `.plans/*-<slug>/tasks.json`).
 
 ## Skill-Assignment Anti-Patterns

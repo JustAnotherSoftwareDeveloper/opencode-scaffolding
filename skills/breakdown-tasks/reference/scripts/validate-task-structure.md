@@ -48,6 +48,10 @@ Apply these structural rules.
 - File array entries must be non-empty strings with no duplicates.
 - Purpose, context, and expectedOutput must be strings.
 - FilesToRead, filesToWrite, and skills must be arrays of strings.
+- The root task array has no maximum length. Atomic coverage determines task count.
+- Skills retain a separate maximum of three entries per task.
+- Declared compound-task signals are hard errors; uncertain text-only compound
+  heuristics remain review warnings.
 
 ## Exit Codes
 

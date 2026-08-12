@@ -19,6 +19,10 @@ KNOWN_COMPOUND_SIGNALS = frozenset(
         "multiple-helpers",
         "analysis-plus-planning",
         "multiple-comparisons",
+        "multiple-analysis-questions",
+        "multiple-operation-changes",
+        "multiple-documentation-changes",
+        "lifecycle-stage-bundle",
     }
 )
 
@@ -193,11 +197,11 @@ def _validate_metadata(tasks: list[dict[str, Any]]) -> list[str]:
             for signal in named_signals:
                 diagnostics.append(
                     _diagnostic(
-                        "WARNING",
+                        "ERROR",
                         f"anti-pattern-{signal}",
                         path,
-                        f"declared {signal!r}; split the independent concerns or "
-                        "record evidence for one boundary and one result.",
+                        f"declared {signal!r}; split the independent concerns before "
+                        "publication.",
                     )
                 )
         purpose = task.get("purpose", "")
@@ -372,6 +376,12 @@ def validate(
         error exists.
     """
     errors: list[str] = []
+    tasks_schema: dict[str, Any] | None = schema.get("properties", {}).get("tasks")
+    if isinstance(tasks_schema, dict):
+        minimum = tasks_schema.get("minItems")
+        if isinstance(minimum, int) and len(tasks) < minimum:
+            errors.append(f"tasks: expected at least {minimum} task")
+
     task_schema: dict[str, Any] = schema.get("definitions", {}).get(
         "TaskPacket", schema
     )

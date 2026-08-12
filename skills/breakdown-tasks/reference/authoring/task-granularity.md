@@ -25,10 +25,18 @@ sequential, naming the prior output in `filesToRead`. In this workflow, candidat
 decomposition is first; skill assignment follows it. The first task establishes
 shared outputs that subsequent dependent tasks list in `filesToRead`.
 
-## Capacity and revalidation
+Do not use lifecycle stages such as analysis, proposal, implementation, or review as
+automatic task boundaries. A stage may contain many independent questions or
+changes, each requiring its own task. Conversely, do not add a stage the request did
+not ask for.
 
-Do not expand beyond three tasks. A warning is appropriate for repairable missing
-evidence; a hard failure applies when the boundary or result remains ambiguous.
-After splitting or migrating a concern, re-check every new boundary, purpose,
-expected output, verification, dependency, and assigned skill. An additional
-mandatory review phase remains deferred.
+## Split test and revalidation
+
+There is no task-count ceiling or target. Before publication, ask whether any clause
+of a task can be completed, rejected, retried, assigned, or verified independently.
+If yes, split it. Apply this test to analytical dimensions as well as file changes:
+architecture taxonomy, style conformance, workflow policy, migration, and validation
+are separate questions unless evidence proves one indivisible result. After splitting
+or migrating a concern, re-check every new boundary, purpose, expected output,
+verification, dependency, and assigned skill. Keep the one-to-three skills-per-task
+constraint unchanged.

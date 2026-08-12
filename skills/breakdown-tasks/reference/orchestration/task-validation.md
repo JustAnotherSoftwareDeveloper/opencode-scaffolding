@@ -16,15 +16,16 @@ Rework affected packet(s) if any check fails.
 - **Dependency representation** — Each dependent task identifies its predecessors
   with explicit `dependencies` edges and lists required prior artifacts in
   `filesToRead`. Paths are explicit or bounded, never invented placeholders.
-- **Staged outcomes** — Report a repairable evidence gap as a warning first; use a
-  hard failure for unresolved ambiguity, boundary violations, or unverifiable
-  results. Any split or migration outcome must be revalidated, including skills.
-- **Named anti-patterns** — A declared implementation-plus-tests, multiple-helpers,
-  analysis-plus-planning, or multiple-comparisons signal produces a named split-review
-  diagnostic. Text heuristics remain warnings and do not prove independence.
-- **Deferred decisions** — Preserve the three-task ceiling and do not require an
-  extra review phase. These are compatibility/capacity decisions, not validator
-  expansion points.
+- **Staged outcomes** — Report uncertain text heuristics as warnings; use a hard
+  failure for declared compound signals, demonstrated independent concerns,
+  boundary violations, or unverifiable results. Any split or migration outcome must
+  be revalidated, including skills.
+- **Named anti-patterns** — Any declared compound-task signal produces a hard split
+  diagnostic. Text heuristics remain warnings because they do not prove independence.
+- **Uncapped task inventory** — Confirm every independently decidable question,
+  change, and produced deliverable is represented. Do not reject, merge, or pad tasks
+  based on packet size. Keep verification evidence with its result unless it is an
+  explicitly requested deliverable. Enforce one to three skills per task separately.
 
 - **JSON validity** — The entire output must be parseable as valid JSON.
 - **JSON object structure** — The parsed result must be an object with `summary` (string) and `tasks` (array) properties.
@@ -39,6 +40,5 @@ Rework affected packet(s) if any check fails.
 - **Skill-name reasonableness** — Each entry in the `skills` array must be appropriate for the task's purpose and context.
 
 The layered checks are current diagnostic policy where they describe warning versus
-failure behavior. The three-task ceiling and deferred review are compatibility
-constraints; they must not be silently converted into new capacity or workflow
-stages.
+failure behavior. Task count is derived solely from atomic coverage and must not be
+silently converted into a capacity target or extra workflow stage.

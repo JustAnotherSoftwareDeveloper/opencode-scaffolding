@@ -13,8 +13,8 @@ Field definitions extracted from `../../schema/task-packet.schema.json`. All fie
 - **`tasks`**
   - Type: `array` of `TaskPacket`
   - Required: yes
-  - Constraints: `minItems`: 1
-  - Description: An ordered list of atomic delegation packets. Each task must represent a single unit of work that can be completed independently.
+  - Constraints: `minItems`: 1; no maximum
+  - Description: An ordered, uncapped list of atomic delegation packets. Task count is determined by independent work, not packet capacity.
 
 ## TaskPacket Fields
 
@@ -45,8 +45,8 @@ Field definitions extracted from `../../schema/task-packet.schema.json`. All fie
 - **`skills`**
   - Type: `array` of `string`
   - Required: yes
-  - Constraints: `uniqueItems`: true, `maxItems`: 3
-  - Description: Zero to three skills the worker must load before executing. An empty array authorizes direct packet execution without specialized skill guidance.
+  - Constraints: `uniqueItems`: true, `minItems`: 1, `maxItems`: 3
+  - Description: One to three skills the worker must load before executing. This limit applies per task and does not limit the number of tasks.
 
 - **`executionInstructions`**
   - Type: `array` of `object`

@@ -145,7 +145,7 @@ def valid_task_3() -> dict:
 
 @pytest.fixture
 def valid_tasks(valid_task_1, valid_task_2, valid_task_3) -> list[dict]:
-    """A valid task list with three tasks."""
+    """A valid task list with several tasks."""
     return [valid_task_1, valid_task_2, valid_task_3]
 
 
@@ -242,6 +242,27 @@ class TestValidateFunction:
         valid, errors = validate(valid_tasks, schema_dict)
         assert valid is True
         assert errors == []
+
+    def test_more_than_three_tasks_are_valid(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        """Task packets have no task-count ceiling."""
+        tasks = []
+        for index in range(6):
+            task = dict(valid_task_1)
+            task["taskId"] = f"task-{index + 1}"
+            task["filesToRead"] = [f"src/input-{index + 1}.py"]
+            task["filesToWrite"] = [f"src/output-{index + 1}.py"]
+            tasks.append(task)
+        valid, errors = validate(tasks, schema_dict)
+        assert valid is True
+        assert errors == []
+
+    def test_empty_task_list_is_rejected(self, schema_dict) -> None:
+        """The validator enforces the root task array's minimum length."""
+        valid, errors = validate([], schema_dict)
+        assert valid is False
+        assert any("expected at least 1 task" in error for error in errors)
 
     # --- Missing required keys (caught by jsonschema) ---
 
@@ -535,12 +556,28 @@ class TestAtomicityDiagnostics:
             ("multiple-helpers", "Write three independent helpers"),
             ("analysis-plus-planning", "Analyze checkout and propose a plan"),
             ("multiple-comparisons", "Compare framework A and framework B"),
+            (
+                "multiple-analysis-questions",
+                "Analyze architecture, style, and workflow policy",
+            ),
+            (
+                "multiple-operation-changes",
+                "Update the factory and validator operations",
+            ),
+            (
+                "multiple-documentation-changes",
+                "Rewrite architecture and maintenance references",
+            ),
+            (
+                "lifecycle-stage-bundle",
+                "Analyze the system and author its proposal",
+            ),
         ],
     )
     def test_compound_patterns_enter_split_review(
         self, valid_task_1, schema_dict, signal, purpose
     ) -> None:
-        """Emit a named warning for every declared compound-task signal."""
+        """Reject every declared compound-task signal until it is split."""
         task = dict(valid_task_1)
         task["purpose"] = purpose
         task["antiPatternSignals"] = [signal]
@@ -549,9 +586,9 @@ class TestAtomicityDiagnostics:
             "evidence": "The named compound signal requires a split decision.",
         }
         valid, diagnostics = validate([task], schema_dict)
-        assert valid is True
+        assert valid is False
         assert any(
-            item.startswith(f"WARNING [anti-pattern-{signal}]") for item in diagnostics
+            item.startswith(f"ERROR [anti-pattern-{signal}]") for item in diagnostics
         )
 
     def test_missing_verification_is_a_migration_warning(

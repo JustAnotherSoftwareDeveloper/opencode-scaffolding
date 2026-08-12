@@ -2,7 +2,7 @@
 
 How the pieces fit together — the breakdown pipeline flows through six domains, from authoring to execution:
 
-1. **Authoring** (`reference/authoring/`) — Rules and heuristics for producing atomic, well-structured task packets. Start here if a task fails validation or feels too large. Includes:
+1. **Authoring** (`reference/authoring/`) — Rules and heuristics for producing atomic, well-structured task packets with no task-count ceiling. Start here if a task fails validation or feels too large. Includes:
    - `core-rules.md` — Five atomicity rules (why tasks must be atomic)
    - `anti-patterns.md` — Common mistakes and how to diagnose them
    - `task-granularity.md` — Heuristics for splitting work at the right boundaries
@@ -26,4 +26,4 @@ How the pieces fit together — the breakdown pipeline flows through six domains
 
 6. **Schema** (`../schema/`) — Canonical output format definitions that all pipeline stages conform to.
    - `task-packet.schema.json` — JSON Schema defining the BreakdownTasksOutput object and TaskPacket structure
-   - `task-input.schema.json` — JSON Schema defining the TaskDraft input format (no `skills` property — enforced by schema)
+   - `task-input.schema.json` — JSON Schema defining the complete candidate TaskDraft format before `skills` assignment

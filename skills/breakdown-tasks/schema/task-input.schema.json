@@ -11,7 +11,7 @@
       "maxLength": 2000
     },
     "tasks": {
-      "description": "An ordered list of TaskDraft objects. No skills field — skills are assigned inline by the LLM.",
+      "description": "An ordered, uncapped list of atomic TaskDraft objects. Create one draft per independently completable and verifiable concern. No skills field — skills are assigned inline by the LLM.",
       "type": "array",
       "items": { "$ref": "#/definitions/TaskDraft" },
       "minItems": 1
@@ -24,6 +24,11 @@
       "additionalProperties": false,
       "description": "A single atomic task produced by the LLM during decomposition. Does NOT include skills — skills are assigned inline after collection.",
       "properties": {
+        "taskId": {
+          "description": "Stable identity for this draft task.",
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+        },
         "purpose": {
           "description": "Single sentence describing what this task accomplishes. Must be actionable and self-contained.",
           "type": "string",
@@ -79,9 +84,82 @@
           "description": "Precise description of the Deliverable payload this task produces.",
           "type": "string",
           "maxLength": 2000
+        },
+        "verificationCoverage": {
+          "description": "Observable checks covering this draft task's result.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "observable": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "coverage": {
+              "type": "string",
+              "enum": ["complete", "partial", "unknown"]
+            }
+          },
+          "required": ["observable"]
+        },
+        "couplingRationale": {
+          "description": "Inspectable exception for multiple files that publish one tightly coupled result.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "group": { "type": "string", "minLength": 1 },
+            "rationale": { "type": "string", "minLength": 1 },
+            "sharedResult": { "type": "string", "minLength": 1 },
+            "verification": { "type": "string", "minLength": 1 }
+          },
+          "required": ["rationale", "sharedResult", "verification"]
+        },
+        "dependencies": {
+          "description": "Directed dependency edges to other draft taskId values.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "taskId": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$" },
+              "reason": { "type": "string", "minLength": 1 }
+            },
+            "required": ["taskId"]
+          }
+        },
+        "antiPatternSignals": {
+          "description": "Compound-task signals considered while defining the draft boundary.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "none",
+              "implementation-plus-tests",
+              "multiple-helpers",
+              "analysis-plus-planning",
+              "multiple-comparisons",
+              "multiple-analysis-questions",
+              "multiple-operation-changes",
+              "multiple-documentation-changes",
+              "lifecycle-stage-bundle"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "purposeOutputAlignment": {
+          "description": "Explicit assessment connecting the draft purpose to its expected output.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": { "type": "string", "enum": ["aligned", "needs-review", "not-aligned"] },
+            "evidence": { "type": "string", "minLength": 1 }
+          },
+          "required": ["status", "evidence"]
         }
       },
-      "required": ["purpose", "context", "filesToRead", "filesToWrite", "executionInstructions", "expectedOutput"]
+      "required": ["taskId", "purpose", "context", "filesToRead", "filesToWrite", "executionInstructions", "expectedOutput", "verificationCoverage", "dependencies", "antiPatternSignals", "purposeOutputAlignment"]
     }
   }
 }

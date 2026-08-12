@@ -11,6 +11,13 @@ Each task performs exactly one logical change or answers exactly one analytical
 question. Define the task boundary before looking for a skill. A task may not hide
 independent concerns behind a broad purpose, context, or file list.
 
+Inventory the request's independently decidable questions, changes, and produced
+deliverables before drafting tasks. Use the split test: if one part can
+be completed, rejected, retried, assigned, or verified without another part, they
+are separate tasks. Similar topics and a shared final document do not make concerns
+atomic. Keep verification evidence with the result it verifies unless verification
+is itself an explicitly requested deliverable.
+
 ## 2. Single purpose and single result
 
 Each task has one purpose sentence with one action and one expected output: one
@@ -43,11 +50,11 @@ never define task boundaries; do not merge or split work to fit a skill. Assign 
 after the candidate tasks and dependencies are stable, and assign the matching skill
 to the matching task.
 
-## 6. Staged enforcement and capacity
+## 6. Staged enforcement and task count
 
-Treat actionable atomicity defects as warnings first when they can be repaired by
-clarifying evidence. Escalate to a hard failure when the defect remains ambiguous,
-violates a declared boundary, or cannot be verified. If a task is split or migrated,
-revalidate the resulting task(s), dependencies, purpose/output mapping, and skill
-assignment. Retain the three-task ceiling. A mandatory extra review phase is a
-deferred compatibility decision, not a current requirement.
+Treat heuristic atomicity concerns as warnings when independence is uncertain.
+Treat declared compound signals and demonstrated independently verifiable concerns
+as hard failures until the task is split. If a task is split or migrated, revalidate
+the resulting tasks, dependencies, purpose/output mapping, and skill assignment.
+Create as many tasks as atomic coverage requires. Never target, cap, or pad task
+count. The separate one-to-three limit applies only to skills assigned per task.

@@ -11,13 +11,12 @@
       "maxLength": 2000
     },
     "tasks": {
-      "description": "An ordered list of atomic delegation packets. Each task must represent a single unit of work that can be completed independently.",
+      "description": "An ordered, uncapped list of atomic delegation packets. Create as many tasks as the independent work requires; each task must represent one unit of work that can be completed and verified independently.",
       "type": "array",
       "items": {
         "$ref": "#/definitions/TaskPacket"
       },
-        "minItems": 1,
-        "maxItems": 3
+        "minItems": 1
     }
   },
   "required": ["summary", "tasks"],
@@ -129,7 +128,7 @@
           "required": ["rationale", "sharedResult", "verification"]
         },
         "dependencies": {
-          "description": "Optional directed dependency edges. References use taskId when present, or the migration identities task-1, task-2, and task-3.",
+          "description": "Optional directed dependency edges. References use taskId when present, or the migration identity task-<one-based-position>.",
           "type": "array",
           "uniqueItems": true,
           "items": {
@@ -152,7 +151,11 @@
               "implementation-plus-tests",
               "multiple-helpers",
               "analysis-plus-planning",
-              "multiple-comparisons"
+              "multiple-comparisons",
+              "multiple-analysis-questions",
+              "multiple-operation-changes",
+              "multiple-documentation-changes",
+              "lifecycle-stage-bundle"
             ]
           },
           "uniqueItems": true
