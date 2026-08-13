@@ -37,32 +37,38 @@ Return the deliverable defined by `expectedOutput`.
 
 ## Capability Boundary
 
-The packet's `skills` are bounded executable assignments, not a planning corpus.
-Load exactly those declared skills and never dynamically add names. An inline task
-has no passive planning-load exception: planning profiles may be mentioned as
-input context, but cannot be loaded as authority or counted in the executable set.
+The packet's `skills` field is the complete executable-skill declaration. Load exactly those declared skills
+once and in listed order; never add, substitute,
+infer, or transitively load a skill. Documentation or planning references cannot
+authorize an additional load. A task that needs such context must declare it in
+`skills`; otherwise it is not loaded.
+
+An inline task has no passive planning-load exception and no worker-style
+minimum-resource or relevant-addition behavior. Planning profiles may be mentioned
+as input context, but cannot be loaded as authority or counted in the executable
+set unless explicitly task-declared.
 Assignments must be resolved before execution to collector-winning existing
 `SKILL.md` paths and must contain one to three skills when the packet schema
 requires assignments. Missing, stale, substituted, or non-winning paths block.
 
-Use two-pass reconciliation for assignments: before execution verify name, class,
-and cardinality against the received packet; after execution verify every
-loaded skill path still resolves. A loaded skill is not completion
-evidence, and no score, rank, threshold, nearest-neighbor, or fallback may repair a
-failed path or assignment.
+Use two-pass reconciliation for assignments: before execution verify each declared
+name resolves to its assigned existing `SKILL.md` path; after execution verify every
+loaded skill is exactly one of those declared names and its path still resolves. A
+loaded skill is not completion evidence. No collector, similarity, score, rank,
+threshold, nearest-neighbor, or fallback may repair or expand the declaration.
 
 ## Execution Plan
 
 1. Validate the input object against the canonical single-task contract.
 2. Reject contradictions and prohibited delegation skills before reading, writing, or executing.
-3. Load every skill named in `skills` in listed order, after pre-execution
-   assignment/path reconciliation.
+3. Load every skill named in `skills` exactly once and in listed order, after
+   pre-execution declaration/path reconciliation; do not load anything else.
 4. Return `BLOCKED: Skill '<name>' is unavailable` when a named skill cannot load.
 5. Read every path in `filesToRead` before execution.
 6. Return `BLOCKED: Required file '<path>' is unavailable` when a required path cannot read.
 7. Execute `executionInstructions` in ascending `step` order.
 8. Write every path in `filesToWrite` unless blocked.
-9. Reconcile loaded assignments and paths in the post-execution pass.
+9. Reconcile the exact declared skill names and paths in the post-execution pass.
 10. Run every declared `verification` check against the completed deliverable.
 11. Produce the result described by `expectedOutput`.
 
@@ -75,7 +81,8 @@ Do not delegate to workers, subagents, or delegation skills.
 ## Guardrails
 
 - Treat the input task object as immutable.
-- Do not load skills outside `skills`.
+- Do not load skills outside `skills`, including dynamically discovered,
+  documentation-referenced, planning, or transitive skills.
 - Do not discover or read files outside `filesToRead` unless `context` or `executionInstructions` explicitly authorizes related discovery.
 - Do not write outside `filesToWrite`.
 - Do not use `webfetch` unless `executionInstructions` explicitly authorizes external retrieval.

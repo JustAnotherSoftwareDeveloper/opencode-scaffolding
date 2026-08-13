@@ -1,6 +1,6 @@
 ---
 name: skill-factory
-description: "Use when creating or updating all OpenCode skill files under skills/<name>/ from requirements and source material."
+description: "Use when creating or updating one OpenCode skill workspace from requirements and source material."
 selection:
   role: owner
   tags:
@@ -17,15 +17,15 @@ selection:
     constraints:
       - direct selection profile
   use_when:
-    - creating or updating the files of a skill under skills/<name>/
+    - creating or updating one selected skill workspace under skills/<name>/
   not_for:
-    - maintaining guidance without changing a skill workspace
+    - reviewing one existing skill, migrating a family, choosing taxonomy, or maintaining passive guidance
 class: operation
 ---
 
 # Skill Factory
 
-Create or update a skill workspace and validate its direct-selection profile.
+Create or update one skill workspace and validate its direct-selection profile.
 
 ## Normalize Input
 
@@ -35,12 +35,16 @@ Create or update a skill workspace and validate its direct-selection profile.
 
 ## Procedure
 
-1. Read `./reference/workflow-create-update.md` in full.
+1. Read `./reference/workflow-create-update.md` in full and confirm the request is limited to one workspace.
 2. Create or update only `name`, `description`, `selection`, and `class` frontmatter, plus supported profile fields only when explicitly required.
 3. Set `selection.role` and grouped tags from the request contract; add concise `use_when`, `not_for`, or directional `supports` values only when they improve selection.
 4. Preserve the skill body and update all relevant examples or evaluation cases with the profile.
 5. Validate every changed `SKILL.md` with the shared profile validator before handoff.
 6. Run the repository Markdown lint command on every modified Markdown file.
+
+Family migration is a workflow applied as bounded updates through this operation;
+there is no standalone migration operation. Taxonomy, ownership policy, review, and
+passive reference authority belong to their canonical owners.
 
 ## Self-Validation
 

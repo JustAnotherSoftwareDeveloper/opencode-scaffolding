@@ -9,12 +9,16 @@ selection:
     outputs: [<<output>>]
     topics: [<<topic>>]
     environments: [<<environment>>]
-    constraints: [<<safety boundary>>]
-  aliases: [<<alias>>]
+     constraints: [<<safety boundary>>]
+  aliases: [<<alias>>] # optional recognition-only wording
   use_when: [<<positive selection condition>>]
   not_for: [<<nearby request not owned>>]
 class: operation
 ---
+
+`aliases` is optional recognition-only metadata. Use it only for alternate wording
+that should resolve to this skill's canonical `name`; it must not create another
+skill, change ownership or class, or authorize routing, delegation, or loading.
 
 # `<<Skill Name>>`
 

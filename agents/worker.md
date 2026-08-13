@@ -51,9 +51,12 @@ outcome, or the caller's plan authority.
    skill after the planning collector call completes. Planning loads are passive,
    separately reported, and grant no execution, tool, write, or transitive authority.
 6. For that workflow, reconcile one to three executable assignments against the
-   operation/documentation collector output. Each assignment must use a name present
-   in that collector array. Stale paths, name mismatch, class mismatch, failed load,
-   or unresolved assignment blocks.
+   operation/documentation collector output. Each assignment must use the collector-
+    winning `name`, `class`, and path; use the collector-winning existing `SKILL.md` path;
+    do not repair stale, substituted, similar, or
+    unresolved assignments. Any stale path, a name absent from that array, a path mismatch, a class
+   mismatch, or a failed load blocks. Planning collector results are context only and
+   never become executable assignments.
 7. Execute the authoritative outcome with the resource rules above. Do not write
    outside declared literal targets or bounded patterns except for a minor explained
    purpose-preserving adjustment. Reconcile every suggested and actual target.
@@ -66,8 +69,13 @@ Return only the envelope defined by `output-contract-template.md`. Do not rely o
 remembered or abbreviated version of the contract. Everything after its payload
 boundary is the exact payload requested by `EXPECTED OUTPUT`.
 
-Apply the canonical executable-skill and planning-context reporting rules. Never claim
-a malformed envelope is valid and never invent evidence.
+Apply the canonical executable-skill and planning-context reporting rules. Report
+`Skills loaded` for executable operation/delegated skills only. Report explicitly
+loaded passive documentation skills in `Reads relied on` with their collector-winning
+name/class/path and mark them as passive documentation context; they do not add steps,
+authority, tools, writes, delegation, or completion evidence. Keep `Planning context
+loaded` limited to the scoped planning collector's passive output. Never claim a
+malformed envelope is valid and never invent evidence.
 
 ## Boundaries
 
@@ -75,3 +83,7 @@ a malformed envelope is valid and never invent evidence.
 - Do not perform side effects before required skill calls complete.
 - Do not carry state across packets or silently vary authoritative fields.
 - Do not emit an envelope that differs from `output-contract-template.md`.
+- Ordinary execution must not load planning skills. An operation or delegated worker
+  may explicitly load materially relevant documentation, but documentation loading is
+  passive and non-transitive; any further reference requires an explicit load. This
+  policy does not claim runtime loader enforcement.

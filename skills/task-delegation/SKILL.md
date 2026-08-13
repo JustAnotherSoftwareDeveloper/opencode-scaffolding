@@ -70,11 +70,29 @@ parse payload content as envelope metadata.
 When the executable skill is `breakdown-tasks`, validate the uncapped materially
 relevant planning profiles from the planning collector call separately from one to
 three executable operation/documentation assignments from the operation collector
-call. Require names present in the relevant collector array, existing `SKILL.md`
+ call. Require each assignment to preserve the collector-winning `name`, `class`, and
+ `path`, existing `SKILL.md`
 files within their source roots, task-contract inspection, and two-pass
 reconciliation. Planning loads are passive and never grant execution or transitive
-authority. Stale paths, failed loads, irrelevant names, name absent from the
-relevant array, class mismatch, or unresolved assignments block.
+ authority. Stale paths or substituted paths, failed loads, irrelevant names, a name absent
+ from the relevant array, class mismatch, or unresolved assignments block; do not
+ repair by similarity.
+
+During ordinary execution, an operation or delegated worker may explicitly load a
+materially relevant `documentation` skill named by the packet or workflow. Treat that
+load as passive, non-transitive context: it cannot add steps, authority, tools, writes,
+delegation, or completion evidence. Ordinary execution may not load `planning` skills;
+keep inline/task-executor exact-declaration behavior unchanged.
+
+## Reporting Boundary
+
+Preserve the canonical worker envelope without adding a local grammar. `Skills loaded`
+contains executable skills only. Report passive documentation loads in `Reads relied
+on` as passive documentation with their collector-winning identity when applicable.
+Reserve `Planning context loaded` for passive planning profiles from the scoped planning
+collector; it is not an executable assignment or completion evidence. Do not claim
+runtime enforcement for loading, recursion, duplication, or passive behavior without
+loader-harness evidence.
 
 ## Dispatch Boundary
 

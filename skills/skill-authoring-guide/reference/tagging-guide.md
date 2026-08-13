@@ -19,8 +19,9 @@ details.
 
 Use `use_when` for plain-language conditions that make the profile applicable. Use
 `not_for` for conditional near-misses, not as a second tag list. Use a small number of
-global aliases in tags or conditions when authors and users use different words; an
-alias must identify the same concept, not create a second concept.
+`selection.aliases` only for alternate wording of the same owned request; aliases are
+recognition-only and never create identity, routing, ranking, delegation, or a second
+concept.
 
 Use `supports` directionally for skills this skill directly supports. Do not use it to
 express similarity, ownership, or a general relatedness list.

@@ -9,12 +9,16 @@ selection:
     outputs: [reference context]
     topics: [<<reference-subject>>]
     environments: [<<environment>>]
-    constraints: [passive, no side effects]
-  aliases: [<<alias>>]
+     constraints: [passive, no side effects]
+  aliases: [<<alias>>] # optional recognition-only wording
   use_when: [the request needs <<domain-context>> reference material]
   not_for: [executing a workflow or changing the referenced artifact]
 class: documentation
 ---
+
+`aliases` is optional recognition-only metadata. Use it only for alternate wording
+that should resolve to this skill's canonical `name`; it must not create another
+skill, change ownership or class, or authorize routing, delegation, or loading.
 
 # `<<Skill Name>>` — Documentation Store
 

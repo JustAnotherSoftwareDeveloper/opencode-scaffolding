@@ -44,7 +44,7 @@ Read `PURPOSE` and `DETAILS`. Block when either is absent.
 
    Capture stdout. It is a JSON array with the same shape as step 1. Block on non-zero exit.
 
-5. **Assign skills to each task.** Present the complete candidate draft and the operation/documentation array to the LLM. Select one to three skills per task without changing the established boundaries. Block with explicit no-match evidence when no valid assignment exists. Reconcile every selected name against the array. A name absent from the array blocks. Do not score, rank, rerank, clip, or use lexical fallback.
+5. **Assign skills to each task.** Present the complete candidate draft and the operation/documentation array to the LLM. Select one to three skills per task without changing the established boundaries. Block with explicit no-match evidence when no valid assignment exists. Reconcile every selected assignment against the array's winning `name`, `class`, and `path`. A name absent from the array, stale or substituted path, class mismatch, or unresolved assignment blocks. Do not score, rank, rerank, clip, repair, or use lexical/similarity fallback.
 
 6. **Inspect contracts.** Read each selected skill's `SKILL.md` at its collector-winning `path` from the array. Verify the contract matches the task.
 
@@ -87,7 +87,12 @@ Return the relative published packet path.
 - Do not manually populate, correct, reorder, or remove `skills`.
 - Do not cap, target, or pad the number of tasks. The one-to-three limit applies to `skills` within each task, not to tasks within a packet.
 - Fail closed. Publish no partial output.
-- Planning loads are passive context. Only task-declared skills are executable.
+- Planning loads are passive context and are reported separately; only reconciled
+  operation/documentation assignments are executable. A documentation assignment may
+  be explicitly loaded by the operation or delegated worker as passive, non-transitive
+  context, but it cannot add authority, steps, tools, writes, delegation, or completion
+  evidence. Ordinary execution may not load planning skills. These are contract
+  boundaries, not claims of runtime loader enforcement.
 
 ## References
 

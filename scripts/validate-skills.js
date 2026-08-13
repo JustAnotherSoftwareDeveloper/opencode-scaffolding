@@ -31,8 +31,9 @@ function profileErrors(data) {
   if (!classes.has(data.class)) errors.push('class must be a canonical skill class');
   const s = data.selection;
   if (!s || typeof s !== 'object' || Array.isArray(s)) return [...errors, 'selection is required and must be an object'];
-  for (const key of Object.keys(s)) if (!['role', 'tags', 'use_when', 'not_for', 'supports'].includes(key)) errors.push(`unknown selection field: ${key}`);
+  for (const key of Object.keys(s)) if (!['role', 'aliases', 'tags', 'use_when', 'not_for', 'supports'].includes(key)) errors.push(`unknown selection field: ${key}`);
   if (!['owner', 'support', 'reference'].includes(s.role)) errors.push('selection.role must be owner, support, or reference');
+  if ('aliases' in s) try { items(s.aliases, 'selection.aliases'); } catch (e) { errors.push(e.message); }
   if (!s.tags || typeof s.tags !== 'object' || !Object.keys(s.tags).length) errors.push('selection.tags must contain at least one tag group');
   else { for (const key of Object.keys(s.tags)) { if (!groups.has(key)) errors.push(`unknown tag group: ${key}`); else try { items(s.tags[key], `tags.${key}`); } catch (e) { errors.push(e.message); } } }
   for (const key of ['use_when', 'not_for']) if (key in s) try { items(s[key], `selection.${key}`); } catch (e) { errors.push(e.message); }

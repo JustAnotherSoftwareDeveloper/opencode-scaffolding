@@ -9,12 +9,16 @@ selection:
     outputs: [bounded deliverable]
     topics: [<<task subject>>]
     environments: [OpenCode worker]
-    constraints: [declared files, declared skills]
-  aliases: [<<alias>>]
+     constraints: [declared files, declared skills]
+  aliases: [<<alias>>] # optional recognition-only wording
   use_when: [an orchestrator delegates <<owned-operation>>]
   not_for: [interactive orchestration or unbounded discovery]
 class: delegated
 ---
+
+`aliases` is optional recognition-only metadata. Use it only for alternate wording
+that should resolve to this skill's canonical `name`; it must not create another
+skill, change ownership or class, or authorize routing, delegation, or loading.
 
 # `<<Skill Name>>` — Delegated Worker
 

@@ -9,12 +9,16 @@ selection:
     outputs: [planning context]
     topics: [<<reference-subject>>]
     environments: [<<environment>>]
-    constraints: [no side effects]
-  aliases: [<<alias>>]
+     constraints: [no side effects]
+  aliases: [<<alias>>] # optional recognition-only wording
   use_when: [the request needs <<domain>> planning context]
   not_for: [executing or editing the planned artifact]
 class: planning
 ---
+
+`aliases` is optional recognition-only metadata. Use it only for alternate wording
+that should resolve to this skill's canonical `name`; it must not create another
+skill, change ownership or class, or authorize routing, delegation, or loading.
 
 # `<<Skill Name>>` — Domain Planning Reference
 

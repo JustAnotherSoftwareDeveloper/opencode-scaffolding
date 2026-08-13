@@ -1,0 +1,29 @@
+{
+  "contract": "selection.aliases is recognition-only metadata",
+  "canonicalIdentity": {
+    "pass": "aliases-pass",
+    "aliasResolvesTo": "aliases-pass"
+  },
+  "pass": [
+    {
+      "path": "aliases-pass/SKILL.md",
+      "expected": "valid",
+      "aliases": [
+        "alternate wording recognition",
+        "recognize equivalent request phrasing"
+      ]
+    }
+  ],
+  "fail": [
+    {
+      "path": "aliases-fail-empty/SKILL.md",
+      "expected": "invalid",
+      "reason": "selection.aliases must be non-empty"
+    },
+    {
+      "path": "aliases-fail-duplicate/SKILL.md",
+      "expected": "invalid",
+      "reason": "selection.aliases must contain unique values"
+    }
+  ]
+}

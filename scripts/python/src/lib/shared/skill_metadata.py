@@ -17,7 +17,7 @@ TAG_GROUPS = ("actions", "inputs", "outputs", "topics", "environments", "constra
 OPTIONAL_FIELDS = ("version", "license", "compatibility", "metadata", "permission")
 _NAME = re.compile(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$")
 _ROOT = {"name", "description", "selection", "class", *OPTIONAL_FIELDS}
-_SELECTION = {"role", "tags", "use_when", "not_for", "supports"}
+_SELECTION = {"role", "aliases", "tags", "use_when", "not_for", "supports"}
 _OBSOLETE = {
     "schema_version",
     "cues",
@@ -56,12 +56,15 @@ class SelectionTags:
 class SelectionProfile:
     role: SkillRole
     tags: SelectionTags
+    aliases: tuple[str, ...] = ()
     use_when: tuple[str, ...] = ()
     not_for: tuple[str, ...] = ()
     supports: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         result: dict[str, Any] = {"role": self.role, "tags": self.tags.to_dict()}
+        if self.aliases:
+            result["aliases"] = list(self.aliases)
         for key, value in (
             ("use_when", self.use_when),
             ("not_for", self.not_for),
@@ -165,6 +168,11 @@ def normalize_skill_metadata(data: Mapping[str, Any]) -> SkillMetadata:
     tags = SelectionTags(
         **{group: _items(raw_tags[group], f"tags.{group}") for group in raw_tags}
     )
+    aliases = (
+        _items(raw_selection["aliases"], "selection.aliases")
+        if "aliases" in raw_selection
+        else ()
+    )
     conditions = {
         key: _items(raw_selection[key], f"selection.{key}")
         for key in ("use_when", "not_for")
@@ -193,6 +201,7 @@ def normalize_skill_metadata(data: Mapping[str, Any]) -> SkillMetadata:
         SelectionProfile(
             role,
             tags,
+            aliases,
             conditions.get("use_when", ()),
             conditions.get("not_for", ()),
             supports,

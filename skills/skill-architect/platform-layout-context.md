@@ -1,4 +1,30 @@
-# Platform Context: Where Skills Live
+# Platform Layout Context
+
+## Purpose
+
+Provide historical layout context for the canonical platform-layout concern.
+
+## Applicability
+
+This passive reference applies when interpreting skill locations, entry points, and
+class-oriented support-file conventions.
+
+## Non-goals
+
+It does not authorize discovery procedures, tool use, writes, migration, loading, or
+runtime enforcement. The canonical current layout and discovery owner is
+[platform-layout-and-discovery.md](platform-layout-and-discovery.md).
+
+## Authority source
+
+The approved architecture and migration ledger in the plan workspace are authoritative.
+
+## Evidence status
+
+Historical supporting context retained; current layout authority is consolidated in the
+canonical concern document.
+
+## Historical context
 
 - **Skill root**: `./` (the skill's base directory).
 - **Entry point**: `SKILL.md` — the file the agent loads.

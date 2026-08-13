@@ -14,6 +14,7 @@
       "required": ["role", "tags"],
       "properties": {
         "role": {"enum": ["owner", "support", "reference"]},
+        "aliases": {"$ref": "#/$defs/strings"},
         "tags": {
           "type": "object", "additionalProperties": false,
           "properties": {

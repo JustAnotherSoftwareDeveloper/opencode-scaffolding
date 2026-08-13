@@ -1,71 +1,49 @@
 ---
 name: skill-architect
-description: "Use as planning reference to classify an OpenCode skill using class boundaries, side-effect contracts, and delegation rules."
+description: "Use as a passive planning reference for the approved skill-authoring architecture, six concern scope, class boundaries, layout, workflow semantics, dependencies, ownership, and acceptance evidence."
 selection:
   role: reference
   tags:
-    actions: [classify skill]
-    inputs: [skill requirements]
-    outputs: [skill architecture guidance]
-    topics: [skill architecture, skill class boundaries]
-    constraints: [current class taxonomy]
-  use_when: [a requested skill needs class or platform-boundary guidance]
-  not_for: [authoring skill files or executing a skill workflow]
+    actions: [architect skill family]
+    inputs: [skill architecture question]
+    outputs: [passive architecture context]
+    topics: [skill ownership, class boundaries, platform layout]
+    constraints: [five-class contract, passive reference]
+  use_when: [a request needs approved skill-authoring architecture or boundary context]
+  not_for: [authoring files, running workflows, or making migration changes]
 class: planning
 ---
 
-# Skill Architect — Skill Architecture Planning Reference
+# Skill Architect — Approved Passive Scope
 
-This is a **reference context**, not a procedure runner.
-Planning skills must not produce side effects, modify files, invoke tools, or define execution steps.
-It answers "what skill classes exist, how to choose one, what boundaries separate them, and how the skills platform is structured."
+This is a **passive planning index**, not an executable workflow or an approval authority.
+It publishes one coupled six-concern scope for the approved architecture. The concern
+documents describe context; they do not authorize execution, loading, changes, or
+completion.
 
-## Domain Context
+## Six concern documents
 
-- Five skill classes govern all OpenCode skills: `operation`, `delegated`, `inline`, `planning`, and `documentation`.
-  Each class has a distinct contract for side effects, delegation, and output shape.
-- The `planning` and `documentation` classes are passive reference sources.
-  They produce no side effects, modify no files, and invoke no tools.
-- The `operation`, `delegated`, and `inline` classes are active procedure classes.
-  They produce side effects and define execution steps.
-- Skill selection is driven by the `description` field in frontmatter.
-  The `class` field further constrains behavior.
-- Skills are stored under `skills/<name>/` with `SKILL.md` as the entry point and supporting files in subdirectories.
+- [Taxonomy and ownership map](taxonomy-and-ownership-map.md) — five classes and one canonical owner per approved outcome.
+- [Class boundary and loading matrix](class-boundary-loading-matrix.md) — class contracts and asymmetric passive loading.
+- [Platform layout and discovery](platform-layout-and-discovery.md) — target locations, entry points, and discovery context.
+- [Workflow document semantics](workflow-document-semantics.md) — passive workflow shape and handoff boundary.
+- [Dependency direction and non-transitivity](dependency-direction-and-non-transitivity.md) — permitted context direction and authority limits.
+- [Migration and acceptance evidence](migration-and-acceptance-evidence.md) — implementation gates and evidence posture.
 
-## Key Considerations
+## Supporting references
 
-- Each skill must belong to exactly one class.
-  No hybrid classes are supported.
-- If the boundary between classes is unclear, trace the proposed skill's contract: does it produce side effects, does it delegate, does it run in a single pass?
-- The default class is `operation`.
-  Only choose another class when a specific condition clearly applies.
-- Cross-skill interaction is represented exclusively through skill loading.
-  No skill file may contain a literal path to a file in another skill's directory.
-- Scripts are the sole exception to directory confinement.
+- [Class boundary rules](class-boundary-rules.md) — side-effect, delegation, and cross-skill boundary rules.
+- [Skill class taxonomy](class-taxonomy.md) — the five valid classes and their passive or executable contracts.
+- [Class decision flow](class-decision-flow.md) — descriptive criteria for distinguishing the five classes.
+- [Platform layout context](platform-layout-context.md) — historical layout and script-resolution context.
+- [Selection profile schema](references/skill-selection-profile.schema.json) — the local metadata schema used by this family.
 
-## Files
+## Shared contract
 
-- `class-taxonomy.md` — Defines all five skill classes with their contracts, side-effect rules, and template mappings.
-- `class-decision-flow.md` — Documents the decision flow for selecting a skill class, from the default `operation` choice through specific alternative conditions.
-- `class-boundary-rules.md` — Documents the boundary rules between skill classes and how to disambiguate when a skill's behavior spans multiple classes.
-- `platform-layout-context.md` — Documents the filesystem layout for skills, the discovery mechanism, and platform-level rules organized by class.
-
-## Related Skills
-
-- skill-factory: Use when creating or updating all OpenCode skill files under `skills/<name>/` (SKILL.md, reference/, templates/, schemas/, and snippets/) from user requirements and source material, including executing the CREATE/UPDATE workflow.
-- skill-authoring-guide: Use as documentation reference for authoring style, frontmatter field rules, and progressive disclosure.
-- skill-maintenance-reference: Use as documentation reference for update workflows, migration guides, and validation checklists.
-- skill-template-library: Use as documentation reference for all skill templates, schemas, and snippets.
-
-## Cross-References
-
-- `./class-taxonomy.md` — Full definitions of all five skill classes.
-- `./class-decision-flow.md` — Decision flow for selecting a skill class.
-- `./class-boundary-rules.md` — Boundary disambiguation rules between classes.
-- `./platform-layout-context.md` — Platform filesystem layout and discovery rules.
-
-## Docs
-
-This skill is self-contained.
-All reference files are listed in the Files section above and reside directly under `skills/skill-architect/`.
-No separate `reference/` subdirectory exists.
+The six documents share the coupling rationale that taxonomy, ownership, class
+boundaries, layout, workflow meaning, dependency direction, and acceptance evidence
+must remain mutually consistent as one passive planning scope. None is a procedure,
+tool specification, write authority, delegation contract, implicit load chain, or
+completion authority. Passive-contract verification means that this index and every
+support document are descriptive reference content only; execution remains owned by
+an explicitly selected active skill.
