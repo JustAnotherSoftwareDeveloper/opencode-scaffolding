@@ -1,19 +1,91 @@
-# Section Rationale
+# Section rationale
 
-Use a proportional business-and-technical case structure.
-Arrange or combine required decision content to fit the proposal without a
-fixed heading sequence, callout box, or document length.
+Use the smallest proportional structure that makes the decision reviewable. The
+canonical taxonomy is an answer-first set of nine semantic sections. Authors may
+combine compatible content in a short proposal, but each material purpose must
+remain independently findable. Do not add decorative structure or a fixed length
+in place of decision content.
 
-Capture the decision, context, scope, options, recommendation, benefits, and
-risks in headings that make those subjects clear to the reader.
+## Summary
 
-Capture traceable requirements and acceptance criteria as distinct content,
-whether they are separate subsections or clearly labeled parts of one section.
+The **Summary** gives the answer first: the proposed decision, expected outcome,
+and material trade-off. It lets a reader quickly determine what is being asked
+and why the choice matters before reading the supporting reasoning.
 
-Capture material objections and their disposition, assumptions, evidence gaps,
-and only unresolved engineer decisions in the decision record.
+## Problem and rationale
 
-Keep researchable uncertainty in analysis and evidence rather than presenting it as an engineering decision.
+**Problem and rationale** establishes the current state, the problem, its
+consequence, and why the proposed direction follows from the evidence. It supplies
+only the context needed to understand the decision and prevents the recommendation
+from appearing detached from the need it addresses.
+
+## Scope
+
+**Scope** defines goals, exclusions, boundaries, included work, and success
+measures. It limits what the decision claims to settle and makes clear which
+effects or concerns are outside the decision.
+
+## Criteria
+
+**Criteria** defines the drivers, constraints, trade-offs, and evidence used to
+judge viable approaches and the proposed shape. Evaluation criteria are not
+completion tests.
+
+## Alternatives and trade-offs
+
+**Alternatives and trade-offs** compares viable alternatives on differentiators,
+consequences, and evidence. It makes the rejected options and the cost of the
+recommendation reviewable.
+
+## Selected direction
+
+**Selected direction** states the recommendation and decisive rationale. Link
+proposal-specific implementation detail separately rather than turning this section
+into an execution plan.
+
+## Design constraints
+
+**Design constraints** states what the format or decision must preserve or cannot
+import, including governing principles, boundaries, and dependencies.
+
+## Open owner choices
+
+**Open owner choices** records only unresolved decisions requiring the responsible
+owner, including the consequence of deferral. Researchable uncertainty belongs in
+evidence work or an evidence gap, not as an owner decision.
+
+## Acceptance criteria
+
+**Acceptance criteria** states observable completion tests for the decision or
+proposal-specific change. Keep these distinct from evaluation criteria and do not
+present them as an implementation task list.
+
+For a conditional direction, record the confirmation needed and the evidence or
+trigger that would cause a revisit. Confirmation and revisit conditions support
+review by making conditional commitment explicit without inventing universal
+gates, dates, or lifecycle steps.
+
+## Cross-cutting review guidance
+
+Quick-read guidance exists to improve navigation and scanning, not to remove
+material reasoning. Lead major sections with their answer, decision, or
+consequence; use concise prose, descriptive sentence-case headings, deliberate
+whitespace, and bullets for parallel choices or conditions. Add navigation only
+when the proposal's length or structure makes it useful.
+
+Readiness describes whether the decision path, evidence, and owner choices are
+sufficient for review or for the decision authority; it is not approval,
+acceptance, or a lifecycle transition. Support every material claim affecting the
+decision, scope, requirement, acceptance criterion, risk, trade-off, or option
+rejection with a descriptive relative source link and citation, or label it as an
+assumption or evidence gap. Citation completeness does not imply strong evidence;
+record evidence strength honestly.
+
+Supporting sources is the required source index, not an additional decision
+section. Keep implementation detail in its separate implementation document, and
+keep the proposal taxonomy forward-only: do not introduce alternate section names,
+compatibility behavior, historical migration guidance, or unrelated operational
+workflow.
 
 Apply these public references when their guidance is relevant to the proposal domain.
 

@@ -1,45 +1,49 @@
 ---
-title: "Adopt proportional proposal navigation implementation overview"
+title: "Separate proposal decisions from implementation changes"
 proposal: "standard-proposal.md"
-slug: "adopt-proportional-proposal-navigation"
+slug: "separate-proposal-decisions-from-implementation-changes"
 created: "0"
 status: draft
 ---
 
-# Adopt proportional proposal navigation implementation overview
+# Separate proposal decisions from implementation changes
 
-Implement the [recommended conditional navigation](./standard-proposal.md#options-and-recommendation)
-while retaining source and evidence traceability.
+The proposal workflow produces a decision document and a separate implementation
+overview. This fixture records only concrete changes to the proposal skill,
+implementation template, and conformance fixture.
 
 ## Proposal skill contract
 
-### `skills/proposal/SKILL.md` — Generate conditional navigation
+### `skills/proposal/SKILL.md` — Link the implementation overview from the recommendation
 
-- **Change:** Require a table of contents only when proposal complexity makes it useful
-  ([proposal decision](./standard-proposal.md#options-and-recommendation)).
-- **Reason:** Keep short proposals easy to scan in raw Markdown
-  ([format rules](../proposal-format.md)).
+- **Change:** Keep `PROPOSAL.md` as the decision artifact and link `implementation.md`
+  from its recommendation; populate the latter with named artifact or behavior
+  changes.
+- **Reason:** The workspace contract assigns the decision document and implementation
+  overview separate responsibilities ([workspace contract](../workspace-contract.md#canonical-artifacts)).
 
-### `skills/proposal/SKILL.md` — Generate one source index
+### `skills/proposal/SKILL.md` — Group changes by affected area
 
-- **Change:** List copied sources once under supporting sources instead of in navigation and references
-  ([proposal requirements](./standard-proposal.md#requirements)).
-- **Reason:** Repeated source links add visual noise without adding evidence
-  ([format rules](../proposal-format.md)).
+- **Change:** Require an H2 for each affected area and an H3 that names each concrete
+  target and its modification.
+- **Reason:** The implementation format makes affected targets and modifications
+  directly reviewable ([implementation format](../implementation-format.md#structure)).
 
 ## Proposal templates
 
-### `skills/proposal/templates/PROPOSAL.md` — Use semantic-core headings
+### `skills/proposal/templates/implementation.md` — Render concrete target sections
 
-- **Change:** Replace decorative boxes with sentence-case headings and ordinary lists
-  ([format rules](../proposal-format.md)).
-- **Reason:** Separate document structure from authoring guidance
-  ([format rules](../proposal-format.md)).
+- **Change:** Render the implementation title and summary, followed by affected-area
+  sections with target-specific change bullets.
+- **Reason:** The template structure matches the required H2/H3 implementation
+  organization ([implementation template](../../templates/implementation.md)).
 
-## Validation
+## Fixture conformance checks
 
-### Proposal fixtures — Check proportional navigation
+### `skills/proposal/reference/fixtures/implementation-overview.md` — Demonstrate separated concrete changes
 
-- **Change:** Verify short fixtures omit navigation and complex fixtures use one
-  non-duplicative table of contents
-  ([proposal acceptance criteria](./standard-proposal.md#acceptance-criteria)).
+- **Change:** Show multiple concrete changes under the proposal skill contract and
+  proposal templates areas, plus a distinct fixture-conformance area.
+- **Reason:** The fixture coverage requires named targets, concrete modifications,
+  multiple changes in one area, and a separate affected area
+  ([fixture coverage](./README.md#fixture-coverage)).

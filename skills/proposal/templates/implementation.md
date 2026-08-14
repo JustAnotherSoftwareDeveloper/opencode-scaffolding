@@ -8,7 +8,7 @@ status: draft
 
 # {{title}} implementation overview
 
-{{purpose}}
+{{implementation_summary}}
 
 ## {{affected_area}}
 
