@@ -1,12 +1,14 @@
 # Proposal format
 
 Use this reference to author readable, evidence-based proposal workspaces. It
-defines the presentation and content contract for `PROPOSAL.md`; the workspace
-contract defines workspace integrity and metadata storage.
+defines the presentation and content contract for the indexed section files;
+the workspace contract defines workspace integrity and metadata storage.
+Apply the concrete prose and scan-path rules in [proposal writing style](./writing-style.md).
 
 ## Canonical decision architecture
 
-Every proposal uses these nine canonical, answer-first sections, in this order:
+Every proposal uses these nine canonical, answer-first sections, in this order, with
+one section per numbered Markdown file:
 
 1. **Summary** — state the decision, expected outcome, and material trade-off.
 2. **Problem and rationale** — state the current state, problem, consequence, and
@@ -18,7 +20,7 @@ Every proposal uses these nine canonical, answer-first sections, in this order:
 5. **Alternatives and trade-offs** — compare viable alternatives on differentiators,
    consequences, and evidence.
 6. **Selected direction** — state the recommendation and rationale. Link
-   `implementation.md` from this section when that file exists.
+   `10-implementation.md` from this section.
 7. **Design constraints** — state what the format or decision must preserve or
    cannot import.
 8. **Open owner choices** — record only unresolved decisions requiring the
@@ -26,13 +28,13 @@ Every proposal uses these nine canonical, answer-first sections, in this order:
 9. **Acceptance criteria** — state observable completion tests for the decision or
    proposal-specific change.
 
-**Supporting sources** is a required source index, but is not a seventh decision
-section. List every copied source exactly once there. Combine compatible content
-under a canonical heading when that improves a short proposal, but keep the nine
-semantic areas independently findable when they contain material content. Do not
-create empty sections merely to satisfy the list.
+**Supporting sources** is a required source index at `11-supporting-sources.md`, but
+is not an additional decision section. List every copied source exactly once there.
+Do not combine canonical sections into one file. A short proposal may keep each
+section concise, but the section files remain separate so each decision boundary is
+independently readable.
 
-Keep implementation detail in `implementation.md`, not in the decision document:
+Keep implementation detail in `10-implementation.md`, not in the decision files:
 commands, assignments, estimates, owners, and runbook steps are not proposal
 format content. Add risks, migration, objections, benefits, confirmation, or
 revisit details only as conditional subsections where they help review.
@@ -41,13 +43,12 @@ revisit details only as conditional subsections where they help review.
 
 Choose the smallest structure that makes the decision reviewable:
 
-- **Short:** use compact canonical sections; omit a table of contents and
-  unsupported optional detail.
+- **Short:** use compact canonical section files and omit unsupported optional detail.
 - **Standard:** use distinct headings and conditional subsections where they
   improve scanning.
-- **Complex:** add a table of contents only when length or expanded structure
-  materially benefits navigation. Link proposal sections, `implementation.md`,
-  and **Supporting sources**; do not repeat individual source links.
+- **Complex:** add indexed companion files only when expanded structure materially
+  benefits navigation. Link them from `PROPOSAL.md` and their governing canonical
+  section; do not repeat individual source links in the index.
 
 Use these reviewable heuristics, not quotas:
 
@@ -70,6 +71,11 @@ Use these reviewable heuristics, not quotas:
 - Use tables only for genuinely parallel comparisons. Use prose or bullets for
   sequence, nuance, unequal evidence, long caveats, or acceptance tests.
 
+The [proposal writing style](./writing-style.md) is authoritative when “readable,”
+“scannable,” “concise,” or “answer-first” requires interpretation. In particular,
+each canonical file starts with its answer, paragraphs retain one connected idea,
+terms remain stable, and evidence sits next to the claim it supports.
+
 No sentence, word, bullet, option, heading, section, or bold-span count is a
 completion requirement. Readability must not fragment reasoning, hide evidence,
 or merge **Scope**, **Criteria** (evaluation), and **Acceptance criteria**
@@ -86,7 +92,7 @@ quantitative and must not be presented as completed outcomes.
 the selected direction or proposal-specific change is complete. It answers,
 “What must be true for this decision to be accepted?” Keep it distinct from
 evaluation criteria even when both use measurable language. Put concrete
-implementation targets in `implementation.md` when appropriate.
+implementation targets in `10-implementation.md` when appropriate.
 
 ## Metadata and readiness
 
@@ -182,46 +188,20 @@ New or deliberately revised documents migrate forward to this taxonomy. Do not
 retain legacy heading aliases, compatibility behavior, or alternate names for
 the canonical sections. Historical proposal workspaces are not rewritten.
 
-## Format pattern
+## Workspace index pattern
 
 ```markdown
-## Summary
+## Proposal index
 
-State the decision, expected outcome, and material trade-off first.
-
-## Problem and rationale
-
-State the current state, problem, consequence, and rationale.
-
-## Scope
-
-State goals, exclusions, boundaries, and success measures.
-
-## Criteria
-
-Define how approaches and the proposed shape will be judged.
-
-## Alternatives and trade-offs
-
-Compare viable alternatives and their consequences.
-
-## Selected direction
-
-State the recommendation and link implementation.md when present.
-
-## Design constraints
-
-State intended boundaries and constraints.
-
-## Open owner choices
-
-Record unresolved owner decisions and deferral consequences.
-
-## Acceptance criteria
-
-State observable completion tests.
-
-## Supporting sources
-
-- Descriptive copied source — Chicago bibliography entry.
+1. [Summary](./01-summary.md)
+2. [Problem and rationale](./02-problem-and-rationale.md)
+3. [Scope](./03-scope.md)
+4. [Criteria](./04-criteria.md)
+5. [Alternatives and trade-offs](./05-alternatives-and-trade-offs.md)
+6. [Selected direction](./06-selected-direction.md)
+7. [Design constraints](./07-design-constraints.md)
+8. [Open owner choices](./08-open-owner-choices.md)
+9. [Acceptance criteria](./09-acceptance-criteria.md)
+10. [Implementation overview](./10-implementation.md)
+11. [Supporting sources](./11-supporting-sources.md)
 ```

@@ -1,6 +1,6 @@
 # Implementation Format
 
-Use this reference for `implementation.md`. Follow the sentence-case and plain
+Use this reference for `10-implementation.md`. Follow the sentence-case and plain
 Markdown rules in [proposal-format.md](./proposal-format.md).
 
 ## Structure
@@ -27,15 +27,16 @@ reason for the change differs. Do not use lifecycle phases as area headings.
 - **Change:** Replace fixed section and sentence checks with semantic-core and optional-section checks.
 - **Reason:** Keep validation aligned with the generated document format.
 
-### `skills/proposal/SKILL.md` — Apply conditional navigation
+### `skills/proposal/SKILL.md` — Apply conditional companion files
 
-- **Change:** Require a table of contents only when proposal complexity makes it useful.
+- **Change:** Permit substantial conditional detail only in companion files linked
+  from the proposal index and their governing canonical section.
 
 ## Proposal templates
 
-### `skills/proposal/templates/PROPOSAL.md` — Use the semantic core
+### `skills/proposal/templates/` — Use the semantic core
 
-- **Change:** Replace decorative boxes with sentence-case headings and ordinary lists.
+- **Change:** Keep `PROPOSAL.md` as the index and put each canonical section in its numbered file.
 ```
 
 ## Rejected Structure

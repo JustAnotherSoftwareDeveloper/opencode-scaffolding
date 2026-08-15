@@ -1,10 +1,10 @@
 # Section rationale
 
-Use the smallest proportional structure that makes the decision reviewable. The
-canonical taxonomy is an answer-first set of nine semantic sections. Authors may
-combine compatible content in a short proposal, but each material purpose must
-remain independently findable. Do not add decorative structure or a fixed length
-in place of decision content.
+Use the smallest proportional content that makes the decision reviewable. The
+canonical taxonomy is an answer-first set of nine semantic sections, and each
+section owns one numbered file. Short proposals keep those files concise rather
+than merging them. `PROPOSAL.md` is the ordered index, not a second copy of the
+decision. Do not add decorative structure or a fixed length in place of content.
 
 ## Summary
 
@@ -81,8 +81,8 @@ rejection with a descriptive relative source link and citation, or label it as a
 assumption or evidence gap. Citation completeness does not imply strong evidence;
 record evidence strength honestly.
 
-Supporting sources is the required source index, not an additional decision
-section. Keep implementation detail in its separate implementation document, and
+Supporting sources is the required `11-supporting-sources.md` index, not an additional
+decision section. Keep implementation detail in its separate implementation document, and
 keep the proposal taxonomy forward-only: do not introduce alternate section names,
 compatibility behavior, historical migration guidance, or unrelated operational
 workflow.

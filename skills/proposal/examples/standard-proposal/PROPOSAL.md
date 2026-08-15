@@ -1,17 +1,18 @@
 ---
-title: "{{title}}"
-slug: "{{slug}}"
-created: "{{epoch_milliseconds}}"
-created-at: "{{utc_timestamp}}"
+title: "Adopt proportional proposal navigation"
+slug: "adopt-proportional-proposal-navigation"
+created: "0"
+created-at: "1970-01-01T00:00:00Z"
 status: draft
-readiness: "{{readiness}}"
-decision-owner: "{{decision_owner}}"
+readiness: decision-ready
+decision-owner: "responsible engineer"
 citation-style: chicago
 source-documents:
-  - "{{source_document}}"
+  - "../../reference/proposal-format.md"
+  - "../../reference/implementation-format.md"
 ---
 
-# {{title}}
+# Adopt proportional proposal navigation
 
 ## Proposal index
 
@@ -26,6 +27,3 @@ source-documents:
 9. [Acceptance criteria](./09-acceptance-criteria.md)
 10. [Implementation overview](./10-implementation.md)
 11. [Supporting sources](./11-supporting-sources.md)
-
-<!-- Keep this file as metadata and navigation only. Remove this comment after
-populating frontmatter. Do not copy decision prose into the index. -->
