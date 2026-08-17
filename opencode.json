@@ -125,6 +125,9 @@
       "mode": "primary",
       "model": "openai/gpt-5.6-terra",
       "variant": "high",
+      "options": {
+        "reasoningEffort": "high"
+      },
       "prompt": "{file:./agents/delegator.md}",
       "permission": {
         "*": "deny",
@@ -153,6 +156,9 @@
       "mode": "subagent",
       "model": "openai/gpt-5.6-luna",
       "variant": "xhigh",
+      "options": {
+        "reasoningEffort": "xhigh"
+      },
       "prompt": "{file:./agents/worker.md}",
       "permission": {
         "*": "allow",
