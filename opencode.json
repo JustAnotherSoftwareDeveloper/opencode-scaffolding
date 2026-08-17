@@ -124,7 +124,7 @@
       "description": "Dispatches decomposition to breakdown-tasks, and delegates each task to workers in serial. Does not perform implementation work directly.",
       "mode": "primary",
       "model": "openai/gpt-5.6-terra",
-      "reasoningEffort": "high",
+      "variant": "high",
       "prompt": "{file:./agents/delegator.md}",
       "permission": {
         "*": "deny",
@@ -152,7 +152,7 @@
       "description": "Single text worker for all delegated text tasks. Handles any complexity level within the scope of a delegation packet.",
       "mode": "subagent",
       "model": "openai/gpt-5.6-luna",
-      "reasoningEffort": "xhigh",
+      "variant": "xhigh",
       "prompt": "{file:./agents/worker.md}",
       "permission": {
         "*": "allow",
