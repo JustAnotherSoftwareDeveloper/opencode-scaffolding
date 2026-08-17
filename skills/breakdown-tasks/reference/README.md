@@ -1,29 +1,30 @@
 # Reference Documentation Map
 
-How the pieces fit together — the breakdown pipeline flows through six domains, from authoring to execution:
+Use this index to locate detailed guidance for the decomposition workflow.
 
-1. **Authoring** (`reference/authoring/`) — Rules and heuristics for producing atomic, well-structured task packets with no task-count ceiling. Start here if a task fails validation or feels too large. Includes:
-   - `core-rules.md` — Five atomicity rules (why tasks must be atomic)
-   - `anti-patterns.md` — Common mistakes and how to diagnose them
-   - `task-granularity.md` — Heuristics for splitting work at the right boundaries
-   - `field-reference-table.md` — All fields in the TaskPacket and root-level object
-   - `context-preservation.md` — Guidelines for self-contained worker packets
-   - `implementation-steps-format.md` — Format specification for implementation steps documentation
+## Authoring
 
-2. **Orchestration** (`reference/orchestration/`) — Validation of decomposition output correctness. Use after completing a decomposition to check structure.
-   - `task-validation.md` — Validation checks for decomposition output correctness
+- [Core rules](authoring/core-rules.md) define the atomicity contract.
+- [Task granularity](authoring/task-granularity.md) defines the split test.
+- [Atomicity anti-patterns](authoring/anti-patterns.md) list shortcuts to reject.
+- [Atomicity examples](authoring/atomicity-examples.md) contrast boundaries.
+- [Field reference](authoring/field-reference-table.md) describes packet fields.
+- [Context preservation](authoring/context-preservation.md) describes worker context.
+- [Implementation steps](implementation-steps-format.md) describes step documents.
 
-3. **Skill Assignment** (`reference/skill-assignment.md`) — Direct LLM selection over two filtered collector arrays, separate planning loads, and bounded task assignment.
-    - `skill-assignment.md` — Authoritative direct-selection and read-only audit procedure
+## Orchestration And Assignment
 
-4. **Scripts** (`reference/scripts/`) — Automation layer documentation for the breakdown pipeline. Consult when running, debugging, or extending the pipeline scripts:
-    - `pipeline-overview.md` — Full pipeline walkthrough
-    - `validate-task-structure.md` — Task structure validation rules
-    - `error-handling-testing.md` — Exit code conventions and testing patterns
+- [Task validation](orchestration/task-validation.md) defines packet review checks.
+- [Skill assignment](skill-assignment.md) defines direct skill selection.
 
-5. **Maintenance** (`reference/maintenance/`) — Quality assurance and verification best practices. Use before dispatch to confirm output integrity:
-   - `verification-best-practices.md` — Verification checks by task type
+## Scripts And Maintenance
 
-6. **Schema** (`../schema/`) — Canonical output format definitions that all pipeline stages conform to.
-   - `task-packet.schema.json` — JSON Schema defining the BreakdownTasksOutput object and TaskPacket structure
-   - `task-input.schema.json` — JSON Schema defining the complete candidate TaskDraft format before `skills` assignment
+- [Pipeline overview](scripts/pipeline-overview.md) summarizes the pipeline.
+- [Structure validation](scripts/validate-task-structure.md) documents validation.
+- [Error handling](scripts/error-handling-testing.md) documents failure behavior.
+- [Verification practices](maintenance/verification-best-practices.md) lists checks.
+
+## Schemas
+
+- [Task packet schema](../schema/task-packet.schema.json) defines published packets.
+- [Task input schema](../schema/task-input.schema.json) defines draft packets.

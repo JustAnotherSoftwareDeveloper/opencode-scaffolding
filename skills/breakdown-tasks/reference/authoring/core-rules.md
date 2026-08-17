@@ -1,60 +1,50 @@
 # Core Rules
 
-The layered atomicity contract has one authoring result: a decomposition that is
-bounded, independently checkable, and ready for orchestration. These rules are
-authoring guidance; diagnostics and compatibility decisions are identified where
-they are not yet hard requirements.
+Use these rules before assigning skills.
 
-## 1. Single boundary, single unit
+## Inventory Concerns
 
-Each task performs exactly one logical change or answers exactly one analytical
-question. Define the task boundary before looking for a skill. A task may not hide
-independent concerns behind a broad purpose, context, or file list.
+- List every question, change, operation, decision, and deliverable.
+- Name the result produced by each concern.
+- Do not use a workflow phase, shared topic, or desired packet size as a boundary.
 
-Inventory the request's independently decidable questions, changes, and produced
-deliverables before drafting tasks. Use the split test: if one part can
-be completed, rejected, retried, assigned, or verified without another part, they
-are separate tasks. Similar topics and a shared final document do not make concerns
-atomic. Keep verification evidence with the result it verifies unless verification
-is itself an explicitly requested deliverable.
+## Split Aggressively
 
-## 2. Single purpose and single result
+Create separate tasks when either concern can be assigned, rejected, retried,
+completed, or verified without the other. Apply this test to analysis,
+documentation, implementation, and operations.
 
-Each task has one purpose sentence with one action and one expected output: one
-verifiable artifact or one documented finding. Verification is evidence about that
-result, not a second deliverable. Purpose, output, and verification must describe
-the same boundary; write the mapping explicitly when the result is a package.
+Create as many tasks as the request requires. Do not target or cap task, file, step,
+or skill counts.
 
-## 3. Dependencies are part of the boundary
+## Keep One Result
 
-Represent dependencies with ordered tasks and explicit `filesToRead`/
-`filesToWrite` paths. Serialize dependent work; independent work may be parallel.
-A later task declares its dependency by listing the prior output in its
-`filesToRead`. Use bounded patterns only when a prior path is genuinely unknown;
-never use invented output variables. Explicit `dependencies` edges (in the packet
-schema) make these relationships machine-readable for the validator.
+Give each task one purpose and one expected result. Keep verification with the
+result it checks. Create a separate verification task only when the user requests
+an independently reviewable verification deliverable.
 
-## 4. Coupled-file exception
+## Separate Dependencies
 
-The default heuristic is one task per file and one conceptual change. Multiple
-files are allowed when they jointly form one tightly coupled result with one shared
-verification signal. The exception rationale must be inspectable in purpose,
-expected output, `couplingRationale`, and verification. It does not authorize
-combining implementation with tests, analysis with planning, or unrelated edits,
-and it does not establish a universal one-file rule.
+Represent dependent work as separate ordered tasks. Put the predecessor artifact
+in the dependent task's `filesToRead`. A dependency explains order; it does not
+prove that two concerns belong in one task.
 
-## 5. Skill-aware, not skill-bound
+## Require Coupling Evidence
 
-Candidate decomposition comes before skill assignment. Skills inform execution but
-never define task boundaries; do not merge or split work to fit a skill. Assign only
-after the candidate tasks and dependencies are stable, and assign the matching skill
-to the matching task.
+Keep multiple concerns together only when all of these statements are true:
 
-## 6. Staged enforcement and task count
+- They produce one shared result.
+- They have one verification boundary.
+- Separating execution, review, retry, or verification would be unsafe,
+  misleading, or impossible.
 
-Treat heuristic atomicity concerns as warnings when independence is uncertain.
-Treat declared compound signals and demonstrated independently verifiable concerns
-as hard failures until the task is split. If a task is split or migrated, revalidate
-the resulting tasks, dependencies, purpose/output mapping, and skill assignment.
-Create as many tasks as atomic coverage requires. Never target, cap, or pad task
-count. The separate one-to-three limit applies only to skills assigned per task.
+Record that evidence in `couplingRationale`. Shared files, topics, releases,
+destinations, skills, dependencies, or final documents are not sufficient evidence.
+
+## Assign Skills Last
+
+Stabilize task boundaries, results, verification, and dependencies before selecting
+skills. Do not merge or split work to fit an available skill.
+
+After any split or migration, revalidate boundaries, mappings, dependencies, and
+skills. Treat uncertain language as a review prompt rather than proof of atomicity.

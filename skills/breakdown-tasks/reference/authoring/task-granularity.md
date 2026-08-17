@@ -1,42 +1,41 @@
-# Task Granularity Guidelines
+# Task Granularity
 
-These are authoring guidance for choosing boundaries before skills are assigned.
+Choose boundaries from independent work, not file count or workflow stages.
 
-## Default and exception
+## Start With An Inventory
 
-Use one task per conceptual change and treat one file per task as a review heuristic,
-not a universal rule. A tightly coupled multi-file change is valid when the files
-jointly produce one result with one verification signal. Record the shared outcome,
-why separate execution would be misleading, and the exact verification evidence.
-Never use this exception for implementation plus tests, analysis plus planning, or
-unrelated changes.
+List each requested question, change, operation, decision, and deliverable. Include
+concealed concerns that appear inside broad phrases such as “finish the migration”
+or “update the feature.”
 
-## Purpose/output alignment
+## Apply The Split Test
 
-Use one action verb in one purpose sentence and one `expectedOutput` paragraph. The
-output must be the result of that purpose, while verification names observable
-evidence for the same result. A file write and a test result are two outputs; keep
-production and testing in separate tasks.
+For every pair of concerns, ask whether either can be:
 
-## Pipeline and dependencies
+- assigned to a different worker;
+- rejected without rejecting the other;
+- retried without repeating the other;
+- completed without completing the other; or
+- verified without verifying the other.
 
-Split independent concerns and parallelize them. Keep dependent concerns
-sequential, naming the prior output in `filesToRead`. In this workflow, candidate
-decomposition is first; skill assignment follows it. The first task establishes
-shared outputs that subsequent dependent tasks list in `filesToRead`.
+Split when any answer is yes. Prefer an extra explicit dependency over an implicit
+compound task.
 
-Do not use lifecycle stages such as analysis, proposal, implementation, or review as
-automatic task boundaries. A stage may contain many independent questions or
-changes, each requiring its own task. Conversely, do not add a stage the request did
-not ask for.
+## Preserve Only One Shared Result
 
-## Split test and revalidation
+Keep work together only when it satisfies the coupling requirements in
+[Core Rules](core-rules.md). One file can contain several independent changes.
+Several files can form one result. File count is only a review signal.
 
-There is no task-count ceiling or target. Before publication, ask whether any clause
-of a task can be completed, rejected, retried, assigned, or verified independently.
-If yes, split it. Apply this test to analytical dimensions as well as file changes:
-architecture taxonomy, style conformance, workflow policy, migration, and validation
-are separate questions unless evidence proves one indivisible result. After splitting
-or migrating a concern, re-check every new boundary, purpose, expected output,
-verification, dependency, and assigned skill. Keep the one-to-three skills-per-task
-constraint unchanged.
+## Recheck The Boundary
+
+After each split, confirm that:
+
+- `purpose` names one result;
+- `expectedOutput` describes that result;
+- verification checks that result;
+- dependencies identify predecessor tasks and artifacts; and
+- assigned skills match the final boundary.
+
+Do not use punctuation, lifecycle order, or skill availability as proof. Do not
+introduce universal task, file, step, or skill limits.
