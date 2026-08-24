@@ -46,18 +46,31 @@ sentence first.
 - **Open owner choices** exposes only decisions requiring an owner and the consequence
   of deferral; use `None.` when no owner choice remains.
 - **Acceptance criteria** exposes observable states and how each state can be checked.
-- Front-load list items with short descriptive labels. Keep list items parallel in
-  grammar and decision role.
-- Use tables only when every row can be compared on the same columns. Keep nuance,
-  long evidence, sequences, and unequal caveats in prose or bullets.
-- Use bold for short labels or decisive values, not whole sentences or paragraphs.
+- Front-load comparable list items with short descriptive labels. Use parallel bullets
+  for parallel decision roles: alternatives can expose a **Differentiator:**,
+  **Consequence:**, **Disposition:**, and **Evidence:**; scope can expose included,
+  excluded, and success boundaries; constraints can expose a boundary and its effect.
+  Keep the grammar and role consistent across the items being compared.
+- Use short bold labels as selective scan cues for adjacent decision units, such as
+  **Recommendation:**, **Consequence:**, **Differentiator:**, **Disposition:**, and
+  evidence-state labels such as **Assumption:**, **Evidence Gap:**, and **Open
+  Question:**. Bold the label or decisive value, not the supporting claim, rationale,
+  or whole paragraph. Emphasis must not imply evidence strength.
+- Keep connected reasoning in focused prose. Use prose for recommendation rationale,
+  causal sequences, evidence synthesis, and unequal caveats; keep one connected idea
+  per paragraph and start a new paragraph when the claim, evidence, decision state,
+  consequence, or audience question changes.
+- Do not use Markdown tables in authored proposal documents. Choose headings for
+  independent roles that need room to develop, selective bold labels for concise
+  adjacent roles, parallel bullets for comparable roles, and focused prose for
+  connected or unequal reasoning.
 - Use descriptive sentence-case headings. Do not add headings solely to break up
   text, and do not use decorative separators or callout boxes.
 
 ## Evidence and uncertainty language
 
 - Put a descriptive source link at the end of the sentence, paragraph, bullet, or
-  table row it supports.
+  labeled block it supports. Keep the link adjacent to the material claim.
 - State evidence strength separately from citation presence when strength affects the
   decision.
 - Use `Assumption: <statement>` for an unverified claim.
@@ -91,5 +104,6 @@ the index and the first substantive block of each canonical file:
 6. What observable conditions demonstrate completion?
 
 The review also checks that terms are stable, evidence is adjacent to claims, list
-items are parallel, and no paragraph mixes unrelated claims. Do not replace this
-review with sentence, paragraph, bullet, or word counts.
+items are parallel, and no paragraph mixes unrelated claims. These are semantic
+choices, not formatting quotas: do not impose heading, bullet, paragraph, sentence,
+or bold-span counts.

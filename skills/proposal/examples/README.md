@@ -9,25 +9,25 @@ The examples are not additional templates.
 
 ## Example coverage
 
-| Example | Accepted coverage |
-| --- | --- |
-| [Short proposal](./short-proposal/PROPOSAL.md) | Compact per-section workspace with a metadata-bearing index and concise numbered artifacts. |
-| [Standard proposal](./standard-proposal/PROPOSAL.md) | Per-section workspace with distinct Criteria and Acceptance criteria, evidence links, one source index, and a separate implementation overview linked from the index and selected direction. |
-| [Complex proposal](./complex-proposal/PROPOSAL.md) | Per-section workspace with an indexed conditional companion document for risks and revisit conditions, without duplicating canonical section prose. |
-| [Implementation overview](./standard-proposal/10-implementation.md) | Proposal-specific implementation boundary: affected-area headings, named artifact targets, concrete modifications, and no generic lifecycle or runbook content. |
+- **[Short proposal](./short-proposal/PROPOSAL.md):** Compact per-section workspace with a metadata-bearing index and concise numbered artifacts.
+- **[Standard proposal](./standard-proposal/PROPOSAL.md):** Per-section workspace with distinct Criteria and Acceptance criteria, evidence links, one source index, and a separate implementation overview linked from the index and selected direction.
+- **[Complex proposal](./complex-proposal/PROPOSAL.md):** Per-section workspace with an indexed conditional companion document for risks and revisit conditions, without duplicating canonical section prose.
+- **[Implementation overview](./standard-proposal/10-implementation.md):** Proposal-specific implementation boundary: affected-area headings, named artifact targets, concrete modifications, and no generic lifecycle or runbook content.
+
+This index represents authored proposal examples only. Copied evidence snapshots are
+source material, not authored examples, and are not represented in this coverage list.
 
 ## Deterministic contract checks
 
-The examples are checked against the following accepted behaviors:
+The Markdown linter applies deterministic syntax checks to authored proposal files. Its
+`no-tables` rule rejects every Markdown table node, so authored proposal files MUST NOT
+contain Markdown tables. A passing lint run establishes this syntax condition only; it
+does not establish readability, scanability, or glanceability.
 
 - **Taxonomy and proportionality:** verify `PROPOSAL.md` indexes nine separate
   canonical section files in order, short examples keep those files compact, and
   complex examples index companion files only when useful
   ([proposal format](../reference/proposal-format.md#canonical-decision-architecture)).
-- **Language:** verify each canonical file answers its review question first, uses
-  direct actors and stable terms, keeps evidence next to claims, and uses parallel
-  lists or genuinely comparable tables
-  ([writing style](../reference/writing-style.md#review-test)).
 - **Readiness:** accept only `not-ready`, `review-ready`, or `decision-ready`,
   and keep readiness independent from status and acceptance
   ([proposal format](../reference/proposal-format.md#metadata-and-readiness)).
@@ -51,3 +51,17 @@ The examples are checked against the following accepted behaviors:
 
 No example contains authoring instructions, unresolved template placeholders, or a
 monolithic `PROPOSAL.md` decision body.
+
+## Human readability review
+
+Human review is separate from deterministic lint. Reviewers scan each canonical file
+and its index for the following qualities:
+
+- **Answer-first order:** the first substantive block answers the file's review question.
+- **Role visibility:** headings or concise labels make each decision role clear.
+- **Selective emphasis:** bold text cues decisive terms or values without implying evidence strength.
+- **Paragraph purpose:** each paragraph carries one connected idea.
+- **Evidence adjacency:** source links and evidence labels sit beside the claims they qualify.
+
+Lint success does not prove these qualities or prove glanceability. The human scan is a
+qualitative readability review, not a measured-usability claim.

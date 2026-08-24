@@ -1,12 +1,19 @@
 ## Alternatives and trade-offs
 
-| Alternative | Benefits | Costs and consequences | Evidence and disposition |
-| --- | --- | --- | --- |
-| {{alternative}} | {{benefits}} | {{costs_and_consequences}} | {{evidence_and_disposition}} |
+### {{alternative}}
+
+- **Differentiator:** {{differentiator}}
+- **Benefits:** {{benefits}}
+- **Costs and consequences:** {{costs_and_consequences}}
+- **Disposition:** {{disposition}}
+- **Evidence:** {{evidence_and_disposition}}
+
+{{additional_alternatives}}
 
 {{non_tabular_tradeoff_detail}}
 
 <!-- Include every viable alternative, including the status quo when meaningful.
-Use the table only when alternatives can be compared on these same fields. Move
-unequal caveats or connected reasoning below the table. State why each option is
-selected, rejected, or deferred. Remove this comment before publication. -->
+Repeat the labeled block for each option and keep the roles in the same order.
+Keep unequal caveats or connected reasoning in focused prose near the relevant
+option. State why each option is selected, rejected, or deferred, and keep evidence
+adjacent to the claim it supports. Remove this comment before publication. -->

@@ -62,14 +62,20 @@ Use these reviewable heuristics, not quotas:
   decision state, or audience question changes.
 - Use bold selectively for a key term, result, decision, or material caveat;
   never use emphasis as evidence or bold whole paragraphs.
-- Use bullets for parallel alternatives, criteria, requirements, risks,
-  trade-offs, evidence states, and owner choices. Keep connected reasoning in
-  prose.
+- Use headings for independent decision roles that need room to develop, or use
+  selective bold labels for concise independent roles that can remain adjacent.
+- Use parallel bullets for comparable alternatives, constraints, criteria,
+  requirements, risks, trade-offs, evidence states, and owner choices.
+- Use focused prose for connected reasoning, sequences, unequal evidence or
+  caveats, and acceptance tests.
 - Use descriptive, sentence-case headings and deliberate whitespace. Do not use
   decorative blockquotes, callout boxes, horizontal-rule decoration, or
   title-case compound headings.
-- Use tables only for genuinely parallel comparisons. Use prose or bullets for
-  sequence, nuance, unequal evidence, long caveats, or acceptance tests.
+
+Authored proposal documents MUST NOT use Markdown tables. Choose headings,
+selective bold labels, parallel bullets, or focused prose according to the
+decision role and relationship between the content; this is semantic guidance,
+not a formatting quota.
 
 The [proposal writing style](./writing-style.md) is authoritative when “readable,”
 “scannable,” “concise,” or “answer-first” requires interpretation. In particular,
