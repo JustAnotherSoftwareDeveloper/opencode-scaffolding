@@ -7,3 +7,4 @@
 - [Analysis To Plan](./analysis-to-plan.md) describes planning work that turns a documented assessment into a plan workspace.
 - [Proposal To Plan](./proposal-to-plan.md) describes planning work that turns decision evidence into a plan workspace.
 - [Analysis To Proposal To Plan](./analysis-to-proposal-to-plan.md) describes planning work that includes all three lifecycle stages.
+- [Proposal-Derived Audit Lifecycle](./proposal-derived-audit-lifecycle.md) describes the audit, bounded-fix, revised-plan, and mandatory re-audit handoffs for proposal-derived plans.

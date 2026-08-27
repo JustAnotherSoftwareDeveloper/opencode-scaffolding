@@ -1,6 +1,9 @@
-# Atomicity Anti-Patterns
+# Boundary Review Signals
 
-Reject these boundary shortcuts during decomposition.
+Use these operation-specific signals to trigger review against the shared
+[task-contract semantics](../../../task-contract/reference/README.md). The shared
+owner defines atomicity, dependency, coupling, traceability, and metadata meaning;
+these examples do not replace that contract.
 
 ## Hidden Independent Work
 
@@ -9,10 +12,11 @@ Reject these boundary shortcuts during decomposition.
 - A final document is used to merge independently reviewable findings.
 - Implementation and a separately requested test artifact share one task.
 
-## Unsupported Coupling
+## Unsupported Coupling Signals
 
 - The rationale names only a shared topic, file, destination, release, or skill.
-- A dependency is treated as proof that work is inseparable.
+- Dependency or shared-destination claims are sent back to the shared dependency and
+  coupling reference for evidence review.
 - Several outputs are called a package without one shared result.
 - Verification checks unrelated results under one task.
 
@@ -30,4 +34,5 @@ Reject these boundary shortcuts during decomposition.
 - A selected skill changes an already established boundary.
 
 Use [Atomicity Examples](atomicity-examples.md) for short contrastive cases. Use
-[Core Rules](core-rules.md) for the authoritative boundary test.
+[Core Rules](core-rules.md) for the operation procedure and the linked task-contract
+references for the authoritative boundary semantics.

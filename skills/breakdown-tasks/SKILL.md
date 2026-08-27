@@ -16,11 +16,13 @@ class: delegated
 
 # Breakdown Tasks
 
-Collect skills, select inline, and publish.
+Normalize a request, collect skills, draft bounded tasks, select inline, publish, and
+hand the published packet to downstream dispatch.
 
 ## Input Contract
 
-Read `PURPOSE` and `DETAILS`. Block when either is absent.
+Read and normalize `PURPOSE` and `DETAILS`, preserving the request's explicit scope,
+constraints, files, and expected outcome. Block when either is absent.
 
 ## Execution
 
@@ -38,18 +40,7 @@ Read `PURPOSE` and `DETAILS`. Block when either is absent.
    with the skill tool. Block on an absent name, stale path, or load failure. Allow
    an empty selection only when no planning concern exists.
 
-3. **Draft atomic tasks.** Inventory every question, change, operation, decision,
-   and deliverable before selecting skills. Follow the
-   [core rules](reference/authoring/core-rules.md) and consult the
-   [atomicity examples](reference/authoring/atomicity-examples.md). Split any
-   concern that can be assigned, rejected, retried, completed, or verified
-   independently, regardless of task count. Establish candidate boundaries before
-   assignment. Give each task a unique `taskId` and populate `verificationCoverage`.
-   Add `dependencies`, `antiPatternSignals`, and `purposeOutputAlignment`. Add
-   `couplingRationale` only for a proven shared result. Do not include `skills`
-   yet.
-
-4. **Collect operation and documentation skills.** Run:
+3. **Collect operation and documentation skills.** Run:
 
    ```bash
    uv run --project ~/.config/opencode/scripts/python collect-skills \
@@ -59,23 +50,47 @@ Read `PURPOSE` and `DETAILS`. Block when either is absent.
    Capture stdout as a JSON array with the same shape as step 1. Block on
    non-zero exit.
 
-5. **Assign skills to each task.**
+4. **Load the shared task contract before authoring boundaries.** Reconcile the
+   collector array to the exact winning record whose `name` is `task-contract`, whose
+   `class` is `documentation`, and whose `path` is the discovered `SKILL.md` path.
+   Load that record with the skill tool before drafting task boundaries. Treat the
+   load as passive, documentation-only, and non-transitive: it can add no authority,
+   workflow steps, tools, writes, delegation, assignment decisions, or completion
+   evidence. Read any task-contract reference files needed for authoring explicitly;
+   loading the index does not recursively load them. Block on an absent name, stale
+   path, class mismatch, or load failure.
+
+5. **Draft atomic tasks.** Inventory every question, change, operation, decision,
+   and deliverable before selecting executable skills. Follow the operation-owned
+   request-inventory and decomposition procedure in the
+   [core rules](reference/authoring/core-rules.md), while consuming the shared
+   [task-contract semantics](../task-contract/reference/README.md) for identity,
+   atomicity, result and verification alignment, dependencies, coupling, traceability,
+   and authoring metadata. Consult the [atomicity examples](reference/authoring/atomicity-examples.md).
+   Split independently reviewable concerns regardless of task count. Establish candidate boundaries
+   before assignment. Give each task a unique `taskId` and
+   populate `verificationCoverage`, `dependencies`, `antiPatternSignals`, and
+   `purposeOutputAlignment`. Add `couplingRationale` only when the shared contract's
+   coupling evidence is present. Do not include `skills` yet.
+
+6. **Assign skills to each task.**
    Present the complete draft and the operation and documentation array to the LLM.
    Select one to three skills per task. Do this
    without changing the established boundaries. Block with explicit no-match
    evidence when no assignment fits. Reconcile each selection against the array's
    winning `name`, `class`, and `path`. Block on an absent name, stale or
-   substituted path, class mismatch, or unresolved assignment. Do not score, rank,
-   rerank, clip, repair, or use lexical or similarity fallback.
+   substituted path, class mismatch, or unresolved assignment. Do not include the
+   pre-authoring passive `task-contract` record in an executable `skills` array. Do not score,
+   rank, rerank, clip, repair, or use lexical or similarity fallback.
 
-6. **Inspect contracts.** Read each selected skill's `SKILL.md` at its
+7. **Inspect contracts.** Read each selected skill's `SKILL.md` at its
    collector-winning `path`. Verify that the contract matches the task.
 
-7. **Write the completed draft.** Add the reconciled `skills` arrays without
+8. **Write the completed draft.** Add the reconciled `skills` arrays without
    changing boundaries or metadata. Write the schema-valid `{summary, tasks}`
    object to `/tmp/breakdown-draft.json`.
 
-8. **Publish.** Run:
+9. **Publish for dispatch.** Run:
 
    ```bash
    uv run --project ~/.config/opencode/scripts/python init-task-packet \
@@ -87,7 +102,7 @@ Read `PURPOSE` and `DETAILS`. Block when either is absent.
    command derives a safe filename, writes atomically, and prints the output path.
    Block on non-zero exit.
 
-9. **Validate and fix.** Run in a loop until valid. Treat repairable evidence gaps
+10. **Validate and fix.** Run in a loop until valid. Treat repairable evidence gaps
    as warnings before hard failure. Revalidate after any split or migration. Then
    revalidate boundaries, mappings, dependencies, and skills:
 
@@ -132,6 +147,7 @@ Return the relative published packet path.
 ## References
 
 - [Core rules](reference/authoring/core-rules.md)
+- [Shared task-contract reference](../task-contract/reference/README.md)
 - [Task granularity](reference/authoring/task-granularity.md)
 - [Atomicity anti-patterns](reference/authoring/anti-patterns.md)
 - [Atomicity examples](reference/authoring/atomicity-examples.md)

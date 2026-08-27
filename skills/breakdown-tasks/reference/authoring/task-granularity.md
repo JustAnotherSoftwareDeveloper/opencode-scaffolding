@@ -1,41 +1,29 @@
 # Task Granularity
 
-Choose boundaries from independent work, not file count or workflow stages.
+Choose boundaries from independent work, not file count or workflow stages. The
+shared [atomicity and alignment contract](../../../task-contract/reference/atomicity-and-alignment.md)
+owns the split test and the one-result boundary; the shared
+[dependencies and coupling contract](../../../task-contract/reference/dependencies-and-coupling.md)
+owns ordering and coupling evidence. Do not redefine either contract here.
 
-## Start With An Inventory
+## Start With An Inventory — operation-owned
 
 List each requested question, change, operation, decision, and deliverable. Include
 concealed concerns that appear inside broad phrases such as “finish the migration”
-or “update the feature.”
+or “update the feature.” Name the result for each concern before selecting skills.
 
-## Apply The Split Test
+## Apply The Shared Boundary Review
 
-For every pair of concerns, ask whether either can be:
+For every pair of concerns, apply the split test in the shared task-contract
+reference. Split independently actionable concerns into separate draft tasks and
+represent required order with the shared dependency semantics. Prefer an explicit
+dependency over an implicit compound task and review coupling with the linked shared
+reference.
 
-- assigned to a different worker;
-- rejected without rejecting the other;
-- retried without repeating the other;
-- completed without completing the other; or
-- verified without verifying the other.
+## Recheck The Boundary — operation-owned
 
-Split when any answer is yes. Prefer an extra explicit dependency over an implicit
-compound task.
-
-## Preserve Only One Shared Result
-
-Keep work together only when it satisfies the coupling requirements in
-[Core Rules](core-rules.md). One file can contain several independent changes.
-Several files can form one result. File count is only a review signal.
-
-## Recheck The Boundary
-
-After each split, confirm that:
-
-- `purpose` names one result;
-- `expectedOutput` describes that result;
-- verification checks that result;
-- dependencies identify predecessor tasks and artifacts; and
-- assigned skills match the final boundary.
-
-Do not use punctuation, lifecycle order, or skill availability as proof. Do not
-introduce universal task, file, step, or skill limits.
+After each split or migration, use the shared contract to review identity, result,
+verification, dependencies, coupling evidence, traceability, and metadata. Then
+confirm that the operation's assigned skills match the final boundary. Do not use
+punctuation, lifecycle order, or skill availability as proof, and do not introduce
+universal task, file, step, or skill limits.

@@ -4,7 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parents[3]
 BREAKDOWN = ROOT / "skills/breakdown-tasks/SKILL.md"
-PLAN = ROOT / "skills/plan/SKILL.md"
+PLAN = ROOT / "skills/plan-writer/SKILL.md"
 
 
 def test_both_workflows_use_two_collector_calls_and_inline_assignment() -> None:

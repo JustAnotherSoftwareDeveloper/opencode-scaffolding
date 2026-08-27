@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "inventory": [
+    {
+      "name": "plan-audit",
+      "class": "operation",
+      "path": "skills/plan-audit/SKILL.md",
+      "source": "project"
+    },
+    {
+      "name": "plan-writer",
+      "class": "operation",
+      "path": "skills/plan-writer/SKILL.md",
+      "source": "project"
+    },
+    {
+      "name": "task-contract",
+      "class": "documentation",
+      "path": "skills/task-contract/SKILL.md",
+      "source": "project"
+    }
+  ],
+  "cases": [
+    {
+      "id": "owned-immutable-audit",
+      "kind": "supported-task",
+      "mode": "task",
+      "request": "Audit one immutable proposal-derived plan snapshot and write one external Markdown report without changing audited files.",
+      "expected": {
+        "names": ["plan-audit"],
+        "paths": ["skills/plan-audit/SKILL.md"]
+      }
+    },
+    {
+      "id": "paraphrased-read-only-review",
+      "kind": "paraphrase",
+      "mode": "task",
+      "request": "Independently inspect a plan's proposal traceability, task boundaries, and exact current skill assignments from a frozen input set.",
+      "expected": {
+        "names": ["plan-audit"],
+        "paths": ["skills/plan-audit/SKILL.md"]
+      }
+    },
+    {
+      "id": "writer-neighbor",
+      "kind": "neighbor",
+      "mode": "task",
+      "request": "Create a source-grounded executable plan workspace and publish tasks.json and tasks.md.",
+      "expected": {
+        "names": ["plan-writer"],
+        "paths": ["skills/plan-writer/SKILL.md"]
+      }
+    },
+    {
+      "id": "passive-context-neighbor",
+      "kind": "neighbor",
+      "mode": "task",
+      "request": "Explain shared task identity and atomicity semantics as passive documentation.",
+      "expected": {
+        "names": ["task-contract"],
+        "paths": ["skills/task-contract/SKILL.md"]
+      }
+    },
+    {
+      "id": "unrelated",
+      "kind": "no-match",
+      "mode": "task",
+      "request": "Rename unrelated image files and compress them.",
+      "expected": {
+        "names": [],
+        "paths": []
+      }
+    }
+  ],
+  "invalid_contract_cases": [
+    {
+      "id": "stale-assignment",
+      "expected": {
+        "names": ["plan-audit"],
+        "paths": ["skills/old-plan-audit/SKILL.md"]
+      },
+      "error": "collector winner path must be exact"
+    },
+    {
+      "id": "passive-assignment",
+      "expected": {
+        "names": ["task-contract"],
+        "paths": ["skills/task-contract/SKILL.md"]
+      },
+      "error": "documentation cannot be execution authority"
+    },
+    {
+      "id": "too-many-skills",
+      "expected": {
+        "names": ["plan-audit", "plan-writer", "task-contract", "missing"],
+        "paths": [
+          "skills/plan-audit/SKILL.md",
+          "skills/plan-writer/SKILL.md",
+          "skills/task-contract/SKILL.md",
+          "skills/missing/SKILL.md"
+        ]
+      },
+      "error": "task assignment exceeds three names"
+    }
+  ]
+}

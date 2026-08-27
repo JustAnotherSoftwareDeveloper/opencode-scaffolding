@@ -22,7 +22,7 @@ deeper contract details.
 - `breakdown-tasks` — decompose requests into bounded task packets.
 - `customize-opencode` — modify OpenCode configuration and behavior.
 - `display-tasks` — render canonical task summaries.
-- `plan` — create executable plan workspaces.
+- `plan-writer` — create executable plan workspaces.
 - `proposal` — create evidence-based decision proposals.
 - `todo-writer` — write todo entries from task output.
 

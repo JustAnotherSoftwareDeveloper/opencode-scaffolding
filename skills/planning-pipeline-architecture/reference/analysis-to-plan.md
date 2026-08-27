@@ -1,6 +1,6 @@
 # Analysis To Plan
 
-`analysis-to-plan` - `generic-analysis`, `plan` - Moves from documented assessment to executable planning without a decision workspace.
+`analysis-to-plan` - `generic-analysis`, `plan-writer` - Moves from documented assessment to executable planning without a decision workspace.
 
 **Use when:** An assessment resolves the planning question and no durable decision record or approval gate is required.
 

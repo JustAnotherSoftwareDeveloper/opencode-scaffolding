@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "inventory": [
+    {
+      "name": "planning-pipeline-architecture",
+      "class": "planning",
+      "path": "skills/planning-pipeline-architecture/SKILL.md",
+      "source": "project"
+    },
+    {
+      "name": "proposal",
+      "class": "operation",
+      "path": "skills/proposal/SKILL.md",
+      "source": "project"
+    },
+    {
+      "name": "plan-writer",
+      "class": "operation",
+      "path": "skills/plan-writer/SKILL.md",
+      "source": "project"
+    },
+    {
+      "name": "plan-audit",
+      "class": "operation",
+      "path": "skills/plan-audit/SKILL.md",
+      "source": "project"
+    }
+  ],
+  "cases": [
+    {
+      "id": "proposal-derived-forward-lifecycle",
+      "kind": "supported-planning",
+      "mode": "planning",
+      "request": "Describe the proposal-recorded, plan-writer, audit-pending, findings, bounded-fix, revised-plan, and mandatory re-audit lifecycle.",
+      "expected": {
+        "names": ["planning-pipeline-architecture"],
+        "paths": ["skills/planning-pipeline-architecture/SKILL.md"]
+      }
+    },
+    {
+      "id": "direct-plan-only-publication",
+      "kind": "supported-planning",
+      "mode": "planning",
+      "request": "Explain why a non-proposal plan-only publication does not enter audit unless an audit is explicitly requested.",
+      "expected": {
+        "names": ["planning-pipeline-architecture"],
+        "paths": ["skills/planning-pipeline-architecture/SKILL.md"]
+      }
+    },
+    {
+      "id": "bounded-finding-fix-handoff",
+      "kind": "supported-planning",
+      "mode": "planning",
+      "request": "Identify the plan-writer-owned bounded fix and mandatory re-audit after an independent plan-audit finding.",
+      "expected": {
+        "names": ["planning-pipeline-architecture"],
+        "paths": ["skills/planning-pipeline-architecture/SKILL.md"]
+      }
+    },
+    {
+      "id": "blocked-upstream-decision-handoff",
+      "kind": "supported-planning",
+      "mode": "planning",
+      "request": "Describe exact needed input and impact when a proposal decision changes, evidence is missing, a baseline drifts, or an exact collector-backed capability is unavailable.",
+      "expected": {
+        "names": ["planning-pipeline-architecture"],
+        "paths": ["skills/planning-pipeline-architecture/SKILL.md"]
+      }
+    },
+    {
+      "id": "proposal-owner-neighbor",
+      "kind": "neighbor",
+      "mode": "task",
+      "request": "Create the evidence-based decision proposal from source documents.",
+      "expected": {
+        "names": ["proposal"],
+        "paths": ["skills/proposal/SKILL.md"]
+      }
+    },
+    {
+      "id": "plan-writer-owner-neighbor",
+      "kind": "neighbor",
+      "mode": "task",
+      "request": "Create and publish the source-grounded executable plan workspace.",
+      "expected": {
+        "names": ["plan-writer"],
+        "paths": ["skills/plan-writer/SKILL.md"]
+      }
+    },
+    {
+      "id": "plan-audit-owner-neighbor",
+      "kind": "neighbor",
+      "mode": "task",
+      "request": "Audit one immutable proposal-derived plan snapshot and publish an external Markdown report.",
+      "expected": {
+        "names": ["plan-audit"],
+        "paths": ["skills/plan-audit/SKILL.md"]
+      }
+    },
+    {
+      "id": "unrelated-file-work",
+      "kind": "no-match",
+      "mode": "task",
+      "request": "Rename unrelated image files and compress them.",
+      "expected": {
+        "names": [],
+        "paths": []
+      }
+    }
+  ],
+  "blocked_handoffs": [
+    {
+      "id": "changed-proposal-decision",
+      "owner": "proposal",
+      "needed_input": "the revised authoritative proposal section, decision delta, and supporting evidence identity",
+      "impact": "the existing plan snapshot is stale for audit and cannot enter a plan-writer fix"
+    },
+    {
+      "id": "missing-evidence",
+      "owner": "proposal",
+      "needed_input": "named source path or an explicit Evidence Gap: disposition identifying what is unavailable",
+      "impact": "the affected decision, plan traceability, or audit criterion remains blocked"
+    },
+    {
+      "id": "baseline-drift",
+      "owner": "plan-audit",
+      "needed_input": "authoritative proposal baseline plus the changed-file identity and manifest/digest evidence",
+      "impact": "the immutable snapshot is not auditable, so no pass or finding-driven fix handoff is valid"
+    },
+    {
+      "id": "unavailable-exact-collector-capability",
+      "owner": "plan-audit",
+      "needed_input": "a fresh collector-backed record naming the exact plan-audit operation, class, and SKILL.md path",
+      "impact": "audit remains pending and blocked, with no fallback assignment, passive planning reference, pass, or finding result"
+    }
+  ]
+}

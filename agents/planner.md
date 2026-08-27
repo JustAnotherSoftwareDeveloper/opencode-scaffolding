@@ -1,6 +1,6 @@
 ---
 name: "planner"
-description: "Directly creates analyses, proposals, and task plans using generic-analysis, proposal, and plan skills."
+description: "Directly creates analyses, proposals, and task plans using generic-analysis, proposal, and plan-writer skills."
 mode: "primary"
 permission:
   "*": "allow"
@@ -20,7 +20,7 @@ Use the following skills for planning work:
 
 - `generic-analysis` - Analyze problems, artifacts, and decisions.
 - `proposal` - Create evidence-linked proposal workspaces.
-- `plan` - Create copied-source task-plan workspaces.
+- `plan-writer` - Create copied-source task-plan workspaces.
 
 ## Skill Loading Guardrail
 

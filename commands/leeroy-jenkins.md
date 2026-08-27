@@ -16,7 +16,7 @@ You are executing the leeroy-jenkins auto-orchestration pipeline. The user has g
 
 2. **Auto-Accept Immediately**: After proposal creation, set `status: accepted`. Do not present for human review. Skip any quality gates that request user decision. Record acceptance timestamp and move forward.
 
-3. **Create Plan**: Load the `plan` skill. Generate `.plans/<timestamp>-slug/INDEX.md` from the accepted proposal. Ensure `status: approved` is set in metadata. Continue without asking about tradeoffs or structure concerns.
+3. **Create Plan**: Load the `plan-writer` skill. Generate `.plans/<timestamp>-slug/INDEX.md` from the accepted proposal. Ensure `status: approved` is set in metadata. Continue without asking about tradeoffs or structure concerns.
 
 4. **Build Runbook**: Load the `build-runbook` skill. Create `.runbooks/<timestamp>-slug/main.xml` with v3 XML format. Initialize all step files and default manifest indexes. Validate workspace immediately after creation. Log any validation warnings but do not halt.
 

@@ -7,7 +7,7 @@
     {"name": "dispatch-decompose", "class": "inline", "path": "skills/dispatch-decompose/SKILL.md", "source": "project"},
     {"name": "display-tasks", "class": "inline", "path": "skills/display-tasks/SKILL.md", "source": "project"},
     {"name": "generic-analysis", "class": "operation", "path": "skills/generic-analysis/SKILL.md", "source": "project"},
-    {"name": "plan", "class": "operation", "path": "skills/plan/SKILL.md", "source": "project"},
+    {"name": "plan-writer", "class": "operation", "path": "skills/plan-writer/SKILL.md", "source": "project"},
     {"name": "planning-pipeline-architecture", "class": "planning", "path": "skills/planning-pipeline-architecture/SKILL.md", "source": "project"},
     {"name": "proposal", "class": "operation", "path": "skills/proposal/SKILL.md", "source": "project"},
     {"name": "skill-architect", "class": "planning", "path": "skills/skill-architect/SKILL.md", "source": "project"},
@@ -33,15 +33,15 @@
     {"id": "planning-lifecycle-reference", "kind": "supported-planning", "mode": "planning", "request": "Decide which planning lifecycle stages are relevant to an analysis-to-plan handoff.", "expected": {"names": ["planning-pipeline-architecture"], "paths": ["skills/planning-pipeline-architecture/SKILL.md"]}},
     {"id": "writer-versus-test-writer", "kind": "disambiguation", "mode": "task", "request": "Generate the Python implementation, not tests.", "expected": {"names": ["skill-script-python-writer"], "paths": ["skills/skill-script-python-writer/SKILL.md"]}},
     {"id": "proposal-versus-analysis", "kind": "disambiguation", "mode": "task", "request": "Turn source documents into an evidence-based decision proposal.", "expected": {"names": ["proposal"], "paths": ["skills/proposal/SKILL.md"]}},
-    {"id": "analysis-and-plan-additive", "kind": "additive-class", "mode": "task", "request": "Assess the migration evidence and then produce an executable plan from the source documents.", "expected": {"names": ["generic-analysis", "plan"], "paths": ["skills/generic-analysis/SKILL.md", "skills/plan/SKILL.md"]}},
-    {"id": "three-skill-task-cardinality", "kind": "cardinality", "mode": "task", "request": "Analyze the issue, write a decision proposal, and create the executable plan.", "expected": {"names": ["generic-analysis", "proposal", "plan"], "paths": ["skills/generic-analysis/SKILL.md", "skills/proposal/SKILL.md", "skills/plan/SKILL.md"]}},
+    {"id": "analysis-and-plan-additive", "kind": "additive-class", "mode": "task", "request": "Assess the migration evidence and then produce an executable plan from the source documents.", "expected": {"names": ["generic-analysis", "plan-writer"], "paths": ["skills/generic-analysis/SKILL.md", "skills/plan-writer/SKILL.md"]}},
+    {"id": "three-skill-task-cardinality", "kind": "cardinality", "mode": "task", "request": "Analyze the issue, write a decision proposal, and create the executable plan.", "expected": {"names": ["generic-analysis", "proposal", "plan-writer"], "paths": ["skills/generic-analysis/SKILL.md", "skills/proposal/SKILL.md", "skills/plan-writer/SKILL.md"]}},
     {"id": "no-match-structural-work", "kind": "cardinality", "mode": "task", "request": "Rename these unrelated files without analysis, planning, documentation, or skill authoring.", "expected": {"names": [], "paths": []}},
     {"id": "misleading-path", "kind": "path", "mode": "task", "request": "The file is under scripts/python; add pytest tests for the existing Python script.", "expected": {"names": ["skill-script-python-test-writer"], "paths": ["skills/skill-script-python-test-writer/SKILL.md"]}},
     {"id": "python-writer-path", "kind": "path", "mode": "task", "request": "Use the Python script writer contract for a new CLI.", "expected": {"names": ["skill-script-python-writer"], "paths": ["skills/skill-script-python-writer/SKILL.md"]}}
   ],
   "invalid_contract_cases": [
     {"id": "unknown-expected-name", "expected": {"names": ["missing-skill"], "paths": ["skills/missing-skill/SKILL.md"]}, "error": "expected skill is absent from inventory"},
-    {"id": "expected-path-mismatch", "expected": {"names": ["plan"], "paths": ["skills/proposal/SKILL.md"]}, "error": "expected path does not match inventory"},
-    {"id": "too-many-task-skills", "mode": "task", "expected": {"names": ["generic-analysis", "proposal", "plan", "skill-factory"], "paths": ["skills/generic-analysis/SKILL.md", "skills/proposal/SKILL.md", "skills/plan/SKILL.md", "skills/skill-factory/SKILL.md"]}, "error": "task selection exceeds three skills"}
+    {"id": "expected-path-mismatch", "expected": {"names": ["plan-writer"], "paths": ["skills/proposal/SKILL.md"]}, "error": "expected path does not match inventory"},
+    {"id": "too-many-task-skills", "mode": "task", "expected": {"names": ["generic-analysis", "proposal", "plan-writer", "skill-factory"], "paths": ["skills/generic-analysis/SKILL.md", "skills/proposal/SKILL.md", "skills/plan-writer/SKILL.md", "skills/skill-factory/SKILL.md"]}, "error": "task selection exceeds three skills"}
   ]
 }

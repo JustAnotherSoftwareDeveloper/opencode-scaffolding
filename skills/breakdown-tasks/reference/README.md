@@ -4,11 +4,15 @@ Use this index to locate detailed guidance for the decomposition workflow.
 
 ## Authoring
 
-- [Core rules](authoring/core-rules.md) define the atomicity contract.
-- [Task granularity](authoring/task-granularity.md) defines the split test.
-- [Atomicity anti-patterns](authoring/anti-patterns.md) list shortcuts to reject.
-- [Atomicity examples](authoring/atomicity-examples.md) contrast boundaries.
-- [Field reference](authoring/field-reference-table.md) describes packet fields.
+- [Core rules](authoring/core-rules.md) define operation-owned inventory and draft
+  procedures and point to the shared task contract.
+- [Task granularity](authoring/task-granularity.md) applies the shared boundary
+  review to the operation's concern inventory.
+- [Atomicity anti-patterns](authoring/anti-patterns.md) list operation review signals.
+- [Atomicity examples](authoring/atomicity-examples.md) provide decomposition examples
+  that consume the shared contract.
+- [Field reference](authoring/field-reference-table.md) mirrors the schemas and links
+  shared field meaning to its owner.
 - [Context preservation](authoring/context-preservation.md) describes worker context.
 - [Implementation steps](implementation-steps-format.md) describes step documents.
 
@@ -28,3 +32,9 @@ Use this index to locate detailed guidance for the decomposition workflow.
 
 - [Task packet schema](../schema/task-packet.schema.json) defines published packets.
 - [Task input schema](../schema/task-input.schema.json) defines draft packets.
+
+## Shared Semantics
+
+- [Task-contract reference](../../task-contract/reference/README.md) owns task
+  identity, atomicity, alignment, dependencies, coupling, traceability, and
+  authoring metadata. It is passive and non-transitive.

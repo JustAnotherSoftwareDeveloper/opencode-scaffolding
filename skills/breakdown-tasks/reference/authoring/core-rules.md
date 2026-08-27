@@ -1,50 +1,34 @@
 # Core Rules
 
-Use these rules before assigning skills.
+Load the passive [task-contract reference](../../../task-contract/SKILL.md) before
+using these authoring procedures. The shared owner defines task identity, atomicity,
+result and verification alignment, dependency meaning, coupling evidence,
+traceability, and authoring metadata. This file does not restate those invariants.
 
-## Inventory Concerns
+## Inventory Concerns — operation-owned
 
 - List every question, change, operation, decision, and deliverable.
 - Name the result produced by each concern.
 - Do not use a workflow phase, shared topic, or desired packet size as a boundary.
 
-## Split Aggressively
+## Draft Boundaries — operation-owned
 
-Create separate tasks when either concern can be assigned, rejected, retried,
-completed, or verified without the other. Apply this test to analysis,
-documentation, implementation, and operations.
+Use the shared [atomicity and alignment](../../../task-contract/reference/atomicity-and-alignment.md),
+[dependencies and coupling](../../../task-contract/reference/dependencies-and-coupling.md),
+and [traceability and metadata](../../../task-contract/reference/traceability-and-metadata.md)
+references when turning the inventory into candidate tasks. Establish boundaries
+before selecting skills, and keep the task count derived from the inventory rather
+than from a capacity target.
 
-Create as many tasks as the request requires. Do not target or cap task, file, step,
-or skill counts.
+The operation adds the draft fields required by the input schema (`taskId`,
+`verificationCoverage`, `dependencies`, `antiPatternSignals`,
+`purposeOutputAlignment`, and any justified `couplingRationale`) without changing
+the shared meaning of those fields. Do not include `skills` until assignment.
 
-## Keep One Result
+## Assign Skills Last — operation-owned
 
-Give each task one purpose and one expected result. Keep verification with the
-result it checks. Create a separate verification task only when the user requests
-an independently reviewable verification deliverable.
-
-## Separate Dependencies
-
-Represent dependent work as separate ordered tasks. Put the predecessor artifact
-in the dependent task's `filesToRead`. A dependency explains order; it does not
-prove that two concerns belong in one task.
-
-## Require Coupling Evidence
-
-Keep multiple concerns together only when all of these statements are true:
-
-- They produce one shared result.
-- They have one verification boundary.
-- Separating execution, review, retry, or verification would be unsafe,
-  misleading, or impossible.
-
-Record that evidence in `couplingRationale`. Shared files, topics, releases,
-destinations, skills, dependencies, or final documents are not sufficient evidence.
-
-## Assign Skills Last
-
-Stabilize task boundaries, results, verification, and dependencies before selecting
-skills. Do not merge or split work to fit an available skill.
-
-After any split or migration, revalidate boundaries, mappings, dependencies, and
-skills. Treat uncertain language as a review prompt rather than proof of atomicity.
+Stabilize the candidate boundaries and their draft metadata before selecting skills.
+Do not merge or split work to fit an available skill. After any split or migration,
+rerun the operation's boundary, mapping, dependency, and skill checks. Treat
+uncertain language as a review prompt and apply the shared contract explicitly; it
+is not proof of a boundary or coupling decision.

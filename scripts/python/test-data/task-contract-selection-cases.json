@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "inventory": [
+    {
+      "name": "task-contract",
+      "class": "documentation",
+      "path": "skills/task-contract/SKILL.md",
+      "source": "project"
+    },
+    {
+      "name": "breakdown-tasks",
+      "class": "delegated",
+      "path": "skills/breakdown-tasks/SKILL.md",
+      "source": "project"
+    },
+    {
+      "name": "plan-writer",
+      "class": "operation",
+      "path": "skills/plan-writer/SKILL.md",
+      "source": "project"
+    },
+    {
+      "name": "task-executor",
+      "class": "inline",
+      "path": "skills/task-executor/SKILL.md",
+      "source": "project"
+    },
+    {
+      "name": "proposal",
+      "class": "operation",
+      "path": "skills/proposal/SKILL.md",
+      "source": "project"
+    }
+  ],
+  "cases": [
+    {
+      "id": "positive-shared-task-semantics",
+      "kind": "positive",
+      "mode": "task",
+      "request": "Reference the shared semantics for task identity, atomicity, one result, verification alignment, dependencies, coupling evidence, and traceability.",
+      "expected": {
+        "names": ["task-contract"],
+        "paths": ["skills/task-contract/SKILL.md"]
+      }
+    },
+    {
+      "id": "positive-task-authoring-metadata",
+      "kind": "positive",
+      "mode": "task",
+      "request": "Explain how task authoring metadata records purpose-output alignment, verification coverage, dependency edges, coupling rationale, and source or proposal references without changing the runtime schema.",
+      "expected": {
+        "names": ["task-contract"],
+        "paths": ["skills/task-contract/SKILL.md"]
+      }
+    },
+    {
+      "id": "neighboring-decomposition-workflow",
+      "kind": "neighboring",
+      "mode": "task",
+      "request": "Decompose this user request into atomic worker-ready task packets and publish the delegation JSON.",
+      "expected": {
+        "names": ["breakdown-tasks"],
+        "paths": ["skills/breakdown-tasks/SKILL.md"]
+      }
+    },
+    {
+      "id": "neighboring-plan-workspace",
+      "kind": "neighboring",
+      "mode": "task",
+      "request": "Create a source-document plan workspace and produce executable task JSON from the copied sources.",
+      "expected": {
+        "names": ["plan-writer"],
+        "paths": ["skills/plan-writer/SKILL.md"]
+      }
+    },
+    {
+      "id": "negative-packet-execution",
+      "kind": "negative",
+      "mode": "task",
+      "request": "Execute exactly one canonical task packet and return its verified deliverable.",
+      "expected": {
+        "names": ["task-executor"],
+        "paths": ["skills/task-executor/SKILL.md"]
+      }
+    },
+    {
+      "id": "negative-decision-proposal",
+      "kind": "negative",
+      "mode": "task",
+      "request": "Create an evidence-based decision proposal from the supplied source documents.",
+      "expected": {
+        "names": ["proposal"],
+        "paths": ["skills/proposal/SKILL.md"]
+      }
+    },
+    {
+      "id": "negative-unrelated-file-change",
+      "kind": "negative",
+      "mode": "task",
+      "request": "Rename these unrelated files without task authoring, decomposition, planning, documentation, or packet execution.",
+      "expected": {
+        "names": [],
+        "paths": []
+      }
+    }
+  ],
+  "invalid_contract_cases": [
+    {
+      "id": "unknown-task-contract-name",
+      "mode": "task",
+      "expected": {
+        "names": ["missing-skill"],
+        "paths": ["skills/missing-skill/SKILL.md"]
+      },
+      "error": "expected skill is absent from inventory"
+    },
+    {
+      "id": "task-contract-path-mismatch",
+      "mode": "task",
+      "expected": {
+        "names": ["task-contract"],
+        "paths": ["skills/breakdown-tasks/SKILL.md"]
+      },
+      "error": "expected path does not match inventory"
+    }
+  ]
+}
