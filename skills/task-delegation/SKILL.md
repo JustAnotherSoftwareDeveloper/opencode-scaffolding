@@ -51,7 +51,7 @@ and `expectedOutput` are authoritative. Only `skills`, `filesToRead`, and
 
 ## Result Validation
 
-Before assessing a result, read `output-contract-template.md` from the workspace root.
+Before assessing a result, read `~/.config/opencode/output-contract-template.md`.
 It is the sole authority for the envelope grammar, required fields, vocabularies,
 reconciliation rules, status invariants, and payload boundary. Reject any report that
 does not conform to that contract; do not maintain a second grammar in this skill.
@@ -62,8 +62,9 @@ misordered headings, invalid labels, malformed records, failed reconciliation, o
 status/payload contradiction). Never translate malformed output into a valid report
 and never use parser failure as evidence that the task itself was completed.
 
-Treat the payload boundary defined by `output-contract-template.md` as opaque. Do not
-parse payload content as envelope metadata.
+Treat the payload boundary defined by
+`~/.config/opencode/output-contract-template.md` as opaque. Do not parse payload
+content as envelope metadata.
 
 ## Scoped Planning Workflow
 
@@ -110,8 +111,8 @@ invocation, and no silent authority creep.
 2. Map its fields into the eight-section plaintext packet and mark only genuinely
    unknown values with the explicit unknown marker.
 3. Validate the packet and dispatch exactly one worker.
-4. Read `output-contract-template.md`, then validate the complete envelope, resource
-   reconciliation, status, and payload against it.
+4. Read `~/.config/opencode/output-contract-template.md`, then validate the complete
+   envelope, resource reconciliation, status, and payload against it.
 5. If malformed, troubleshoot and infer the narrowest correction; do not stop at the
    first validation failure unless the evidence is genuinely insufficient.
 6. When valid, return the report unchanged.

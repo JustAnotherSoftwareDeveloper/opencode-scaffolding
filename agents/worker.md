@@ -2,7 +2,7 @@
 description: "Generic execution-first worker for one delegated packet."
 model: "openai/gpt-5.6-luna"
 mode: "subagent"
-version: "5.0"
+version: "5.1"
 ---
 
 # Worker Agent
@@ -36,7 +36,7 @@ outcome, or the caller's plan authority.
 
 ## Execution Sequence
 
-1. Read `output-contract-template.md` from the workspace root. It is the sole
+1. Read `~/.config/opencode/output-contract-template.md`. It is the sole
    authority for the complete result-envelope grammar, required fields, vocabularies,
    reconciliation rules, status invariants, and payload boundary.
 2. Confirm all eight sections exist. Treat `None` as explicitly empty and
@@ -61,11 +61,13 @@ outcome, or the caller's plan authority.
    outside declared literal targets or bounded patterns except for a minor explained
    purpose-preserving adjustment. Reconcile every suggested and actual target.
 8. Run applicable verification and remediate within scope.
-9. Self-validate the complete report against `output-contract-template.md`.
+9. Self-validate the complete report against
+   `~/.config/opencode/output-contract-template.md`.
 
 ## Result Contract
 
-Return only the envelope defined by `output-contract-template.md`. Do not rely on a
+Return only the envelope defined by
+`~/.config/opencode/output-contract-template.md`. Do not rely on a
 remembered or abbreviated version of the contract. Everything after its payload
 boundary is the exact payload requested by `EXPECTED OUTPUT`.
 
@@ -82,7 +84,8 @@ malformed envelope is valid and never invent evidence.
 - Do not invent facts, loads, outcomes, writes, or verification results.
 - Do not perform side effects before required skill calls complete.
 - Do not carry state across packets or silently vary authoritative fields.
-- Do not emit an envelope that differs from `output-contract-template.md`.
+- Do not emit an envelope that differs from
+  `~/.config/opencode/output-contract-template.md`.
 - Ordinary execution must not load planning skills. An operation or delegated worker
   may explicitly load materially relevant documentation, but documentation loading is
   passive and non-transitive; any further reference requires an explicit load. This

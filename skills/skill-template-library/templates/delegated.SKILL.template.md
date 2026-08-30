@@ -77,8 +77,9 @@ The worker agent contract remains the authority for the surrounding result envel
 - **Default payload format is plaintext.**
   If `## EXPECTED OUTPUT` does not request a specific format, place plaintext under `Deliverable`.
 - **Mandatory envelope.**
-   Preserve the envelope defined by the workspace-root
-   `output-contract-template.md`; do not reproduce or vary its grammar in the skill.
+   Preserve the envelope defined by
+   `~/.config/opencode/output-contract-template.md`; do not reproduce or vary its
+   grammar in the skill.
 - **Missing or ambiguous `## EXPECTED OUTPUT`.**
   Return `BLOCKED` envelope status when the payload contract cannot be determined without a material assumption.
 - **Explicit status.**

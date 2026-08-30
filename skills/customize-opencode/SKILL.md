@@ -51,8 +51,8 @@ class: documentation
 - Requires every dynamic output to match an authorized pattern.
 - Requires bounded patterns to identify a directory, filename structure, and extension.
 - Excludes recursive wildcards and repository-wide write patterns.
-- Reports each listed path according to the workspace-root
-  `output-contract-template.md` reconciliation contract.
+- Reports each listed path according to the canonical
+  `~/.config/opencode/output-contract-template.md` reconciliation contract.
 - Permits an unchanged result when verification establishes that the path already satisfies the requested state.
 
 ### `## SKILLS`
@@ -72,7 +72,8 @@ class: documentation
 ### `## VERIFICATION`
 
 - Defines applicable quality checks.
-- Reports every check according to workspace-root `output-contract-template.md`.
+- Reports every check according to
+  `~/.config/opencode/output-contract-template.md`.
 - Permits remediation within the hard boundaries.
 
 ### `## EXPECTED OUTPUT`
@@ -99,12 +100,12 @@ class: documentation
 
 ## Status Values
 
-Status vocabulary and invariants are defined only in workspace-root
-`output-contract-template.md`.
+Status vocabulary and invariants are defined only in
+`~/.config/opencode/output-contract-template.md`.
 
 ## Output Format
 
-`output-contract-template.md` at the workspace root is the sole canonical source for
+`~/.config/opencode/output-contract-template.md` is the sole canonical source for
 the worker result envelope. Read it when producing, validating, or consuming a worker
 report. This reference intentionally does not reproduce the envelope grammar.
 
@@ -114,7 +115,8 @@ report. This reference intentionally does not reproduce the envelope grammar.
 - Controllers read `Status` to continue after `COMPLETE` or `PARTIAL` and stop after `BLOCKED`.
 - Payload-specific consumers extract all content after `## Deliverable` and validate that content against their own contract.
 - Malformed envelopes fail before payload consumption.
-- Envelope parsing and reconciliation follow `output-contract-template.md` without a
+- Envelope parsing and reconciliation follow
+  `~/.config/opencode/output-contract-template.md` without a
   local compatibility grammar.
 
 ## Docs

@@ -62,7 +62,7 @@ A single string payload under Deliverable: the relative `.tasks/<epoch-milliseco
 
 ## Output
 
-First read `output-contract-template.md` from the workspace root and validate the
+First read `~/.config/opencode/output-contract-template.md` and validate the
 complete worker envelope against that canonical contract and the ordinary
 `task-delegation` reconciliation rules. Then return the valid relative `.tasks/` path
 extracted from a `COMPLETE` envelope.
@@ -91,8 +91,9 @@ Return `BLOCKED:` for every non-complete or invalid result.
    Set `command` to `Decompose request into atomic tasks`.
    Set `prompt` to the complete decomposition packet.
 6. **Validate the worker result envelope.**
-   Read `output-contract-template.md` and validate the report against its complete
-   envelope grammar, status rules, reconciliation rules, and payload boundary.
+   Read `~/.config/opencode/output-contract-template.md` and validate the report
+   against its complete envelope grammar, status rules, reconciliation rules, and
+   payload boundary.
    Return `BLOCKED: decomposition worker returned a malformed result envelope.` when validation fails.
 7. **Handle non-complete status.**
    Return `BLOCKED: decomposition worker was blocked — <Blocker>. Unblock condition: <Unblock condition>.` for `BLOCKED`.
@@ -117,7 +118,8 @@ Launch exactly one worker task per invocation.
 - Never call any subagent type other than `worker`.
 - Never rewrite a valid relative `.tasks/` payload before returning it.
 - Never treat `PARTIAL` or `BLOCKED` worker status as valid decomposition output.
-- Never accept an envelope that violates `output-contract-template.md`.
+- Never accept an envelope that violates
+  `~/.config/opencode/output-contract-template.md`.
 - Never write files outside the .tasks/ state file declared in ## FILES TO WRITE.
 
 ## Docs

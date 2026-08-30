@@ -1,6 +1,6 @@
 # Task Delegation Reference
 
-- Read workspace-root `output-contract-template.md` as the sole worker-envelope
+- Read `~/.config/opencode/output-contract-template.md` as the sole worker-envelope
   grammar. Fixtures illustrate outcomes but never override that contract.
 - Treat `SKILL.md` as the authoritative packet construction and worker result handling contract.
 - Use `./fixtures/complete-no-files.txt` for complete analysis-only result validation.

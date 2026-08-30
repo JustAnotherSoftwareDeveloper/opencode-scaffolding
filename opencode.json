@@ -94,9 +94,15 @@
         "*": "deny",
         "read": {
           "*": "deny",
-          "output-contract-template.md": "allow",
+          "~/.config/opencode/output-contract-template.md": "allow",
           ".plans/*/tasks.json": "allow",
-          ".tasks/*.json": "allow"
+          ".tasks/*.json": "allow",
+          "*/.plans/*/tasks.json": "allow",
+          "*/.tasks/*.json": "allow"
+        },
+        "external_directory": {
+          "*": "deny",
+          "~/.config/opencode/output-contract-template.md": "allow"
         },
         "task": {
           "*": "deny",
@@ -130,8 +136,13 @@
         "*": "deny",
         "read": {
           "*": "deny",
-          "output-contract-template.md": "allow",
-          ".tasks/*.json": "allow"
+          "~/.config/opencode/output-contract-template.md": "allow",
+          ".tasks/*.json": "allow",
+          "*/.tasks/*.json": "allow"
+        },
+        "external_directory": {
+          "*": "deny",
+          "~/.config/opencode/output-contract-template.md": "allow"
         },
         "todowrite": "allow",
         "question": "allow",
