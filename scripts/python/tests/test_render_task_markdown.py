@@ -85,6 +85,17 @@ def test_render_task_markdown_does_not_replace_existing_output(tmp_path: Path) -
     assert output.read_text() == "preserve\n"
 
 
+def test_render_task_markdown_replaces_existing_output_only_when_requested(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "tasks.md"
+    output.write_text("stale\n")
+
+    render_task_markdown(_packet(), output, overwrite=True)
+
+    assert output.read_text().startswith("# Task Plan\n")
+
+
 def test_write_text_new_cleans_up_after_link_failure(tmp_path: Path) -> None:
     output = tmp_path / "tasks.md"
     with (

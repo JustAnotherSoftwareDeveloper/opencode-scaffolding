@@ -20,8 +20,13 @@ authorize a repair, and an audit pass does not authorize approval.
 
 - **Proposal recorded** — `proposal` owns the decision record, supporting evidence,
   source labels, and authoritative proposal baseline. The proposal workspace and
-  its canonical decision sections are the artifact. A stable baseline makes the
-  decision available to `plan-writer`.
+  its canonical decision sections are the artifact. A stable baseline does not
+  authorize planning.
+- **Proposal authorization confirmed** — the decision authority owns the transition
+  to planning. It requires either a recorded accepted lifecycle state or
+  `decision-ready` plus explicit planning authorization from the recorded
+  `decision-owner`. Publication, validation, `review-ready`, baseline stability,
+  recency, and invocation do not cause this transition.
 - **Plan authored** — `plan-writer` owns the proposal-derived plan snapshot. The
   plan workspace, `tasks.json`, `tasks.md`, copied sources, and proposal traceability
   are the artifacts. Publication transitions this proposal-derived path to **Audit
@@ -52,7 +57,7 @@ authorize a repair, and an audit pass does not authorize approval.
 ## Evidence Labels And Handoff Shape
 
 - `Proposal-derived:` identifies requirements, decisions, constraints, and
-  acceptance criteria inherited from the proposal.
+  verification criteria inherited from the proposal.
 - `Source-derived:` identifies evidence and constraints inherited from source
   documents.
 - `Assumption:` identifies unverified material.

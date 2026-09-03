@@ -2,13 +2,16 @@
 
 The report is one UTF-8 Markdown file with these semantic sections, in order:
 
-1. **Audit identity and input provenance** — deterministic audit identity, resolved
-   inputs, baseline mode, metadata facts, read-only boundary, complete SHA-256
-   manifest, and the fresh collector command, provenance, digest, and array.
+1. **Audit identity and input provenance** — deterministic audit identity,
+   resolved inputs, baseline mode, proposal metadata facts (frontmatter
+   status, readiness, owner, source-documents), read-only boundary, complete
+   SHA-256 manifest, and the fresh collector command, provenance, digest,
+   and array.
 2. **Overall disposition** — the rollup independent of proposal status, readiness,
-   acceptance, implementation completion, or approval.
+   implementation completion, or approval.
 3. **Proposal compliance** — coverage, confidence, traceability criteria, source
-   comparison, diagnostics, and evidence gaps.
+   comparison, PROPOSAL.md section and source-documents checks, diagnostics, and
+   evidence gaps.
 4. **Task atomicity** — structural/schema coverage, conceptual split-test coverage,
    dependency and coupling evidence, diagnostics, and evidence gaps.
 5. **Skill assignment** — cardinality, exact fresh-winner reconciliation, inspected

@@ -10,6 +10,11 @@ Resolve each path and reject a missing path, a non-file path, a target outside `
 
 Follow a symbolic link only when its resolved target is a regular file inside `$CWD`.
 
+When `PROPOSAL.md` is an input, require either a recorded accepted lifecycle state
+or `readiness: decision-ready` plus explicit planning authorization from its
+`decision-owner`. A stable file, successful validation, `review-ready`, recency,
+or invocation does not satisfy this authorization gate.
+
 ## Workspace Layout
 
 Create this workspace structure.

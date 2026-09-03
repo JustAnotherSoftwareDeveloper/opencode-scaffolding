@@ -1,7 +1,7 @@
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { cli } from "cleye";
-import { type LintResult, lintFile } from "../lib/lint-md/core.ts";
+import { type LintResult, lintDirectory, lintFile } from "../lib/lint-md/core.ts";
 import { ExitCode } from "../lib/shared/exit-codes.ts";
 import { die, formatViolation } from "../lib/shared/format.ts";
 import { isExempted, resolveTarget } from "../lib/shared/path.ts";
@@ -17,7 +17,7 @@ async function main(): Promise<void> {
 
   if (!targetPath) {
     die(
-      "Error: no target file specified. Usage: bun run --cwd scripts/node lint:md -- <target-file>",
+      "Error: no target file or directory specified. Usage: bun run --cwd scripts/node lint:md -- <target>",
       ExitCode.INVALID_INPUT,
     );
   }
@@ -25,7 +25,7 @@ async function main(): Promise<void> {
   const resolvedPath = resolve(targetPath);
 
   if (!existsSync(resolvedPath)) {
-    die(`Error: file not found: ${resolvedPath}`, ExitCode.INVALID_INPUT);
+    die(`Error: path not found: ${resolvedPath}`, ExitCode.INVALID_INPUT);
   }
 
   if (isExempted(resolvedPath)) {
@@ -34,7 +34,12 @@ async function main(): Promise<void> {
 
   let result: LintResult;
   try {
-    result = await lintFile(resolvedPath);
+    const stat = statSync(resolvedPath);
+    if (stat.isDirectory()) {
+      result = await lintDirectory(resolvedPath);
+    } else {
+      result = await lintFile(resolvedPath);
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     die(`Error: lint processing failed: ${message}`, ExitCode.CONFIG_ERROR);

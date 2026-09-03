@@ -1,31 +1,23 @@
 ---
-description: Generate an engineering plan from a proposal slug, or the most recent proposal if none specified
+description: Create and audit an engineering plan from an authorized one-document proposal
 ---
 
-Generate a plan from a proposal slug. If no slug is provided, use the most recent proposal in `.proposals/`.
-
-`$ARGUMENTS`
+Create a plan from the proposal path or slug in `$ARGUMENTS`; when omitted, inspect the most recent active proposal workspace.
 
 ## Workflow
 
-### If `$ARGUMENTS` names a proposal slug or path
-1. Locate `.proposals/<slug>/INDEX.md` (or the full path if given). For historical proposals, `.proposals/<slug>.md` remains readable and must not be migrated.
-2. Verify the proposal has `status: accepted` in `metadata.md` for proposal workspaces, or in frontmatter for historical single-file proposals.
-3. Load the `plan-writer` skill.
-4. Create `.plans/<unix-timestamp>-slug/INDEX.md` from the proposal.
-5. Run embedded quality check via `worker` with review-mode instructions.
-6. Report the artifact path, status, and next step (runbook).
-
-### If `$ARGUMENTS` is empty
-1. List `.proposals/` directory entries sorted by name (timestamps are in the directory or filename).
-2. Prefer the most recent proposal workspace `.proposals/<ts>-slug/INDEX.md`; historical `.proposals/<ts>-slug.md` files may be read if no newer accepted workspace exists.
-3. Verify it has `status: accepted` in workspace `metadata.md` or historical file frontmatter.
-4. Proceed with plan generation as above.
-
-### If no accepted proposal is found
-- Report that no accepted proposal is available and the user should run `/proposal` first.
+1. Resolve the selected active workspace to `.proposals/<epoch-ms>-<slug>/PROPOSAL.md`. Read an explicitly selected historical single-file proposal only when its documented compatibility boundary permits planning; never migrate it.
+2. Read lifecycle `status`, `readiness`, `decision-owner`, and `source-documents` from `PROPOSAL.md` frontmatter without modifying them.
+3. Authorize planning only when either the proposal records an accepted lifecycle state or it is `decision-ready` and the invocation explicitly comes from the recorded decision authority. Do not infer acceptance from `review-ready`, recency, or command invocation alone.
+4. Load the `plan-writer` skill. Pass `PROPOSAL.md` plus every declared copied source as explicit source documents.
+5. Create the plan-writer workspace containing copied sources, `tasks.json`, and `tasks.md`; do not invent plan `INDEX.md` or `metadata.md` artifacts.
+6. Load the `plan-audit` skill. Perform the mandatory read-only audit against the authoritative proposal baseline and the new plan workspace.
+7. Report the plan workspace, audit report path, audit disposition, and exact blocked handoff inputs or impacts. A findings disposition returns to bounded plan-owned correction followed by mandatory re-audit.
 
 ## Constraints
 
-- Do not implement. This command creates a plan only.
-- Do not create a runbook; use `/build-runbook` after the plan is approved.
+- Do not implement the proposal or execute plan tasks.
+- Do not mutate proposal metadata, infer approval, auto-accept a proposal, or auto-approve a plan.
+- Do not use an ad hoc worker review in place of `plan-audit`.
+- Do not create a runbook or direct the user to the legacy build-runbook flow.
+- If no authorized proposal is available, report the missing authorization or readiness fact without changing it.

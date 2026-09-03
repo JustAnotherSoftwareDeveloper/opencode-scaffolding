@@ -24,9 +24,15 @@ from lib.render_task_markdown.core import RenderValidationError, render_task_mar
     type=click.Path(dir_okay=False, path_type=Path, resolve_path=True),
     required=True,
 )
+@click.option(
+    "--overwrite",
+    is_flag=True,
+    help="Atomically replace an existing output after a bounded plan correction.",
+)
 def main(
     input_file: Path,
     output_file: Path,
+    overwrite: bool,
 ) -> None:
     """Render validated INPUT task JSON as OUTPUT Markdown."""
     try:
@@ -35,6 +41,7 @@ def main(
         result = render_task_markdown(
             data,
             output_file,
+            overwrite=overwrite,
         )
     except (OSError, ValueError, json.JSONDecodeError, RenderValidationError) as exc:
         click.echo(f"Error: {exc}", err=True)

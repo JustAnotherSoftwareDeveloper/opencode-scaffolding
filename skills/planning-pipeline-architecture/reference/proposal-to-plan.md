@@ -1,6 +1,6 @@
 # Proposal To Plan
 
-`proposal-to-plan` - `proposal`, `plan-writer`, `plan-audit` - Moves from a recorded decision through proposal-derived audit handoffs.
+`proposal-to-plan` - `proposal`, `plan-writer`, `plan-audit` - Moves from an authorized decision through proposal-derived audit handoffs.
 
 **Use when:** A decision record and its supporting evidence require a source-preserving task plan.
 
@@ -14,6 +14,10 @@ requirements, and open engineering decisions for `plan-writer`.
 
 - `Proposal recorded` is owned by `proposal` and is represented by the proposal
   workspace, its source set, and its authoritative baseline.
+- `Proposal authorization confirmed` is the required gate before planning. It
+  requires either a recorded accepted lifecycle state or `decision-ready` plus
+  explicit planning authorization from the recorded decision authority. Recording,
+  publication, validation, `review-ready`, and recency do not cause this transition.
 - `Plan authored` is owned by `plan-writer` and is represented by the plan workspace
   with `tasks.json`, `tasks.md`, and preserved source context.
 - A published proposal-derived plan transitions to `Audit pending`, owned by
@@ -39,7 +43,7 @@ requirements, and open engineering decisions for `plan-writer`.
 - Source-derived constraints remain present in task context.
 - Open engineering decisions remain labeled as `Open Question:` in task context.
 - Unverified material remains labeled as `Assumption:` in task context.
-- Proposal-derived requirements, decisions, constraints, and acceptance criteria
+- Proposal-derived requirements, decisions, constraints, and verification criteria
   retain a `Proposal-derived:` label in plan context.
 - Audit findings retain their exact finding IDs and the impact that bounds any
   plan-writer fix.

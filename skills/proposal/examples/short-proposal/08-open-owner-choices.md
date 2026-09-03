@@ -1,3 +1,0 @@
-## Open owner choices
-
-None.

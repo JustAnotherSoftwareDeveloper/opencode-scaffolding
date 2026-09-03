@@ -70,6 +70,7 @@ def test_proposal_derived_lifecycle_has_the_mandatory_reaudit_loop() -> None:
     )
     states = [
         "Proposal recorded",
+        "Proposal authorization confirmed",
         "Plan authored",
         "Audit pending",
         "Audit passed",
@@ -85,6 +86,10 @@ def test_proposal_derived_lifecycle_has_the_mandatory_reaudit_loop() -> None:
     assert "plan-audit" in text
     assert "mandatory re-audit" in text.lower()
     assert "revised plan transitions to **Mandatory\n  re-audit**" in text
+    assert "review-ready" in text
+    assert "do not cause this transition" in text
+    assert "decision-ready" in text
+    assert "recorded\n  `decision-owner`" in text
 
 
 def test_blocked_handoffs_preserve_exact_needed_input_and_impact() -> None:

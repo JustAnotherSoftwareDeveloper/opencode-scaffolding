@@ -12,16 +12,20 @@ The operation accepts one object with these fields:
   inventory. It is historical comparison evidence only.
 - `auditOutput` — a new caller-declared Markdown path.
 
-An authoritative baseline must contain `PROPOSAL.md`, the nine numbered decision
-files, `10-implementation.md`, `11-supporting-sources.md`, and every indexed copied
-source. The audit records status, readiness, owner choices, and acceptance as facts;
-none is treated as approval.
+An authoritative baseline must contain `PROPOSAL.md` with valid YAML frontmatter
+(`title`, `slug`, `status`, `readiness`, `decision-owner`, `source-documents`),
+the required H2 sections (`Recommendation`, `Technical Rationale`, `Questions`,
+`Options Considered`, `Implementation Details`, `Verification Criteria`,
+`Sources`), and every frontmatter-declared copied source file. The audit records
+status, readiness, and declared sources as evidence facts; none is treated as
+approval.
 
 The copied-snapshot exception additionally requires an explicit unavailable or
 unreadable reason, `originIdentity`, `captureTime`, and a manifest covering every
-snapshot file. It must pass the same complete canonical-file and source-index checks.
-When both baselines are supplied, the authoritative tree remains the comparison
-baseline and any difference is a proposal-compliance source-drift finding.
+snapshot file. It must pass the same PROPOSAL.md section, frontmatter, and
+source-documents index checks. When both baselines are supplied, the authoritative
+tree remains the comparison baseline and any difference is a proposal-compliance
+source-drift finding.
 
 ## Boundary
 

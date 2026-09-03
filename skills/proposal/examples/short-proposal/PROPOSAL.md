@@ -6,23 +6,72 @@ created-at: "1970-01-01T00:00:00Z"
 status: draft
 readiness: review-ready
 decision-owner: "responsible engineer"
-citation-style: chicago
 source-documents:
-  - "../../reference/proposal-format.md"
+  - "other/heading-policy.md"
 ---
 
 # Adopt sentence-case proposal headings
 
-## Proposal index
+## Table of Contents
 
-1. [Summary](./01-summary.md)
-2. [Problem and rationale](./02-problem-and-rationale.md)
-3. [Scope](./03-scope.md)
-4. [Criteria](./04-criteria.md)
-5. [Alternatives and trade-offs](./05-alternatives-and-trade-offs.md)
-6. [Selected direction](./06-selected-direction.md)
-7. [Design constraints](./07-design-constraints.md)
-8. [Open owner choices](./08-open-owner-choices.md)
-9. [Acceptance criteria](./09-acceptance-criteria.md)
-10. [Implementation overview](./10-implementation.md)
-11. [Supporting sources](./11-supporting-sources.md)
+- [Recommendation](#recommendation)
+- [Technical Rationale](#technical-rationale)
+- [Questions](#questions)
+- [Options Considered](#options-considered)
+- [Implementation Details](#implementation-details)
+- [Verification Criteria](#verification-criteria)
+- [Sources](#sources)
+
+## Recommendation
+
+Generated proposal headings will use sentence case. The change affects the proposal
+template only and preserves the existing Markdown heading hierarchy.
+
+## Technical Rationale
+
+Sentence case exposes the first meaningful words without adding title-style visual
+noise. The source policy requires sentence-case headings and treats heading hierarchy,
+not capitalization, as the structural invariant.
+
+Assumption: Reviewers recognize the unchanged Markdown heading levels without title
+capitalization.
+
+## Questions
+
+- Evidence Gap: None.
+- Open Question: None.
+
+## Options Considered
+
+### Keep title case
+
+- **Differentiator:** Existing capitalization remains unchanged.
+- **Consequence:** Compound headings retain unnecessary visual emphasis.
+- **Disposition:** Rejected because capitalization adds no structural information.
+
+### Use sentence case
+
+- **Differentiator:** Headings read like concise engineering labels.
+- **Consequence:** Existing title capitalization changes while hierarchy remains stable.
+- **Disposition:** Selected because it meets the policy with a bounded template edit.
+
+## Implementation Details
+
+### Proposal template — render sentence-case headings
+
+- **Change:** Replace title-case generated headings with sentence-case labels.
+- **Invariant:** Markdown heading levels and section order remain unchanged.
+- **Compatibility and migration:** Existing proposals remain unchanged; only new or
+  deliberately revised output uses the rule.
+- **Failure behavior:** The Markdown check rejects malformed heading hierarchy.
+- **Verification dependency:** Inspect generated headings and run Markdown lint.
+
+## Verification Criteria
+
+- A generated proposal uses sentence case for every section heading.
+- The generated document retains the required H2 order and valid Markdown hierarchy.
+- Historical proposal workspaces remain unchanged.
+
+## Sources
+
+- [Sentence-case heading policy](./other/heading-policy.md)

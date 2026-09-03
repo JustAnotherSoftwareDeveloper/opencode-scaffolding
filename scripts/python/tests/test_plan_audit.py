@@ -1,4 +1,11 @@
-"""Focused fixtures for the read-only plan-audit operation."""
+"""Focused fixtures for the read-only plan-audit operation.
+
+All proposal fixtures use the one-document monolithic PROPOSAL.md format
+introduced during the single-file migration.  Historical multi-file strings
+are not used here; coverage for multi-file input path handling is exercised
+through the parser's structured section extraction, source-documents
+resolution, and connection of declared names to indexed sources.
+"""
 # ruff: noqa: E501
 
 from __future__ import annotations
@@ -26,48 +33,57 @@ def _write(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
-def _proposal(root: Path, *, drift: bool = False) -> None:
-    _write(
-        root / "PROPOSAL.md",
-        """---
+PROPOSAL_BASE = """---
 title: audit fixture
+slug: audit-fixture
+created: "1725148800000"
+created-at: "2024-09-01T00:00:00Z"
 status: draft
 readiness: review-ready
+decision-owner: test-engineer
 source-documents:
   - analysis/source.md
 ---
 # Audit fixture
-## Proposal index
-1. [Summary](./01-summary.md)
-2. [Problem](./02-problem-and-rationale.md)
-3. [Scope](./03-scope.md)
-4. [Criteria](./04-criteria.md)
-5. [Alternatives](./05-alternatives-and-trade-offs.md)
-6. [Selected direction](./06-selected-direction.md)
-7. [Design constraints](./07-design-constraints.md)
-8. [Open owner choices](./08-open-owner-choices.md)
-9. [Acceptance criteria](./09-acceptance-criteria.md)
-10. [Implementation](./10-implementation.md)
-11. [Supporting sources](./11-supporting-sources.md)
-""",
-    )
-    bodies = {
-        "01-summary.md": "## Summary\nThe decision selects the audit behavior.\n",
-        "02-problem-and-rationale.md": "## Problem and rationale\nThe current plan needs independent evidence.\n",
-        "03-scope.md": "## Scope\nInclude the plan audit; exclude repair and approval.\n",
-        "04-criteria.md": "## Criteria\nUse stable, reproducible evidence.\n",
-        "05-alternatives-and-trade-offs.md": "## Alternatives and trade-offs\nA read-only report is preferred.\n",
-        "06-selected-direction.md": "## Selected direction\nAdopt a read-only plan audit.\n",
-        "07-design-constraints.md": "## Design constraints\nPreserve immutable inputs and write only the external report.\n",
-        "08-open-owner-choices.md": "## Open owner choices\nNo owner decisions remain.\n",
-        "09-acceptance-criteria.md": "## Acceptance criteria\nThe report exposes all three checks and stable findings.\n",
-        "10-implementation.md": "## Implementation overview\nImplement the audit report and collector provenance.\n",
-        "11-supporting-sources.md": "## Supporting sources\n- [Source](./analysis/source.md)\n",
-    }
-    for name, body in bodies.items():
-        suffix = " drift" if drift and name == "06-selected-direction.md" else ""
-        _write(root / name, body + suffix)
-    _write(root / "analysis/source.md", "# Source\nThe source supports the selected direction.\n")
+
+## Table of Contents
+
+- [Recommendation](#recommendation)
+- [Technical Rationale](#technical-rationale)
+- [Questions](#questions)
+- [Options Considered](#options-considered)
+- [Implementation Details](#implementation-details)
+- [Verification Criteria](#verification-criteria)
+- [Sources](#sources)
+
+## Recommendation
+Adopt a read-only plan audit.
+
+## Technical Rationale
+The current plan needs independent evidence. The decision selects the audit behavior. Use stable, reproducible evidence.
+
+## Questions
+
+None.
+
+## Options Considered
+A read-only report is preferred.
+
+## Implementation Details
+Implement the audit report and collector provenance. Include the plan audit; exclude repair and approval. Preserve immutable inputs and write only the external report.{drift}
+
+## Verification Criteria
+The report exposes all three checks and stable findings.
+
+## Sources
+- [Source](./analysis/source.md)
+"""
+
+
+def _proposal(root: Path, *, drift: bool = False) -> None:
+    """Create a one-document monolithic PROPOSAL.md with one copied source."""
+    _write(root / "PROPOSAL.md", PROPOSAL_BASE.format(drift=" drift" if drift else ""))
+    _write(root / "analysis" / "source.md", "# Source\nThe source supports the selected direction.\n")
 
 
 def _task(*, skills: list[str] | None = None, compound: bool = False) -> dict[str, Any]:
@@ -75,11 +91,12 @@ def _task(*, skills: list[str] | None = None, compound: bool = False) -> dict[st
         "taskId": "audit-report",
         "purpose": "Produce the immutable audit report" if not compound else "Audit the plan and repair the report",
         "context": (
-            "Trace 06-selected-direction.md, 03-scope.md, 07-design-constraints.md, "
-            "10-implementation.md, and 09-acceptance-criteria.md. Preserve the "
-            "Open Question: label and copied source identity. The task is read-only."
+            "Trace the Recommendation, Scope and Exclusions, Design Constraints, "
+            "Implementation Details, and Verification Criteria from PROPOSAL.md. "
+            "Preserve the Open Question: label and copied source identity. "
+            "The task is read-only and writes only the external audit report."
         ),
-        "filesToRead": ["06-selected-direction.md", "03-scope.md", "07-design-constraints.md", "10-implementation.md", "09-acceptance-criteria.md", "analysis/source.md"],
+        "filesToRead": ["PROPOSAL.md", "analysis/source.md"],
         "filesToWrite": ["audit-report.md"],
         "skills": skills or ["plan-audit"],
         "executionInstructions": [
@@ -96,7 +113,7 @@ def _task(*, skills: list[str] | None = None, compound: bool = False) -> dict[st
 
 def _plan(root: Path, tasks: list[dict[str, Any]], *, include_brief: bool = True) -> None:
     if include_brief:
-        _write(root / "PLAN.md", "# Plan brief\nThe plan preserves selected direction, scope, constraints, implementation targets, and acceptance tests.\n")
+        _write(root / "PLAN.md", "# Plan brief\nThe plan preserves recommendation, scope and exclusions, design constraints, implementation targets, and verification tests.\n")
     _write(root / "tasks.md", "# Tasks\n\nProduce the immutable audit report\n")
     (root / "analysis").mkdir(parents=True, exist_ok=True)
     _write(root / "analysis/source.md", "# Copied source\nThe source supports the selected direction.\n")
@@ -342,8 +359,11 @@ def test_normal_plan_writer_workspace_does_not_require_a_separate_brief(tmp_path
 def test_label_guidance_is_not_mistaken_for_an_unresolved_statement(tmp_path: Path) -> None:
     raw, _, proposal = _input(tmp_path)
     _write(
-        proposal / "07-design-constraints.md",
-        "## Design constraints\nPreserve `Assumption:`, `Evidence Gap:`, and `Open Question:` labels when present.\n",
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="").replace(
+            "## Technical Rationale\nThe current plan needs independent evidence.",
+            "## Technical Rationale\nThe current plan needs independent evidence. Preserve `Assumption:`, `Evidence Gap:`, and `Open Question:` labels when present.",
+        ),
     )
 
     result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
@@ -354,8 +374,11 @@ def test_label_guidance_is_not_mistaken_for_an_unresolved_statement(tmp_path: Pa
 def test_actual_unresolved_statement_must_be_preserved(tmp_path: Path) -> None:
     raw, _, proposal = _input(tmp_path)
     _write(
-        proposal / "08-open-owner-choices.md",
-        "## Open owner choices\n\nOpen Question: Choose the release owner.\n",
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="").replace(
+            "None.",
+            "Open Question: Choose the release owner.",
+        ),
     )
 
     result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
@@ -435,3 +458,229 @@ def test_standalone_cli_supplies_structural_validator_dependencies(tmp_path: Pat
     payload = json.loads(process.stdout)
     assert payload["overall"] in {"PASS", "CONDITIONAL PASS", "FAIL", "BLOCKED"}
     assert "No module named 'jsonschema'" not in Path(payload["report"]).read_text(encoding="utf-8")
+
+
+def test_blocking_evidence_gap_with_decision_ready_fails(tmp_path: Path) -> None:
+    raw, _, proposal = _input(tmp_path)
+    _write(
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="")
+        .replace("readiness: review-ready", "readiness: decision-ready")
+        .replace(
+            "None.",
+            "Evidence Gap: Missing performance data blocks the architecture selection.",
+        ),
+    )
+
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+
+    assert any(item.criterion == "BLOCKING-RESEARCH" for item in result.checks[0].diagnostics)
+    assert result.checks[0].disposition == "FAIL"
+
+
+def test_source_drift_declared_not_indexed_blocks_incomplete_baseline(tmp_path: Path) -> None:
+    raw, _, proposal = _input(tmp_path)
+    _write(proposal / "analysis" / "missing-source.md", "# Missing source\n")
+    _write(
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="").replace(
+            "source-documents:\n  - analysis/source.md",
+            "source-documents:\n  - analysis/source.md\n  - analysis/missing-source.md",
+        ),
+    )
+
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+
+    assert result.checks[0].disposition == "BLOCKED"
+    assert any(item.criterion == "BASELINE-COMPLETE" for item in result.checks[0].diagnostics)
+
+
+# ---------------------------------------------------------------------------
+# One-document monolithic proposal tests (migration completion coverage)
+# ---------------------------------------------------------------------------
+
+
+def test_valid_copied_snapshot_passes(tmp_path: Path) -> None:
+    """A copied-snapshot with complete provenance and intact manifest passes."""
+    raw, _, _ = _input(tmp_path, copied=True)
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    assert result.overall == "PASS"
+    assert result.checks[0].disposition == "PASS"
+
+
+def test_copied_manifest_missing_file_blocks_without_crashing(tmp_path: Path) -> None:
+    raw, _, _ = _input(tmp_path, copied=True)
+    raw["proposalBaseline"]["manifest"].append(
+        {"path": "analysis/missing.md", "bytes": 1, "sha256": "0" * 64}
+    )
+
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+
+    assert result.overall == "BLOCKED"
+    assert result.checks[0].disposition == "BLOCKED"
+
+
+def test_missing_recommendation_section_fails(tmp_path: Path) -> None:
+    """A one-document proposal without a Recommendation heading fails proposal compliance."""
+    raw, _, proposal = _input(tmp_path)
+    _write(
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="").replace("## Recommendation\nAdopt a read-only plan audit.", ""),
+    )
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    assert result.checks[0].disposition == "BLOCKED"
+    assert any(item.criterion == "BASELINE-COMPLETE" for item in result.checks[0].diagnostics)
+
+
+def test_missing_implementation_details_section_blocked(tmp_path: Path) -> None:
+    """A one-document proposal without Implementation Details heading blocks proposal compliance."""
+    raw, _, proposal = _input(tmp_path)
+    _write(
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="").replace(
+            "## Implementation Details\nImplement the audit report and collector provenance.",
+            "",
+        ),
+    )
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    assert result.checks[0].disposition == "BLOCKED"
+
+
+def test_missing_verification_criteria_section_blocked(tmp_path: Path) -> None:
+    """A one-document proposal without Verification Criteria heading blocks proposal compliance."""
+    raw, _, proposal = _input(tmp_path)
+    _write(
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="").replace(
+            "## Verification Criteria\nThe report exposes all three checks and stable findings.",
+            "",
+        ),
+    )
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    assert result.checks[0].disposition == "BLOCKED"
+
+
+def test_invalid_readiness_blocked(tmp_path: Path) -> None:
+    """A one-document proposal with an unrecognized readiness value blocks proposal compliance."""
+    raw, _, proposal = _input(tmp_path)
+    _write(
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="").replace("readiness: review-ready", "readiness: invalid-state"),
+    )
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    assert result.checks[0].disposition == "BLOCKED"
+    assert any(item.criterion == "BASELINE-COMPLETE" for item in result.checks[0].diagnostics)
+
+
+def test_malformed_frontmatter_blocks_and_writes_a_report(tmp_path: Path) -> None:
+    raw, _, proposal = _input(tmp_path)
+    _write(
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="").replace("title: audit fixture", "title: [broken"),
+    )
+
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+
+    assert result.overall == "BLOCKED"
+    assert result.report_path.is_file()
+    assert result.checks[0].disposition == "BLOCKED"
+
+
+def test_complex_example_accepts_ordered_optional_h3_toc_entries() -> None:
+    parsed = plan_audit._parse_proposal_md(
+        ROOT / "skills" / "proposal" / "examples" / "complex-proposal" / "PROPOSAL.md"
+    )
+
+    assert parsed["valid"]
+
+
+def test_missing_declared_source_file_blocked(tmp_path: Path) -> None:
+    """A source-documents entry pointing to a missing file blocks proposal compliance."""
+    raw, _, proposal = _input(tmp_path)
+    _write(
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="").replace(
+            "source-documents:\n  - analysis/source.md",
+            "source-documents:\n  - analysis/source.md\n  - analysis/absent.md",
+        ),
+    )
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    assert result.checks[0].disposition == "BLOCKED"
+    assert any(
+        "declared source is missing or not a regular file" in str(item.observed).lower()
+        for item in result.checks[0].diagnostics
+    )
+
+
+def test_unsafe_path_in_source_documents_blocked(tmp_path: Path) -> None:
+    """A source-documents entry resolving outside the proposal root blocks proposal compliance."""
+    raw, _, proposal = _input(tmp_path)
+    _write(
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="").replace(
+            "source-documents:\n  - analysis/source.md",
+            "source-documents:\n  - analysis/source.md\n  - ../../../unsafe.md",
+        ),
+    )
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    assert result.checks[0].disposition == "BLOCKED"
+    assert any(
+        "declared source is unsafe" in str(item.observed).lower()
+        for item in result.checks[0].diagnostics
+    )
+
+
+def test_task_atomicity_passes_with_one_document_baseline(tmp_path: Path) -> None:
+    """Task atomicity check works against a one-document PROPOSAL.md baseline."""
+    raw, plan, proposal = _input(tmp_path)
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    assert result.checks[1].disposition == "PASS"
+
+
+def test_exact_skill_assignment_passes_with_one_document_baseline(tmp_path: Path) -> None:
+    """Skill assignment check works against a one-document PROPOSAL.md baseline."""
+    raw, _, _ = _input(tmp_path)
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    assert result.checks[2].disposition == "PASS"
+
+
+def test_missing_decision_owner_blocks_incomplete_baseline(tmp_path: Path) -> None:
+    raw, _, proposal = _input(tmp_path)
+    _write(
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="").replace("decision-owner: test-engineer\n", ""),
+    )
+
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+
+    assert result.checks[0].disposition == "BLOCKED"
+    assert any("decision-owner" in str(item.observed) for item in result.checks[0].diagnostics)
+
+
+def test_duplicate_sources_identity_blocks_incomplete_baseline(tmp_path: Path) -> None:
+    raw, _, proposal = _input(tmp_path)
+    _write(
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="").replace(
+            "- [Source](./analysis/source.md)",
+            "- [Source](./analysis/source.md)\n- [Duplicate](./analysis/source.md)",
+        ),
+    )
+
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+
+    assert result.checks[0].disposition == "BLOCKED"
+    assert any("duplicate internal identities" in str(item.observed) for item in result.checks[0].diagnostics)
+
+
+def test_missing_table_of_contents_blocks_incomplete_baseline(tmp_path: Path) -> None:
+    raw, _, proposal = _input(tmp_path)
+    text = PROPOSAL_BASE.format(drift="")
+    start = text.index("## Table of Contents")
+    end = text.index("## Recommendation")
+    _write(proposal / "PROPOSAL.md", text[:start] + text[end:])
+
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+
+    assert result.checks[0].disposition == "BLOCKED"
+    assert any("table of contents" in str(item.observed).lower() for item in result.checks[0].diagnostics)

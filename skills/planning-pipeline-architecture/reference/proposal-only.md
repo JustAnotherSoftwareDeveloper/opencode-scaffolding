@@ -7,7 +7,7 @@
 ## Purpose
 
 This workflow records a decision from a defined source set.
-The proposal workspace preserves the source documents, decision rationale, requirements, open engineering decisions, and implementation overview.
+The proposal workspace preserves the source documents, decision rationale, requirements, open engineering decisions, and implementation details.
 
 ## Sequence
 
@@ -19,7 +19,7 @@ The proposal workspace preserves the source documents, decision rationale, requi
 ## Artifacts
 
 - Supporting source documents.
-- Proposal workspace containing `PROPOSAL.md` and `implementation.md`.
+- Proposal workspace containing `PROPOSAL.md` with Implementation Details, Verification Criteria, and Questions sections, plus copied sources.
 
 ## Notes
 

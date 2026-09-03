@@ -88,9 +88,9 @@ paths are not part of rollback scope.
 Post-cutover SHA-256 values used by the migration regression test:
 
 ```text
-e7ef6b12a5779ade860dd23524bb2210edbe3e2a39e2537b099e9595c528c9b6  skills/plan-writer/SKILL.md
+4fe372b16bb308c55fa7859c12718990471cd19c63796279af61a0e52e53d025  skills/plan-writer/SKILL.md
 06504be2b7436c44c07be44442146d89ec6e4e5cd9cca7f9115d20abcc0cd90d  skills/plan-writer/reference/README.md
-5a680a9b70e9ec6734eae882cc2b219eb496890d1bc6334002fa830c9b51a3bc  skills/plan-writer/reference/scripts.md
-b309547ed580f62dde0a70fde214dfd66de44e207ec90113495d27153504f9f1  skills/plan-writer/reference/task-authoring.md
-6a6506200a54d3f3a023fe231fb8f87867190d38b7f807b2b7b3f46bf0d3cb22  skills/plan-writer/reference/workspace-contract.md
+87500fcc8096c97686a9dfba860192c0779613eb590950b12f8b98084f027e5b  skills/plan-writer/reference/scripts.md
+17001bb9b496d4be823f947196a824e4fc81bd7c996105d648088e349f091f44  skills/plan-writer/reference/task-authoring.md
+9b42f2e9b932820c90c5548e946293c5ec7335a40b26d8c8b2c8732645109040  skills/plan-writer/reference/workspace-contract.md
 ```

@@ -48,6 +48,29 @@ def test_cli_renders_markdown(tmp_path: Path) -> None:
     assert output_file.is_file()
 
 
+def test_cli_overwrites_only_with_explicit_flag(tmp_path: Path) -> None:
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        input_file = Path.cwd() / "tasks.json"
+        output_file = Path.cwd() / "tasks.md"
+        input_file.write_text(json.dumps(_packet()))
+        output_file.write_text("stale\n")
+
+        result = runner.invoke(
+            main,
+            [
+                "--input",
+                str(input_file),
+                "--output",
+                str(output_file),
+                "--overwrite",
+            ],
+        )
+
+    assert result.exit_code == 0, result.output
+    assert output_file.read_text().startswith("# Task Plan\n")
+
+
 def test_cli_rejects_invalid_json(tmp_path: Path) -> None:
     input_file = tmp_path / "tasks.json"
     input_file.write_text("not json")

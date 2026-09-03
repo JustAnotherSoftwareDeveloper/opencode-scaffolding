@@ -14,16 +14,20 @@ Each stage adds a distinct artifact without replacing the artifact of the prior 
 1. Analysis establishes the evidence-calibrated assessment.
 2. The persisted assessment and supporting evidence form proposal sources.
 3. The proposal workspace records the decision, trade-offs, requirements, and open engineering decisions.
-4. The proposal workspace and source evidence form plan sources.
-5. The plan workspace records executable tasks and rendered task documentation.
-6. The published proposal-derived plan enters the audit-pending state described in
+4. Proposal authorization is confirmed through a recorded accepted lifecycle state,
+   or through `decision-ready` plus explicit authorization from the recorded
+   decision authority. Recording, validation, `review-ready`, and recency do not
+   authorize the transition.
+5. The authorized proposal workspace and source evidence form plan sources.
+6. The plan workspace records executable tasks and rendered task documentation.
+7. The published proposal-derived plan enters the audit-pending state described in
    the [proposal-derived audit lifecycle](./proposal-derived-audit-lifecycle.md).
 
 ## Artifacts
 
 - Persisted analysis document.
 - Supporting evidence documents.
-- Proposal workspace containing `PROPOSAL.md` and `implementation.md`.
+- Proposal workspace containing `PROPOSAL.md` with Implementation Details, Verification Criteria, and Questions sections, plus copied sources.
 - Plan workspace containing `tasks.json` and `tasks.md`.
 
 ## Notes

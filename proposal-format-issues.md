@@ -1,3 +1,10 @@
+# Superseded Proposal Format Analysis
+
+> Historical analysis only. It describes the retired multi-document proposal
+> format and is not an active contract or recommendation. The current authority is
+> [`skills/proposal/SKILL.md`](skills/proposal/SKILL.md), which requires one
+> metadata-bearing `PROPOSAL.md` plus declared copied sources.
+
 ## Worker Result
 
 | Field | Value |

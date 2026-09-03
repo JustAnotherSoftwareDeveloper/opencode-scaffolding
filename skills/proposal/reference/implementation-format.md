@@ -1,68 +1,68 @@
-# Implementation Format
+# Implementation Details format
 
-Use this reference for `10-implementation.md`. Follow the sentence-case and plain
-Markdown rules in [proposal-format.md](./proposal-format.md).
+Use this reference inside the proposal's `Implementation Details` section. The section
+defines the implementation boundary for planning; it is not a companion file or runbook.
 
 ## Structure
 
-- Use one H2 heading for each affected area: a component, interface, workflow,
-  policy, or closely related set of artifacts.
-- Use one H3 heading for each concrete change in that area.
-- Name the affected target and its modification in each H3 heading.
-- Add one or two concise bullets: the precise change, then its reason or effect
-  when the heading does not make that clear.
-- Use selective bolding for short labels only.
+- Use one H3 for each affected area: component, interface, schema, file family,
+  workflow, or tightly coupled artifact set.
+- Use H4 headings when several independently reviewable concrete changes belong to one
+  affected area.
+- Name the target and modification in each heading.
+- State the behavior change first, then preserved invariants, dependencies,
+  compatibility or migration effects, failure behavior, and verification dependency
+  when applicable.
+- Separate affected areas when their interface, review concern, or verification differs.
+- Do not group work by generic phases such as prepare, implement, integrate, or deploy.
 
-Group multiple changes under one H2 only when they affect the same area and are
-reviewed together. Start a new H2 when the target area, owner-facing concern, or
-reason for the change differs. Do not use lifecycle phases as area headings.
+## Concrete examples
 
-## Compliant Multi-Change Structure
+### Operation contract
 
-```markdown
-## Proposal skill contract
+#### `skills/proposal/SKILL.md` — Create one authored proposal document
 
-### `skills/proposal/SKILL.md` — Apply proportional document validation
+- Replace numbered-file generation with one metadata-bearing `PROPOSAL.md` and copied
+  source directories.
+- Preserve source bytes, readiness semantics, stable evidence labels, and historical
+  workspace immutability.
+- Verify the operation with profile, Markdown, workspace, and source-manifest checks.
 
-- **Change:** Replace fixed section and sentence checks with semantic-core and optional-section checks.
-- **Reason:** Keep validation aligned with the generated document format.
+### Validator interface
 
-### `skills/proposal/SKILL.md` — Apply conditional companion files
+#### `lint-md` — Dispatch proposal directories to workspace validation
 
-- **Change:** Permit substantial conditional detail only in companion files linked
-  from the proposal index and their governing canonical section.
+- Preserve existing generic file behavior and exit codes.
+- Parse proposal frontmatter with a maintained YAML parser; report parse errors as
+  stable violations rather than uncaught exceptions.
+- Permit comparison tables only in the proposal profile and verify directory behavior
+  with focused library and CLI tests.
 
-## Proposal templates
+### Schema migration
 
-### `skills/proposal/templates/` — Use the semantic core
+#### `source-documents` — Reconcile copied sources with in-document `Sources`
 
-- **Change:** Keep `PROPOSAL.md` as the index and put each canonical section in its numbered file.
-```
+- Require each safe relative manifest path to resolve to one copied regular file and
+  one matching internal source entry.
+- Reject traversal, absolute paths, unsafe symlinks, missing files, and duplicate or
+  mismatched identities.
 
-## Rejected Structure
+### Downstream consumer
 
-```markdown
-## Implementation changes
+#### `plan-audit` — Read implementation and verification traceability from `PROPOSAL.md`
 
-### Prepare
+- Replace fixed numbered-file reads with heading and frontmatter parsing.
+- Preserve immutable snapshots, finding identity, status precedence, and report-only
+  behavior.
+- Migrate the existing regression module rather than introducing a second fixture owner.
 
-- Prepare the implementation.
+## Optional detail
 
-### Integrate
+Add security, performance, reliability, rollout, rollback, observability, operational,
+or stakeholder detail only when evidence shows that it affects the decision. State
+failure modes and compatibility consequences where material. Omit empty headings.
 
-- Integrate affected systems.
-```
-
-Reject this structure because it names lifecycle phases instead of affected
-targets and modifications.
-
-## Optional Content And Evidence
-
-Include dependencies, decision gates, validation checks, rollout procedures, or
-stakeholder actions only when a copied source, explicit proposal assumption, or
-external constraint supports them. Omit their headings when no supported content
-exists.
-
-Exclude generic implementation steps, unstated dependencies, standard practices
-without source justification, and stakeholder actions without an explicit
-requirement.
+Exclude assignments, estimates, generic lifecycle phases, unsupported dependencies,
+and command-by-command execution instructions. A proposal may identify a CLI as an
+affected interface and specify its required behavior without prescribing an operator
+runbook.

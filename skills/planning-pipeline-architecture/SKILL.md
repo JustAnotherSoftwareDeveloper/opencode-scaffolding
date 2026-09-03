@@ -66,3 +66,7 @@ non-redundant, and scoped.
 - Confirm the proposal-derived audit lifecycle and direct plan-only boundary remain
   represented in the references.
 - Confirm no execution or side-effect authority appears.
+
+## Docs
+
+See `./reference/README.md` for the lifecycle workflow index.

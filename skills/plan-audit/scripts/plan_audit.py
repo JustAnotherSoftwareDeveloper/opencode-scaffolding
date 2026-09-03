@@ -31,25 +31,17 @@ except ImportError:  # pragma: no cover - the repository project supplies PyYAML
 
 DISPOSITIONS = {"PASS", "CONDITIONAL PASS", "FAIL", "BLOCKED"}
 DIAGNOSTIC_STATUSES = {"WARNING", "NOT OBSERVABLE", "BLOCKED", "FAIL"}
-CANONICAL_PROPOSAL_FILES = [
-    "PROPOSAL.md",
-    *[f"{number:02d}-{name}.md" for number, name in enumerate(
-        (
-            "summary",
-            "problem-and-rationale",
-            "scope",
-            "criteria",
-            "alternatives-and-trade-offs",
-            "selected-direction",
-            "design-constraints",
-            "open-owner-choices",
-            "acceptance-criteria",
-        ),
-        1,
-    )],
-    "10-implementation.md",
-    "11-supporting-sources.md",
+PROPOSAL_REQUIRED_SECTIONS = [
+    "table of contents",
+    "recommendation",
+    "technical rationale",
+    "questions",
+    "options considered",
+    "implementation details",
+    "verification criteria",
+    "sources",
 ]
+CANONICAL_PROPOSAL_FILES: list[str] = ["PROPOSAL.md"]
 COLLECTOR_COMMAND = (
     "uv run --project ~/.config/opencode/scripts/python collect-skills "
     "--class operation --class documentation"
@@ -73,6 +65,7 @@ STOPWORDS = {
     "a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of",
     "on", "or", "the", "to", "under", "use", "when", "with",
 }
+TOC_HEADING_RE = re.compile(r"^(#{2,3}) (.+?)(?:\s+#+)?$")
 
 
 class AuditInputError(ValueError):
@@ -345,7 +338,10 @@ def _frontmatter(text: str) -> dict[str, Any]:
         return {}
     if yaml is None:
         return {}
-    value = yaml.safe_load("\n".join(lines[1:end]))
+    try:
+        value = yaml.safe_load("\n".join(lines[1:end]))
+    except yaml.YAMLError:
+        return {}
     return value if isinstance(value, dict) else {}
 
 
@@ -358,56 +354,211 @@ def _links(text: str) -> list[str]:
     return values
 
 
-def _canonical_baseline(root: Path) -> tuple[bool, list[str], str]:
+def _unresolved_label_statements(text: str) -> list[str]:
+    pattern = re.compile(
+        r"(?im)^\s*(?:[-*]\s+)?(?:\*\*)?(Assumption:|Evidence Gap:|Open Question:)"
+        r"(?:\*\*)?\s*(.+?)\s*$"
+    )
+    return [f"{label} {statement}".strip() for label, statement in pattern.findall(text)]
+
+
+def _markdown_anchor(heading: str) -> str:
+    anchor = heading.lower()
+    anchor = re.sub(r"[^\w\s-]", "", anchor)
+    anchor = re.sub(r"\s+", "-", anchor)
+    anchor = re.sub(r"-+", "-", anchor)
+    return anchor.strip("-")
+
+
+def _parse_proposal_md(path: Path) -> dict[str, Any]:
+    """Parse a single PROPOSAL.md into its constituent parts."""
+    if not path.is_file():
+        return {
+            "valid": False,
+            "issues": [f"PROPOSAL.md is missing: {path}"],
+            "source_digest": "",
+            "text": "",
+            "frontmatter": {},
+            "sections": {},
+            "source_paths": [],
+            "labels": [],
+            "readiness": "",
+            "declared_sources": [],
+        }
+
+    try:
+        text = _read_utf8(path)
+    except (OSError, UnicodeDecodeError) as exc:
+        return {
+            "valid": False,
+            "issues": [f"unreadable PROPOSAL.md: {exc}"],
+            "source_digest": "",
+            "text": "",
+            "frontmatter": {},
+            "sections": {},
+            "source_paths": [],
+            "labels": [],
+            "readiness": "",
+            "declared_sources": [],
+        }
+
+    fm = _frontmatter(text)
     issues: list[str] = []
-    if not root.is_dir():
-        return False, [f"baseline directory is missing: {root}"], ""
-    for relative in CANONICAL_PROPOSAL_FILES:
-        path = root / relative
-        if not path.is_file():
-            issues.append(f"missing canonical proposal file {relative}")
-            continue
-        try:
-            _read_utf8(path)
-        except (OSError, UnicodeDecodeError) as exc:
-            issues.append(f"unreadable proposal file {relative}: {exc}")
-    index = root / "PROPOSAL.md"
-    index_text = ""
-    if index.is_file():
-        try:
-            index_text = _read_utf8(index)
-        except (OSError, UnicodeDecodeError) as exc:
-            issues.append(f"unreadable proposal index PROPOSAL.md: {exc}")
-        text = index_text
-        for relative in CANONICAL_PROPOSAL_FILES[1:]:
-            if relative not in text:
-                issues.append(f"PROPOSAL.md does not link {relative}")
-    sources = root / "11-supporting-sources.md"
-    indexed_sources: list[str] = []
-    if sources.is_file():
-        try:
-            source_index_text = _read_utf8(sources)
-        except (OSError, UnicodeDecodeError) as exc:
-            issues.append(f"unreadable source index 11-supporting-sources.md: {exc}")
-            source_index_text = ""
-        for target in _links(source_index_text):
-            candidate = (sources.parent / target).resolve(strict=False)
-            if _inside(candidate, root) and candidate not in {root / item for item in CANONICAL_PROPOSAL_FILES}:
-                indexed_sources.append(candidate.relative_to(root).as_posix())
-                if not candidate.is_file():
-                    issues.append(f"indexed source is missing: {candidate.relative_to(root)}")
-    if not indexed_sources:
-        issues.append("11-supporting-sources.md has no copied source links")
-    frontmatter = _frontmatter(index_text) if index_text else {}
-    declared = frontmatter.get("source-documents", [])
-    if declared and isinstance(declared, list):
+
+    sections: dict[str, str] = {}
+    heading_order: list[str] = []
+    toc_heading_order: list[str] = []
+    current_heading: str | None = None
+    current_lines: list[str] = []
+    for line in text.splitlines():
+        toc_heading = TOC_HEADING_RE.match(line)
+        if toc_heading:
+            depth = len(toc_heading.group(1))
+            heading = (toc_heading.group(2) or "").strip()
+            toc_heading_order.append(heading)
+        else:
+            depth = 0
+            heading = ""
+        if depth == 2:
+            if current_heading is not None:
+                sections[current_heading.strip().lower()] = "\n".join(current_lines)
+            current_heading = heading
+            heading_order.append(heading.lower())
+            current_lines = []
+        elif current_heading is not None:
+            current_lines.append(line)
+    if current_heading is not None:
+        sections[current_heading.strip().lower()] = "\n".join(current_lines)
+
+    for section in PROPOSAL_REQUIRED_SECTIONS:
+        if section not in sections:
+            issues.append(f"PROPOSAL.md missing required section: {section}")
+
+    if len(heading_order) != len(set(heading_order)):
+        issues.append("PROPOSAL.md contains duplicate H2 headings")
+
+    positions = [heading_order.index(section) for section in PROPOSAL_REQUIRED_SECTIONS if section in heading_order]
+    if len(positions) == len(PROPOSAL_REQUIRED_SECTIONS) and positions != sorted(positions):
+        issues.append("PROPOSAL.md required sections are out of order")
+
+    if "table of contents" in sections:
+        toc_targets = [unquote(raw.strip()) for raw in LINK_RE.findall(sections["table of contents"])]
+        expected_h2 = [
+            f"#{_markdown_anchor(section)}"
+            for section in heading_order
+            if section != "table of contents"
+        ]
+        all_anchors = [
+            f"#{_markdown_anchor(section)}"
+            for section in toc_heading_order
+            if section.lower() != "table of contents"
+        ]
+        h2_targets = [target for target in toc_targets if target in expected_h2]
+        if (
+            any(target not in all_anchors for target in toc_targets)
+            or len(toc_targets) != len(set(toc_targets))
+            or h2_targets != expected_h2
+            or [all_anchors.index(target) for target in toc_targets]
+            != sorted(all_anchors.index(target) for target in toc_targets)
+        ):
+            issues.append("PROPOSAL.md Table of Contents does not match H2 order")
+
+    sources_text = sections.get("sources", "")
+    source_paths: list[str] = []
+    for target in _links(sources_text):
+        candidate = (path.parent / target).resolve(strict=False)
+        if _inside(candidate, path.parent) and candidate != path:
+            source_paths.append(candidate.relative_to(path.parent).as_posix())
+
+    required_frontmatter = (
+        "title",
+        "slug",
+        "created",
+        "created-at",
+        "status",
+        "readiness",
+        "decision-owner",
+        "source-documents",
+    )
+    for key in required_frontmatter:
+        if key not in fm or fm.get(key) in (None, ""):
+            issues.append(f"PROPOSAL.md frontmatter missing {key}")
+
+    declared = fm.get("source-documents", [])
+    normalized_declared: list[str] = []
+    if not isinstance(declared, list) or not declared:
+        issues.append("PROPOSAL.md source-documents must be a non-empty list")
+    else:
         for source in declared:
-            source_path = (root / str(source)).resolve(strict=False)
-            if not _inside(source_path, root) or not source_path.is_file():
-                issues.append(f"declared source is missing: {source}")
-            elif source_path.relative_to(root).as_posix() not in indexed_sources:
-                issues.append(f"declared source is not indexed: {source}")
-    return not issues, issues, _text_digest(_canonical_json(indexed_sources))
+            if not isinstance(source, str) or not source.strip():
+                issues.append("PROPOSAL.md source-documents contains a non-string entry")
+                continue
+            raw_source_path = path.parent / source
+            source_path = raw_source_path.resolve(strict=False)
+            if not _inside(source_path, path.parent):
+                issues.append(f"declared source is unsafe: {source}")
+                continue
+            normalized = source_path.relative_to(path.parent).as_posix()
+            normalized_declared.append(normalized)
+            if raw_source_path.is_symlink() or not source_path.is_file():
+                issues.append(f"declared source is missing or not a regular file: {source}")
+
+    if len(normalized_declared) != len(set(normalized_declared)):
+        issues.append("PROPOSAL.md source-documents contains duplicate identities")
+    if len(source_paths) != len(set(source_paths)):
+        issues.append("PROPOSAL.md Sources contains duplicate internal identities")
+    if sorted(normalized_declared) != sorted(source_paths):
+        issues.append("PROPOSAL.md source-documents and Sources do not reconcile exactly")
+
+    questions_text = sections.get("questions", "")
+    labels = _unresolved_label_statements(questions_text)
+
+    readiness = str(fm.get("readiness", ""))
+    if readiness not in {"not-ready", "review-ready", "decision-ready"}:
+        issues.append(f"PROPOSAL.md has invalid readiness: {readiness}")
+
+    if not source_paths:
+        issues.append("PROPOSAL.md Sources section has no copied source links")
+
+    if re.search(r"\{\{[^{}]+\}\}|<!--[\s\S]*?-->", text):
+        issues.append("PROPOSAL.md contains unresolved authoring scaffolding")
+
+    legacy_names = {
+        "implementation.md",
+        "10-implementation.md",
+        "11-supporting-sources.md",
+        "INDEX.md",
+        "metadata.md",
+    }
+    legacy = [
+        child.name
+        for child in path.parent.iterdir()
+        if child.is_file() and (re.match(r"^0[1-9]-", child.name) or child.name in legacy_names)
+    ]
+    if legacy:
+        issues.append(f"proposal workspace contains legacy authored files: {', '.join(sorted(legacy))}")
+
+    valid = not issues
+    source_digest = _text_digest(_canonical_json(source_paths))
+
+    return {
+        "valid": valid,
+        "issues": issues,
+        "source_digest": source_digest,
+        "text": text,
+        "frontmatter": fm,
+        "sections": sections,
+        "source_paths": source_paths,
+        "labels": labels,
+        "readiness": readiness,
+        "declared_sources": normalized_declared,
+    }
+
+
+def _canonical_baseline(root: Path) -> tuple[bool, list[str], str]:
+    """Validate the proposal baseline. Delegates to _parse_proposal_md."""
+    parsed = _parse_proposal_md(root / "PROPOSAL.md")
+    return parsed["valid"], parsed["issues"], parsed["source_digest"]
 
 
 def _validate_supplied_manifest(root: Path, supplied: Any) -> list[str]:
@@ -439,7 +590,10 @@ def _validate_supplied_manifest(root: Path, supplied: Any) -> list[str]:
             issues.append(f"snapshot manifest path is missing: {path}")
         elif str(item["sha256"]) != actual_entry["sha256"]:
             issues.append(f"snapshot manifest digest differs: {path}")
-        if item.get("bytes") is not None and int(item["bytes"]) != actual_entry.get("bytes", -1):
+        if actual_entry is not None and (
+            item.get("bytes") is not None
+            and int(item["bytes"]) != actual_entry.get("bytes", -1)
+        ):
             issues.append(f"snapshot manifest byte length differs: {path}")
     extra = sorted(set(actual) - expected_paths)
     issues.extend(f"snapshot manifest omits file: {path}" for path in extra)
@@ -584,14 +738,6 @@ def _load_tasks(plan: Path) -> tuple[Any, list[Diagnostic], bool]:
     return value, diagnostics, status == "BLOCKED"
 
 
-def _unresolved_label_statements(text: str) -> list[str]:
-    pattern = re.compile(
-        r"(?im)^\s*(?:[-*]\s+)?(?:\*\*)?(Assumption:|Evidence Gap:|Open Question:)"
-        r"(?:\*\*)?\s*(.+?)\s*$"
-    )
-    return [f"{label} {statement}".strip() for label, statement in pattern.findall(text)]
-
-
 def _proposal_check(inp: NormalizedInput, plan_text: str, tasks: Any, before: list[dict[str, Any]]) -> CheckResult:
     diagnostics: list[Diagnostic] = []
     criteria = [
@@ -599,11 +745,16 @@ def _proposal_check(inp: NormalizedInput, plan_text: str, tasks: Any, before: li
         "scope and exclusion traceability",
         "design-constraint traceability",
         "implementation-target traceability",
-        "acceptance-test traceability",
+        "verification traceability",
         "source identity and labels",
         "write-boundary preservation",
     ]
-    valid, issues, _ = _canonical_baseline(inp.proposal_root)
+
+    proposal_index = inp.proposal_root / "PROPOSAL.md"
+    parsed = _parse_proposal_md(proposal_index)
+    valid = parsed["valid"]
+    issues = list(parsed["issues"])
+
     if inp.proposal_mode == "copied-snapshot":
         if inp.unavailable_reason is None or inp.copied_origin_identity is None or inp.copied_capture_time is None:
             issues.append("copied snapshot lacks provenance")
@@ -611,10 +762,27 @@ def _proposal_check(inp: NormalizedInput, plan_text: str, tasks: Any, before: li
             issues.extend(_validate_supplied_manifest(inp.proposal_root, inp.copied_manifest))
         except AuditInputError as exc:
             issues.append(str(exc))
+
     if not valid or issues:
         for issue in sorted(set(issues)):
-            diagnostics.append(_diag("PC", "BLOCKED", "BASELINE-COMPLETE", "proposal baseline", issue, "complete readable baseline", "proposal compliance evidence is unavailable", issue))
+            diagnostics.append(
+                _diag(
+                    "PC",
+                    "BLOCKED",
+                    "BASELINE-COMPLETE",
+                    "proposal baseline",
+                    issue,
+                    "complete readable baseline",
+                    "proposal compliance evidence is unavailable",
+                    issue,
+                )
+            )
         return CheckResult("Proposal compliance", "BLOCKED", "not observable", "HIGH", criteria, diagnostics, issues)
+
+    proposal_text = parsed["text"]
+    proposal_frontmatter = parsed["frontmatter"]
+    proposal_sections = parsed["sections"]
+
     if tasks is None:
         diagnostics.append(
             _diag(
@@ -628,6 +796,7 @@ def _proposal_check(inp: NormalizedInput, plan_text: str, tasks: Any, before: li
                 "the plan packet is unavailable",
             )
         )
+
     if not (inp.plan_workspace / "tasks.md").is_file():
         diagnostics.append(
             _diag(
@@ -641,6 +810,7 @@ def _proposal_check(inp: NormalizedInput, plan_text: str, tasks: Any, before: li
                 "tasks.md is required and is never generated by the audit",
             )
         )
+
     if inp.comparison_snapshot:
         copy_issues: list[str] = []
         if not inp.comparison_origin_identity or not inp.comparison_capture_time or not inp.comparison_manifest:
@@ -667,39 +837,184 @@ def _proposal_check(inp: NormalizedInput, plan_text: str, tasks: Any, before: li
                         f"authoritative={left.get(path, 'missing')}; "
                         f"copied={right.get(path, 'missing')}"
                     )
-                    diagnostics.append(_diag("PC", "FAIL", "SOURCE-DRIFT", path, observed, "identical baseline manifests", "proposal compliance is not reproducible", f"authoritative and copied proposal differ at {path}"))
+                    diagnostics.append(
+                        _diag(
+                            "PC",
+                            "FAIL",
+                            "SOURCE-DRIFT",
+                            path,
+                            observed,
+                            "identical baseline manifests",
+                            "proposal compliance is not reproducible",
+                            f"authoritative and copied proposal differ at {path}",
+                        )
+                    )
         if copy_issues:
-            diagnostics.append(_diag("PC", "BLOCKED", "BASELINE-COMPLETE", "comparison snapshot", "; ".join(copy_issues), "complete comparison snapshot", "source comparison cannot run", "comparison snapshot is incomplete"))
-    combined = plan_text + "\n" + "\n".join(_task_text(task) for task in (tasks.get("tasks", []) if isinstance(tasks, Mapping) else []))
+            diagnostics.append(
+                _diag(
+                    "PC",
+                    "BLOCKED",
+                    "BASELINE-COMPLETE",
+                    "comparison snapshot",
+                    "; ".join(copy_issues),
+                    "complete comparison snapshot",
+                    "source comparison cannot run",
+                    "comparison snapshot is incomplete",
+                )
+            )
+
+    combined = plan_text + "\n" + "\n".join(
+        _task_text(task) for task in (tasks.get("tasks", []) if isinstance(tasks, Mapping) else [])
+    )
     lower = combined.lower()
+
     required_markers = {
-        "decision traceability": ("06-selected-direction.md", "selected direction", "recommendation"),
-        "scope and exclusion traceability": ("03-scope.md", "scope", "exclusion"),
-        "design-constraint traceability": ("07-design-constraints.md", "design constraint", "constraint"),
-        "implementation-target traceability": ("10-implementation.md", "implementation", "target"),
-        "acceptance-test traceability": ("09-acceptance-criteria.md", "acceptance", "test"),
+        "decision traceability": ("recommendation", "selected direction", "recommend"),
+        "scope and exclusion traceability": ("scope", "exclusion"),
+        "design-constraint traceability": ("design constraint", "constraint"),
+        "implementation-target traceability": ("implementation", "target"),
+        "verification traceability": ("verification", "test", "acceptance"),
     }
     for criterion, markers in required_markers.items():
         if not any(marker in lower for marker in markers):
-            diagnostics.append(_diag("PC", "FAIL", criterion.upper().replace(" ", "-"), "plan tasks and brief", "no trace marker", "proposal material traceable to plan", "proposal-derived scope is untraceable", f"missing {criterion}"))
-    proposal_text = "\n".join(_read_utf8(inp.proposal_root / name) for name in CANONICAL_PROPOSAL_FILES if (inp.proposal_root / name).is_file())
-    for statement in _unresolved_label_statements(proposal_text):
+            diagnostics.append(
+                _diag(
+                    "PC",
+                    "FAIL",
+                    criterion.upper().replace(" ", "-"),
+                    "plan tasks and brief",
+                    "no trace marker",
+                    "proposal material traceable to plan",
+                    "proposal-derived scope is untraceable",
+                    f"missing {criterion}",
+                )
+            )
+
+    for statement in parsed["labels"]:
         if statement.lower() not in lower:
-            diagnostics.append(_diag("PC", "FAIL", "LABEL-PRESERVATION", statement, "unresolved statement absent from plan", statement, "proposal uncertainty may be laundered", f"lost proposal statement {statement}"))
-    source_index = inp.proposal_root / "11-supporting-sources.md"
-    source_paths = [
-        target for target in _links(_read_utf8(source_index))
-        if _inside((source_index.parent / target).resolve(strict=False), inp.proposal_root)
-    ] if source_index.is_file() else []
+            diagnostics.append(
+                _diag(
+                    "PC",
+                    "FAIL",
+                    "LABEL-PRESERVATION",
+                    statement,
+                    "unresolved statement absent from plan",
+                    statement,
+                    "proposal uncertainty may be laundered",
+                    f"lost proposal statement {statement}",
+                )
+            )
+
+    source_paths = parsed["source_paths"]
     copied_paths = {path.relative_to(inp.plan_workspace).as_posix() for path in _tree_files(inp.plan_workspace)}
     for source in source_paths:
         if not any(Path(item).name == Path(source).name or source in item for item in copied_paths):
-            diagnostics.append(_diag("PC", "FAIL", "SOURCE-COPY", source, "source absent from plan tree", source, "copied-source identity is not preserved", f"proposal source {source} is not copied into the plan"))
+            diagnostics.append(
+                _diag(
+                    "PC",
+                    "FAIL",
+                    "SOURCE-COPY",
+                    source,
+                    "source absent from plan tree",
+                    source,
+                    "copied-source identity is not preserved",
+                    f"proposal source {source} is not copied into the plan",
+                )
+            )
+
     for index, task in enumerate(tasks.get("tasks", []) if isinstance(tasks, Mapping) else []):
         for target in task.get("filesToWrite", []):
             target_text = str(target)
-            if ".proposals" in target_text or target_text.endswith("PROPOSAL.md") or any(Path(target_text).name == Path(item).name for item in CANONICAL_PROPOSAL_FILES[1:]):
-                diagnostics.append(_diag("PC", "FAIL", "WRITE-BOUNDARY", f"tasks[{index}].filesToWrite", target_text, "plan-owned targets only", "audit cannot permit proposal mutation", f"scope-expanding or proposal write target {target_text}"))
+            if ".proposals" in target_text or target_text.rstrip("/").endswith("PROPOSAL.md"):
+                diagnostics.append(
+                    _diag(
+                        "PC",
+                        "FAIL",
+                        "WRITE-BOUNDARY",
+                        f"tasks[{index}].filesToWrite",
+                        target_text,
+                        "plan-owned targets only",
+                        "audit cannot permit proposal mutation",
+                        f"scope-expanding or proposal write target {target_text}",
+                    )
+                )
+
+    plan_tokens = _significant_tokens(combined)
+
+    impl_section = proposal_sections.get("implementation details", "")
+    impl_stripped = impl_section.strip().lower()
+    if impl_stripped and impl_stripped not in {"none", "none.", "n/a", "n/a."}:
+        impl_tokens = _significant_tokens(impl_section)
+        if impl_tokens and not impl_tokens.intersection(plan_tokens):
+            diagnostics.append(
+                _diag(
+                    "PC",
+                    "FAIL",
+                    "IMPLEMENTATION-TRACEABILITY",
+                    "PROPOSAL.md#implementation-details",
+                    "no implementation terms in plan",
+                    "implementation details traceable to plan tasks",
+                    "implementation may be disconnected from plan",
+                    "Implementation Details section terms are not found in plan",
+                    "MEDIUM",
+                )
+            )
+
+    verify_section = proposal_sections.get("verification criteria", "")
+    verify_stripped = verify_section.strip().lower()
+    if verify_stripped and verify_stripped not in {"none", "none.", "n/a", "n/a."}:
+        verify_tokens = _significant_tokens(verify_section)
+        if verify_tokens and not verify_tokens.intersection(plan_tokens):
+            diagnostics.append(
+                _diag(
+                    "PC",
+                    "FAIL",
+                    "VERIFICATION-TRACEABILITY",
+                    "PROPOSAL.md#verification-criteria",
+                    "no verification terms in plan",
+                    "verification criteria traceable to plan",
+                    "verification may be disconnected from plan",
+                    "Verification Criteria section terms are not found in plan",
+                    "MEDIUM",
+                )
+            )
+
+    readiness = str(proposal_frontmatter.get("readiness", ""))
+    if readiness == "decision-ready":
+        for label in parsed["labels"]:
+            lower_label = label.lower()
+            if lower_label.startswith("evidence gap:") and ("block" in lower_label or "blocks" in lower_label):
+                diagnostics.append(
+                    _diag(
+                        "PC",
+                        "FAIL",
+                        "BLOCKING-RESEARCH",
+                        label,
+                        f"Evidence Gap blocks but readiness is {readiness}",
+                        "blocking evidence gaps resolved before decision-ready",
+                        "decision quality is compromised",
+                        f"blocking Evidence Gap present with decision-ready readiness: {label}",
+                    )
+                )
+
+    declared = parsed["declared_sources"]
+    indexed = parsed["source_paths"]
+    for src in declared:
+        if src not in indexed:
+            diagnostics.append(
+                _diag(
+                    "PC",
+                    "WARNING",
+                    "SOURCE-DRIFT",
+                    "frontmatter source-documents",
+                    f"declared: {src}",
+                    "indexed in Sources section",
+                    "source identity inconsistent",
+                    f"source-documents entry {src} is not indexed in Sources",
+                    "MEDIUM",
+                )
+            )
+
     return CheckResult("Proposal compliance", _disposition(diagnostics), "complete", "HIGH", criteria, diagnostics, [])
 
 

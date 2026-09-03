@@ -19,3 +19,16 @@ uv run --project ~/.config/opencode/scripts/python render-task-markdown \
 
 `PUBLISHED_PATH` is the path printed by `init-task-packet`. Validation uses the
 state-file form only; do not combine a positional input path with `--state-file`.
+
+For a bounded plan-owned correction after an audit finding, validate the revised
+`tasks.json` and rerender the existing `tasks.md` explicitly:
+
+```bash
+uv run --project ~/.config/opencode/scripts/python render-task-markdown \
+  --input "$PLAN_DIR/tasks.json" \
+  --output "$PLAN_DIR/tasks.md" \
+  --overwrite
+```
+
+`--overwrite` is limited to the existing rendered task document in the same plan
+workspace. It is not used for initial publication or to replace any other artifact.

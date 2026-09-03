@@ -11,8 +11,13 @@ Produce one root object with `summary` and `tasks`.
 Produce TaskDraft objects without a `skills` field after reviewing boundaries
 against the shared task contract.
 
-Preserve material source constraints, proposal-derived scope, decisions, and
-acceptance conditions in each task `context`.
+Extract proposal-derived scope, decisions, implementation details, verification
+criteria, and questions from one PROPOSAL.md and its copied sources. Do not
+require a separate implementation document; implementation detail lives inside
+PROPOSAL.md as Implementation Details.
+
+Preserve source-derived requirements, recommendation constraints, concrete
+implementation targets, compatibility, and exclusions in each task `context`.
 
 Preserve source-derived requirements in each task `context`.
 
@@ -32,3 +37,8 @@ Keep execution instructions ordered, concrete, and limited to one worker unit of
 Label unresolved material as `Open Question:` in task context.
 
 Label unverified material as `Assumption:` in task context.
+
+Label missing material evidence as `Evidence Gap:` in task context.
+
+Research questions remain labeled as researchable uncertainty. Do not convert a
+research question into an owner decision without evidence work.

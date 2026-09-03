@@ -28,6 +28,8 @@ class RenderValidationError(ValueError):
 def render_task_markdown(
     data: dict[str, Any],
     output_file: Path,
+    *,
+    overwrite: bool = False,
 ) -> Path:
     """Validate *data* and atomically write its Markdown representation."""
     errors = validate_json_schema(data, load_schema(OUTPUT_SCHEMA_PATH))
@@ -37,7 +39,7 @@ def render_task_markdown(
         )
     if output_file.suffix != ".md":
         raise RenderValidationError("output file must use a .md suffix")
-    _write_text_new(output_file, _render(data))
+    _write_text_new(output_file, _render(data), overwrite=overwrite)
     return output_file
 
 
@@ -85,10 +87,10 @@ def _inline_text(value: str) -> str:
     return value.replace("\\", "\\\\").replace("\r", " ").replace("\n", " ")
 
 
-def _write_text_new(path: Path, text: str) -> None:
-    """Atomically create *path* without replacing an existing file."""
+def _write_text_new(path: Path, text: str, *, overwrite: bool = False) -> None:
+    """Atomically create *path*, replacing it only when explicitly authorized."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists():
+    if path.exists() and not overwrite:
         raise FileExistsError(f"Output file already exists: {path}")
     descriptor, temporary_path = tempfile.mkstemp(
         dir=path.parent, prefix=f".{path.name}.tmp_"
@@ -96,8 +98,11 @@ def _write_text_new(path: Path, text: str) -> None:
     try:
         with os.fdopen(descriptor, "w", encoding="utf-8") as output_file:
             output_file.write(text)
-        os.link(temporary_path, path)
-        os.unlink(temporary_path)
+        if overwrite:
+            os.replace(temporary_path, path)
+        else:
+            os.link(temporary_path, path)
+            os.unlink(temporary_path)
     except BaseException:
         with contextlib.suppress(OSError):
             os.unlink(temporary_path)

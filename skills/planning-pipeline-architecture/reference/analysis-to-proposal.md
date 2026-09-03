@@ -22,7 +22,7 @@ Proposal records the decision from explicit source documents.
 
 - Persisted analysis document.
 - Supporting evidence documents.
-- Proposal workspace containing `PROPOSAL.md` and `implementation.md`.
+- Proposal workspace containing `PROPOSAL.md` with Implementation Details, Verification Criteria, and Questions sections, plus copied sources.
 
 ## Notes
 

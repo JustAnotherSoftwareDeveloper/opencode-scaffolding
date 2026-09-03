@@ -16,13 +16,13 @@ one task.
 
 ## Proposal Traceability
 
-Proposal-derived scope, constraints, decisions, and acceptance conditions remain
+Proposal-derived scope, constraints, decisions, and verification criteria remain
 recognizable in task context.
 
 Proposal section references and supporting source paths preserve the route from
 the task result back to the decision record.
 
-An implementation overview or acceptance condition does not become a generic workflow
+An implementation detail or verification criterion does not become a generic workflow
 stage merely because it appears in a proposal.
 
 Unsupported claims remain distinct from sourced requirements, assumptions, evidence
