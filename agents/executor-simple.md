@@ -13,15 +13,15 @@ Execute an existing canonical task plan without worker delegation.
 
 1. Read Task Plan
    Resolve the supplied path to a task JSON file under `.plans/` or `.tasks/`.
-   Read the file and parse its canonical `{summary, tasks}` object.
-   Require exactly the root fields `summary` and `tasks`.
-   Require a non-empty summary string and a non-empty tasks array.
-   Require exactly the canonical required task fields, with `verification` as the sole optional field.
+    Read the file and parse its complete canonical packet root.
+    Validate it through `skills/breakdown-tasks/schema/task-packet.schema.json`,
+    including the author-selected packet slug. Do not derive, normalize, or locally
+    validate the slug.
    Return `BLOCKED: <reason>` before display when the path or task data cannot be used.
 
 2. Display Tasks
    Load `display-tasks`.
-   Pass the complete `{summary, tasks}` object to the skill.
+    Pass the complete canonical packet root to the skill.
    Stop when `display-tasks` returns `BLOCKED:`.
    Display its Markdown table before execution.
 
@@ -41,6 +41,7 @@ Execute an existing canonical task plan without worker delegation.
 - Use the `read` tool only for the selected task JSON file at the controller level.
 - Load only `display-tasks` and `task-executor` at the controller level.
 - Keep task data unchanged between display and inline execution.
+- Preserve the packet slug unchanged in memory and all downstream handoffs.
 - Do not reorder, combine, parallelize, summarize, or rewrite task results.
 - Do not load task-declared skills directly.
 - Do not invoke the `task` tool.

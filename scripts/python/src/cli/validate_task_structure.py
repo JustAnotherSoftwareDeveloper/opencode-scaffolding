@@ -23,6 +23,7 @@ import click
 
 from lib.schema import load_schema
 from lib.validate_task_structure import auto_fix_task_structure, validate
+from lib.validate_task_structure.core import validate_root
 
 
 @click.command(name="validate-task-structure")
@@ -35,13 +36,14 @@ from lib.validate_task_structure import auto_fix_task_structure, validate
     "--stdin",
     is_flag=True,
     default=False,
-    help="Read task input from stdin instead of a file.",
+    help="Read a rootless JSON task array from stdin instead of a file.",
 )
 @click.option(
     "--state-file",
     type=click.Path(exists=True, dir_okay=False, readable=True),
     required=False,
-    help="Path to a .tasks state file (JSON object with 'tasks' array). "
+    help="Path to a canonical task-packet state file. This mode validates the "
+    "complete root object, including slug. "
     "Mutually exclusive with file_path and --stdin.",
 )
 @click.option(
@@ -67,8 +69,9 @@ def main(
     """Validate task objects from FILE_PATH, --stdin, or --state-file
     against a JSON Schema.
 
-    Reads a JSON array of task objects (or extracts them from a .tasks
-    state file) and validates each one against the task-packet schema.
+    File-path and stdin modes validate a rootless JSON array of task objects.
+    State-file mode validates the complete canonical task-packet root, then its
+    tasks. It does not treat a task array as a packet.
     Outputs ``{"valid": true}`` or ``{"valid": false, "errors": [...]}``
     to stdout.
     """
@@ -141,19 +144,13 @@ def main(
         raise SystemExit(2) from exc
 
     if state_file:
-        if not isinstance(parsed, dict) or "tasks" not in parsed:
-            click.echo(
-                "Error: --state-file must contain a JSON object with a 'tasks' array.",
-                err=True,
-            )
-            raise SystemExit(2)
-        tasks: list[dict] = parsed["tasks"]
-        if not isinstance(tasks, list):
-            click.echo(
-                "Error: 'tasks' in state file must be a JSON array.",
-                err=True,
-            )
-            raise SystemExit(2)
+        root_valid, root_errors = validate_root(parsed, schema_dict)
+        if not root_valid:
+            click.echo(json.dumps({"valid": False, "errors": root_errors}))
+            raise SystemExit(1)
+        assert isinstance(parsed, dict)
+        tasks = parsed["tasks"]
+        assert isinstance(tasks, list)
     else:
         if not isinstance(parsed, list):
             click.echo(

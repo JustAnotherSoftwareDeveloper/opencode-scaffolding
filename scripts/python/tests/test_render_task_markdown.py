@@ -16,6 +16,7 @@ VALID_CONTEXT = "x" * 200
 def _packet() -> dict:
     return {
         "summary": "Render a plan.",
+        "slug": "render-a-plan",
         "tasks": [
             {
                 "purpose": "Render Markdown.",
@@ -31,14 +32,17 @@ def _packet() -> dict:
 
 
 def test_render_task_markdown_writes_packet_content(tmp_path: Path) -> None:
+    packet = _packet()
     output = render_task_markdown(
-        _packet(),
+        packet,
         tmp_path / "tasks.md",
     )
     content = output.read_text()
     assert output == tmp_path / "tasks.md"
     assert "## Task 1: Render Markdown." in content
     assert content.startswith("# Task Plan\n")
+    assert packet["slug"] == "render-a-plan"
+    assert "render-a-plan" not in content
 
 
 def test_render_task_markdown_renders_verification_and_normalizes_input(
@@ -64,6 +68,7 @@ def test_render_task_markdown_rejects_invalid_packet(tmp_path: Path) -> None:
             {"summary": "bad", "tasks": []},
             tmp_path / "tasks.md",
         )
+    assert not (tmp_path / "tasks.md").exists()
 
 
 def test_render_task_markdown_rejects_non_markdown_output(tmp_path: Path) -> None:

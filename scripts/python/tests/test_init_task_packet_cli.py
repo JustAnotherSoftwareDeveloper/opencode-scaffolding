@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from click.testing import CliRunner
 
 from cli.init_task_packet import main
@@ -13,6 +14,7 @@ from cli.init_task_packet import main
 def _packet(**overrides: object) -> dict[str, object]:
     data: dict[str, object] = {
         "summary": "Test packet for init",
+        "slug": "test-packet-for-init",
         "tasks": [
             {
                 "purpose": "Init a packet.",
@@ -96,16 +98,59 @@ def test_rejects_existing_destination(tmp_path: Path, monkeypatch) -> None:
     assert "already exists" in result.output
 
 
-def test_derives_readable_slug(tmp_path: Path) -> None:
+def test_preserves_supplied_slug(tmp_path: Path) -> None:
     result = CliRunner().invoke(
         main,
         ["--output-dir", str(tmp_path)],
-        input=json.dumps(_packet(summary="Deploy the API Gateway")),
+        input=json.dumps(_packet(slug="deploy-api-gateway")),
     )
     assert result.exit_code == 0
     path = Path(result.output.strip())
-    assert "deploy-the-api-gateway" in path.name
+    assert "deploy-api-gateway" in path.name
     assert path.suffix == ".json"
+    assert json.loads(path.read_text(encoding="utf-8"))["slug"] == "deploy-api-gateway"
+
+
+def test_accepts_non_ascii_summary_without_deriving_a_slug(tmp_path: Path) -> None:
+    """Summary text is opaque; publication uses the supplied ASCII identity."""
+    result = CliRunner().invoke(
+        main,
+        ["--output-dir", str(tmp_path)],
+        input=json.dumps(
+            _packet(summary="公開用の計画 — naïve café", slug="published-plan")
+        ),
+    )
+
+    assert result.exit_code == 0, result.output
+    path = Path(result.output.strip())
+    assert path.name.endswith("-published-plan.json")
+    persisted = json.loads(path.read_text(encoding="utf-8"))
+    assert persisted["summary"] == "公開用の計画 — naïve café"
+    assert persisted["slug"] == "published-plan"
+
+
+@pytest.mark.parametrize(
+    "slug",
+    [None, "", "Uppercase", "unicode-ß", "repeated--separator", "a" * 81],
+)
+def test_rejects_missing_or_malformed_supplied_slug(
+    tmp_path: Path, slug: object
+) -> None:
+    packet = _packet()
+    if slug is None:
+        packet.pop("slug")
+    else:
+        packet["slug"] = slug
+
+    result = CliRunner().invoke(
+        main,
+        ["--output-dir", str(tmp_path)],
+        input=json.dumps(packet),
+    )
+
+    assert result.exit_code == 1
+    assert "slug" in result.output
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_help_works() -> None:

@@ -36,8 +36,10 @@ recorded decision authority explicitly authorized planning. Validation success,
    Resolve every source path.
    Block on a missing path, a non-file path, a target outside `$CWD`, or a target inside an existing plan workspace.
 
-2. **Create the workspace.** Derive a lowercase kebab-case summary slug and epoch-millisecond timestamp.
-   Create `.plans/<epoch-ms>-<slug>/` without replacing an existing directory.
+2. **Create the workspace.** Derive a workspace-directory summary slug and
+    epoch-millisecond timestamp. Create `.plans/<epoch-ms>-<workspace-slug>/`
+    without replacing an existing directory. This directory identity is distinct
+    from the packet slug.
    Create category subdirectories only when sources belong to them.
 
 3. **Copy sources.** Copy each source into its category directory.
@@ -76,7 +78,11 @@ recorded decision authority explicitly authorized planning. Validation success,
    Read any task-contract reference files needed for authoring explicitly.
    Block on an absent name, stale path, class mismatch, or load failure.
 
-8. **Author tasks.** Write a schema-valid `{summary, tasks}` object.
+8. **Author tasks.** Require the author to select one packet slug and write a
+    schema-valid canonical packet root. Preserve the selected packet slug unchanged;
+    its fields and constraints are owned by the canonical
+    [task-packet schema](../breakdown-tasks/schema/task-packet.schema.json), not this
+    workflow.
    Follow [task-authoring rules](reference/task-authoring.md) and consume the shared [task-contract semantics](../task-contract/reference/README.md) for task identity, atomicity, result and verification alignment, dependencies, coupling, traceability, and authoring metadata.
    Preserve copied relative source paths in `filesToRead`.
    Extract proposal-derived implementation details, verification criteria, and questions from one PROPOSAL.md and its copied sources.
@@ -95,7 +101,9 @@ recorded decision authority explicitly authorized planning. Validation success,
 10. **Inspect contracts.** Read each selected skill's `SKILL.md` at its collector-winning `path` from the array.
     Verify the contract matches the task.
 
-11. **Write the completed draft.** Write the completed `{summary, tasks}` object with every task's `skills` populated to the workspace as `draft.json`.
+11. **Write the completed draft.** Write the completed canonical packet root with
+    every task's `skills` populated to the workspace as `draft.json`, retaining the
+    author-selected packet slug unchanged.
 
 12. **Publish.** Run from the workspace directory:
 
@@ -104,7 +112,8 @@ recorded decision authority explicitly authorized planning. Validation success,
       --output-dir . < draft.json
     ```
 
-    Derive a safe filename, write atomically, and capture the printed output path.
+     Use the supplied packet slug for the filename, write atomically, and capture
+     the printed output path.
     Move the published file to `tasks.json` in the workspace root.
     Block on non-zero exit.
 
@@ -146,6 +155,8 @@ recorded decision authority explicitly authorized planning. Validation success,
 - Load the collector-winning `task-contract` documentation record before task authoring. Keep that load passive, documentation-only, and non-transitive; it is not an executable task assignment.
 - Do not score, rank, rerank, clip, or use lexical fallback.
 - Do not manually populate, correct, reorder, or remove `skills`.
+- Require an author-selected packet slug in every published root. Never derive,
+  normalize, or locally validate it; defer to the canonical task-packet schema.
 - Fail closed. Leave no partial outputs.
 - Planning loads are passive context. Only task-declared skills are executable.
 - Preserve source files, source paths, proposal traceability, task field order, and task context.

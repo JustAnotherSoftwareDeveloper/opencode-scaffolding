@@ -95,8 +95,11 @@ constraints, files, and expected outcome. Block when either is absent.
    collector-winning `path`. Verify that the contract matches the task.
 
 8. **Write the completed draft.** Add the reconciled `skills` arrays without
-   changing boundaries or metadata. Write the schema-valid `{summary, tasks}`
-   object to `/tmp/breakdown-draft.json`.
+    changing boundaries or metadata. Require the author to select one packet slug;
+    write the schema-valid canonical packet root to `/tmp/breakdown-draft.json`.
+    Preserve that packet slug unchanged. The canonical root fields and slug
+    constraints are owned by [the task-packet schema](schema/task-packet.schema.json),
+    not this workflow.
 
 9. **Publish for dispatch.** Run:
 
@@ -107,7 +110,8 @@ constraints, files, and expected outcome. Block when either is absent.
 
    Run from the workspace root so `.tasks` resolves there. The project option
    selects the scripts environment without changing the working directory. The
-   command derives a safe filename, writes atomically, and prints the output path.
+    command uses the supplied packet slug for the filename, writes atomically, and
+    prints the output path.
    Block on non-zero exit.
 
 10. **Validate and fix.** Run in a loop until valid. Treat repairable evidence gaps
@@ -142,6 +146,8 @@ Return the relative published packet path.
   documentation array for assignment. Do not swap them.
 - Do not recollect, rebuild metadata from names, or substitute paths.
 - Do not manually populate, correct, reorder, or remove `skills`.
+- Require an author-selected packet slug in every published root. Never derive,
+  normalize, or locally validate it; use the canonical task-packet schema.
 - Do not cap, target, or pad the number of tasks.
 - The one-to-three limit applies to `skills` within each task.
 - Fail closed. Publish no partial output.

@@ -266,47 +266,37 @@ class TestValidateFunction:
 
     # --- Missing required keys (caught by jsonschema) ---
 
-    def test_purpose_maxlength_exceeded(self, valid_task_1, schema_dict) -> None:
-        """purpose longer than 200 chars is rejected."""
+    def test_purpose_has_no_narrative_maximum(self, valid_task_1, schema_dict) -> None:
+        """Purpose text is not rejected by the removed narrative maximum."""
         task = dict(valid_task_1)
         task["purpose"] = "x" * 201
-        valid, errors = validate([task], schema_dict)
-        assert valid is False
-        assert any("too long" in e for e in errors)
-
-    def test_context_maxlength_exceeded(self, valid_task_1, schema_dict) -> None:
-        """context longer than 8000 chars is rejected."""
-        task = dict(valid_task_1)
-        task["context"] = "x" * 8001
-        valid, errors = validate([task], schema_dict)
-        assert valid is False
-        assert any("too long" in e for e in errors)
-
-    def test_context_below_minimum_is_rejected(self, valid_task_1, schema_dict) -> None:
-        """context shorter than 200 chars is rejected."""
-        task = dict(valid_task_1)
-        task["context"] = "x" * 199
-        valid, errors = validate([task], schema_dict)
-        assert valid is False
-        assert any("too short" in error for error in errors)
-
-    def test_context_at_minimum_is_accepted(self, valid_task_1, schema_dict) -> None:
-        """context with exactly 200 chars is accepted."""
-        task = dict(valid_task_1)
-        task["context"] = "x" * 200
         valid, errors = validate([task], schema_dict)
         assert valid is True
         assert errors == []
 
-    def test_expected_output_maxlength_exceeded(
+    def test_context_has_no_narrative_minimum_or_maximum(
         self, valid_task_1, schema_dict
     ) -> None:
-        """expectedOutput longer than 2000 chars is rejected."""
+        """Context accepts both short and formerly over-limit narrative text."""
+        task = dict(valid_task_1)
+        task["context"] = "x" * 8001
+        valid, errors = validate([task], schema_dict)
+        assert valid is True
+        assert errors == []
+        task["context"] = ""
+        valid, errors = validate([task], schema_dict)
+        assert valid is True
+        assert errors == []
+
+    def test_expected_output_has_no_narrative_maximum(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        """Expected-output text is not rejected by the removed maximum."""
         task = dict(valid_task_1)
         task["expectedOutput"] = "x" * 2001
         valid, errors = validate([task], schema_dict)
-        assert valid is False
-        assert any("too long" in e for e in errors)
+        assert valid is True
+        assert errors == []
 
     # --- Missing required keys (caught by jsonschema) ---
 
@@ -400,7 +390,7 @@ class TestValidateFunction:
         ]
         valid, errors = validate([task], schema_dict)
         assert valid is False
-        assert any("too long" in e for e in errors)
+        assert not any("too long" in e for e in errors)
         assert any("expected step 1" in e for e in errors)
 
 
@@ -447,13 +437,20 @@ class TestAutoFix:
         ]
         state_file = tmp_path / "state.json"
         state_file.write_text(
-            json.dumps({"summary": "Test state", "tasks": [valid_task_1]})
+            json.dumps(
+                {
+                    "summary": "Test state",
+                    "slug": "test-state",
+                    "tasks": [valid_task_1],
+                }
+            )
         )
 
         result = auto_fix_task_structure(state_file, schema_dict)
 
         assert result == {"valid": True, "fixed": True}
         persisted = json.loads(state_file.read_text())
+        assert persisted["slug"] == "test-state"
         assert persisted["tasks"][0]["skills"] == ["python", "testing", "linting"]
 
     def test_auto_fix_state_file_accepts_empty_skills(
@@ -463,7 +460,13 @@ class TestAutoFix:
         valid_task_1["skills"] = []
         state_file = tmp_path / "state.json"
         state_file.write_text(
-            json.dumps({"summary": "Test state", "tasks": [valid_task_1]})
+            json.dumps(
+                {
+                    "summary": "Test state",
+                    "slug": "test-state",
+                    "tasks": [valid_task_1],
+                }
+            )
         )
 
         result = auto_fix_task_structure(state_file, schema_dict)
@@ -478,7 +481,13 @@ class TestAutoFix:
         valid_task_1["skills"] = ["python", "python", "testing", "linting"]
         state_file = tmp_path / "state.json"
         state_file.write_text(
-            json.dumps({"summary": "Test state", "tasks": [valid_task_1]})
+            json.dumps(
+                {
+                    "summary": "Test state",
+                    "slug": "test-state",
+                    "tasks": [valid_task_1],
+                }
+            )
         )
 
         result = CliRunner().invoke(
@@ -506,33 +515,75 @@ class TestAutoFix:
         ):
             valid_task_1.pop(key)
         state_file = tmp_path / "state.json"
-        state_file.write_text(json.dumps({"tasks": [valid_task_1]}))
+        state_file.write_text(
+            json.dumps(
+                {
+                    "summary": "Test state",
+                    "slug": "test-state",
+                    "tasks": [valid_task_1],
+                }
+            )
+        )
         result = auto_fix_task_structure(state_file, schema_dict)
         assert result["valid"] is True
         assert result["fixed"] is False
         assert result["diagnostics"]
 
-    def test_auto_fix_state_rejects_non_array_tasks(
+    def test_auto_fix_state_rejects_non_array_tasks_before_writing(
         self, schema_dict: dict, tmp_path: Path
     ) -> None:
         state_file = tmp_path / "state.json"
-        state_file.write_text(json.dumps({"tasks": "not-an-array"}))
-        with pytest.raises(ValueError, match="tasks.*array"):
-            auto_fix_task_structure(state_file, schema_dict)
+        original = json.dumps(
+            {"summary": "Test", "slug": "test", "tasks": "not-an-array"}
+        )
+        state_file.write_text(original)
+        result = auto_fix_task_structure(state_file, schema_dict)
+        assert result["valid"] is False
+        assert state_file.read_text() == original
 
-    def test_auto_fix_state_rejects_non_object_task(
+    def test_auto_fix_state_rejects_non_object_task_before_writing(
         self, schema_dict: dict, tmp_path: Path
     ) -> None:
         state_file = tmp_path / "state.json"
-        state_file.write_text(json.dumps({"tasks": ["not-an-object"]}))
-        with pytest.raises(ValueError, match="JSON objects"):
-            auto_fix_task_structure(state_file, schema_dict)
+        original = json.dumps(
+            {"summary": "Test", "slug": "test", "tasks": ["not-an-object"]}
+        )
+        state_file.write_text(original)
+        result = auto_fix_task_structure(state_file, schema_dict)
+        assert result["valid"] is False
+        assert state_file.read_text() == original
+
+    @pytest.mark.parametrize(
+        "slug",
+        [None, "", "Uppercase", "unicode-ß", "repeated--separator", "a" * 81],
+    )
+    def test_auto_fix_rejects_invalid_slug_before_writing(
+        self, valid_task_1: dict, schema_dict: dict, tmp_path: Path, slug: object
+    ) -> None:
+        packet: dict[str, object] = {
+            "summary": "Test state",
+            "slug": slug,
+            "tasks": [valid_task_1],
+        }
+        if slug is None:
+            packet.pop("slug")
+        state_file = tmp_path / "state.json"
+        original = json.dumps(packet)
+        state_file.write_text(original)
+
+        result = auto_fix_task_structure(state_file, schema_dict)
+
+        assert result["valid"] is False
+        assert any("slug" in error for error in result["errors"])
+        assert state_file.read_text() == original
 
     def test_auto_fix_state_stops_after_three_changed_invalid_passes(
         self, valid_task_1: dict, schema_dict: dict, tmp_path: Path
     ) -> None:
         state_file = tmp_path / "state.json"
-        state_file.write_text(json.dumps({"tasks": [valid_task_1]}))
+        state_file.write_text(
+            json.dumps({"summary": "Test", "slug": "test", "tasks": [valid_task_1]})
+        )
         with (
             unittest.mock.patch(
                 "lib.validate_task_structure.core.auto_fix", return_value=True
@@ -915,19 +966,19 @@ class TestCliInvalid:
         assert data["valid"] is False
         assert len(data["errors"]) > 0
 
-    def test_maxlength_violation_returns_invalid(
+    def test_removed_narrative_maximum_returns_valid(
         self, valid_task_1, tmp_path: Path
     ) -> None:
-        """A task with purpose over 200 chars produces validation errors."""
+        """A task with formerly over-limit purpose text remains valid."""
         task = dict(valid_task_1)
         task["purpose"] = "x" * 201
         input_file = tmp_path / "bad.json"
         input_file.write_text(json.dumps([task]))
         runner = CliRunner()
         result = runner.invoke(main, [str(input_file), "--schema", str(SCHEMA_PATH)])
-        assert result.exit_code == 1, result.output
+        assert result.exit_code == 0, result.output
         data = json.loads(result.output)
-        assert data["valid"] is False
+        assert data["valid"] is True
 
     def test_bad_step_numbering_returns_invalid(
         self, valid_task_1, tmp_path: Path
@@ -1123,8 +1174,10 @@ class TestCliErrors:
         assert result.exit_code == 2
         assert "mutually exclusive" in result.output
 
-    def test_state_file_tasks_not_an_array(self, tmp_path: Path) -> None:
-        """State file with ``tasks`` that is not an array exits with code 2."""
+    def test_state_file_tasks_not_an_array_is_a_root_validation_failure(
+        self, tmp_path: Path
+    ) -> None:
+        """State-file mode rejects a malformed canonical root with code 1."""
         runner = CliRunner()
         state_file = tmp_path / "state.json"
         state_file.write_text(json.dumps({"tasks": "not an array"}))
@@ -1132,8 +1185,8 @@ class TestCliErrors:
             main,
             ["--state-file", str(state_file), "--schema", str(SCHEMA_PATH)],
         )
-        assert result.exit_code == 2
-        assert "must be a JSON array" in result.output
+        assert result.exit_code == 1
+        assert "tasks" in result.output
 
     def test_state_file_missing_tasks(self, tmp_path: Path) -> None:
         runner = CliRunner()
@@ -1143,8 +1196,8 @@ class TestCliErrors:
             main,
             ["--state-file", str(state_file), "--schema", str(SCHEMA_PATH)],
         )
-        assert result.exit_code == 2
-        assert "must contain a JSON object" in result.output
+        assert result.exit_code == 1
+        assert "tasks" in result.output
 
     def test_auto_fix_requires_state_file(self, tmp_path: Path) -> None:
         input_file = tmp_path / "tasks.json"

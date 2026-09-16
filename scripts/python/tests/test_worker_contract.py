@@ -39,11 +39,22 @@ def test_delegation_uses_flexible_resource_semantics_and_list_envelope() -> None
 
 def test_executor_preserves_approved_plan_without_status_only_routing() -> None:
     content = read("agents/executor.md")
-    assert "approved `{summary, tasks}` plan" in content
+    assert "approved canonical packet root, including its packet slug" in content
     assert "complete report" in content
     assert "Status is a routing signal" in content
     assert "sole acceptance criterion" in content
     assert "Do not reorder, combine, or parallelize tasks" in content
+
+
+def test_executor_contract_requires_and_preserves_the_supplied_slug() -> None:
+    for relative in (
+        "agents/executor.md",
+        "agents/executor-simple.md",
+        "agents/delegator.md",
+    ):
+        content = read(relative)
+        assert "slug" in content
+        assert "preserve" in content.lower()
 
 
 def test_inline_execution_does_not_turn_planning_into_authority() -> None:

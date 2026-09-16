@@ -5,11 +5,8 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "summary": {
-      "description": "One-paragraph summary of the overall user request, capturing its goal, scope, and constraints.",
-      "type": "string",
-      "maxLength": 2000
-    },
+    "summary": { "$ref": "task-packet.schema.json#/definitions/PacketSummary" },
+    "slug": { "$ref": "task-packet.schema.json#/definitions/PacketSlug" },
     "tasks": {
       "description": "An ordered, uncapped list of atomic TaskDraft objects. Create one draft per independently completable and verifiable concern. No skills field — skills are assigned inline by the LLM.",
       "type": "array",
@@ -17,7 +14,7 @@
       "minItems": 1
     }
   },
-  "required": ["summary", "tasks"],
+  "required": ["summary", "slug", "tasks"],
   "definitions": {
     "TaskDraft": {
       "type": "object",
@@ -29,17 +26,8 @@
           "type": "string",
           "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
         },
-        "purpose": {
-          "description": "Single sentence describing what this task accomplishes. Must be actionable and self-contained.",
-          "type": "string",
-          "maxLength": 200
-        },
-        "context": {
-          "description": "Task-specific context for the worker. Include the relevant user-request details, background information, and constraints. Do not add filler text.",
-          "type": "string",
-          "minLength": 200,
-          "maxLength": 8000
-        },
+        "purpose": { "$ref": "task-packet.schema.json#/definitions/TaskPurpose" },
+        "context": { "$ref": "task-packet.schema.json#/definitions/TaskContext" },
         "filesToRead": {
           "description": "Explicit list of file paths the worker must read before starting. Purposeful task-related discovery remains permitted under the worker contract.",
           "type": "array",
@@ -80,11 +68,7 @@
           "minItems": 1,
           "uniqueItems": true
         },
-        "expectedOutput": {
-          "description": "Precise description of the Deliverable payload this task produces.",
-          "type": "string",
-          "maxLength": 2000
-        },
+        "expectedOutput": { "$ref": "task-packet.schema.json#/definitions/TaskExpectedOutput" },
         "verificationCoverage": {
           "description": "Observable checks covering this draft task's result.",
           "type": "object",

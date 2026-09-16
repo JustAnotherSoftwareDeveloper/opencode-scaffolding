@@ -6,7 +6,7 @@ This script is invoked as:
 
 Exit codes:
   0 — Success, output path printed to stdout.
-  1 — Invalid input (missing summary, malformed JSON).
+  1 — Invalid packet (including a missing or malformed canonical slug).
   2 — File-system error (collision, write failure).
 """
 
@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import tempfile
 import time
 from contextlib import suppress
@@ -22,16 +21,8 @@ from pathlib import Path
 
 import click
 
-_SLUG_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
-
-
-def _derive_slug(summary: str) -> str:
-    slug = re.sub(r"[^a-z0-9]+", "-", summary.lower()).strip("-")
-    if not _SLUG_RE.fullmatch(slug):
-        raise ValueError(
-            f"cannot derive a valid slug from summary: {summary!r}"
-        )
-    return slug
+from lib.schema import load_task_packet_schema
+from lib.validate_task_structure.core import validate_root
 
 
 @click.command(name="init-task-packet")
@@ -45,8 +36,8 @@ def _derive_slug(summary: str) -> str:
 def main(output_dir: Path) -> None:
     """Atomically publish a task packet read from stdin.
 
-    Reads a JSON object from stdin.  Derives a safe kebab-case filename slug from
-    the ``summary`` field, prepends an epoch-millisecond timestamp, and writes
+    Reads a complete canonical task-packet JSON object from stdin. Preserves its
+    supplied ``slug`` unchanged, prepends an epoch-millisecond timestamp, and writes
     the object to ``<output-dir>/<timestamp>-<slug>.json``.
 
     Existing destination files are never replaced.
@@ -67,16 +58,25 @@ def main(output_dir: Path) -> None:
         click.echo("Error: stdin JSON must be an object", err=True)
         raise SystemExit(1)
 
-    summary = data.get("summary")
-    if not isinstance(summary, str) or not summary.strip():
-        click.echo("Error: packet must contain a non-empty summary string", err=True)
+    try:
+        schema = load_task_packet_schema()
+    except Exception as exc:
+        click.echo(
+            f"Error: failed to load canonical task-packet schema: {exc}", err=True
+        )
+        raise SystemExit(2) from exc
+
+    valid, errors = validate_root(data, schema)
+    if not valid:
+        click.echo(
+            "Error: packet must satisfy the canonical task-packet schema: "
+            + "; ".join(errors),
+            err=True,
+        )
         raise SystemExit(1)
 
-    try:
-        slug = _derive_slug(summary)
-    except ValueError as exc:
-        click.echo(f"Error: {exc}", err=True)
-        raise SystemExit(1) from exc
+    slug = data["slug"]
+    assert isinstance(slug, str)  # Established by canonical root validation.
 
     timestamp = time.time_ns() // 1_000_000
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -94,7 +94,7 @@ def main(output_dir: Path) -> None:
         os.link(tmp, destination)
     except FileExistsError:
         click.echo(f"Error: output already exists: {destination}", err=True)
-        raise SystemExit(2)
+        raise SystemExit(2) from None
     except OSError as exc:
         click.echo(f"Error: writing output: {exc}", err=True)
         raise SystemExit(2) from exc

@@ -117,7 +117,7 @@ def _plan(root: Path, tasks: list[dict[str, Any]], *, include_brief: bool = True
     _write(root / "tasks.md", "# Tasks\n\nProduce the immutable audit report\n")
     (root / "analysis").mkdir(parents=True, exist_ok=True)
     _write(root / "analysis/source.md", "# Copied source\nThe source supports the selected direction.\n")
-    _write(root / "tasks.json", json.dumps({"summary": "audit fixture", "tasks": tasks}, indent=2))
+    _write(root / "tasks.json", json.dumps({"summary": "audit fixture", "slug": "audit-fixture", "tasks": tasks}, indent=2))
 
 
 def _collector(root: Path, *, task_contract: bool = False) -> list[dict[str, Any]]:
@@ -185,6 +185,19 @@ def test_clean_report_is_composite_and_read_only(tmp_path: Path) -> None:
     assert result.report_path.read_text(encoding="utf-8").startswith("# Plan Audit Report")
     after = {path: path.read_bytes() for path in [*plan.rglob("*"), *proposal.rglob("*")] if path.is_file()}
     assert before == after
+    assert json.loads((plan / "tasks.json").read_text(encoding="utf-8"))["slug"] == "audit-fixture"
+
+
+def test_missing_packet_slug_fails_closed_as_a_schema_error(tmp_path: Path) -> None:
+    raw, plan, _ = _input(tmp_path)
+    packet = json.loads((plan / "tasks.json").read_text(encoding="utf-8"))
+    packet.pop("slug")
+    _write(plan / "tasks.json", json.dumps(packet))
+
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+
+    assert result.checks[1].disposition == "FAIL"
+    assert any(item.criterion == "PACKET-SCHEMA" for item in result.checks[1].diagnostics)
 
 
 def test_compound_task_fails_only_atomicity_and_keeps_sections(tmp_path: Path) -> None:

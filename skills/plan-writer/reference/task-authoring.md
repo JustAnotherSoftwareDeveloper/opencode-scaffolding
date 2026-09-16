@@ -6,7 +6,10 @@ task identity, atomicity, one-result and verification alignment, dependency and
 coupling meaning, source and proposal traceability, and authoring metadata.
 Do not restate those invariants here.
 
-Produce one root object with `summary` and `tasks`.
+Require the author to select a packet slug and produce the canonical packet root.
+Preserve that packet slug unchanged. The canonical root fields and slug constraints
+belong to the [task-packet schema](../../breakdown-tasks/schema/task-packet.schema.json);
+do not restate or locally validate them here.
 
 Produce TaskDraft objects without a `skills` field after reviewing boundaries
 against the shared task contract.

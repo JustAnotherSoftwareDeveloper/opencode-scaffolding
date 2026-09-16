@@ -5,11 +5,8 @@
   "type": "object",
   "additionalProperties": false,
         "properties": {
-    "summary": {
-      "description": "One-paragraph summary of the overall user request, capturing its goal, scope, and constraints. This gives downstream workers context without requiring them to re-read the full prompt.",
-      "type": "string",
-      "maxLength": 2000
-    },
+    "summary": { "$ref": "#/definitions/PacketSummary" },
+    "slug": { "$ref": "#/definitions/PacketSlug" },
     "tasks": {
       "description": "An ordered, uncapped list of atomic delegation packets. Create as many tasks as the independent work requires; each task must represent one unit of work that can be completed and verified independently.",
       "type": "array",
@@ -19,8 +16,31 @@
         "minItems": 1
     }
   },
-  "required": ["summary", "tasks"],
+  "required": ["summary", "slug", "tasks"],
   "definitions": {
+    "PacketSlug": {
+      "description": "Required lowercase ASCII kebab-case identity for this packet. It is preserved unchanged by packet consumers and publishers.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "PacketSummary": {
+      "description": "One-paragraph summary of the overall user request, capturing its goal, scope, and constraints. This gives downstream workers context without requiring them to re-read the full prompt.",
+      "type": "string"
+    },
+    "TaskPurpose": {
+      "description": "Single sentence describing what this task accomplishes. Must be actionable and self-contained.",
+      "type": "string"
+    },
+    "TaskContext": {
+      "description": "Task-specific context for the worker. Include the relevant user-request details, background information, and constraints. Do not add filler text.",
+      "type": "string"
+    },
+    "TaskExpectedOutput": {
+      "description": "Precise description of the Deliverable payload this task produces. Use concrete language such as file paths, function names, and data formats.",
+      "type": "string"
+    },
     "TaskPacket": {
       "type": "object",
       "additionalProperties": false,
@@ -30,17 +50,8 @@
           "type": "string",
           "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
         },
-        "purpose": {
-          "description": "Single sentence describing what this task accomplishes. Must be actionable and self-contained.",
-          "type": "string",
-          "maxLength": 200
-        },
-        "context": {
-          "description": "Task-specific context for the worker. Include the relevant user-request details, background information, and constraints. Do not add filler text. Supports longer prompts up to 8000 characters.",
-          "type": "string",
-          "minLength": 200,
-          "maxLength": 8000
-        },
+        "purpose": { "$ref": "#/definitions/TaskPurpose" },
+        "context": { "$ref": "#/definitions/TaskContext" },
         "filesToRead": {
           "description": "Explicit list of file paths the worker must read before starting. Purposeful task-related discovery remains permitted under the worker contract.",
           "type": "array",
@@ -92,11 +103,7 @@
           "minItems": 1,
           "uniqueItems": true
         },
-        "expectedOutput": {
-          "description": "Precise description of the Deliverable payload this task produces. Use concrete language such as file paths, function names, and data formats.",
-          "type": "string",
-          "maxLength": 2000
-        },
+        "expectedOutput": { "$ref": "#/definitions/TaskExpectedOutput" },
         "verificationCoverage": {
           "description": "Optional publication metadata describing observable checks for this task. Omission is migration-compatible and is diagnosed as a warning.",
           "type": "object",

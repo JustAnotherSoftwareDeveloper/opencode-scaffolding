@@ -34,9 +34,9 @@ validation procedure and diagnostics; they do not replace that passive reference
   explicitly requested as a deliverable. Enforce one to three skills separately.
 
 - **JSON validity** — The entire output must be parseable as valid JSON.
-- **JSON object structure** — The parsed result must be an object with `summary`
-  (string) and `tasks` (array) properties.
-- **Root key strictness** — The root object must contain only `summary` and `tasks`.
+- **Canonical root** — Validate the entire parsed object against the canonical
+  [task-packet schema](../../schema/task-packet.schema.json), including the
+  author-selected packet slug. Do not restate or locally validate root grammar.
 - **Schema compliance** — Every task must have `purpose`, `context`,
   `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, and
   `expectedOutput`. Missing or extra keys are a blocker.

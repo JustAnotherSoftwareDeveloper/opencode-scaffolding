@@ -21,6 +21,9 @@ def test_publish_uses_init_task_packet() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "init-task-packet" in text
     assert "--output-dir .tasks" in text
+    assert "Require the author to select one packet slug" in text
+    assert "Never derive," in text
+    assert "normalize, or locally validate it" in text
 
 
 def test_commands_select_project_without_changing_working_directory() -> None:

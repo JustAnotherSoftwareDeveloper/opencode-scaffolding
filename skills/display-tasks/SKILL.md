@@ -20,7 +20,9 @@ Render canonical `breakdown-tasks` output into a Markdown table with only safe u
 ## Input
 
 Accept exactly one canonical `breakdown-tasks` JSON object.
-The root object must contain only `summary` and `tasks`.
+Validate the complete canonical root, including its author-selected packet slug,
+against `skills/breakdown-tasks/schema/task-packet.schema.json`. Do not restate or
+locally validate slug grammar.
 The `tasks` array must contain task objects with `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, and `expectedOutput`.
 Task objects may also contain `verification`.
 Reject plaintext packets, bare JSON arrays, single task objects, and non-canonical fields.
@@ -53,7 +55,7 @@ One row per item in `tasks`.
 ## Execution Plan
 
 1. Parse input as JSON.
-2. Verify the parsed value is an object with `summary` and `tasks`.
+2. Validate the parsed value as the complete canonical packet root.
 3. Verify `tasks` is a non-empty array.
 4. Reject the input with `BLOCKED: display-tasks requires canonical breakdown-tasks JSON output.` if any check fails.
 5. Extract fields per [Extraction Rules](#extraction-rules) for each task.
@@ -69,4 +71,6 @@ One row per item in `tasks`.
 - Do not modify or execute the packet contents.
   This is a rendering helper only.
 - Do not accept non-canonical packet shapes.
+- Preserve the packet slug unchanged in memory. Do not render it: packet-slug
+  display is deferred pending the repository maintainer's display-policy decision.
 - Do not normalize arrays, single task objects, or plaintext packets.

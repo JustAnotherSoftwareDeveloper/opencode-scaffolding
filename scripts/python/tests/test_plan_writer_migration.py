@@ -82,6 +82,9 @@ def test_frontmatter_and_shared_contract_are_cut_over_before_authoring() -> None
     assert "init-task-packet" in workflow
     assert "validate-task-structure" in workflow
     assert "--state-file tasks.json" in workflow
+    assert "Require the author to select one packet slug" in workflow
+    assert "Never derive," in workflow
+    assert "normalize, or locally validate it" in workflow
 
 
 def test_script_reference_matches_publication_and_validation_contract() -> None:
@@ -99,6 +102,7 @@ def test_script_reference_matches_publication_and_validation_contract() -> None:
 def test_documented_state_file_validator_form_executes(tmp_path: Path) -> None:
     packet = {
         "summary": "validator command fixture",
+        "slug": "validator-command-fixture",
         "tasks": [
             {
                 "purpose": "Validate one task packet.",

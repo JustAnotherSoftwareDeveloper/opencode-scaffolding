@@ -31,7 +31,11 @@ def render_task_markdown(
     *,
     overwrite: bool = False,
 ) -> Path:
-    """Validate *data* and atomically write its Markdown representation."""
+    """Validate the canonical packet root and atomically render its Markdown.
+
+    The required packet ``slug`` remains part of the validated in-memory object,
+    but is intentionally not rendered until the display policy is resolved.
+    """
     errors = validate_json_schema(data, load_schema(OUTPUT_SCHEMA_PATH))
     if errors:
         raise RenderValidationError(

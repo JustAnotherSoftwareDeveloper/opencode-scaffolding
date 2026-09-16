@@ -63,6 +63,38 @@ def _diagnostic(level: str, criterion: str, path: str, message: str) -> str:
     return f"{level} [{criterion}] {path}: {message}"
 
 
+def _root_schema_errors(
+    packet: Any, schema: dict[str, Any]
+) -> list[jsonschema.ValidationError]:
+    """Return deterministic canonical-root schema errors for *packet*."""
+    validator = jsonschema.Draft7Validator(
+        schema, format_checker=jsonschema.Draft7Validator.FORMAT_CHECKER
+    )
+    return sorted(
+        validator.iter_errors(packet),
+        key=lambda error: (
+            tuple(str(part) for part in error.absolute_path),
+            error.message,
+        ),
+    )
+
+
+def validate_root(packet: Any, schema: dict[str, Any]) -> tuple[bool, list[str]]:
+    """Validate a complete task-packet root against its canonical schema.
+
+    Unlike :func:`validate`, this validates the enclosing object, including its
+    required ``summary`` and immutable ``slug`` identity, and rejects extra roots.
+    """
+    errors = _root_schema_errors(packet, schema)
+    if errors:
+        return False, [
+            f"{'.'.join(str(part) for part in error.absolute_path) or '$'}: "
+            f"{error.message}"
+            for error in errors
+        ]
+    return True, []
+
+
 def _task_identity(task: dict[str, Any], index: int) -> str:
     """Return an explicit identity, or the stable migration identity."""
     value = task.get("taskId")
@@ -382,9 +414,14 @@ def validate(
         if isinstance(minimum, int) and len(tasks) < minimum:
             errors.append(f"tasks: expected at least {minimum} task")
 
-    task_schema: dict[str, Any] = schema.get("definitions", {}).get(
-        "TaskPacket", schema
+    task_schema: dict[str, Any] = dict(
+        schema.get("definitions", {}).get("TaskPacket", schema)
     )
+    # Rootless task-array modes intentionally validate only TaskPacket objects,
+    # but their properties retain local refs to the canonical schema's shared
+    # definitions. Carry those definitions into the task schema rather than
+    # treating a task array as a packet root.
+    task_schema["definitions"] = schema.get("definitions", {})
 
     for idx, task in enumerate(tasks):
         path = f"tasks[{idx}]"
@@ -490,17 +527,33 @@ def auto_fix_task_structure(
     # Read initial state
     raw = state_path.read_text(encoding="utf-8")
     parsed: object = json.loads(raw)
+    root_errors = _root_schema_errors(parsed, schema)
+    if root_errors and not _only_repairable_skills_errors(root_errors):
+        return {"valid": False, "errors": _format_root_errors(root_errors)}
+
+    # The only permitted pre-validation exception is a skills-array violation
+    # that auto_fix() can remove. Every other canonical-root violation is
+    # rejected before task checks and, importantly, before any write.
     if not isinstance(parsed, dict) or not isinstance(parsed.get("tasks"), list):
-        raise ValueError("state file must contain a JSON object with a 'tasks' array")
+        return {
+            "valid": False,
+            "errors": _format_root_errors(root_errors),
+        }
     tasks = parsed["tasks"]
     if not all(isinstance(task, dict) for task in tasks):
-        raise ValueError("state file tasks must contain JSON objects")
+        return {
+            "valid": False,
+            "errors": _format_root_errors(root_errors),
+        }
 
     fixed = False
     errors: list[str] = []
     for _ in range(3):
         changed = auto_fix(tasks)
         fixed = fixed or changed
+        root_errors = _root_schema_errors(parsed, schema)
+        if root_errors:
+            return {"valid": False, "errors": _format_root_errors(root_errors)}
         valid, errors = validate(tasks, schema)
         if valid:
             if fixed:
@@ -516,3 +569,23 @@ def auto_fix_task_structure(
             return {"valid": False, "errors": errors}
 
     return {"valid": False, "errors": errors}
+
+
+def _only_repairable_skills_errors(
+    errors: list[jsonschema.ValidationError],
+) -> bool:
+    """Whether every root-schema error is a skills array limit/duplicate error."""
+    return bool(errors) and all(
+        list(error.absolute_path)[-1:] == ["skills"]
+        and error.validator in {"maxItems", "uniqueItems"}
+        for error in errors
+    )
+
+
+def _format_root_errors(errors: list[jsonschema.ValidationError]) -> list[str]:
+    """Format schema errors consistently with :func:`validate_root`."""
+    return [
+        f"{'.'.join(str(part) for part in error.absolute_path) or '$'}: "
+        f"{error.message}"
+        for error in errors
+    ]

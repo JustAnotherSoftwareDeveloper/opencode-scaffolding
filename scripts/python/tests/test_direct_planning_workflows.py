@@ -18,6 +18,8 @@ def test_both_workflows_use_two_collector_calls_and_inline_assignment() -> None:
         assert "one to three" in lowered
         assert "never score" in lowered or "do not score" in lowered
         assert "init-task-packet" in text
+        assert "packet slug" in lowered
+        assert "never derive" in lowered
 
 
 def test_breakdown_prohibits_obsolete_selection_patterns() -> None:
@@ -33,3 +35,13 @@ def test_plan_preserves_sources_and_fail_closed_publication() -> None:
     assert "fail closed" in text
     assert "tasks.md" in text
     assert "validate-task-structure" in text
+
+
+def test_dispatch_and_display_require_a_canonical_slug_without_derivation() -> None:
+    dispatch = (ROOT / "skills/dispatch-decompose/SKILL.md").read_text(encoding="utf-8")
+    display = (ROOT / "skills/display-tasks/SKILL.md").read_text(encoding="utf-8")
+
+    assert "select a packet slug" in dispatch
+    assert "preserve it unchanged" in dispatch
+    assert "including its author-selected packet slug" in display
+    assert "Do not restate or\nlocally validate slug grammar" in display

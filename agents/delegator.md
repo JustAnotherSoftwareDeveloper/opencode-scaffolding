@@ -27,9 +27,9 @@ uncertainty remains about scope, safety, or the user's goal.
    defect. Never turn that feedback into a new user outcome.
 2. **Read and validate metadata.** Read only the returned `.tasks/*.json` path. Parse
    JSON, allowing one fenced JSON block only as a recovery for a non-JSON response.
-   Require a non-empty `summary`, a non-empty `tasks` array, and the canonical packet
-   fields (`purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`,
-   `executionInstructions`, and `expectedOutput`) on every task. A malformed path,
+    Validate the complete canonical root, including the author-selected packet slug,
+    against `skills/breakdown-tasks/schema/task-packet.schema.json`; preserve the slug
+    unchanged in memory and downstream dispatch. A malformed path,
    file, or root is a problem to diagnose — repair obvious discrepancies, infer what
    you can from context, and block only when the metadata is genuinely unusable.
 3. **Review before display.** Compare the task set with the original request and
@@ -44,7 +44,7 @@ uncertainty remains about scope, safety, or the user's goal.
    Do not display or dispatch an unresolved plan. Stop if decomposition does not
    converge or a further attempt would change intent.
 5. **Display the approved plan.** Load `display-tasks` only after semantic review.
-   Pass the reviewed in-memory `{summary, tasks}` object to it and show its result.
+    Pass the reviewed in-memory canonical packet root to it and show its result.
    Never expose raw packet sections and never pass rendered display text to a worker.
 6. **Dispatch serially.** For each approved task, load `task-delegation` and pass the
    reviewed task object. The skill launches exactly one `worker` and validates the

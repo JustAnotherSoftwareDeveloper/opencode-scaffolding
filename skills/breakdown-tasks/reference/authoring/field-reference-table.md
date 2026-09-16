@@ -14,6 +14,12 @@ references. The fields below are structural interface notes only.
 
 ## Root-Level Fields
 
+- **`slug`**
+  - Required: yes
+  - Description: Author-selected packet identity, preserved unchanged by publishers
+    and consumers. Its type and constraints belong exclusively to the canonical
+    [task-packet schema](../../schema/task-packet.schema.json).
+
 - **`summary`**
   - Type: `string`
   - Required: yes

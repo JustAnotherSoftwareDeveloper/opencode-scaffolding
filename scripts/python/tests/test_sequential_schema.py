@@ -69,9 +69,31 @@ def root_validator(schema_dict: dict) -> jsonschema.Draft7Validator:
 
 
 @pytest.fixture(scope="module")
+def input_schema_dict() -> dict:
+    """Load the pre-assignment draft schema once per module."""
+    return load_schema(TASK_INPUT_SCHEMA_PATH)
+
+
+@pytest.fixture(scope="module")
+def input_root_validator(input_schema_dict: dict) -> jsonschema.Draft7Validator:
+    """Draft validator that resolves shared published-schema definitions."""
+    resolver = jsonschema.RefResolver(
+        base_uri=TASK_INPUT_SCHEMA_PATH.as_uri(), referrer=input_schema_dict
+    )
+    return jsonschema.Draft7Validator(
+        input_schema_dict,
+        resolver=resolver,
+        format_checker=jsonschema.Draft7Validator.FORMAT_CHECKER,
+    )
+
+
+@pytest.fixture(scope="module")
 def task_validator(schema_dict: dict) -> jsonschema.Draft7Validator:
     """Draft7Validator for the TaskPacket definition."""
-    task_schema = schema_dict["definitions"]["TaskPacket"]
+    task_schema = {
+        "$ref": "#/definitions/TaskPacket",
+        "definitions": schema_dict["definitions"],
+    }
     return jsonschema.Draft7Validator(
         task_schema,
         format_checker=jsonschema.Draft7Validator.FORMAT_CHECKER,
@@ -120,6 +142,30 @@ def full_task() -> dict:
     }
 
 
+@pytest.fixture
+def minimal_draft_task() -> dict:
+    """A valid pre-assignment task with required draft metadata and no skills."""
+    return {
+        "taskId": "schema-contract",
+        "purpose": "Validate the draft schema invariants",
+        "context": (
+            "Brief draft context is valid because canonical narrative limits are not "
+            "imposed."
+        ),
+        "filesToRead": ["src/schema.json"],
+        "filesToWrite": ["src/output.py"],
+        "executionInstructions": [{"step": 1, "action": "Validate the draft"}],
+        "expectedOutput": "Validation report",
+        "verificationCoverage": {"observable": ["Draft validates"]},
+        "dependencies": [],
+        "antiPatternSignals": ["none"],
+        "purposeOutputAlignment": {
+            "status": "aligned",
+            "evidence": "Output is the validation report.",
+        },
+    }
+
+
 # ===========================================================================
 # TestValidPacketsWithoutDependencies
 # ===========================================================================
@@ -149,6 +195,7 @@ class TestValidPacketsWithoutDependencies:
         """Multiple tasks in the root ``tasks`` array pass root schema."""
         packet = {
             "summary": "Break down the sequential schema validation work.",
+            "slug": "sequential-schema-validation",
             "tasks": [minimal_task, full_task],
         }
         root_validator.validate(packet)
@@ -161,6 +208,20 @@ class TestValidPacketsWithoutDependencies:
         """A single task in the root ``tasks`` array is valid (minItems: 1)."""
         packet = {
             "summary": "Single task for the sequential schema.",
+            "slug": "single-sequential-task",
+            "tasks": [minimal_task],
+        }
+        root_validator.validate(packet)
+
+    def test_non_ascii_summary_is_valid_when_slug_is_supplied(
+        self,
+        root_validator: jsonschema.Draft7Validator,
+        minimal_task: dict,
+    ) -> None:
+        """Packet identity is explicit, so summary text needs no slug conversion."""
+        packet = {
+            "summary": "公開用の計画 — naïve café",
+            "slug": "published-plan",
             "tasks": [minimal_task],
         }
         root_validator.validate(packet)
@@ -208,7 +269,7 @@ class TestInvalidPacketsWithDependencies:
         self, root_validator: jsonschema.Draft7Validator
     ) -> None:
         """An empty tasks array violates ``minItems: 1``."""
-        packet = {"summary": "No tasks.", "tasks": []}
+        packet = {"summary": "No tasks.", "slug": "no-tasks", "tasks": []}
         with pytest.raises(jsonschema.ValidationError):
             root_validator.validate(packet)
 
@@ -216,7 +277,7 @@ class TestInvalidPacketsWithDependencies:
         self, root_validator: jsonschema.Draft7Validator, minimal_task: dict
     ) -> None:
         """Root packet missing required ``summary`` field is rejected."""
-        packet = {"tasks": [minimal_task]}
+        packet = {"slug": "missing-summary", "tasks": [minimal_task]}
         with pytest.raises(jsonschema.ValidationError):
             root_validator.validate(packet)
 
@@ -224,7 +285,7 @@ class TestInvalidPacketsWithDependencies:
         self, root_validator: jsonschema.Draft7Validator
     ) -> None:
         """Root packet missing required ``tasks`` field is rejected."""
-        packet = {"summary": "No tasks array."}
+        packet = {"summary": "No tasks array.", "slug": "missing-tasks"}
         with pytest.raises(jsonschema.ValidationError):
             root_validator.validate(packet)
 
@@ -234,6 +295,7 @@ class TestInvalidPacketsWithDependencies:
         """Root schema with unknown field violates ``additionalProperties: false``."""
         packet = {
             "summary": "Has extra field.",
+            "slug": "extra-root-field",
             "tasks": [minimal_task],
             "extraRootField": True,
         }
@@ -250,9 +312,9 @@ class TestSchemaStructuralInvariants:
     """Structural invariants of the task-packet schema itself."""
 
     def test_root_required_fields(self, schema_dict: dict) -> None:
-        """Root schema requires ``summary`` and ``tasks``."""
+        """Root schema requires ``summary``, ``slug``, and ``tasks``."""
         assert "required" in schema_dict
-        assert schema_dict["required"] == ["summary", "tasks"]
+        assert schema_dict["required"] == ["summary", "slug", "tasks"]
 
     def test_root_additional_properties_false(self, schema_dict: dict) -> None:
         """Root schema enforces ``additionalProperties: false``."""
@@ -297,9 +359,8 @@ class TestSchemaStructuralInvariants:
     def test_task_packet_enforces_context_and_instruction_limits(
         self, schema_dict: dict
     ) -> None:
-        """TaskPacket requires concise context and at most five steps."""
+        """TaskPacket retains operational instruction and skill limits."""
         props = schema_dict["definitions"]["TaskPacket"]["properties"]
-        assert props["context"]["minLength"] == 200
         assert props["executionInstructions"]["maxItems"] == 5
         assert props["skills"]["maxItems"] == 3
 
@@ -322,6 +383,7 @@ class TestSchemaStructuralInvariants:
         }
         packet = {
             "summary": "Verify an uncapped task packet.",
+            "slug": "uncapped-task-packet",
             "tasks": [dict(task) for _ in range(6)],
         }
         jsonschema.validate(packet, schema_dict)
@@ -330,7 +392,12 @@ class TestSchemaStructuralInvariants:
         """The packet schema rejects an empty task list."""
         with pytest.raises(jsonschema.ValidationError):
             jsonschema.validate(
-                {"summary": "An empty packet is invalid.", "tasks": []}, schema_dict
+                {
+                    "summary": "An empty packet is invalid.",
+                    "slug": "empty-packet",
+                    "tasks": [],
+                },
+                schema_dict,
             )
 
     def test_candidate_schema_matches_packet_metadata_without_skills(self) -> None:
@@ -355,6 +422,102 @@ class TestSchemaStructuralInvariants:
             "antiPatternSignals",
             "purposeOutputAlignment",
         }
+
+    def test_roots_require_and_validate_the_same_slug(
+        self,
+        root_validator: jsonschema.Draft7Validator,
+        input_root_validator: jsonschema.Draft7Validator,
+        minimal_task: dict,
+        minimal_draft_task: dict,
+    ) -> None:
+        """Both strict roots accept valid slugs and reject malformed or absent ones."""
+        published = {
+            "summary": "Published root with a supplied identity.",
+            "slug": "published-root",
+            "tasks": [minimal_task],
+        }
+        draft = {
+            "summary": "Draft root with a supplied identity.",
+            "slug": "draft-root",
+            "tasks": [minimal_draft_task],
+        }
+        root_validator.validate(published)
+        input_root_validator.validate(draft)
+
+        invalid_slugs = ("", "Uppercase", "unicode-ß", "repeated--separator", "a" * 81)
+        for invalid_slug in invalid_slugs:
+            with pytest.raises(jsonschema.ValidationError):
+                root_validator.validate(dict(published, slug=invalid_slug))
+            with pytest.raises(jsonschema.ValidationError):
+                input_root_validator.validate(dict(draft, slug=invalid_slug))
+
+        validators_and_packets = (
+            (root_validator, published),
+            (input_root_validator, draft),
+        )
+        for validator, packet in validators_and_packets:
+            with pytest.raises(jsonschema.ValidationError):
+                validator.validate(
+                    {key: value for key, value in packet.items() if key != "slug"}
+                )
+            with pytest.raises(jsonschema.ValidationError):
+                validator.validate(dict(packet, extraRootField=True))
+
+    def test_draft_omits_skills_but_references_shared_constraints(
+        self,
+        input_root_validator: jsonschema.Draft7Validator,
+        minimal_draft_task: dict,
+    ) -> None:
+        """Draft allows unconstrained narrative fields and rejects skills."""
+        draft = {
+            "summary": "A" * 2001,
+            "slug": "draft-shared-constraints",
+            "tasks": [
+                dict(
+                    minimal_draft_task,
+                    purpose="P" * 201,
+                    context="",
+                    expectedOutput="E" * 2001,
+                )
+            ],
+        }
+        input_root_validator.validate(draft)
+        with pytest.raises(jsonschema.ValidationError):
+            input_root_validator.validate(
+                dict(draft, tasks=[dict(minimal_draft_task, skills=["python"])])
+            )
+
+    def test_draft_shared_fields_resolve_to_published_definitions(self) -> None:
+        """The draft has no copied slug grammar or changed narrative constraints."""
+        packet_schema = load_schema(SCHEMA_PATH)
+        input_schema = load_schema(TASK_INPUT_SCHEMA_PATH)
+        resolver = jsonschema.RefResolver(
+            base_uri=TASK_INPUT_SCHEMA_PATH.as_uri(), referrer=input_schema
+        )
+        shared_fields = {
+            "summary": "PacketSummary",
+            "slug": "PacketSlug",
+            "purpose": "TaskPurpose",
+            "context": "TaskContext",
+            "expectedOutput": "TaskExpectedOutput",
+        }
+        draft_properties = input_schema["definitions"]["TaskDraft"]["properties"]
+        for field, definition in shared_fields.items():
+            draft_property = input_schema["properties"].get(
+                field, draft_properties.get(field)
+            )
+            assert draft_property == {
+                "$ref": f"task-packet.schema.json#/definitions/{definition}"
+            }
+            _, resolved = resolver.resolve(draft_property["$ref"])
+            assert resolved == packet_schema["definitions"][definition]
+
+        assert "pattern" not in input_schema["properties"]["slug"]
+        for field in ("summary", "purpose", "context", "expectedOutput"):
+            draft_property = input_schema["properties"].get(
+                field, draft_properties.get(field)
+            )
+            assert not {"minLength", "maxLength"} & set(draft_property)
 
     def test_dependencies_are_optional_task_references(self, schema_dict: dict) -> None:
         """``dependencies`` contains optional task-reference edges."""

@@ -15,6 +15,7 @@ VALID_CONTEXT = "x" * 200
 def _packet() -> dict:
     return {
         "summary": "Render a plan.",
+        "slug": "render-a-plan",
         "tasks": [
             {
                 "purpose": "Render Markdown.",

@@ -42,7 +42,7 @@ Decompose the request into atomic task-delegation work items.
 <required source-document paths, or None>
 
 ## FILES TO WRITE
-.tasks/<epoch-milliseconds>-<summary-slug>.json
+.tasks/<epoch-milliseconds>-<packet-slug>.json
 
 ## SKILLS
 breakdown-tasks
@@ -51,13 +51,17 @@ breakdown-tasks
 Load the breakdown-tasks skill and use it to decompose the full request into atomic delegation packets.
 Place only the relative `.tasks/` path of the state file in the worker envelope's Deliverable section.
 Maintain decomposition state in the .tasks/ file declared in ## FILES TO WRITE.
+Require the decomposition author to select a packet slug and preserve it unchanged
+in the canonical root; canonical root requirements belong to
+`skills/breakdown-tasks/schema/task-packet.schema.json`.
 
 ## VERIFICATION
-The Deliverable payload must be a non-empty string. It must not be whitespace-only. It must match `^\.tasks/[0-9]{13}-[a-z0-9]+(?:-[a-z0-9]+)*\.json$`.
+The Deliverable payload must be a non-empty, whitespace-trimmed relative `.tasks/`
+JSON path for the published packet.
 Do NOT wrap the Deliverable path in backticks, Markdown code spans, or any other formatting.
 
 ## EXPECTED OUTPUT
-A single string payload under Deliverable: the relative `.tasks/<epoch-milliseconds>-<summary-slug>.json` path written during decomposition.
+A single string payload under Deliverable: the relative `.tasks/<epoch-milliseconds>-<packet-slug>.json` path written during decomposition.
 ```
 
 ## Output
@@ -78,8 +82,9 @@ Return `BLOCKED:` for every non-complete or invalid result.
    Use the packet template above.
    Insert the full input verbatim into `## DETAILS`.
    Set `## FILES TO READ` to `None` unless the effective request identifies required source-document paths.
-   Keep `## FILES TO WRITE` as the literal bounded pattern `.tasks/<epoch-milliseconds>-<summary-slug>.json`.
-   Do not resolve either placeholder; `breakdown-tasks` derives the actual timestamp and slug.
+    Keep `## FILES TO WRITE` as the literal bounded pattern `.tasks/<epoch-milliseconds>-<packet-slug>.json`.
+    Do not resolve either placeholder; `breakdown-tasks` selects the packet slug and
+    preserves it under the canonical schema.
    Keep `## SKILLS` hardcoded to `breakdown-tasks`.
 4. **Validate the packet.**
    Confirm all 8 standard packet sections are present.
@@ -101,7 +106,7 @@ Return `BLOCKED:` for every non-complete or invalid result.
 8. **Extract and validate the payload.**
    Read all content after the `## Deliverable` heading.
    Strip leading and trailing whitespace.
-   Return the payload unchanged when it matches `^\.tasks/[0-9]{13}-[a-z0-9]+(?:-[a-z0-9]+)*\.json$`.
+    Return the payload unchanged when it is a relative `.tasks/` JSON path.
    Return `BLOCKED: decomposition deliverable must be a timestamped relative .tasks path.` for every other payload.
 
 Execute this as a single-pass process.
