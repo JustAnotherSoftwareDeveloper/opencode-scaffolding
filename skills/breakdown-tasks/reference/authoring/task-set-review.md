@@ -17,8 +17,10 @@ documentation skill.
 Create one set-review record for the complete current draft. Identify the normalized
 request, concern inventory, boundary-decision log, boundary mapping, draft-task
 records, and dependency decisions reviewed. For every check below, record **pass**
-or **fail**, the evidence, and—on failure—the named rework route. Do not leave a
-signal, concern, or exception without a disposition.
+or **fail**, the evidence, and—on failure—the named rework route. The record is final
+publication-review evidence: preserve it with the draft and published packet without
+adding a packet field or selecting its storage representation. Do not leave a signal,
+candidate result, concern, or exception without a disposition.
 
 ## Set-Review Checklist
 
@@ -45,15 +47,23 @@ signal, concern, or exception without a disposition.
    file, topic, destination, constraint, skill, workflow phase, or topical order
    is a shared input, not a dependency edge, unless a predecessor must supply
    a material item for the consumer.
-6. **Signal disposition.** Every anti-pattern or compound signal has a visible split
+6. **Outcome-linked disposition and signal disposition.** Every candidate result has
+   exactly one visible disposition—split, dependency, integral evidence, intentional
+   exclusion, or retained coupling—linked to its result, boundary, and source trace.
+   Every anti-pattern or compound signal has a visible split
    or retained-coupling disposition with evidence. Retention must establish one
    shared result, one verification boundary, and why separation is unsafe,
    misleading, or impossible. Signals and metadata prompt review; they are not
-   proof of conceptual atomicity, dependence, or coupling.
+   proof of conceptual atomicity, dependence, or coupling. Missing, ambiguous, or
+   contradictory candidate-result evidence identifies an unresolved boundary: record
+   its candidate-result ID, fail this check, and do not report the structurally valid
+   packet as atomicity-assessed.
 
-Pass only when every applicable check passes and every inventory concern and signal
-has a documented disposition. Preserve the reviewed records and rationale so a later
-reviewer can trace the decision.
+Pass only when every applicable check passes and every candidate result, inventory
+concern, and signal has a documented, inspectable disposition. Preserve the reviewed
+records and rationale so a later reviewer can trace each publication decision. A
+structural validator can establish schema conformance but cannot turn this semantic
+failure into atomicity assessment.
 
 ## Failure Routes And Rerun
 
@@ -78,6 +88,10 @@ rewriting only packet wording or by assigning a skill.
   passes 7–8.
 - **Invalid concern-to-task mapping after a boundary or relationship change:** return
   to pass 7 **Review boundary mappings**; rerun pass 8.
+- **Absent, ambiguous, or contradictory candidate-result disposition evidence:** name
+  the unresolved boundary and return to pass 3 **State candidate results**, pass 4
+  **Propose boundaries**, or pass 5 **Decide independence, order, and coupling**, as
+  applicable; rerun passes 6–8.
 
 Any boundary change—including a split, merge rejection, coupling revision, or
 dependency change—requires rerunning the affected later passes, the boundary-mapping

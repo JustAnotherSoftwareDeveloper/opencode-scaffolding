@@ -65,7 +65,7 @@ constraints, files, and expected outcome. Block when either is absent.
 5. **Apply the decomposition method and draft atomic tasks.** Before selecting
    executable skills, follow the operation-owned ordered
    [Decomposition Method](reference/authoring/decomposition-method.md). It records
-   the normalized request, concern inventory, candidate boundaries, boundary
+   the normalized request, concern inventory, candidate-result dispositions, boundary
    decisions, draft metadata, and set review while consuming semantics from the
    loaded `task-contract` documentation skill.
    <!-- markdownlint-disable-next-line MD013 -->
@@ -79,7 +79,13 @@ constraints, files, and expected outcome. Block when either is absent.
    yet.
    Give each task a unique `taskId` and populate `verificationCoverage`,
    `dependencies`, `antiPatternSignals`, and `purposeOutputAlignment`; add
-   `couplingRationale` only when the shared contract supports it.
+   `couplingRationale` only when the shared contract supports it. Retain a
+   reviewer-visible **publication-review evidence record** with the draft and
+   published packet. It identifies every candidate result, its source and boundary
+   trace, and exactly one outcome-linked disposition: split, dependency, integral
+   evidence, intentional exclusion, or retained coupling. This is durable authoring
+   evidence, not a packet field, schema change, or validator input; authorized
+   implementation selects its storage representation.
 
 6. **Assign skills to each task.**
    Present the complete draft and the operation and documentation array to the LLM.
@@ -114,8 +120,9 @@ constraints, files, and expected outcome. Block when either is absent.
     prints the output path.
    Block on non-zero exit.
 
-10. **Validate and fix.** Run in a loop until valid. Treat repairable evidence gaps
-   as warnings before hard failure. Revalidate after any split or migration. Then
+10. **Validate and review semantic atomicity.** Run structural validation in a loop
+   until valid. Treat repairable structural diagnostics as warnings before hard
+   failure. Revalidate after any split or migration. Then
    revalidate boundaries, mappings, dependencies, and skills:
 
    ```bash
@@ -128,10 +135,20 @@ constraints, files, and expected outcome. Block when either is absent.
 
    - Exit 0 with no diagnostics and no `"fixed": true` means valid.
    - Exit 0 with diagnostics means repair actionable gaps and retry. Preserve a
-     warning only for migration compatibility or an unresolved decision.
+     warning only for migration compatibility; an unresolved atomicity decision
+     cannot receive semantic approval.
    - Exit 0 and `"fixed": true` means the file changed. Read it and retry.
    - For Exit 1, fix the JSON, retry, and read errors from stderr.
    - Exit 2 → unrecoverable error. Block.
+
+   After structural validation, review the publication-review evidence record for
+   every candidate-result boundary. Report a packet as **atomicity-assessed** only
+   when every candidate has one inspectable, non-contradictory disposition and
+   supporting evidence. A structurally valid packet with absent, ambiguous, or
+   contradictory evidence is structural-only, not atomicity-assessed: identify the
+   candidate-result ID and unresolved boundary, return it to the earliest authoring
+   pass, and do not accept it on the semantic review path. Structural validation
+   remains structural only; it neither creates evidence nor approves atomicity.
 
 ## Output Contract
 
@@ -151,6 +168,10 @@ Return the relative published packet path.
 - Do not cap, target, or pad the number of tasks.
 - The one-to-three limit applies to `skills` within each task.
 - Fail closed. Publish no partial output.
+- Do not claim semantic atomicity assessment from schema validity, metadata presence,
+  multi-action wording, a dependency, a shared file, skill, order, destination, or
+  final document. Retained coupling requires inspectable evidence of one shared
+  result, one verification boundary, and separation risk.
 - Planning loads are passive context and are reported separately. Only reconciled
   operation and documentation assignments are executable. A documentation
   assignment may be loaded as passive, non-transitive context. It cannot add

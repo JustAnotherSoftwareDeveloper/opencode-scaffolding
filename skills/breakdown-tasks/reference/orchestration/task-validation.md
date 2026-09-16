@@ -18,6 +18,17 @@ validation procedure and diagnostics; they do not replace that passive reference
   verification, dependency edges, coupling rationale, traceability, and authoring
   metadata using the loaded documentation skill's named references. Do not let the
   validator become a second semantic owner.
+- **Publication-review evidence gate** — Preserve a reviewer-visible companion record
+  for every candidate result and its outcome-linked disposition: split, dependency,
+  integral evidence, intentional exclusion, or retained coupling. This operation
+  does not add a packet field or choose the record's storage representation. Review
+  the record after structural validation and before reporting semantic acceptance.
+  Mark a packet **atomicity-assessed** only when every disposition is inspectable,
+  unambiguous, non-contradictory, and supported. Otherwise report it as
+  **structural-only**, identify the candidate-result ID and unresolved boundary, and
+  return it for authoring rework. Schema validity, metadata presence, multi-action
+  wording, dependencies, shared files, skills, order, destinations, or final
+  documents cannot substitute for this evidence.
 - **Dependency representation** — The operation checks that dependent tasks carry
   explicit `dependencies` edges and required predecessor artifacts in `filesToRead`,
   using the shared dependency and traceability meaning. Paths are explicit or
@@ -60,6 +71,7 @@ validation procedure and diagnostics; they do not replace that passive reference
 - **Skill-name reasonableness** — Each `skills` entry must be appropriate for the
   task's purpose and context.
 
-The layered checks are current diagnostic policy where they describe warning
+Structural checks and the publication-review evidence gate are distinct: structural
+success is not semantic atomicity approval. The layered checks are current diagnostic policy where they describe warning
 versus failure behavior. Task count derives solely from atomic coverage and must
 not become a capacity target or extra workflow stage.

@@ -37,7 +37,8 @@ gaps, and open decisions.
 - **`dependencies`** records directed predecessors and, when present, the reason
   for the edge.
 - **`couplingRationale`** records why one shared result has one verification boundary
-  despite multiple concerns or files.
+  despite multiple concerns or files; when it records retained coupling, it states
+  the shared result, verification boundary, and separation risk.
 - **`antiPatternSignals`** records compound-task signals considered during
   authoring; a signal is not proof of independence by itself.
 - **`taskId`** preserves stable identity when the authoring and packet contract
@@ -47,6 +48,22 @@ Metadata records the author's boundary reasoning.
 
 Metadata does not prove conceptual atomicity, grant authority, or replace review
 of the purpose, result, verification, dependencies, and coupling evidence together.
+
+## Atomicity Disposition Traceability
+
+Boundary reasoning makes each independently reviewable candidate result inspectable
+by linking it to one outcome-linked disposition: split, integral evidence for one
+result, intentional exclusion, or retained coupling. The record identifies the
+candidate result and the basis for its disposition. For retained coupling, that basis
+contains one shared result, one verification boundary, and separation risk.
+
+This is semantic traceability guidance, not a new metadata field or a task-packet
+schema, routing, lifecycle, or runtime-validation requirement. Dependencies, shared
+files, skills, ordering, final documents, and lifecycle labels may be traceable
+context, but they are not a disposition basis or coupling rationale.
+
+If the available boundary reasoning is missing, ambiguous, or contradictory, the
+candidate result is unresolved rather than semantically approved as atomicity-assessed.
 
 ## Structural Boundary
 

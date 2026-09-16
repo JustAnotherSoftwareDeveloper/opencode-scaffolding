@@ -18,18 +18,21 @@ or load unrelated context.
 
 ## Coupling Evidence
 
-Multiple concerns belong together only when all of these conditions hold:
+Retained coupling is one outcome-linked atomicity disposition. Multiple concerns
+belong together under that disposition only when all of these conditions hold:
 
-- they produce one shared result;
-- they have one verification boundary; and
-- separating execution, review, retry, or verification would be unsafe,
-  misleading, or impossible.
+- the evidence states one shared result;
+- the evidence states one verification boundary; and
+- the evidence states the separation risk: why separating execution, review, retry,
+  or verification would be unsafe, misleading, or impossible.
 
-`couplingRationale` records that evidence in terms of the shared result and its
-verification boundary.
+Where `couplingRationale` records retained coupling, it records all three facts. The
+semantic requirement does not add a field, change a schema, or prescribe a runtime
+validator.
 
-Shared files, topics, releases, destinations, skills, dependencies, or a final
-document are insufficient coupling evidence by themselves.
+Dependencies, shared files, topics, releases, destinations, skills, ordering, final
+documents, and lifecycle labels are insufficient coupling evidence and are not
+coupling rationale.
 
 ## Boundary Review
 
@@ -37,4 +40,9 @@ If a concern can be independently assigned, rejected, retried, completed, or ver
 the dependency or shared destination does not justify merging it.
 
 If separation would make the one result or its verification boundary unsafe,
-misleading, or impossible, the rationale preserves that coupling fact for review.
+misleading, or impossible, the rationale preserves the shared result, verification
+boundary, and separation risk for review.
+
+Absent, ambiguous, or contradictory evidence does not support retained coupling; the
+boundary remains unresolved rather than atomicity-approved. A dependency can still
+express order while the concerns remain separate.

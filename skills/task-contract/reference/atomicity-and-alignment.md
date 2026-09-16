@@ -13,6 +13,31 @@ The test applies to analysis, documentation, implementation, and operations.
 A lifecycle label, shared topic, desired packet size, file count, or available skill
 is not a task boundary.
 
+## Required Outcome-Linked Disposition
+
+Before a task boundary is treated as atomicity-assessed, every independently
+reviewable candidate result has exactly one inspectable disposition linked to that
+result:
+
+- **Split:** the candidate has its own task because it can be independently assigned,
+  rejected, retried, completed, or verified.
+- **Integral evidence for one result:** the candidate is investigation, research, or
+  other evidence necessary to produce or verify the one stated result; it is not a
+  separately requested or independently reviewable result.
+- **Intentional exclusion:** the candidate is explicitly outside the stated result
+  and task scope; the record identifies what is excluded and why it is not part of
+  the result.
+- **Retained coupling:** the candidate remains with another concern only when the
+  coupling evidence states one shared result, one verification boundary, and the
+  risk that separation would create.
+
+These are semantic dispositions, not packet fields, schema requirements, or runtime
+behavior. A multi-action phrase alone does not establish multiple candidate results,
+and research integral to one analysis result does not require a split.
+
+Missing, ambiguous, or contradictory disposition evidence leaves the boundary
+unresolved. It is not semantic approval that atomicity was assessed.
+
 ## One Result
 
 One task has one purpose and one expected result.
@@ -46,3 +71,6 @@ artifact is independently requested.
 
 The signals prompt boundary review; they do not replace evidence of the result and
 its verification boundary.
+
+Dependencies, shared files, skills, ordering, final documents, and lifecycle labels
+may describe context or structure, but none is a rationale for retained coupling.
