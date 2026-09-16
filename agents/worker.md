@@ -1,6 +1,6 @@
 ---
+name: "worker"
 description: "Generic execution-first worker for one delegated packet."
-model: "openai/gpt-5.6-luna"
 mode: "subagent"
 version: "5.1"
 ---

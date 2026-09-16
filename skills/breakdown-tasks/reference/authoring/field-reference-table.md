@@ -1,17 +1,15 @@
 # TaskPacket Field Reference
 
-This table mirrors `../../schema/task-packet.schema.json`. The schema is authoritative
-for types, requiredness, and constraints. The shared
-[task-contract references](../../../task-contract/reference/README.md) are authoritative
-for task identity, atomicity, result and verification alignment, dependency and
-coupling meaning, traceability, and authoring metadata. This table does not duplicate
-those semantics.
+This table mirrors `../../schema/task-packet.schema.json`. The schema is
+authoritative for types, requiredness, and constraints. The loaded `task-contract`
+documentation skill is authoritative for task identity, atomicity, result and
+verification alignment, dependency and coupling meaning, traceability, and
+authoring metadata. This table does not duplicate those semantics.
 
 ## Boundary Guidance
 
-Review task boundaries using the shared [atomicity and alignment](../../../task-contract/reference/atomicity-and-alignment.md),
-[dependencies and coupling](../../../task-contract/reference/dependencies-and-coupling.md),
-and [traceability and metadata](../../../task-contract/reference/traceability-and-metadata.md)
+Review task boundaries using the loaded documentation skill's named **Atomicity
+and alignment**, **Dependencies and coupling**, and **Traceability and metadata**
 references. The fields below are structural interface notes only.
 
 ## Root-Level Fields
@@ -35,8 +33,8 @@ references. The fields below are structural interface notes only.
   - Type: `string`
   - Required: yes
   - Constraints: `maxLength`: 200
-  - Description: Schema field whose shared semantic role is defined by
-    [task identity](../../../task-contract/reference/task-identity.md).
+  - Description: Schema field whose shared semantic role is defined by the loaded
+    documentation skill's named **Task identity** reference.
 
 - **`context`**
   - Type: `string`

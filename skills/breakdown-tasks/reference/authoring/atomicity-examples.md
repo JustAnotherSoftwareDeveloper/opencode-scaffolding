@@ -1,9 +1,9 @@
 # Atomicity Examples
 
-Use these operation examples with the shared
-[atomicity and alignment contract](../../../task-contract/reference/atomicity-and-alignment.md)
-to review a proposed boundary. They illustrate decomposition choices; they do not
-define shared semantics or replace judgment.
+Use these operation examples with the loaded `task-contract` documentation skill's
+named **Atomicity and alignment** reference to review a proposed boundary. They
+illustrate decomposition choices; they do not define shared semantics or replace
+judgment.
 
 ## Independent Analysis
 
@@ -45,5 +45,5 @@ paths.
 **Request:** Analyze migration risk, then write a proposal from the analysis.
 
 - Draft an analysis task and a dependent proposal task.
-- Put the analysis artifact in the proposal task's `filesToRead`, following the shared
-  dependency and traceability contract.
+- Put the analysis artifact in the proposal task's `filesToRead`, following the
+  shared dependency and traceability contract.

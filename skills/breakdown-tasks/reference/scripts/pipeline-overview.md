@@ -11,12 +11,14 @@ publish for dispatch.
 3. Run `collect-skills --class operation --class documentation`. Reconcile and load
    the collector-winning `task-contract` documentation record as passive,
    non-transitive context before drafting task boundaries.
-4. Inventory concerns and draft tasks without `skills`, consuming task-contract
-   semantics while retaining operation-owned decomposition.
-5. Select one to three skills per task inline. Inspect each assigned contract at its
-   collector-winning path; the passive task-contract record is not an assignment.
+4. Apply the ordered decomposition method without `skills`: normalize the request,
+   inventory concerns, state candidate results, disposition boundaries, classify
+   relationships, draft task records, map concerns, and pass the task-set review.
+5. Select one to three skills per task inline. Inspect each assigned contract at
+   its collector-winning path; the passive task-contract record is not an assignment.
 6. Write the completed draft and publish with `init-task-packet --output-dir .tasks`.
-7. Validate and fix with `validate-task-structure --auto-fix --state-file` in a retry loop.
+7. Validate and fix with `validate-task-structure --auto-fix --state-file` in a
+   retry loop.
 
 ## Failure Rules
 

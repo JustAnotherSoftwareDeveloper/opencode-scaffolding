@@ -16,8 +16,10 @@ class: delegated
 
 # Breakdown Tasks
 
-Normalize a request, collect skills, draft bounded tasks, select inline, publish, and
-hand the published packet to downstream dispatch.
+<!-- markdownlint-disable MD007 MD013 -->
+
+Normalize a request, apply the operation-owned decomposition method, collect skills,
+select inline, publish, and hand the published packet to downstream dispatch.
 
 ## Input Contract
 
@@ -60,18 +62,24 @@ constraints, files, and expected outcome. Block when either is absent.
    loading the index does not recursively load them. Block on an absent name, stale
    path, class mismatch, or load failure.
 
-5. **Draft atomic tasks.** Inventory every question, change, operation, decision,
-   and deliverable before selecting executable skills. Follow the operation-owned
-   request-inventory and decomposition procedure in the
-   [core rules](reference/authoring/core-rules.md), while consuming the shared
-   [task-contract semantics](../task-contract/reference/README.md) for identity,
-   atomicity, result and verification alignment, dependencies, coupling, traceability,
-   and authoring metadata. Consult the [atomicity examples](reference/authoring/atomicity-examples.md).
-   Split independently reviewable concerns regardless of task count. Establish candidate boundaries
-   before assignment. Give each task a unique `taskId` and
-   populate `verificationCoverage`, `dependencies`, `antiPatternSignals`, and
-   `purposeOutputAlignment`. Add `couplingRationale` only when the shared contract's
-   coupling evidence is present. Do not include `skills` yet.
+5. **Apply the decomposition method and draft atomic tasks.** Before selecting
+   executable skills, follow the operation-owned ordered
+   [Decomposition Method](reference/authoring/decomposition-method.md). It records
+   the normalized request, concern inventory, candidate boundaries, boundary
+   decisions, draft metadata, and set review while consuming semantics from the
+   loaded `task-contract` documentation skill.
+   <!-- markdownlint-disable-next-line MD013 -->
+   Inventory every question, change, operation, decision, and deliverable through the
+   method before assignment. Consume the loaded `task-contract` documentation
+   skill's named **Atomicity and alignment**, **Dependencies and coupling**, and
+   **Traceability and metadata** references. Establish candidate boundaries before
+   drafting atomic tasks. Draft atomic tasks only after those boundaries are
+   established. Split
+   independently reviewable concerns regardless of task count. Do not include `skills`
+   yet.
+   Give each task a unique `taskId` and populate `verificationCoverage`,
+   `dependencies`, `antiPatternSignals`, and `purposeOutputAlignment`; add
+   `couplingRationale` only when the shared contract supports it.
 
 6. **Assign skills to each task.**
    Present the complete draft and the operation and documentation array to the LLM.
@@ -147,7 +155,13 @@ Return the relative published packet path.
 ## References
 
 - [Core rules](reference/authoring/core-rules.md)
-- [Shared task-contract reference](../task-contract/reference/README.md)
+- [Decomposition method](reference/authoring/decomposition-method.md)
+- [Concern and boundary record](reference/authoring/concern-boundary-record.md)
+- [Dependency and coupling decisions](reference/authoring/dependency-coupling-decisions.md)
+- [Packet drafting checklist](reference/authoring/packet-drafting-checklist.md)
+- [Task-set review](reference/authoring/task-set-review.md)
+- [Worked decomposition examples](reference/authoring/decomposition-examples.md)
+- `task-contract` documentation skill for shared task semantics
 - [Task granularity](reference/authoring/task-granularity.md)
 - [Atomicity anti-patterns](reference/authoring/anti-patterns.md)
 - [Atomicity examples](reference/authoring/atomicity-examples.md)

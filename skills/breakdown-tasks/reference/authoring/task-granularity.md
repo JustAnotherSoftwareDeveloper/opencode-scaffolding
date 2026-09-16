@@ -1,10 +1,12 @@
 # Task Granularity
 
 Choose boundaries from independent work, not file count or workflow stages. The
-shared [atomicity and alignment contract](../../../task-contract/reference/atomicity-and-alignment.md)
-owns the split test and the one-result boundary; the shared
-[dependencies and coupling contract](../../../task-contract/reference/dependencies-and-coupling.md)
-owns ordering and coupling evidence. Do not redefine either contract here.
+loaded `task-contract` documentation skill's named **Atomicity and alignment**
+reference (`atomicity-and-alignment.md`) owns the split test and one-result
+boundary.
+Its named **Dependencies and coupling** reference
+(`dependencies-and-coupling.md`) owns ordering and coupling evidence. Do not
+redefine either contract here.
 
 ## Start With An Inventory — operation-owned
 
