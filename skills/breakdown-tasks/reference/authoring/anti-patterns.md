@@ -11,6 +11,7 @@ contract.
 - A lifecycle label hides analysis, implementation, and review concerns.
 - A final document is used to merge independently reviewable findings.
 - Implementation and a separately requested test artifact share one task.
+- Research that determines later scope or acceptance is hidden inside implementation.
 
 ## Unsupported Coupling Signals
 
@@ -26,6 +27,7 @@ contract.
 - One file, step, or skill is required per task.
 - Tasks are merged to fit an available skill.
 - Tasks are split only because a sentence contains “and” or a comma.
+- Reading, editing, and running checks for one result are turned into separate tasks.
 
 ## Invalid Assignment
 

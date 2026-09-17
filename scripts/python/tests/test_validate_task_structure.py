@@ -603,7 +603,10 @@ class TestAtomicityDiagnostics:
     @pytest.mark.parametrize(
         "signal,purpose",
         [
-            ("implementation-plus-tests", "Implement checkout and run tests"),
+            (
+                "implementation-plus-independent-verification",
+                "Implement checkout and publish a separate verification report",
+            ),
             ("multiple-helpers", "Write three independent helpers"),
             ("analysis-plus-planning", "Analyze checkout and propose a plan"),
             ("multiple-comparisons", "Compare framework A and framework B"),
@@ -641,6 +644,60 @@ class TestAtomicityDiagnostics:
         assert any(
             item.startswith(f"ERROR [anti-pattern-{signal}]") for item in diagnostics
         )
+
+    def test_implementation_with_ordinary_tests_remains_one_valid_result(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        task = dict(valid_task_1)
+        task["purpose"] = "Implement checkout and run its regression tests"
+        task["expectedOutput"] = "One verified checkout implementation."
+        task["antiPatternSignals"] = ["none"]
+        task["purposeOutputAlignment"] = {
+            "status": "aligned",
+            "evidence": "Regression tests verify the checkout implementation.",
+        }
+
+        valid, diagnostics = validate([task], schema_dict)
+
+        assert valid is True
+        assert not any(item.startswith("ERROR ") for item in diagnostics)
+
+    def test_legacy_implementation_plus_tests_signal_remains_migratable(
+        self, valid_task_1, schema_dict
+    ) -> None:
+        task = dict(valid_task_1)
+        task["antiPatternSignals"] = ["implementation-plus-tests"]
+        task["purposeOutputAlignment"] = {
+            "status": "needs-review",
+            "evidence": "The legacy compound signal still requires review.",
+        }
+
+        valid, diagnostics = validate([task], schema_dict)
+
+        assert valid is False
+        assert any(
+            item.startswith("ERROR [anti-pattern-implementation-plus-tests]")
+            for item in diagnostics
+        )
+
+    @pytest.mark.parametrize(
+        "field,value",
+        [
+            ("filesToRead", ".analysis/<path returned by predecessor>"),
+            ("filesToWrite", ".analysis/${TIMESTAMP}-result.md"),
+            ("filesToRead", ".analysis/{{result_path}}"),
+        ],
+    )
+    def test_placeholder_file_paths_are_hard_errors(
+        self, valid_task_1, schema_dict, field, value
+    ) -> None:
+        task = dict(valid_task_1)
+        task[field] = [value]
+
+        valid, diagnostics = validate([task], schema_dict)
+
+        assert valid is False
+        assert any("placeholder path not allowed" in item for item in diagnostics)
 
     def test_missing_verification_is_a_migration_warning(
         self, valid_task_1, schema_dict
@@ -780,7 +837,7 @@ class TestAtomicityDiagnostics:
 
     def test_non_array_signals_are_hard_error(self, valid_task_1, schema_dict) -> None:
         task = dict(valid_task_1)
-        task["antiPatternSignals"] = "implementation-plus-tests"
+        task["antiPatternSignals"] = "implementation-plus-independent-verification"
         valid, diagnostics = validate([task], schema_dict)
         assert valid is False
         assert any("ERROR [anti-pattern-signals]" in item for item in diagnostics)

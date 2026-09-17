@@ -47,11 +47,11 @@ def test_task_contract_is_collector_winning_passive_context_before_drafting() ->
     assert record["path"].endswith("skills/task-contract/SKILL.md")
 
     load = text.index("Load the shared task contract before authoring boundaries")
-    draft = text.index("Draft atomic tasks")
+    draft = text.index("Draft tasks without `skills`")
     assert load < draft
-    assert "exact winning record" in text
-    assert "passive, documentation-only, and non-transitive" in text
-    assert "add no authority" in text
+    assert "exact collector winner" in text
+    assert "passive, non-transitive" in text
+    assert "adds no authority" in text
 
 
 def test_operation_owned_pipeline_remains_and_cli_paths_are_stable() -> None:
@@ -59,12 +59,13 @@ def test_operation_owned_pipeline_remains_and_cli_paths_are_stable() -> None:
 
     for phrase in (
         "normalize",
-        "Inventory every question",
-        "Draft atomic tasks",
+        "break it into smaller results",
+        "split any result that still",
+        "Draft tasks without `skills`",
         "Assign skills to each task",
         "Inspect contracts",
         "Publish for dispatch",
-        "Validate and fix",
+        "Validate structure and recheck the breakdown",
     ):
         assert phrase.lower() in text.lower()
 
@@ -81,6 +82,13 @@ def test_operation_owned_pipeline_remains_and_cli_paths_are_stable() -> None:
     assert (BREAKDOWN / "schema" / "task-packet.schema.json").is_file()
     assert "--output-dir .tasks" in text
     assert 'schema=~/.config/opencode/skills/breakdown-tasks/schema' in text
+    assert 'mktemp "${TMPDIR:-/tmp}/opencode-breakdown.XXXXXX.json"' in text
+    assert '< "$DRAFT_PATH"' in text
+    assert 'rm -f -- "$DRAFT_PATH"' in text
+    assert text.index("init-task-packet") < text.index('rm -f -- "$DRAFT_PATH"')
+    assert "|| status=$?" in text
+    assert 'exit "${status:-0}"' in text
+    assert "/tmp/breakdown-draft.json" not in text
 
 
 def test_local_authoring_docs_point_to_shared_invariant_owners() -> None:
@@ -128,3 +136,28 @@ def test_passive_documentation_is_not_an_executable_assignment() -> None:
     assert "non-transitive" in contract
     assert "does not own decomposition" in contract
     assert "does not auto-read" in contract
+
+
+def test_decomposition_method_splits_then_connects_results() -> None:
+    method = (
+        BREAKDOWN / "reference" / "authoring" / "decomposition-method.md"
+    ).read_text(encoding="utf-8")
+    examples = (
+        BREAKDOWN / "reference" / "authoring" / "decomposition-examples.md"
+    ).read_text(encoding="utf-8")
+
+    for phrase in (
+        "Name the requested outcome",
+        "Break the outcome into smaller results",
+        "Split each result into one assignment",
+        "Connect the results",
+        "Draft and review the task set",
+        "Stop splitting",
+    ):
+        assert phrase in method
+
+    assert "predecessor outputs held fixed" in method
+    assert "Do not add `skills` yet" in method
+    assert "Research That Determines Later Work" in examples
+    assert "Documentation Lookup Inside One Task" in examples
+    assert "session evidence" in examples

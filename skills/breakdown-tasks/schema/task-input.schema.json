@@ -120,6 +120,7 @@
             "type": "string",
             "enum": [
               "none",
+              "implementation-plus-independent-verification",
               "implementation-plus-tests",
               "multiple-helpers",
               "analysis-plus-planning",

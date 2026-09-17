@@ -49,21 +49,19 @@ Metadata records the author's boundary reasoning.
 Metadata does not prove conceptual atomicity, grant authority, or replace review
 of the purpose, result, verification, dependencies, and coupling evidence together.
 
-## Atomicity Disposition Traceability
+## Result Traceability
 
-Boundary reasoning makes each independently reviewable candidate result inspectable
-by linking it to one outcome-linked disposition: split, integral evidence for one
-result, intentional exclusion, or retained coupling. The record identifies the
-candidate result and the basis for its disposition. For retained coupling, that basis
-contains one shared result, one verification boundary, and separation risk.
+Every smaller result maps to one task, a predecessor handoff, or an explicit
+exclusion. Every task maps back to the requested outcome or a necessary intermediate
+result. This exposes missing work, duplicate work, and compound tasks before
+assignment.
 
-This is semantic traceability guidance, not a new metadata field or a task-packet
-schema, routing, lifecycle, or runtime-validation requirement. Dependencies, shared
-files, skills, ordering, final documents, and lifecycle labels may be traceable
-context, but they are not a disposition basis or coupling rationale.
+For retained coupling, traceability identifies the one shared result, one
+verification boundary, and separation risk. Dependencies, shared files, skills,
+ordering, final documents, and lifecycle labels can provide context, but do not
+prove coupling.
 
-If the available boundary reasoning is missing, ambiguous, or contradictory, the
-candidate result is unresolved rather than semantically approved as atomicity-assessed.
+This is semantic guidance, not a packet field or runtime-validation requirement.
 
 ## Structural Boundary
 

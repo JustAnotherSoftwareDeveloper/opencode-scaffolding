@@ -30,8 +30,8 @@ references. The fields below are structural interface notes only.
   - Type: `array` of `TaskPacket`
   - Required: yes
   - Constraints: `minItems`: 1; no maximum
-  - Description: An ordered, uncapped list of delegation packets. The operation's
-    concern inventory determines task count.
+  - Description: An ordered, uncapped list of delegation packets. The smaller results
+    needed to satisfy the request determine task count.
 
 ## TaskPacket Fields
 

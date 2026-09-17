@@ -31,13 +31,14 @@ appear in the plan.
 ## Task Atomicity
 
 First inspect the published packet against the shared task schema. Separately apply
-the task-contract split test: independently assignable, rejectable, retryable,
-completable, or verifiable concerns require separate tasks. A task has one purpose,
-one result, and one verification boundary. Dependencies express order
-and require a predecessor read; coupling requires one shared result,
-one verification boundary, and evidence that separation would be unsafe,
-misleading, or impossible. Schema
-failure fails structural coverage and makes conceptual coverage not observable.
+the task-contract split test with required predecessor outputs fixed and available:
+independently assignable, rejectable, retryable, completable, or verifiable results
+require separate tasks. Investigation that establishes later scope, design,
+interfaces, or acceptance criteria is a predecessor result. A task has one purpose,
+one result, and one verification boundary. Dependencies express order and require
+a predecessor read; coupling requires one shared result, one verification boundary,
+and evidence that separation would be unsafe, misleading, or impossible. Schema
+failure fails structural coverage and makes conceptual coverage unobservable.
 Declared compound signals and independently separable results fail. Uncertain
 heuristics and omitted migration-compatible metadata warn.
 Bounded predecessor writes match concrete reads under the same path; glob

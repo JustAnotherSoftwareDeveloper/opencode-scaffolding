@@ -106,7 +106,11 @@ def _task(*, skills: list[str] | None = None, compound: bool = False) -> dict[st
         "verification": ["The report contains all three independently statused checks."],
         "expectedOutput": "One UTF-8 Markdown audit report.",
         "verificationCoverage": {"observable": ["Report sections and disposition are present."], "coverage": "complete"},
-        "antiPatternSignals": ["implementation-plus-tests"] if compound else ["none"],
+        "antiPatternSignals": (
+            ["implementation-plus-independent-verification"]
+            if compound
+            else ["none"]
+        ),
         "purposeOutputAlignment": {"status": "aligned", "evidence": "The purpose names the one Markdown report."},
     }
 

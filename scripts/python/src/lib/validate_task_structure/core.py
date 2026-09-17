@@ -8,6 +8,7 @@ Consumed by: validate-task-structure.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +16,7 @@ import jsonschema
 
 KNOWN_COMPOUND_SIGNALS = frozenset(
     {
+        "implementation-plus-independent-verification",
         "implementation-plus-tests",
         "multiple-helpers",
         "analysis-plus-planning",
@@ -39,6 +41,10 @@ def _validate_file_array(arr: list[Any], path: str, label: str) -> list[str]:
             )
         elif item == "":
             errors.append(f"{path}.{label}[{i}]: empty string not allowed")
+        elif re.search(r"<[^<>]+>|\$\{[^{}]+\}|\{\{[^{}]+\}\}", item):
+            errors.append(
+                f"{path}.{label}[{i}]: placeholder path not allowed: {item!r}"
+            )
         elif item in seen:
             errors.append(f"{path}.{label}: duplicate entry: {item!r}")
         seen.add(item)

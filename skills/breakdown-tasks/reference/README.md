@@ -4,22 +4,18 @@ Use this index to locate detailed guidance for the decomposition workflow.
 
 ## Authoring
 
-- [Core rules](authoring/core-rules.md) define operation-owned inventory and draft
-  procedures and point to the shared task contract.
-- [Decomposition method](authoring/decomposition-method.md) defines the ordered
-  normalization-through-set-review procedure.
-- [Concern and boundary record](authoring/concern-boundary-record.md) supplies the
-  reusable per-concern authoring record.
-- [Dependency and coupling decisions](authoring/dependency-coupling-decisions.md)
-  guides shared-input, dependency-interface, and retained-coupling decisions.
+- [Core rules](authoring/core-rules.md) define operation-owned decomposition and
+  drafting and point to the shared task contract.
+- [Decomposition method](authoring/decomposition-method.md) defines the break-down,
+  split-again, connect, draft, and review procedure.
 - [Packet drafting checklist](authoring/packet-drafting-checklist.md) maps stabilized
   boundaries into existing task packet content.
 - [Task-set review](authoring/task-set-review.md) defines the final coverage and
   rework gate before assignment.
 - [Worked decomposition examples](authoring/decomposition-examples.md) demonstrate
-  complete records, failure routes, and the retained-coupling exception.
-- [Task granularity](authoring/task-granularity.md) applies the shared boundary
-  review to the operation's concern inventory.
+  recursive splitting, dependency handoffs, internal supporting work, and stopping.
+- [Task granularity](authoring/task-granularity.md)
+  describes recursive splitting and the stopping rule.
 - [Atomicity anti-patterns](authoring/anti-patterns.md) list operation review signals.
 - [Atomicity examples](authoring/atomicity-examples.md) provide short contrastive
   examples that consume the shared contract.

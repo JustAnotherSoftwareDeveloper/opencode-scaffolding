@@ -5,11 +5,12 @@ procedures. The shared owner defines task identity, atomicity, result and
 verification alignment, dependency meaning, coupling evidence, traceability, and
 authoring metadata. This file does not restate those invariants.
 
-## Inventory Concerns — operation-owned
+## Break Down The Problem — operation-owned
 
-- After request normalization and before skill assignment, enter the ordered
-  [Decomposition Method](decomposition-method.md). It owns the operation's concern
-  inventory, candidate-boundary records, and set-review procedure.
+- After request normalization and before skill assignment, follow the
+  [Decomposition Method](decomposition-method.md). Break the requested outcome into
+  smaller results, split compound results again, and connect the final pieces with
+  explicit handoffs.
 
 ## Draft Boundaries — operation-owned
 
@@ -22,8 +23,8 @@ assignment.
 
 ## Assign Skills Last — operation-owned
 
-Stabilize the candidate boundaries and their draft metadata before selecting skills.
+Stabilize the task boundaries and their draft metadata before selecting skills.
 Do not merge or split work to fit an available skill. After any split or migration,
-rerun the operation's boundary, mapping, dependency, and skill checks. Treat
+rerun the operation's coverage, boundary, dependency, and skill checks. Treat
 uncertain language as a review prompt and apply the shared contract explicitly;
 it is not proof of a boundary or coupling decision.

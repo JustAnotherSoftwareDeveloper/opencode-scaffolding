@@ -52,78 +52,70 @@ constraints, files, and expected outcome. Block when either is absent.
    Capture stdout as a JSON array with the same shape as step 1. Block on
    non-zero exit.
 
-4. **Load the shared task contract before authoring boundaries.** Reconcile the
-   collector array to the exact winning record whose `name` is `task-contract`, whose
-   `class` is `documentation`, and whose `path` is the discovered `SKILL.md` path.
-   Load that record with the skill tool before drafting task boundaries. Treat the
-   load as passive, documentation-only, and non-transitive: it can add no authority,
-   workflow steps, tools, writes, delegation, assignment decisions, or completion
-   evidence. Read any task-contract reference files needed for authoring explicitly;
-   loading the index does not recursively load them. Block on an absent name, stale
-   path, class mismatch, or load failure.
+4. **Load the shared task contract before authoring boundaries.**
+   Reconcile the exact collector winner named `task-contract` with class
+   `documentation` and its
+   discovered `SKILL.md` path, then load it before drafting boundaries. The passive,
+   non-transitive load adds no authority, workflow, tools, writes, delegation,
+   assignment, or completion evidence. Read needed references explicitly. Block on
+   an absent name, stale path, class mismatch, or load failure.
 
-5. **Apply the decomposition method and draft atomic tasks.** Before selecting
-   executable skills, follow the operation-owned ordered
-   [Decomposition Method](reference/authoring/decomposition-method.md). It records
-   the normalized request, concern inventory, candidate-result dispositions, boundary
-   decisions, draft metadata, and set review while consuming semantics from the
-   loaded `task-contract` documentation skill.
-   <!-- markdownlint-disable-next-line MD013 -->
-   Inventory every question, change, operation, decision, and deliverable through the
-   method before assignment. Consume the loaded `task-contract` documentation
-   skill's named **Atomicity and alignment**, **Dependencies and coupling**, and
-   **Traceability and metadata** references. Establish candidate boundaries before
-   drafting atomic tasks. Draft atomic tasks only after those boundaries are
-   established. Split
-   independently reviewable concerns regardless of task count. Do not include `skills`
-   yet.
-   Give each task a unique `taskId` and populate `verificationCoverage`,
-   `dependencies`, `antiPatternSignals`, and `purposeOutputAlignment`; add
-   `couplingRationale` only when the shared contract supports it. Retain a
-   reviewer-visible **publication-review evidence record** with the draft and
-   published packet. It identifies every candidate result, its source and boundary
-   trace, and exactly one outcome-linked disposition: split, dependency, integral
-   evidence, intentional exclusion, or retained coupling. This is durable authoring
-   evidence, not a packet field, schema change, or validator input; authorized
-   implementation selects its storage representation.
+5. **Break down the problem and draft atomic tasks.** Before selecting executable
+   skills, follow the operation-owned
+   [Decomposition Method](reference/authoring/decomposition-method.md). Name the
+   requested outcome, break it into smaller results, and split any result that still
+   contains separate questions, decisions, changes, or deliverables. Repeat until
+   each piece is one bounded assignment. Then add the inputs, outputs, dependencies,
+   handoffs, and completion checks needed for the pieces to work together.
 
-6. **Assign skills to each task.**
-   Present the complete draft and the operation and documentation array to the LLM.
-   Select one to three skills per task. Do this
-   without changing the established boundaries. Block with explicit no-match
-   evidence when no assignment fits. Reconcile each selection against the array's
-   winning `name`, `class`, and `path`. Block on an absent name, stale or
-   substituted path, class mismatch, or unresolved assignment. Do not include the
-   pre-authoring passive `task-contract` record in an executable `skills` array. Do not score,
-   rank, rerank, clip, repair, or use lexical or similarity fallback.
+   Apply the loaded `task-contract` documentation skill's named **Atomicity and
+   alignment**, **Dependencies and coupling**, and **Traceability and metadata**
+   references. Hold predecessor outputs fixed when testing whether dependent results
+   can be accepted or retried separately. Keep ordinary reading, editing, and checks
+   inside a task when they only produce or verify that task's result. Do not use a
+   final deliverable, shared file, workflow phase, or available skill as a boundary.
+
+   Draft tasks without `skills`. Give each task a unique `taskId` and populate
+   `verificationCoverage`, `dependencies`, `antiPatternSignals`, and
+   `purposeOutputAlignment`; add `couplingRationale` only when the shared contract
+   supports it. Review the complete set for coverage, duplication, hidden compound
+   work, pointless fragments, and usable dependency handoffs before assignment.
+
+6. **Assign skills to each task.** Present the complete draft and operation and
+   documentation array to the LLM. Select one to three skills per task without
+   changing boundaries. Reconcile each selection against the winning `name`, `class`,
+   and `path`; block on no match, absence, stale or substituted path, class mismatch,
+   or unresolved assignment. Exclude passive `task-contract` from executable
+   `skills`. Do not score, rank, rerank, clip, repair, or use lexical or similarity
+   fallback.
 
 7. **Inspect contracts.** Read each selected skill's `SKILL.md` at its
    collector-winning `path`. Verify that the contract matches the task.
 
 8. **Write the completed draft.** Add the reconciled `skills` arrays without
-    changing boundaries or metadata. Require the author to select one packet slug;
-    write the schema-valid canonical packet root to `/tmp/breakdown-draft.json`.
-    Preserve that packet slug unchanged. The canonical root fields and slug
-    constraints are owned by [the task-packet schema](schema/task-packet.schema.json),
-    not this workflow.
+    changing boundaries or metadata. Require the author to select one packet slug.
+    Run `mktemp "${TMPDIR:-/tmp}/opencode-breakdown.XXXXXX.json"`, capture the
+    returned unique path as `DRAFT_PATH`, and write the schema-valid canonical packet
+    root there. Block if the command fails. Preserve the packet slug unchanged. The
+    canonical root fields and slug constraints are owned by
+    [the task-packet schema](schema/task-packet.schema.json), not this workflow.
 
 9. **Publish for dispatch.** Run:
 
    ```bash
    uv run --project ~/.config/opencode/scripts/python init-task-packet \
-     --output-dir .tasks < /tmp/breakdown-draft.json
+     --output-dir .tasks < "$DRAFT_PATH" || status=$?
+   rm -f -- "$DRAFT_PATH" || status=2
+   exit "${status:-0}"
    ```
 
-   Run from the workspace root so `.tasks` resolves there. The project option
-   selects the scripts environment without changing the working directory. The
-    command uses the supplied packet slug for the filename, writes atomically, and
-    prints the output path.
-   Block on non-zero exit.
+   Run from the workspace root so `.tasks` resolves there. The command preserves the
+   supplied slug, writes atomically, prints the output path, and removes the temporary draft on success or failure. Block on non-zero exit.
 
-10. **Validate and review semantic atomicity.** Run structural validation in a loop
+10. **Validate structure and recheck the breakdown.** Run structural validation in a loop
    until valid. Treat repairable structural diagnostics as warnings before hard
-   failure. Revalidate after any split or migration. Then
-   revalidate boundaries, mappings, dependencies, and skills:
+   failure. Revalidate task coverage, boundaries, dependencies, and skills after any
+   split or migration:
 
    ```bash
    schema=~/.config/opencode/skills/breakdown-tasks/schema
@@ -133,22 +125,15 @@ constraints, files, and expected outcome. Block when either is absent.
      --auto-fix
    ```
 
-   - Exit 0 with no diagnostics and no `"fixed": true` means valid.
-   - Exit 0 with diagnostics means repair actionable gaps and retry. Preserve a
-     warning only for migration compatibility; an unresolved atomicity decision
-     cannot receive semantic approval.
-   - Exit 0 and `"fixed": true` means the file changed. Read it and retry.
-   - For Exit 1, fix the JSON, retry, and read errors from stderr.
-   - Exit 2 → unrecoverable error. Block.
+   Follow [structure validation](reference/scripts/validate-task-structure.md): repair
+   diagnostics, reread and retry changed files, and block on unrecoverable errors.
 
-   After structural validation, review the publication-review evidence record for
-   every candidate-result boundary. Report a packet as **atomicity-assessed** only
-   when every candidate has one inspectable, non-contradictory disposition and
-   supporting evidence. A structurally valid packet with absent, ambiguous, or
-   contradictory evidence is structural-only, not atomicity-assessed: identify the
-   candidate-result ID and unresolved boundary, return it to the earliest authoring
-   pass, and do not accept it on the semantic review path. Structural validation
-   remains structural only; it neither creates evidence nor approves atomicity.
+   After structural validation, compare the packet with the requested outcome and
+   the final breakdown. Confirm that every necessary result appears once, every task
+   owns one result, every dependency supplies a usable handoff, and no skill
+   assignment changed a boundary. Return any compound task or artificial fragment to
+   the decomposition method and revalidate. Structural validation remains structural
+   only; it does not approve atomicity.
 
 ## Output Contract
 
@@ -168,10 +153,10 @@ Return the relative published packet path.
 - Do not cap, target, or pad the number of tasks.
 - The one-to-three limit applies to `skills` within each task.
 - Fail closed. Publish no partial output.
-- Do not claim semantic atomicity assessment from schema validity, metadata presence,
-  multi-action wording, a dependency, a shared file, skill, order, destination, or
-  final document. Retained coupling requires inspectable evidence of one shared
-  result, one verification boundary, and separation risk.
+- Do not claim atomicity from schema validity, metadata presence, wording, a
+  dependency, shared file, skill, order, destination, or final document. Break the
+  problem into smaller results first, then connect them. Retained coupling requires
+  one shared result, one verification boundary, and concrete separation risk.
 - Planning loads are passive context and are reported separately. Only reconciled
   operation and documentation assignments are executable. A documentation
   assignment may be loaded as passive, non-transitive context. It cannot add
@@ -183,8 +168,6 @@ Return the relative published packet path.
 
 - [Core rules](reference/authoring/core-rules.md)
 - [Decomposition method](reference/authoring/decomposition-method.md)
-- [Concern and boundary record](reference/authoring/concern-boundary-record.md)
-- [Dependency and coupling decisions](reference/authoring/dependency-coupling-decisions.md)
 - [Packet drafting checklist](reference/authoring/packet-drafting-checklist.md)
 - [Task-set review](reference/authoring/task-set-review.md)
 - [Worked decomposition examples](reference/authoring/decomposition-examples.md)

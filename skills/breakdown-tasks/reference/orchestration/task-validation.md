@@ -9,7 +9,7 @@ atomicity, result and verification alignment, dependencies, coupling, traceabili
 and authoring metadata. The checks below are the breakdown-tasks operation's
 validation procedure and diagnostics; they do not replace that passive reference.
 
-## Layered Atomicity Checks
+## Atomicity Checks
 
 - **Boundary before assignment** — Candidate tasks and their dependencies are fixed
   before operation/documentation skills are selected. A skill may not create a task
@@ -18,17 +18,10 @@ validation procedure and diagnostics; they do not replace that passive reference
   verification, dependency edges, coupling rationale, traceability, and authoring
   metadata using the loaded documentation skill's named references. Do not let the
   validator become a second semantic owner.
-- **Publication-review evidence gate** — Preserve a reviewer-visible companion record
-  for every candidate result and its outcome-linked disposition: split, dependency,
-  integral evidence, intentional exclusion, or retained coupling. This operation
-  does not add a packet field or choose the record's storage representation. Review
-  the record after structural validation and before reporting semantic acceptance.
-  Mark a packet **atomicity-assessed** only when every disposition is inspectable,
-  unambiguous, non-contradictory, and supported. Otherwise report it as
-  **structural-only**, identify the candidate-result ID and unresolved boundary, and
-  return it for authoring rework. Schema validity, metadata presence, multi-action
-  wording, dependencies, shared files, skills, order, destinations, or final
-  documents cannot substitute for this evidence.
+- **Recursive split review** — Start from the requested outcome, identify its smaller
+  required results, and split each result again while it contains separate questions,
+  decisions, changes, or deliverables. Hold predecessor outputs fixed when checking
+  whether dependent work can be accepted or retried separately.
 - **Dependency representation** — The operation checks that dependent tasks carry
   explicit `dependencies` edges and required predecessor artifacts in `filesToRead`,
   using the shared dependency and traceability meaning. Paths are explicit or
@@ -65,13 +58,11 @@ validation procedure and diagnostics; they do not replace that passive reference
   are strings.
 - **Optional fields** — `verification` is optional. If present, validate it against
   the schema.
-- **No combined tasks** — Apply the shared atomicity contract while checking that
-  no packet bundles independent or logically separable steps under one `purpose`.
-  Ensure each purpose contains exactly one action verb.
+- **No combined tasks** — Apply the shared atomicity contract. No packet may bundle
+  separate results under one `purpose`. Multiple actions are allowed when they only
+  produce or verify one result; verb count is not a boundary test.
 - **Skill-name reasonableness** — Each `skills` entry must be appropriate for the
   task's purpose and context.
 
-Structural checks and the publication-review evidence gate are distinct: structural
-success is not semantic atomicity approval. The layered checks are current diagnostic policy where they describe warning
-versus failure behavior. Task count derives solely from atomic coverage and must
-not become a capacity target or extra workflow stage.
+Structural success is not semantic atomicity approval. Task count derives from the
+results needed to satisfy the request and must not become a capacity target.

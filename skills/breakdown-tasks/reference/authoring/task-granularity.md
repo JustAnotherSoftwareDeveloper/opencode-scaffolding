@@ -1,31 +1,26 @@
 # Task Granularity
 
-Choose boundaries from independent work, not file count or workflow stages. The
-loaded `task-contract` documentation skill's named **Atomicity and alignment**
-reference (`atomicity-and-alignment.md`) owns the split test and one-result
-boundary.
-Its named **Dependencies and coupling** reference
-(`dependencies-and-coupling.md`) owns ordering and coupling evidence. Do not
-redefine either contract here.
+Choose boundaries by repeatedly making the requested problem smaller. The loaded
+`task-contract` documentation skill's
+[atomicity rule](../../../task-contract/reference/atomicity-and-alignment.md) owns
+the split and stopping tests. Its
+[dependency rule](../../../task-contract/reference/dependencies-and-coupling.md)
+owns handoffs and coupling.
 
-## Start With An Inventory — operation-owned
+## Make The Problem Smaller
 
-List each requested question, change, operation, decision, and deliverable. Include
-concealed concerns that appear inside broad phrases such as “finish the migration”
-or “update the feature.” Name the result for each concern before selecting skills.
+1. Name the requested outcome.
+2. List the smaller results needed to reach it.
+3. Split results that still contain separate questions, decisions, changes, or
+   deliverables.
+4. Repeat until each piece is one bounded assignment.
+5. Add dependencies and handoffs after the pieces are clear.
 
-## Apply The Shared Boundary Review
+Do not stop because all work contributes to one final deliverable. Do not keep
+splitting when the remaining actions only produce or verify one result.
 
-For every pair of concerns, apply the split test in the shared task-contract
-reference. Split independently actionable concerns into separate draft tasks and
-represent required order with the shared dependency semantics. Prefer an explicit
-dependency over an implicit compound task and review coupling with the linked shared
-reference.
+## Recheck After Changes
 
-## Recheck The Boundary — operation-owned
-
-After each split or migration, use the shared contract to review identity, result,
-verification, dependencies, coupling evidence, traceability, and metadata. Then
-confirm that the operation's assigned skills match the final boundary. Do not use
-punctuation, lifecycle order, or skill availability as proof, and do not introduce
-universal task, file, step, or skill limits.
+After a split, merge, or dependency change, review the complete set again. Ensure
+every result is covered once, each dependent task receives a usable input, and the
+assigned skills still fit without changing the boundaries.
