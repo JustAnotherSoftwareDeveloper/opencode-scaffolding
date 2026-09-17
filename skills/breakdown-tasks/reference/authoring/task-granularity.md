@@ -11,13 +11,14 @@ owns handoffs and coupling.
 
 1. Name the requested outcome.
 2. List the smaller results needed to reach it.
-3. Split results that still contain separate questions, decisions, changes, or
-   deliverables.
-4. Repeat until each piece is one bounded assignment.
-5. Add dependencies and handoffs after the pieces are clear.
+3. Create separate candidates for discovery, research, analysis, decisions,
+   authoring, changes, verification, and reporting.
+4. Split candidates that still contain more than one immediate result.
+5. Repeat until each piece is the smallest useful assignment.
+6. Add dependencies and handoffs after the pieces are clear.
 
-Do not stop because all work contributes to one final deliverable. Do not keep
-splitting when the remaining actions only produce or verify one result.
+Do not stop because all work contributes to one final deliverable. Prefer a fine task
+with a short handoff over a broad task with hidden stages. When uncertain, split.
 
 ## Recheck After Changes
 

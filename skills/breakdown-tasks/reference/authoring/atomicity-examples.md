@@ -10,23 +10,24 @@ Use these contrasts with the shared
 - **Analyze migration risk, then propose a bridge:** the assessment is a predecessor
   result consumed by the proposal. Create two dependent tasks.
 - **Research session evidence, then create an audit skill:** separate the research
-  when its findings determine the skill's scope or audit contract.
+  inventory, audit-contract decision, skill creation, and validation.
 - **Revise the API reference and deprecation policy:** the documentation and policy
   changes have separate acceptance decisions.
+- **Research packet construction and write a proposal:** separate source discovery,
+  behavioral analysis, recommendation, proposal authoring, and proposal validation.
+- **Implement a change and run tests:** separate implementation and verification when
+  the tests can execute against a fixed implementation result.
 
-## Keep Together
+## Narrow Keep-Together Exceptions
 
-- **Produce one login-flow threat model using dependency attack paths:** investigating
-  attack paths is internal evidence for the one threat-model result when it produces
-  no separate finding needed downstream.
-- **Change cache invalidation and run regression tests:** the tests verify the code
-  result and do not produce a separate requested report.
+- **Read an already-identified parser reference while implementing one specified
+  option:** the read itself produces no discovery, finding, or decision.
 - **Change a source schema and regenerate its client:**
-  keep one task when both files form one reproducible result and separation would
-  leave an invalid repository state.
+  keep the state change together only when separation would leave an invalid
+  repository state; put independently executable verification in another task.
 
 ## Wrong Reasons To Keep Together
 
 Do not merge results because they share a file, report, topic, release, skill,
-dependency, or final deliverable. Do not split one result merely because it requires
-several actions or files.
+dependency, or final deliverable. Do not merge because the intermediate handoff is
+small or was not explicitly requested. If uncertain, split.

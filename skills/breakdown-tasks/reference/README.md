@@ -13,7 +13,7 @@ Use this index to locate detailed guidance for the decomposition workflow.
 - [Task-set review](authoring/task-set-review.md) defines the final coverage and
   rework gate before assignment.
 - [Worked decomposition examples](authoring/decomposition-examples.md) demonstrate
-  recursive splitting, dependency handoffs, internal supporting work, and stopping.
+  aggressive recursive splitting, dependency handoffs, narrow retained coupling, and stopping.
 - [Task granularity](authoring/task-granularity.md)
   describes recursive splitting and the stopping rule.
 - [Atomicity anti-patterns](authoring/anti-patterns.md) list operation review signals.

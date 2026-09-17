@@ -32,9 +32,10 @@ Multiple apparent results belong in one task only when all of these conditions h
 Where `couplingRationale` records retained coupling, it records all three facts.
 This semantic requirement does not alter schemas or prescribe a runtime validator.
 
-Necessary work is not automatically coupled. Investigation that establishes a
-finding or decision for later use is a predecessor. Investigation that only helps
-produce an already-defined result may remain an internal step.
+Necessary work is not automatically coupled. Discovery, investigation, analysis, or
+a decision that precedes later work is a separate predecessor whenever it can produce
+a concise handoff. Do not relabel it as internal evidence merely because all work
+contributes to one final artifact.
 
 Dependencies, shared files, topics, releases, destinations, skills, ordering, final
 documents, and lifecycle labels are insufficient coupling evidence and are not
@@ -49,6 +50,5 @@ If separation would make the one result or its verification boundary unsafe,
 misleading, or impossible, the rationale preserves the shared result, verification
 boundary, and separation risk for review.
 
-Absent, ambiguous, or contradictory evidence does not support retained coupling.
-The boundary remains unresolved; a dependency can still express order between the
-separate concerns.
+Absent, ambiguous, contradictory, or merely convenient coupling evidence requires a
+split. Use a dependency to express order between the separate tasks.

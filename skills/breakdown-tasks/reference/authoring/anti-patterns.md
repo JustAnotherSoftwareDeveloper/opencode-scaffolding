@@ -12,6 +12,10 @@ contract.
 - A final document is used to merge independently reviewable findings.
 - Implementation and a separately requested test artifact share one task.
 - Research that determines later scope or acceptance is hidden inside implementation.
+- Discovery, analysis, recommendation, authoring, implementation, and verification
+  are bundled as one lifecycle task.
+- Work is retained because an intermediate result is small or was not explicitly
+  requested.
 
 ## Unsupported Coupling Signals
 
@@ -21,13 +25,14 @@ contract.
 - Several outputs are called a package without one shared result.
 - Verification checks unrelated results under one task.
 
-## Artificial Granularity
+## Invalid Granularity Decisions
 
 - A fixed task count is chosen before concerns are inventoried.
 - One file, step, or skill is required per task.
 - Tasks are merged to fit an available skill.
-- Tasks are split only because a sentence contains “and” or a comma.
-- Reading, editing, and running checks for one result are turned into separate tasks.
+- A sentence containing multiple action verbs is accepted without testing each verb
+  as a separate result.
+- Fine-grained tasks are merged merely because the author fears over-splitting.
 
 ## Invalid Assignment
 

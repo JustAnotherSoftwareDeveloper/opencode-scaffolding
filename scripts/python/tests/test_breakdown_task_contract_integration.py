@@ -56,18 +56,19 @@ def test_task_contract_is_collector_winning_passive_context_before_drafting() ->
 
 def test_operation_owned_pipeline_remains_and_cli_paths_are_stable() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
+    normalized_text = " ".join(text.split()).lower()
 
     for phrase in (
         "normalize",
-        "break it into smaller results",
-        "split any result that still",
+        "inventory every discovery",
+        "then split it again if it still",
         "Draft tasks without `skills`",
         "Assign skills to each task",
         "Inspect contracts",
         "Publish for dispatch",
         "Validate structure and recheck the breakdown",
     ):
-        assert phrase.lower() in text.lower()
+        assert phrase.lower() in normalized_text
 
     for command in (
         "collect-skills --class planning",
@@ -138,26 +139,52 @@ def test_passive_documentation_is_not_an_executable_assignment() -> None:
     assert "does not auto-read" in contract
 
 
-def test_decomposition_method_splits_then_connects_results() -> None:
+def test_decomposition_method_aggressively_splits_then_connects_results() -> None:
     method = (
         BREAKDOWN / "reference" / "authoring" / "decomposition-method.md"
     ).read_text(encoding="utf-8")
     examples = (
         BREAKDOWN / "reference" / "authoring" / "decomposition-examples.md"
     ).read_text(encoding="utf-8")
+    normalized_method = " ".join(method.split())
+    normalized_examples = " ".join(examples.split())
 
     for phrase in (
         "Name the requested outcome",
-        "Break the outcome into smaller results",
-        "Split each result into one assignment",
+        "Inventory every candidate result",
+        "Split every candidate aggressively",
         "Connect the results",
         "Draft and review the task set",
-        "Stop splitting",
+        "Stop splitting only",
     ):
         assert phrase in method
 
     assert "predecessor outputs held fixed" in method
     assert "Do not add `skills` yet" in method
+    assert (
+        "When there is a reasonable argument for another boundary, create it"
+        in normalized_method
+    )
     assert "Research That Determines Later Work" in examples
-    assert "Documentation Lookup Inside One Task" in examples
+    assert "Known-Source Lookup Inside One Task" in examples
     assert "session evidence" in examples
+    assert "Create a separate verification task" in normalized_examples
+
+
+def test_atomicity_contract_prefers_splitting_over_compound_work() -> None:
+    atomicity = (
+        ROOT / "skills" / "task-contract" / "reference" / "atomicity-and-alignment.md"
+    ).read_text(encoding="utf-8")
+    normalized_atomicity = " ".join(atomicity.split()).lower()
+
+    for phrase in (
+        "when a boundary is uncertain, split it",
+        "A false split is preferable to hidden compound work",
+        "Distinct lifecycle stages are separate tasks by default",
+        "default to separate tasks for",
+        "Verification is a separate task by default",
+        "Do not stop merely because further splitting feels fine-grained",
+    ):
+        assert phrase.lower() in normalized_atomicity
+
+    assert "Research may remain internal" not in atomicity

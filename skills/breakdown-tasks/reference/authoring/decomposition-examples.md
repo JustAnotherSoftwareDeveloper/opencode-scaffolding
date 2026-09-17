@@ -2,7 +2,7 @@
 
 These examples apply the shared `task-contract` semantics through the
 [decomposition method](decomposition-method.md). They show how to make a problem
-smaller, connect the tasks, and stop before creating procedural fragments.
+smaller, connect the tasks, and prefer fine-grained handoffs over compound work.
 
 ## Research That Determines Later Work
 
@@ -20,37 +20,41 @@ Break the request down:
    gaps.
 2. **Define the session-audit skill contract.** This task consumes the finding and
    decides the audit input, checks, report shape, constraints, and completion rules.
-3. **Create the session-audit skill.**
-   This task consumes the contract, authors and validates the workspace.
+3. **Create the session-audit skill.** This task consumes the contract and authors
+   the workspace.
+4. **Validate the session-audit skill.** This task consumes the authored workspace
+   and reports whether it satisfies the contract and repository checks.
 
 The first task is separate because its finding can be reviewed or retried without
-creating the skill. The second is separate when choosing the audit contract is a
-material decision rather than routine authoring. The validators remain inside the
-creation task because they check the created skill and produce no separate requested
-result.
+creating the skill. Contract definition, workspace creation, and validation are also
+separate because each has a distinct completion decision. The user does not need to
+request those intermediate handoffs explicitly.
 
-## Documentation Lookup Inside One Task
+## Known-Source Lookup Inside One Task
 
 **Request:** Add the already-specified `timeout` option using the documented parser
 API and run the parser tests.
 
-Keep one implementation task. Reading the parser documentation is an internal step:
-the required behavior is already defined, the lookup does not establish a reusable
-finding, and the tests verify the same code result.
+Reading the already-identified parser documentation may remain an implementation
+step because it discovers neither the relevant source nor a new decision. Create a
+separate verification task for the parser tests because they can run against the
+fixed implementation and independently accept or reject it.
 
 ## Analysis Followed By A Proposal
 
 **Request:** Analyze migration risk, then propose whether to add a compatibility
 bridge.
 
-Create two tasks:
+Create at least two tasks:
 
 1. Produce the migration-risk assessment.
 2. Produce the bridge proposal from that assessment.
 
-The proposal depends on the assessment. Record the assessment as the supplied item,
-explain how the proposal uses it, and begin only when the assessment is complete
-enough to support a decision. Sequence does not merge the results.
+If collecting migration evidence and analyzing it are independently meaningful,
+split those too. The proposal depends on the assessment. Record the assessment as
+the supplied item, explain how the proposal uses it, and begin only when the
+assessment is complete enough to support a decision. Sequence does not merge the
+results.
 
 ## Independent Findings In One Report
 
@@ -64,14 +68,15 @@ report is itself requested work. A shared destination is not a shared result.
 
 **Request:** Change the source API schema and regenerate the checked-in client.
 
-Keep one task when the source and generated client form one reproducible repository
-state, generation and correspondence provide one verification boundary, and
-separating them would leave the checked-in client inconsistent with its source.
+Keep one implementation task only when the source and generated client form one
+indivisible repository state and separating their production would leave the
+checked-in client inconsistent with its source. Put independently executable
+correspondence checks in a dependent verification task.
 “Same release” or “same tool” would not be enough.
 
-## Stopping Contrast
+## Aggressive Stopping Contrast
 
-Do not turn one bounded implementation result into separate tasks to read a file,
-edit the code, run tests, and report completion. Those are procedural steps. Split
-only when an activity produces another useful result, decision, change, or
-deliverable with its own acceptance or retry boundary.
+An explicitly known file read may stay with the task that uses it. Source discovery,
+a finding derived from the source, a decision based on that finding, the resulting
+edit, and independently executable tests are separate tasks. If it is unclear whether
+an action produces a handoff, split it and state the smallest useful handoff.

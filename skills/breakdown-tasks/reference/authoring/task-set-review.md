@@ -10,8 +10,9 @@ validation checks packet shape; this review checks whether the breakdown makes s
 2. **One result per task:** No task still contains separate questions, decisions,
    changes, or deliverables. A final document or shared file does not hide separate
    results.
-3. **No procedural fragments:** No task exists only to perform one internal action,
-   such as reading a source or running a check, for another task's result.
+3. **Aggressive boundaries:** Discovery, research, analysis, decisions, authoring,
+   implementation, verification, and reporting are separate whenever each can state
+   a concise handoff or completion decision. Every uncertain boundary is split.
 4. **Usable handoffs:** Every dependency names the predecessor result, consumer
    use, and readiness condition. File handoffs appear in the consumer's read set.
 5. **Aligned completion:** Each task's purpose, expected output, instructions, and
@@ -21,4 +22,4 @@ validation checks packet shape; this review checks whether the breakdown makes s
 
 If a check fails, return the affected work to the decomposition method, revise the
 breakdown, and run the complete review again. Do not repair a bad boundary by changing
-only its title or metadata.
+only its title or metadata. Do not merge tasks merely to avoid fine granularity.

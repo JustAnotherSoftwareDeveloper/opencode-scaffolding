@@ -12,8 +12,8 @@ before skill assignment. The task schema controls packet structure; the loaded
    decisions in `context`.
 3. List source files and predecessor file handoffs in `filesToRead`; list only the
    task's write boundary in `filesToWrite`.
-4. Write concrete execution instructions that produce the one result. Keep ordinary
-   checks with the result they verify.
+4. Write concrete execution instructions that produce the one immediate result. Put
+   independently executable checks in a dependent verification task.
 5. Record observable completion in `verificationCoverage` and align it with the
    purpose and expected output.
 6. For each dependency, identify the predecessor, supplied result, consumer use,
@@ -25,6 +25,6 @@ before skill assignment. The task schema controls packet structure; the loaded
 
 ## Final Check
 
-Confirm that the packet describes one result, includes every material input, and
-excludes neighboring results. Return compound tasks or procedural fragments to the
-decomposition method rather than hiding them in wording or metadata.
+Confirm that the packet describes the smallest useful result, includes every material
+input, and excludes neighboring lifecycle stages. Split every uncertain boundary;
+do not hide compound work in wording or metadata.

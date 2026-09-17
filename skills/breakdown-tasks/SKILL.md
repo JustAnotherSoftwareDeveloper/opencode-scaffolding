@@ -60,26 +60,31 @@ constraints, files, and expected outcome. Block when either is absent.
    assignment, or completion evidence. Read needed references explicitly. Block on
    an absent name, stale path, class mismatch, or load failure.
 
-5. **Break down the problem and draft atomic tasks.** Before selecting executable
+5. **Break down the problem into extremely atomic tasks.** Before selecting executable
    skills, follow the operation-owned
    [Decomposition Method](reference/authoring/decomposition-method.md). Name the
-   requested outcome, break it into smaller results, and split any result that still
-   contains separate questions, decisions, changes, or deliverables. Repeat until
-   each piece is one bounded assignment. Then add the inputs, outputs, dependencies,
-   handoffs, and completion checks needed for the pieces to work together.
+   requested outcome, inventory every discovery, research, analysis, finding,
+   decision, recommendation, authored artifact, implementation change, verification,
+   review, and report needed to reach it. Make each candidate its own task, then split
+   it again if it still contains more than one immediate result. Prefer too many small
+   tasks over one compound task. When uncertain, split.
 
    Apply the loaded `task-contract` documentation skill's named **Atomicity and
    alignment**, **Dependencies and coupling**, and **Traceability and metadata**
    references. Hold predecessor outputs fixed when testing whether dependent results
-   can be accepted or retried separately. Keep ordinary reading, editing, and checks
-   inside a task when they only produce or verify that task's result. Do not use a
-   final deliverable, shared file, workflow phase, or available skill as a boundary.
+   can be accepted or retried separately. Treat lifecycle stages as separate tasks by
+   default. Known-file reading may support one task, but source discovery, findings,
+   decisions, changes, and independently executable checks are separate results. Do
+   not use a final deliverable, shared file, workflow, sequence, or available skill to
+   merge them.
 
    Draft tasks without `skills`. Give each task a unique `taskId` and populate
    `verificationCoverage`, `dependencies`, `antiPatternSignals`, and
    `purposeOutputAlignment`; add `couplingRationale` only when the shared contract
    supports it. Review the complete set for coverage, duplication, hidden compound
-   work, pointless fragments, and usable dependency handoffs before assignment.
+   work and usable dependency handoffs before assignment. Do not merge tasks to avoid
+   fine granularity. Retain multiple actions only when separation is demonstrably
+   invalid, misleading, or unsafe; inconvenience is not coupling evidence.
 
 6. **Assign skills to each task.** Present the complete draft and operation and
    documentation array to the LLM. Select one to three skills per task without
@@ -129,11 +134,11 @@ constraints, files, and expected outcome. Block when either is absent.
    diagnostics, reread and retry changed files, and block on unrecoverable errors.
 
    After structural validation, compare the packet with the requested outcome and
-   the final breakdown. Confirm that every necessary result appears once, every task
-   owns one result, every dependency supplies a usable handoff, and no skill
-   assignment changed a boundary. Return any compound task or artificial fragment to
-   the decomposition method and revalidate. Structural validation remains structural
-   only; it does not approve atomicity.
+   the final breakdown. Confirm that every necessary intermediate and final result
+   appears once, every task owns one immediate result, every dependency supplies a
+   usable handoff, and no skill assignment changed a boundary. Split every unresolved
+   boundary rather than approving a broad task. Structural validation remains
+   structural only; it does not approve atomicity.
 
 ## Output Contract
 
@@ -151,12 +156,15 @@ Return the relative published packet path.
 - Require an author-selected packet slug in every published root. Never derive,
   normalize, or locally validate it; use the canonical task-packet schema.
 - Do not cap, target, or pad the number of tasks.
+- Bias aggressively toward splitting. Too many atomic tasks are acceptable; hidden
+  compound work is not.
 - The one-to-three limit applies to `skills` within each task.
 - Fail closed. Publish no partial output.
 - Do not claim atomicity from schema validity, metadata presence, wording, a
   dependency, shared file, skill, order, destination, or final document. Break the
-  problem into smaller results first, then connect them. Retained coupling requires
-  one shared result, one verification boundary, and concrete separation risk.
+  problem into the smallest useful results first, then connect them. Retained
+  coupling requires one indivisible result, one verification boundary, and concrete
+  separation harm. If any element is uncertain, split.
 - Planning loads are passive context and are reported separately. Only reconciled
   operation and documentation assignments are executable. A documentation
   assignment may be loaded as passive, non-transitive context. It cannot add
