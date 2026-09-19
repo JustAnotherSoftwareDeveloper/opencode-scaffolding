@@ -13,11 +13,124 @@
       "items": {
         "$ref": "#/definitions/TaskPacket"
       },
-        "minItems": 1
-    }
+      "minItems": 1
+    },
+    "boundaryReview": { "$ref": "#/definitions/BoundaryReview" }
   },
-  "required": ["summary", "slug", "tasks"],
+  "required": ["summary", "slug", "tasks", "boundaryReview"],
   "definitions": {
+    "BoundaryReview": {
+      "description": "Required request-aware boundary-review evidence. It documents review reasoning and does not prove semantic atomicity or alter task-contract meanings. All dispositions are closed; unresolved evidence is not representable.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requestResultInventory": {
+          "description": "Request-derived immediate and necessary intermediate results, keyed by unique inventory identifier.",
+          "type": "object",
+          "minProperties": 1,
+          "patternProperties": {
+            "^[A-Za-z][A-Za-z0-9_-]{0,63}$": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "result": { "type": "string", "minLength": 1 },
+                "kind": { "type": "string", "enum": ["immediate", "necessary-intermediate"] },
+                "disposition": { "type": "string", "enum": ["represented-by-task", "split-into-tasks", "not-applicable"] }
+              },
+              "required": ["result", "kind", "disposition"]
+            }
+          },
+          "additionalProperties": false
+        },
+        "taskReviews": {
+          "description": "Per-task immediate-result and fixed-predecessor-output mapping, keyed by unique taskId.",
+          "type": "object",
+          "minProperties": 1,
+          "patternProperties": {
+            "^[A-Za-z][A-Za-z0-9_-]{0,63}$": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "immediateResult": { "type": "string", "minLength": 1 },
+                "predecessorOutputs": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 },
+                  "uniqueItems": true
+                },
+                "preAssignmentDisposition": { "type": "string", "enum": ["single-result", "retained-indivisible"] },
+                "acceptanceDisposition": { "type": "string", "enum": ["accepted", "accepted-indivisible"] },
+                "indivisibilityEvidence": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "sharedResult": { "type": "string", "minLength": 1 },
+                    "verificationBoundary": { "type": "string", "minLength": 1 },
+                    "separationHarm": { "type": "string", "minLength": 1 }
+                  },
+                  "required": ["sharedResult", "verificationBoundary", "separationHarm"]
+                }
+              },
+              "required": ["immediateResult", "predecessorOutputs", "preAssignmentDisposition", "acceptanceDisposition"],
+              "allOf": [
+                {
+                  "if": {
+                    "anyOf": [
+                      { "properties": { "preAssignmentDisposition": { "const": "retained-indivisible" } }, "required": ["preAssignmentDisposition"] },
+                      { "properties": { "acceptanceDisposition": { "const": "accepted-indivisible" } }, "required": ["acceptanceDisposition"] }
+                    ]
+                  },
+                  "then": { "required": ["indivisibilityEvidence"] }
+                }
+              ],
+              "oneOf": [
+                {
+                  "properties": {
+                    "preAssignmentDisposition": { "const": "single-result" },
+                    "acceptanceDisposition": { "const": "accepted" }
+                  },
+                  "required": ["preAssignmentDisposition", "acceptanceDisposition"]
+                },
+                {
+                  "properties": {
+                    "preAssignmentDisposition": { "const": "retained-indivisible" },
+                    "acceptanceDisposition": { "const": "accepted-indivisible" }
+                  },
+                  "required": ["preAssignmentDisposition", "acceptanceDisposition"]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "warningDispositions": {
+          "description": "Structural warning decisions, keyed by unique warning identifier. Every disposition is closed.",
+          "type": "object",
+          "patternProperties": {
+            "^[A-Za-z][A-Za-z0-9_-]{0,63}$": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "signal": { "type": "string", "minLength": 1 },
+                "taskId": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$" },
+                "disposition": { "type": "string", "enum": ["split", "accepted-indivisible", "not-applicable"] }
+              },
+              "required": ["signal", "disposition"],
+              "allOf": [
+                {
+                  "if": {
+                    "properties": { "disposition": { "const": "accepted-indivisible" } },
+                    "required": ["disposition"]
+                  },
+                  "then": { "required": ["taskId"] }
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["requestResultInventory", "taskReviews", "warningDispositions"]
+    },
     "PacketSlug": {
       "description": "Required lowercase ASCII kebab-case identity for this packet. It is preserved unchanged by packet consumers and publishers.",
       "type": "string",
@@ -46,7 +159,7 @@
       "additionalProperties": false,
       "properties": {
         "taskId": {
-          "description": "Stable optional identity for this task. Legacy packets may omit it; validators use the ordered task position as a migration identity.",
+          "description": "Stable required identity for this task.",
           "type": "string",
           "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
         },
@@ -105,7 +218,7 @@
         },
         "expectedOutput": { "$ref": "#/definitions/TaskExpectedOutput" },
         "verificationCoverage": {
-          "description": "Optional publication metadata describing observable checks for this task. Omission is migration-compatible and is diagnosed as a warning.",
+          "description": "Required publication metadata describing observable checks for this task.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
@@ -135,7 +248,7 @@
           "required": ["rationale", "sharedResult", "verification"]
         },
         "dependencies": {
-          "description": "Optional directed dependency edges. References use taskId when present, or the migration identity task-<one-based-position>.",
+          "description": "Required directed dependency edges. References use taskId.",
           "type": "array",
           "uniqueItems": true,
           "items": {
@@ -149,7 +262,7 @@
           }
         },
         "antiPatternSignals": {
-          "description": "Optional documented signals considered during authoring; signals are not proof of conceptual independence.",
+          "description": "Required documented signals considered during authoring; signals are not proof of conceptual independence.",
           "type": "array",
           "items": {
             "type": "string",
@@ -169,7 +282,7 @@
           "uniqueItems": true
         },
         "purposeOutputAlignment": {
-          "description": "Optional explicit authoring assessment connecting the purpose to the expected output.",
+          "description": "Required explicit authoring assessment connecting the purpose to the expected output.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
@@ -179,7 +292,7 @@
           "required": ["status", "evidence"]
         }
       },
-      "required": ["purpose", "context", "filesToRead", "filesToWrite", "skills", "executionInstructions", "expectedOutput"]
+      "required": ["taskId", "purpose", "context", "filesToRead", "filesToWrite", "skills", "executionInstructions", "expectedOutput", "verificationCoverage", "dependencies", "antiPatternSignals", "purposeOutputAlignment"]
     }
   }
 }

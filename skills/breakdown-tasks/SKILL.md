@@ -60,7 +60,7 @@ constraints, files, and expected outcome. Block when either is absent.
    assignment, or completion evidence. Read needed references explicitly. Block on
    an absent name, stale path, class mismatch, or load failure.
 
-5. **Break down the problem into extremely atomic tasks.** Before selecting executable
+5. **Draft boundaries and close the pre-assignment review.** Before selecting executable
    skills, follow the operation-owned
    [Decomposition Method](reference/authoring/decomposition-method.md). Name the
    requested outcome, inventory every discovery, research, analysis, finding,
@@ -81,12 +81,23 @@ constraints, files, and expected outcome. Block when either is absent.
    Draft tasks without `skills`. Give each task a unique `taskId` and populate
    `verificationCoverage`, `dependencies`, `antiPatternSignals`, and
    `purposeOutputAlignment`; add `couplingRationale` only when the shared contract
-   supports it. Review the complete set for coverage, duplication, hidden compound
-   work and usable dependency handoffs before assignment. Do not merge tasks to avoid
-   fine granularity. Retain multiple actions only when separation is demonstrably
-   invalid, misleading, or unsafe; inconvenience is not coupling evidence.
+   supports it. Create and retain a boundary-review record alongside the draft and
+   canonical packet. For every applicable packet, the record must cover every
+   request-derived immediate and necessary intermediate result; map every proposed
+   task to one immediate result and its fixed predecessor outputs; record the
+   split-by-default fixed-predecessor decision; and close every warning as `split`,
+   `accepted-indivisible`, or `not-applicable`. An accepted-indivisible disposition
+   states one shared result, one verification boundary, and concrete separation harm.
+   Review the complete set for coverage, duplication, hidden compound work, usable
+   dependency handoffs, and closed warning dispositions before assignment. Missing,
+   ambiguous, contradictory, or unresolved evidence returns the set for revision.
+   Do not merge tasks to avoid fine granularity. Retain multiple actions only when
+   separation is demonstrably invalid, misleading, or unsafe; inconvenience is not
+   coupling evidence.
 
-6. **Assign skills to each task.** Present the complete draft and operation and
+6. **Assign skills only after boundary acceptance.** Assign only after the completed
+   pre-assignment review accepts the draft boundaries. Present the complete accepted
+   draft and operation and
    documentation array to the LLM. Select one to three skills per task without
    changing boundaries. Reconcile each selection against the winning `name`, `class`,
    and `path`; block on no match, absence, stale or substituted path, class mismatch,
@@ -105,7 +116,7 @@ constraints, files, and expected outcome. Block when either is absent.
     canonical root fields and slug constraints are owned by
     [the task-packet schema](schema/task-packet.schema.json), not this workflow.
 
-9. **Publish for dispatch.** Run:
+9. **Publish the candidate packet.** Run:
 
    ```bash
    uv run --project ~/.config/opencode/scripts/python init-task-packet \
@@ -115,12 +126,14 @@ constraints, files, and expected outcome. Block when either is absent.
    ```
 
    Run from the workspace root so `.tasks` resolves there. The command preserves the
-   supplied slug, writes atomically, prints the output path, and removes the temporary draft on success or failure. Block on non-zero exit.
+   supplied slug, writes atomically, prints the output path, and removes the temporary
+   draft on success or failure. Block on non-zero exit. This publication does not
+   accept the packet for display or dispatch.
 
-10. **Validate structure and recheck the breakdown.** Run structural validation in a loop
+10. **Validate structure and close final request-aware acceptance.** Run structural validation in a loop
    until valid. Treat repairable structural diagnostics as warnings before hard
    failure. Revalidate task coverage, boundaries, dependencies, and skills after any
-   split or migration:
+   split:
 
    ```bash
    schema=~/.config/opencode/skills/breakdown-tasks/schema
@@ -133,12 +146,17 @@ constraints, files, and expected outcome. Block when either is absent.
    Follow [structure validation](reference/scripts/validate-task-structure.md): repair
    diagnostics, reread and retry changed files, and block on unrecoverable errors.
 
-   After structural validation, compare the packet with the requested outcome and
-   the final breakdown. Confirm that every necessary intermediate and final result
-   appears once, every task owns one immediate result, every dependency supplies a
-   usable handoff, and no skill assignment changed a boundary. Split every unresolved
-   boundary rather than approving a broad task. Structural validation remains
-   structural only; it does not approve atomicity.
+   After structural validation, the delegator independently compares the retained
+   boundary-review record, original request, and final task set. Accept the packet
+   for display or dispatch only when the record is closed: the inventory covers every
+   necessary intermediate and final result exactly once; every task owns one immediate
+   result; each fixed-predecessor split decision is supported; every dependency
+   supplies a usable handoff without claiming coupling; every warning has a closed
+   disposition; retained coupling has concrete indivisibility evidence; and no skill
+   assignment changed a boundary. Otherwise return the set for split or a concrete
+   indivisibility rationale and repeat the applicable review. Structural validation
+   remains structural only; it never approves atomicity. There is no absent-record,
+   warning-free, structural-validity, or alternate acceptance path.
 
 ## Output Contract
 
@@ -158,6 +176,11 @@ Return the relative published packet path.
 - Do not cap, target, or pad the number of tasks.
 - Bias aggressively toward splitting. Too many atomic tasks are acceptable; hidden
   compound work is not.
+- Every applicable packet requires one closed boundary-review record before it may be
+  accepted for display or dispatch. The record is request-aware evidence retained
+  alongside the canonical packet, not a schema claim or mechanical proof of atomicity.
+  Do not provide an optional adoption, backwards-compatibility, migration, legacy,
+  transition, prior-format, or alternate acceptance path.
 - The one-to-three limit applies to `skills` within each task.
 - Fail closed. Publish no partial output.
 - Do not claim atomicity from schema validity, metadata presence, wording, a

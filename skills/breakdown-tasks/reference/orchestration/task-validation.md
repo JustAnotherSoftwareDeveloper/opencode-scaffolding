@@ -11,9 +11,17 @@ validation procedure and diagnostics; they do not replace that passive reference
 
 ## Atomicity Checks
 
+- **Mandatory closed boundary-review evidence** — Every applicable packet
+  retains a request-aware boundary-review record alongside the canonical packet.
+  Before skill assignment, it inventories every immediate and necessary
+  intermediate result, maps each candidate to one immediate result and fixed
+  predecessor outputs, and records a
+  split-by-default decision. Every warning is closed as `split`,
+  `accepted-indivisible`, or `not-applicable`; accepted indivisibility states one
+  shared result, one verification boundary, and concrete separation harm.
 - **Boundary before assignment** — Candidate tasks and their dependencies are fixed
-  before operation/documentation skills are selected. A skill may not create a task
-  boundary or justify a merge.
+  and accepted in the pre-assignment boundary review before operation/documentation
+  skills are selected. A skill may not create a task boundary or justify a merge.
 - **Shared boundary semantics** — Review each task's purpose, expected output,
   verification, dependency edges, coupling rationale, traceability, and authoring
   metadata using the loaded documentation skill's named references. Do not let the
@@ -26,10 +34,11 @@ validation procedure and diagnostics; they do not replace that passive reference
   explicit `dependencies` edges and required predecessor artifacts in `filesToRead`,
   using the shared dependency and traceability meaning. Paths are explicit or
   bounded, never invented placeholders.
-- **Staged outcomes** — Report uncertain text heuristics as warnings; use a hard
-  failure for declared compound signals, demonstrated independent concerns,
-  boundary violations, or unverifiable results. Any split or migration outcome must
-  be revalidated, including skills.
+- **Staged outcomes and warnings** — Treat uncertain text heuristics as review
+  warnings, not atomicity proof. Every warning requires a recorded closed disposition;
+  an unresolved warning is a hard failure. Declared compound signals, demonstrated
+  independent concerns, boundary violations, or unverifiable results require revision.
+  Any split outcome must be revalidated, including skills.
 - **Named anti-patterns** — Any declared compound-task signal produces a hard split
   diagnostic. Text heuristics remain warnings because they do not prove independence.
 - **Uncapped task inventory** — Confirm every independently decidable question,
@@ -64,5 +73,15 @@ validation procedure and diagnostics; they do not replace that passive reference
 - **Skill-name reasonableness** — Each `skills` entry must be appropriate for the
   task's purpose and context.
 
-Structural success is not semantic atomicity approval. Task count derives from the
-results needed to satisfy the request and must not become a capacity target.
+## Final Request-Aware Acceptance
+
+After candidate publication and structural validation, the delegator independently
+compares the original request, retained boundary-review record, and final task set.
+Acceptance for display or dispatch requires closed inventory coverage, one immediate
+result per task, supported fixed-predecessor split decisions, closed warnings, usable
+dependency handoffs, and concrete evidence for every retained indivisible boundary.
+Failure returns the set for split or a concrete indivisibility rationale. Structural
+success is not semantic atomicity approval. For every applicable packet, reject
+optional adoption, backwards compatibility, migration, legacy, transition,
+prior-format, absent-record acceptance, and alternate paths. Task count derives from
+the results needed to satisfy the request and must not become a capacity target.

@@ -12,9 +12,10 @@
       "type": "array",
       "items": { "$ref": "#/definitions/TaskDraft" },
       "minItems": 1
-    }
+    },
+    "boundaryReview": { "$ref": "task-packet.schema.json#/definitions/BoundaryReview" }
   },
-  "required": ["summary", "slug", "tasks"],
+  "required": ["summary", "slug", "tasks", "boundaryReview"],
   "definitions": {
     "TaskDraft": {
       "type": "object",

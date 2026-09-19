@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """CLI entry point for validate-task-structure.
 
-Validates task objects against the task-packet JSON Schema.
+Validates complete task packets against the task-packet JSON Schema.
 
 Invocation:
   uv run --directory <scripts-python-dir> validate-task-structure \\
       [file-path | --stdin] --schema PATH
 
 Exit codes:
-  0 — All tasks valid.
+  0 — The packet's structural interface is valid. This is not semantic
+      atomicity approval.
   1 — Validation violations found.
   2 — Parse/file/schema error (bad input, unreadable file, invalid JSON,
       bad schema).
@@ -23,7 +24,6 @@ import click
 
 from lib.schema import load_schema
 from lib.validate_task_structure import auto_fix_task_structure, validate
-from lib.validate_task_structure.core import validate_root
 
 
 @click.command(name="validate-task-structure")
@@ -36,7 +36,10 @@ from lib.validate_task_structure.core import validate_root
     "--stdin",
     is_flag=True,
     default=False,
-    help="Read a rootless JSON task array from stdin instead of a file.",
+    help=(
+        "Read a complete canonical task-packet JSON object from stdin instead "
+        "of a file."
+    ),
 )
 @click.option(
     "--state-file",
@@ -66,12 +69,12 @@ def main(
     auto_fix: bool,
     schema: str,
 ) -> None:
-    """Validate task objects from FILE_PATH, --stdin, or --state-file
+    """Validate canonical task-packet roots from FILE_PATH, --stdin, or --state-file
     against a JSON Schema.
 
-    File-path and stdin modes validate a rootless JSON array of task objects.
-    State-file mode validates the complete canonical task-packet root, then its
-    tasks. It does not treat a task array as a packet.
+    Every input mode validates the complete canonical task-packet root, including
+    required boundaryReview evidence, then its tasks. A successful result is
+    structural-interface evidence only; it does not approve semantic atomicity.
     Outputs ``{"valid": true}`` or ``{"valid": false, "errors": [...]}``
     to stdout.
     """
@@ -143,28 +146,11 @@ def main(
         click.echo(f"Error: invalid JSON input: {exc}", err=True)
         raise SystemExit(2) from exc
 
-    if state_file:
-        root_valid, root_errors = validate_root(parsed, schema_dict)
-        if not root_valid:
-            click.echo(json.dumps({"valid": False, "errors": root_errors}))
-            raise SystemExit(1)
-        assert isinstance(parsed, dict)
-        tasks = parsed["tasks"]
-        assert isinstance(tasks, list)
-    else:
-        if not isinstance(parsed, list):
-            click.echo(
-                "Error: input must be a JSON array of task objects.",
-                err=True,
-            )
-            raise SystemExit(2)
-        tasks = parsed
-
     # --- Validate ---
     try:
         valid: bool
         errors: list[str]
-        valid, errors = validate(tasks, schema_dict)
+        valid, errors = validate(parsed, schema_dict)
     except Exception as exc:
         click.echo(f"Error: validation error: {exc}", err=True)
         raise SystemExit(2) from exc

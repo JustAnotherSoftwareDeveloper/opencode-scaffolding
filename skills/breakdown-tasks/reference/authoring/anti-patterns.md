@@ -33,12 +33,33 @@ contract.
 - A sentence containing multiple action verbs is accepted without testing each verb
   as a separate result.
 - Fine-grained tasks are merged merely because the author fears over-splitting.
+- A candidate is accepted without a request-result inventory,
+  fixed-predecessor split decision, one-immediate-result mapping, or closed warning
+  disposition.
+- A warning is ignored because wording appears simple, structure validates, or no
+  heuristic signal remains.
+- A dependency is treated as coupling rather than order between separate results.
+- An indivisibility claim lacks one shared result, one verification boundary, or
+  concrete separation harm.
 
 ## Invalid Assignment
 
 - Skills are assigned before operation and documentation profiles are collected.
 - A fallback skill is forced when no contract matches.
 - A selected skill changes an already established boundary.
+- Skills are selected before the pre-assignment boundary review accepts the draft.
+
+## Invalid Acceptance
+
+- A packet is accepted for display or dispatch without the retained, closed
+  request-aware boundary-review record.
+- Final acceptance compares only packet structure or metadata rather than the original
+  request, record, and final task set.
+- A record is treated as closed while inventory coverage, a boundary decision, or
+  a warning disposition is missing, ambiguous, contradictory, or unresolved.
+- For every applicable packet, reject optional adoption, backwards compatibility,
+  migration, legacy, transition, prior-format, absent-record acceptance, and alternate
+  paths.
 
 Use [Atomicity Examples](atomicity-examples.md) for short contrasts and
 [Worked Decomposition Examples](decomposition-examples.md) for complete records,

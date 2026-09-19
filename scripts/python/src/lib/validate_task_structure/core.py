@@ -14,20 +14,6 @@ from typing import Any
 
 import jsonschema
 
-KNOWN_COMPOUND_SIGNALS = frozenset(
-    {
-        "implementation-plus-independent-verification",
-        "implementation-plus-tests",
-        "multiple-helpers",
-        "analysis-plus-planning",
-        "multiple-comparisons",
-        "multiple-analysis-questions",
-        "multiple-operation-changes",
-        "multiple-documentation-changes",
-        "lifecycle-stage-bundle",
-    }
-)
-
 
 def _validate_file_array(arr: list[Any], path: str, label: str) -> list[str]:
     """Validate a file path array: all strings, no duplicates, no empty strings."""
@@ -88,29 +74,103 @@ def _root_schema_errors(
 def validate_root(packet: Any, schema: dict[str, Any]) -> tuple[bool, list[str]]:
     """Validate a complete task-packet root against its canonical schema.
 
-    Unlike :func:`validate`, this validates the enclosing object, including its
-    required ``summary`` and immutable ``slug`` identity, and rejects extra roots.
+    This validates the enclosing object, including its required ``summary`` and
+    immutable ``slug`` identity, and rejects extra roots.
     """
     errors = _root_schema_errors(packet, schema)
     if errors:
-        return False, [
-            f"{'.'.join(str(part) for part in error.absolute_path) or '$'}: "
-            f"{error.message}"
-            for error in errors
-        ]
-    return True, []
+        return False, _format_root_errors(errors)
+    return_errors = _validate_boundary_review(packet)
+    return not return_errors, return_errors
 
 
-def _task_identity(task: dict[str, Any], index: int) -> str:
-    """Return an explicit identity, or the stable migration identity."""
-    value = task.get("taskId")
-    return value if isinstance(value, str) and value else f"task-{index + 1}"
+def _validate_boundary_review(packet: dict[str, Any]) -> list[str]:
+    """Check cross-field consistency in a schema-valid boundary-review record.
+
+    This is deliberately limited to references and mutually exclusive record
+    shapes.  It neither interprets prose nor determines whether a task is
+    semantically atomic; that request-aware decision remains with the delegator.
+    """
+    diagnostics: list[str] = []
+    tasks = packet["tasks"]
+    assert isinstance(tasks, list)
+    task_ids = {task["taskId"] for task in tasks if isinstance(task, dict)}
+    review = packet["boundaryReview"]
+    assert isinstance(review, dict)
+    task_reviews = review["taskReviews"]
+    assert isinstance(task_reviews, dict)
+
+    reviewed_ids = set(task_reviews)
+    for task_id in sorted(task_ids - reviewed_ids):
+        diagnostics.append(
+            _diagnostic(
+                "ERROR",
+                "boundary-review-task-coverage",
+                "boundaryReview.taskReviews",
+                f"missing review for taskId {task_id!r}.",
+            )
+        )
+    for task_id in sorted(reviewed_ids - task_ids):
+        diagnostics.append(
+            _diagnostic(
+                "ERROR",
+                "boundary-review-task-reference",
+                f"boundaryReview.taskReviews.{task_id}",
+                f"unknown taskId {task_id!r}.",
+            )
+        )
+
+    for task_id, task_review in task_reviews.items():
+        assert isinstance(task_review, dict)
+        has_evidence = "indivisibilityEvidence" in task_review
+        retained = task_review["preAssignmentDisposition"] == "retained-indivisible"
+        accepted = task_review["acceptanceDisposition"] == "accepted-indivisible"
+        if has_evidence and not (retained and accepted):
+            diagnostics.append(
+                _diagnostic(
+                    "ERROR",
+                    "boundary-review-indivisibility-evidence",
+                    f"boundaryReview.taskReviews.{task_id}.indivisibilityEvidence",
+                    "is only valid for a retained, accepted-indivisible review.",
+                )
+            )
+
+    warning_dispositions = review["warningDispositions"]
+    assert isinstance(warning_dispositions, dict)
+    for warning_id, warning in warning_dispositions.items():
+        assert isinstance(warning, dict)
+        task_id = warning.get("taskId")
+        path = f"boundaryReview.warningDispositions.{warning_id}"
+        if task_id is not None and task_id not in task_ids:
+            diagnostics.append(
+                _diagnostic(
+                    "ERROR",
+                    "boundary-review-warning-reference",
+                    f"{path}.taskId",
+                    f"unknown taskId {task_id!r}.",
+                )
+            )
+        if warning["disposition"] == "accepted-indivisible":
+            task_review = task_reviews.get(task_id)
+            if not isinstance(task_review, dict) or (
+                task_review.get("acceptanceDisposition") != "accepted-indivisible"
+            ):
+                diagnostics.append(
+                    _diagnostic(
+                        "ERROR",
+                        "boundary-review-warning-consistency",
+                        path,
+                        "accepted-indivisible requires the referenced task review "
+                        "to be accepted-indivisible.",
+                    )
+                )
+    return diagnostics
 
 
 def _validate_metadata(tasks: list[dict[str, Any]]) -> list[str]:
-    """Validate publication metadata while keeping legacy packets migratable."""
+    """Validate required publication metadata and cross-task consistency."""
     diagnostics: list[str] = []
-    identities = [_task_identity(task, index) for index, task in enumerate(tasks)]
+    identities = [task["taskId"] for task in tasks]
     known = set(identities)
 
     for identity in sorted(known):
@@ -127,34 +187,8 @@ def _validate_metadata(tasks: list[dict[str, Any]]) -> list[str]:
 
     for index, task in enumerate(tasks):
         path = f"tasks[{index}]"
-        if "taskId" not in task:
-            diagnostics.append(
-                _diagnostic(
-                    "WARNING",
-                    "identity",
-                    path,
-                    "taskId is absent; migration identity is "
-                    f"{identities[index]!r}. Add taskId before relying on cross-packet "
-                    "references.",
-                )
-            )
-
-        coverage = task.get("verificationCoverage")
-        # ``verification`` predates this metadata and is a valid migration
-        # source when it contains concrete checks.
-        if coverage is None and isinstance(task.get("verification"), list):
-            coverage = {"observable": task["verification"]}
-        if coverage is None:
-            diagnostics.append(
-                _diagnostic(
-                    "WARNING",
-                    "verification-coverage",
-                    path,
-                    "observable verification coverage is absent; add "
-                    "verificationCoverage.observable.",
-                )
-            )
-        elif not isinstance(coverage, dict) or not coverage.get("observable"):
+        coverage = task["verificationCoverage"]
+        if not isinstance(coverage, dict) or not coverage.get("observable"):
             diagnostics.append(
                 _diagnostic(
                     "ERROR",
@@ -165,125 +199,7 @@ def _validate_metadata(tasks: list[dict[str, Any]]) -> list[str]:
                 )
             )
 
-        alignment = task.get("purposeOutputAlignment")
-        if alignment is None:
-            diagnostics.append(
-                _diagnostic(
-                    "WARNING",
-                    "purpose-output-alignment",
-                    path,
-                    "purpose/output mapping is undocumented; add "
-                    "purposeOutputAlignment with evidence.",
-                )
-            )
-        elif isinstance(alignment, dict):
-            status = alignment.get("status")
-            if status == "not-aligned":
-                diagnostics.append(
-                    _diagnostic(
-                        "ERROR",
-                        "purpose-output-alignment",
-                        path,
-                        "purposeOutputAlignment is not-aligned; revise the boundary "
-                        "or expectedOutput.",
-                    )
-                )
-            elif status == "needs-review":
-                diagnostics.append(
-                    _diagnostic(
-                        "WARNING",
-                        "purpose-output-alignment",
-                        path,
-                        "purposeOutputAlignment needs-review; provide evidence that "
-                        "one result matches the purpose.",
-                    )
-                )
-
-        signals = task.get("antiPatternSignals")
-        if signals is None:
-            diagnostics.append(
-                _diagnostic(
-                    "WARNING",
-                    "anti-pattern-signals",
-                    path,
-                    "known compound-task signals are undocumented; record reviewed "
-                    "signals or explicitly none.",
-                )
-            )
-        elif not isinstance(signals, list):
-            diagnostics.append(
-                _diagnostic(
-                    "ERROR",
-                    "anti-pattern-signals",
-                    path,
-                    "antiPatternSignals must be an array of documented signal names.",
-                )
-            )
-        else:
-            named_signals = [
-                signal for signal in signals if signal in KNOWN_COMPOUND_SIGNALS
-            ]
-            if "none" in signals and len(signals) > 1:
-                diagnostics.append(
-                    _diagnostic(
-                        "ERROR",
-                        "anti-pattern-signals",
-                        path,
-                        "antiPatternSignals cannot combine 'none' with named signals.",
-                    )
-                )
-            for signal in named_signals:
-                diagnostics.append(
-                    _diagnostic(
-                        "ERROR",
-                        f"anti-pattern-{signal}",
-                        path,
-                        f"declared {signal!r}; split the independent concerns before "
-                        "publication.",
-                    )
-                )
-        purpose = task.get("purpose", "")
-        output = task.get("expectedOutput", "")
-        effective_signals = (
-            [signal for signal in signals if signal != "none"]
-            if isinstance(signals, list)
-            else []
-        )
-        if (
-            isinstance(purpose, str)
-            and isinstance(output, str)
-            and (" and " in purpose.lower() or "," in output)
-            and not effective_signals
-        ):
-            diagnostics.append(
-                _diagnostic(
-                    "WARNING",
-                    "compound-task-signal",
-                    path,
-                    "purpose/output text contains a possible compound-task signal; "
-                    "document the signal and boundary evidence. This heuristic does "
-                    "not prove independence.",
-                )
-            )
-
-        writes = task.get("filesToWrite", [])
-        if (
-            isinstance(writes, list)
-            and len(writes) > 1
-            and not task.get("couplingRationale")
-        ):
-            diagnostics.append(
-                _diagnostic(
-                    "WARNING",
-                    "coupling-rationale",
-                    path,
-                    "multiple write targets lack couplingRationale; document one "
-                    "shared result "
-                    "or split the task. File count alone is not a rejection rule.",
-                )
-            )
-
-        dependencies = task.get("dependencies", [])
+        dependencies = task["dependencies"]
         if isinstance(dependencies, list):
             for edge_index, edge in enumerate(dependencies):
                 if not isinstance(edge, dict):
@@ -388,10 +304,8 @@ def _validate_metadata(tasks: list[dict[str, Any]]) -> list[str]:
     return diagnostics
 
 
-def validate(
-    tasks: list[dict[str, Any]], schema: dict[str, Any]
-) -> tuple[bool, list[str]]:
-    """Validate a list of task objects against the task-packet schema.
+def validate(packet: Any, schema: dict[str, Any]) -> tuple[bool, list[str]]:
+    """Validate a complete canonical task-packet against the packet schema.
 
     Performs both JSON Schema validation (via *jsonschema*) and custom checks:
 
@@ -405,49 +319,25 @@ def validate(
     * type correctness via JSON Schema validation
 
     Args:
-        tasks: List of task dicts to validate.
+        packet: Canonical packet root containing packet metadata, tasks, and closed
+            boundary-review evidence. Rootless task arrays are rejected.
         schema: The full task-packet JSON Schema (with definitions).
 
     Returns:
-        ``(True, diagnostics)`` when no hard error exists. Diagnostics may contain
-        migration or review warnings. Returns ``(False, diagnostics)`` when a hard
-        error exists.
+        ``(True, diagnostics)`` when no structural error exists. A successful result
+        is structural-interface evidence only; it is not semantic atomicity approval.
     """
+    root_valid, root_errors = validate_root(packet, schema)
+    if not root_valid:
+        return False, root_errors
+    assert isinstance(packet, dict)
+    tasks = packet["tasks"]
+    assert isinstance(tasks, list)
     errors: list[str] = []
-    tasks_schema: dict[str, Any] | None = schema.get("properties", {}).get("tasks")
-    if isinstance(tasks_schema, dict):
-        minimum = tasks_schema.get("minItems")
-        if isinstance(minimum, int) and len(tasks) < minimum:
-            errors.append(f"tasks: expected at least {minimum} task")
-
-    task_schema: dict[str, Any] = dict(
-        schema.get("definitions", {}).get("TaskPacket", schema)
-    )
-    # Rootless task-array modes intentionally validate only TaskPacket objects,
-    # but their properties retain local refs to the canonical schema's shared
-    # definitions. Carry those definitions into the task schema rather than
-    # treating a task array as a packet root.
-    task_schema["definitions"] = schema.get("definitions", {})
 
     for idx, task in enumerate(tasks):
         path = f"tasks[{idx}]"
-
-        # --- JSON Schema validation ---
-        schema_errors: list[str] = []
-        try:
-            jsonschema.validate(
-                task,
-                task_schema,
-                cls=jsonschema.Draft7Validator,
-                format_checker=jsonschema.Draft7Validator.FORMAT_CHECKER,
-            )
-        except jsonschema.ValidationError as exc:
-            schema_errors.append(f"{path}: {exc.message}")
-
-        if schema_errors:
-            errors.extend(schema_errors)
-            # Continue with custom checks even if schema validation failed
-            # to collect all issues at once
+        assert isinstance(task, dict)
 
         # --- Custom: execution instruction step numbering ---
         steps: Any = task.get("executionInstructions")
@@ -464,7 +354,7 @@ def validate(
     errors.extend(diagnostics)
 
     hard_errors = [error for error in errors if error.startswith("ERROR ")]
-    # Legacy structural errors do not carry a stage prefix and remain hard.
+    # Unprefixed structural errors remain hard.
     hard_errors.extend(
         error for error in errors if not error.startswith(("WARNING ", "ERROR "))
     )
@@ -560,7 +450,10 @@ def auto_fix_task_structure(
         root_errors = _root_schema_errors(parsed, schema)
         if root_errors:
             return {"valid": False, "errors": _format_root_errors(root_errors)}
-        valid, errors = validate(tasks, schema)
+        root_valid, root_diagnostics = validate_root(parsed, schema)
+        if not root_valid:
+            return {"valid": False, "errors": root_diagnostics}
+        valid, errors = validate(parsed, schema)
         if valid:
             if fixed:
                 state_path.write_text(
@@ -590,8 +483,19 @@ def _only_repairable_skills_errors(
 
 def _format_root_errors(errors: list[jsonschema.ValidationError]) -> list[str]:
     """Format schema errors consistently with :func:`validate_root`."""
-    return [
-        f"{'.'.join(str(part) for part in error.absolute_path) or '$'}: "
-        f"{error.message}"
-        for error in errors
-    ]
+    formatted: list[str] = []
+    for error in errors:
+        path = ".".join(str(part) for part in error.absolute_path) or "$"
+        message = f"{path}: {error.message}"
+        boundary_path = list(error.absolute_path)[:1] == ["boundaryReview"]
+        missing_boundary_review = "boundaryReview" in error.message
+        if boundary_path or missing_boundary_review:
+            message = _diagnostic(
+                "ERROR",
+                "boundary-review-interface",
+                path,
+                "malformed or missing required boundaryReview evidence: "
+                f"{error.message}",
+            )
+        formatted.append(message)
+    return formatted
