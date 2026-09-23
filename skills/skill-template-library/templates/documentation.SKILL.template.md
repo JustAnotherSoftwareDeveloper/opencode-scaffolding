@@ -22,7 +22,10 @@ skill, change ownership or class, or authorize routing, delegation, or loading.
 
 # `<<Skill Name>>` — Documentation Store
 
-> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
+> **Editorial constraint:** Do not use Markdown tables in filled content. Use bullets
+> for peer rules, paragraphs for connected reasoning, definition lists for
+> term-and-definition material, and subsection headings for separately reviewable
+> concerns. Put executable ordered procedures in an active-class skill instead.
 
 This skill is a passive data store for `<<domain>>` shared reference content.
 It does not auto-read any files when loaded.
@@ -50,7 +53,7 @@ Do not read every file — read as needed.
 
 ## Self-Validation
 
-- [ ] No Markdown tables in filled content (use bullet lists instead).
+- [ ] Filled content uses semantic prose forms and contains no Markdown tables.
 
 ## Docs
 

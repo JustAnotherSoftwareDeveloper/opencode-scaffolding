@@ -23,11 +23,17 @@ Factory and template maintenance are separate operations.
 
 ## Reference Files
 
-- `./reference/frontmatter-rules.md` — Required fields, roles, groups, optionals, and bounds.
-- `./reference/tagging-guide.md` — How to write grouped tags, aliases, conditions, and supports.
-- `./reference/trigger-evaluation.md` — How to test positive, negative, and neighboring requests.
-- `./reference/authoring-style.md` — Prose, headings, examples, and discrimination rules.
-- `./reference/progressive-disclosure.md` — How to keep the entry point compact.
+- [Frontmatter rules](./reference/frontmatter-rules.md) — Required fields, roles,
+  groups, optionals, and bounds.
+- [Tagging guide](./reference/tagging-guide.md) — How to write grouped tags, aliases,
+  conditions, and supports.
+- [Trigger evaluation](./reference/trigger-evaluation.md) — How to test positive,
+  negative, and neighboring requests.
+- [Authoring style](./reference/authoring-style.md) — Semantic prose forms, headings,
+  examples, and discrimination rules for filled content.
+- [Progressive disclosure](./reference/progressive-disclosure.md) — Compact entry
+  points, deterministic conformance evidence, and the unqualified no-table rule
+  (`TABLE-001`).
 
 Read the relevant reference before editing. Validate the completed profile and examples
 with the repository skill validator.

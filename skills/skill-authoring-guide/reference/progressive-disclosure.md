@@ -10,20 +10,85 @@ Link every moved detail with a repository-relative Markdown link.
 The following checks are conformance policy. They are observable checks, not claims
 that the metadata validators currently implement them. A checker reports the file,
 1-based source line, rule ID, and a short diagnostic. A pass means no diagnostic for
-that rule. A policy exception must name the rule, reason, reviewer, and expiry or
-permanent disposition; it is not a silent pass.
+that rule. When a rule explicitly permits an exception, the exception must name the
+rule, reason, reviewer, and expiry or permanent disposition; it is not a silent pass.
+`TABLE-001` permits no exception.
 
-| Rule | Deterministic condition | Diagnostic evidence |
-|---|---|---|
-| `H1-001` one H1 | The file contains exactly one ATX level-one heading (`# `). Setext H1 headings also count. | Report every H1 line when the count is not one. |
-| `HEAD-001` headings | Headings use ATX syntax, levels do not jump by more than one, and headings other than the H1 use Title Case. A heading must not restate the skill name. | Report the offending heading line and the observed level/text. |
-| `TABLE-001` no tables | No Markdown table separator row is present. This policy applies to prose and examples; use bullets instead. | Report the separator line and the nearest table header line when available. |
-| `PLACE-001` placeholders | No unresolved template markers remain: `TODO`, `TBD`, `FIXME`, `<...>`, `${...}`, `{{...}}`, or bracketed instructional placeholders such as `[insert ...]`. | Report the exact token and line. Code examples may suppress a token only with an explicit fixture annotation. |
-| `STEP-001` numbered steps | A procedure is an ordered list whose markers start at 1 and increase by one. Only a class contract that requires a procedure is checked for a procedure; passive documentation is not forced to have one. | Report the first malformed marker, missing start, or gap with its line. |
-| `STEP-002` duplicate numbering | Sibling ordered-list items use unique consecutive numbers. Repeated `2.` markers are an error even when Markdown renders them acceptably. | Report both the repeated marker and its preceding sibling context. |
-| `LINK-001` required links | A compact index links each referenced detail file. Each relative target resolves from the source file, stays inside the repository, and has non-empty link text. | Report source line, target, and resolution failure; report an unlinked detail section by heading. |
-| `DISC-001` disclosure budget | Entry-point body budgets are class-aware: `operation`/`delegated` ≤ 120 nonblank lines, `inline` ≤ 100, `planning`/`documentation` ≤ 80. Frontmatter, the H1, and link-only reference index lines are excluded. | Report counted lines, class, limit, and the first line beyond the limit. |
-| `DISC-002` duplication | A reference must not repeat a contiguous prose block of 3 or more normalized sentences from its entry point. Normalize whitespace and Markdown punctuation before comparison. | Report both source ranges and the normalized duplicate excerpt. |
+### H1-001 — One H1
+
+**Condition.** The file contains exactly one ATX level-one heading (`# `). Setext H1
+headings also count.
+
+**Diagnostic evidence.** Report every H1 line when the count is not one.
+
+### HEAD-001 — Headings
+
+**Condition.** Headings use ATX syntax, levels do not jump by more than one, and
+headings other than the H1 use Title Case. A heading must not restate the skill name.
+
+**Diagnostic evidence.** Report the offending heading line and observed level or text.
+
+### TABLE-001 — No Tables
+
+**Condition.** No Markdown table separator row is present. This policy applies to
+prose and examples; use bullets, ordered lists, paragraphs, definition lists, or
+subsection headings according to their semantic purpose.
+
+**Diagnostic evidence.** Report the separator line and nearest table header line when
+available.
+
+### PLACE-001 — Placeholders
+
+**Condition.** No unresolved template markers remain: `TODO`, `TBD`, `FIXME`,
+`<...>`, `${...}`, `{{...}}`, or bracketed instructional placeholders such as
+`[insert ...]`.
+
+**Diagnostic evidence.** Report the exact token and line. Code examples may suppress
+a token only with an explicit fixture annotation.
+
+### STEP-001 — Numbered Steps
+
+**Condition.** A procedure is an ordered list whose markers start at 1 and increase by
+one. Only a class contract that requires a procedure is checked for a procedure;
+passive documentation is not forced to have one.
+
+**Diagnostic evidence.** Report the first malformed marker, missing start, or gap with
+its line.
+
+### STEP-002 — Duplicate Numbering
+
+**Condition.** Sibling ordered-list items use unique consecutive numbers. Repeated
+`2.` markers are an error even when Markdown renders them acceptably.
+
+**Diagnostic evidence.** Report both the repeated marker and its preceding sibling
+context.
+
+### LINK-001 — Required Links
+
+**Condition.** A compact index links each referenced detail file. Each relative target
+resolves from the source file, stays inside the repository, and has non-empty link
+text.
+
+**Diagnostic evidence.** Report the source line, target, and resolution failure;
+report an unlinked detail section by heading.
+
+### DISC-001 — Disclosure Budget
+
+**Condition.** Entry-point body budgets are class-aware: `operation`/`delegated` ≤ 120
+nonblank lines, `inline` ≤ 100, and `planning`/`documentation` ≤ 80. Frontmatter, the
+H1, and link-only reference index lines are excluded.
+
+**Diagnostic evidence.** Report counted lines, class, limit, and the first line beyond
+the limit.
+
+### DISC-002 — Duplication
+
+**Condition.** A reference must not repeat a contiguous prose block of three or more
+normalized sentences from its entry point. Normalize whitespace and Markdown
+punctuation before comparison.
+
+**Diagnostic evidence.** Report both source ranges and the normalized duplicate
+excerpt.
 
 These thresholds are authoring policy, not schema facts. A reviewer may approve a
 documented exception when the larger entry point is itself the required index; the
@@ -66,10 +131,6 @@ Expected disposition: `H1-001`, `HEAD-001`, `TABLE-001`, `PLACE-001`, `STEP-001`
 
 ## details
 
-| Rule | Result |
-|---|---|
-| one | two |
-
 TODO: add the link to [insert reference].
 
 1. First step.
@@ -78,10 +139,20 @@ TODO: add the link to [insert reference].
 ```
 
 Expected diagnostics include `H1-001` on lines 1 and 2, `HEAD-001` on line 4,
-`TABLE-001` on line 7, `PLACE-001` on line 11, and `STEP-002` on the repeated
-marker line. If the procedure is required, `STEP-001` also fails because numbering
-is not strictly consecutive. A missing or unresolved reference link produces
-`LINK-001` at its source heading or link line.
+`PLACE-001` on the unresolved-token line, and `STEP-002` on the repeated marker line.
+If the procedure is required, `STEP-001` also fails because numbering is not strictly
+consecutive. A missing or unresolved reference link produces `LINK-001` at its source
+heading or link line.
+
+### Generated TABLE-001 Fixture
+
+Generate the `TABLE-001` defect in a temporary file rather than embedding a prohibited
+table in this reference. Write a table header on line 1. Build line 2 by concatenating
+a pipe, three hyphens, a pipe, three hyphens, and a final pipe. Write one data row on
+line 3. Run the checker against that temporary source.
+
+Expected disposition: `TABLE-001` reports the generated separator on line 2 and the
+nearest header on line 1. Delete the temporary fixture after recording the diagnostic.
 
 ### Disclosure And Duplication Fixture
 

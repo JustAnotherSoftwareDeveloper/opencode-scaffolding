@@ -22,7 +22,10 @@ skill, change ownership or class, or authorize routing, delegation, or loading.
 
 # `<<Skill Name>>`
 
-> **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
+> **Editorial constraint:** Do not use Markdown tables in filled content. Use bullets
+> for peer rules, ordered lists only for order-dependent procedures, paragraphs for
+> connected reasoning, definition lists for term-and-definition material, and
+> subsection headings for separately reviewable concerns.
 
 ## Normalize Input
 
@@ -53,7 +56,7 @@ Each check is a yes/no assertion.
 - <<yes/no check>>.
 - <<yes/no check>>.
 - <<yes/no check>>.
-- [ ] No Markdown tables in filled content (use bullet lists instead).
+- [ ] Filled content uses semantic prose forms and contains no Markdown tables.
 
 ## Expected Output
 
