@@ -48,6 +48,44 @@ VALID_CONTEXT = (
 
 assert SCHEMA_PATH.is_file(), f"Schema not found at {SCHEMA_PATH}"
 
+
+def _boundary_review(*task_ids: str) -> dict:
+    return {
+        "requestResultInventory": {
+            task_id: {
+                "result": f"Result for {task_id}",
+                "kind": "immediate",
+                "disposition": "represented-by-task",
+            }
+            for task_id in task_ids
+        }
+        or {
+            "empty": {
+                "result": "An empty packet cannot publish a task.",
+                "kind": "immediate",
+                "disposition": "not-applicable",
+            }
+        },
+        "taskReviews": {
+            task_id: {
+                "immediateResult": f"Result for {task_id}",
+                "predecessorOutputs": [],
+                "preAssignmentDisposition": "single-result",
+                "acceptanceDisposition": "accepted",
+            }
+            for task_id in task_ids
+        }
+        or {
+            "empty": {
+                "immediateResult": "No task is present.",
+                "predecessorOutputs": [],
+                "preAssignmentDisposition": "single-result",
+                "acceptanceDisposition": "accepted",
+            }
+        },
+        "warningDispositions": {},
+    }
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -102,11 +140,9 @@ def task_validator(schema_dict: dict) -> jsonschema.Draft7Validator:
 
 @pytest.fixture
 def minimal_task() -> dict:
-    """A minimal valid task packet with all required fields, no extras.
-
-    Does NOT include ``dependencies`` or ``verification``.
-    """
+    """A minimal valid task packet with all required fields, no extras."""
     return {
+        "taskId": "minimal",
         "purpose": "Validate the sequential schema invariants",
         "context": VALID_CONTEXT,
         "filesToRead": ["src/schema.json"],
@@ -117,6 +153,13 @@ def minimal_task() -> dict:
             {"step": 2, "action": "Validate invariants"},
         ],
         "expectedOutput": "Validation report",
+        "verificationCoverage": {"observable": ["Validation report exists"]},
+        "dependencies": [],
+        "antiPatternSignals": ["none"],
+        "purposeOutputAlignment": {
+            "status": "aligned",
+            "evidence": "Validating invariants produces the report.",
+        },
     }
 
 
@@ -124,6 +167,7 @@ def minimal_task() -> dict:
 def full_task() -> dict:
     """A full valid task packet including optional ``verification`` field."""
     return {
+        "taskId": "full",
         "purpose": "Full task with verification checks",
         "context": VALID_CONTEXT,
         "filesToRead": ["src/main.py", "src/lib.py"],
@@ -139,6 +183,13 @@ def full_task() -> dict:
             "Output file exists at expected path",
         ],
         "expectedOutput": "Generated source and passing test suite",
+        "verificationCoverage": {"observable": ["Tests pass"]},
+        "dependencies": [],
+        "antiPatternSignals": ["none"],
+        "purposeOutputAlignment": {
+            "status": "aligned",
+            "evidence": "The task produces source and passing tests.",
+        },
     }
 
 
@@ -171,7 +222,7 @@ def minimal_draft_task() -> dict:
 # ===========================================================================
 
 
-class TestValidPacketsWithoutDependencies:
+class TestValidPackets:
     """Valid task packets."""
 
     def test_minimal_valid_packet(
@@ -197,6 +248,7 @@ class TestValidPacketsWithoutDependencies:
             "summary": "Break down the sequential schema validation work.",
             "slug": "sequential-schema-validation",
             "tasks": [minimal_task, full_task],
+            "boundaryReview": _boundary_review("minimal", "full"),
         }
         root_validator.validate(packet)
 
@@ -210,6 +262,7 @@ class TestValidPacketsWithoutDependencies:
             "summary": "Single task for the sequential schema.",
             "slug": "single-sequential-task",
             "tasks": [minimal_task],
+            "boundaryReview": _boundary_review("minimal"),
         }
         root_validator.validate(packet)
 
@@ -223,6 +276,7 @@ class TestValidPacketsWithoutDependencies:
             "summary": "公開用の計画 — naïve café",
             "slug": "published-plan",
             "tasks": [minimal_task],
+            "boundaryReview": _boundary_review("minimal"),
         }
         root_validator.validate(packet)
 
@@ -232,13 +286,8 @@ class TestValidPacketsWithoutDependencies:
 # ===========================================================================
 
 
-class TestInvalidPacketsWithDependencies:
-    """Packets that should be invalid under the updated schema.
-
-    The updated schema enforces ``additionalProperties: false`` on the
-    TaskPacket definition.  Since ``dependencies`` has been removed from
-    the schema, a task WITH ``dependencies`` is now schema-invalid.
-    """
+class TestInvalidPackets:
+    """Packets that should be invalid under the updated schema."""
 
     def test_extra_unknown_field_rejected(
         self, task_validator: jsonschema.Draft7Validator, minimal_task: dict
@@ -269,24 +318,64 @@ class TestInvalidPacketsWithDependencies:
         self, root_validator: jsonschema.Draft7Validator
     ) -> None:
         """An empty tasks array violates ``minItems: 1``."""
-        packet = {"summary": "No tasks.", "slug": "no-tasks", "tasks": []}
-        with pytest.raises(jsonschema.ValidationError):
+        packet = {
+            "summary": "No tasks.",
+            "slug": "no-tasks",
+            "tasks": [],
+            "boundaryReview": _boundary_review(),
+        }
+        with pytest.raises(
+            jsonschema.ValidationError, match=r"\[\] should be non-empty"
+        ):
+            root_validator.validate(packet)
+
+    def test_missing_task_dependencies_rejected(
+        self, task_validator: jsonschema.Draft7Validator, minimal_task: dict
+    ) -> None:
+        """Every published task declares its dependency edges, even when empty."""
+        task = dict(minimal_task)
+        del task["dependencies"]
+        with pytest.raises(
+            jsonschema.ValidationError, match="'dependencies' is a required"
+        ):
+            task_validator.validate(task)
+
+    def test_missing_boundary_review_rejected(
+        self, root_validator: jsonschema.Draft7Validator, minimal_task: dict
+    ) -> None:
+        """The published root requires boundary review evidence."""
+        packet = {
+            "summary": "Missing review.",
+            "slug": "missing-review",
+            "tasks": [minimal_task],
+        }
+        with pytest.raises(
+            jsonschema.ValidationError, match="'boundaryReview' is a required"
+        ):
             root_validator.validate(packet)
 
     def test_root_without_summary_rejected(
         self, root_validator: jsonschema.Draft7Validator, minimal_task: dict
     ) -> None:
         """Root packet missing required ``summary`` field is rejected."""
-        packet = {"slug": "missing-summary", "tasks": [minimal_task]}
-        with pytest.raises(jsonschema.ValidationError):
+        packet = {
+            "slug": "missing-summary",
+            "tasks": [minimal_task],
+            "boundaryReview": _boundary_review("minimal"),
+        }
+        with pytest.raises(jsonschema.ValidationError, match="'summary' is a required"):
             root_validator.validate(packet)
 
     def test_root_without_tasks_rejected(
         self, root_validator: jsonschema.Draft7Validator
     ) -> None:
         """Root packet missing required ``tasks`` field is rejected."""
-        packet = {"summary": "No tasks array.", "slug": "missing-tasks"}
-        with pytest.raises(jsonschema.ValidationError):
+        packet = {
+            "summary": "No tasks array.",
+            "slug": "missing-tasks",
+            "boundaryReview": _boundary_review("minimal"),
+        }
+        with pytest.raises(jsonschema.ValidationError, match="'tasks' is a required"):
             root_validator.validate(packet)
 
     def test_root_extra_unknown_field_rejected(
@@ -297,9 +386,10 @@ class TestInvalidPacketsWithDependencies:
             "summary": "Has extra field.",
             "slug": "extra-root-field",
             "tasks": [minimal_task],
+            "boundaryReview": _boundary_review("minimal"),
             "extraRootField": True,
         }
-        with pytest.raises(jsonschema.ValidationError):
+        with pytest.raises(jsonschema.ValidationError, match="extraRootField"):
             root_validator.validate(packet)
 
 
@@ -312,9 +402,14 @@ class TestSchemaStructuralInvariants:
     """Structural invariants of the task-packet schema itself."""
 
     def test_root_required_fields(self, schema_dict: dict) -> None:
-        """Root schema requires ``summary``, ``slug``, and ``tasks``."""
+        """Root schema requires packet identity, tasks, and boundary review."""
         assert "required" in schema_dict
-        assert schema_dict["required"] == ["summary", "slug", "tasks"]
+        assert schema_dict["required"] == [
+            "summary",
+            "slug",
+            "tasks",
+            "boundaryReview",
+        ]
 
     def test_root_additional_properties_false(self, schema_dict: dict) -> None:
         """Root schema enforces ``additionalProperties: false``."""
@@ -338,6 +433,11 @@ class TestSchemaStructuralInvariants:
             "skills",
             "executionInstructions",
             "expectedOutput",
+            "taskId",
+            "verificationCoverage",
+            "dependencies",
+            "antiPatternSignals",
+            "purposeOutputAlignment",
         }
         task_def = schema_dict["definitions"]["TaskPacket"]
         actual_required = set(task_def["required"])
@@ -371,6 +471,7 @@ class TestSchemaStructuralInvariants:
         assert "maxItems" not in tasks
 
         task = {
+            "taskId": "result",
             "purpose": "Create one bounded result",
             "context": "Create one independently verifiable result while preserving "
             "the stated contract and restricting all work to the listed target file. "
@@ -380,11 +481,21 @@ class TestSchemaStructuralInvariants:
             "skills": ["generic-analysis"],
             "executionInstructions": [{"step": 1, "action": "Create the result"}],
             "expectedOutput": "One result file",
+            "verificationCoverage": {"observable": ["Result file exists"]},
+            "dependencies": [],
+            "antiPatternSignals": ["none"],
+            "purposeOutputAlignment": {
+                "status": "aligned",
+                "evidence": "Creating the file produces the result.",
+            },
         }
         packet = {
             "summary": "Verify an uncapped task packet.",
             "slug": "uncapped-task-packet",
-            "tasks": [dict(task) for _ in range(6)],
+            "tasks": [dict(task, taskId=f"result-{index}") for index in range(6)],
+            "boundaryReview": _boundary_review(
+                *(f"result-{index}" for index in range(6))
+            ),
         }
         jsonschema.validate(packet, schema_dict)
 
@@ -396,6 +507,7 @@ class TestSchemaStructuralInvariants:
                     "summary": "An empty packet is invalid.",
                     "slug": "empty-packet",
                     "tasks": [],
+                    "boundaryReview": _boundary_review(),
                 },
                 schema_dict,
             )
@@ -435,11 +547,13 @@ class TestSchemaStructuralInvariants:
             "summary": "Published root with a supplied identity.",
             "slug": "published-root",
             "tasks": [minimal_task],
+            "boundaryReview": _boundary_review("minimal"),
         }
         draft = {
             "summary": "Draft root with a supplied identity.",
             "slug": "draft-root",
             "tasks": [minimal_draft_task],
+            "boundaryReview": _boundary_review("schema-contract"),
         }
         root_validator.validate(published)
         input_root_validator.validate(draft)
@@ -480,6 +594,7 @@ class TestSchemaStructuralInvariants:
                     expectedOutput="E" * 2001,
                 )
             ],
+            "boundaryReview": _boundary_review("schema-contract"),
         }
         input_root_validator.validate(draft)
         with pytest.raises(jsonschema.ValidationError):
@@ -519,10 +634,11 @@ class TestSchemaStructuralInvariants:
             )
             assert not {"minLength", "maxLength"} & set(draft_property)
 
-    def test_dependencies_are_optional_task_references(self, schema_dict: dict) -> None:
-        """``dependencies`` contains optional task-reference edges."""
+    def test_dependencies_are_required_task_references(self, schema_dict: dict) -> None:
+        """Required ``dependencies`` contains task-reference edges."""
         props = schema_dict["definitions"]["TaskPacket"]["properties"]
         dependencies = props["dependencies"]
+        assert "dependencies" in schema_dict["definitions"]["TaskPacket"]["required"]
         assert dependencies["type"] == "array"
         assert dependencies["uniqueItems"] is True
         assert dependencies["items"]["required"] == ["taskId"]

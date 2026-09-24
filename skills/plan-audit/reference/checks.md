@@ -21,6 +21,11 @@ labels (a `decision-ready` proposal with an unresolved blocking evidence gap
 fails). Source-drift checks compare authoritative and copied-snapshot manifests
 byte-for-byte; any difference is a FAIL finding.
 
+An explicit statement that a gap does not block the bounded decision is not
+itself blocking research, even if the same gap blocks outcome claims. A separate
+affirmative statement that it blocks the decision, readiness, or selection still
+fails for `decision-ready`.
+
 The proposal heading names checked for traceability are `Recommendation`,
 `Technical Rationale`, `Questions`, `Options Considered`, `Implementation
 Details`, `Verification Criteria`, and `Sources`. Implementation traceability

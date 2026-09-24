@@ -3,7 +3,6 @@
 import json
 from pathlib import Path
 
-
 ROOT = Path(__file__).parents[3]
 CONTRACT = "output-contract-template.md"
 
@@ -64,8 +63,11 @@ def test_active_producers_and_consumers_reference_canonical_contract() -> None:
 def test_restricted_agents_can_read_canonical_contract() -> None:
     config = json.loads(read("opencode.json"))
     for name in ("delegator", "executor"):
-        permissions = config["agent"][name]["permission"]["read"]
-        assert permissions[CONTRACT] == "allow"
+        permissions = config["agent"][name]["permission"]
+        contract_path = f"~/.config/opencode/{CONTRACT}"
+        assert permissions["read"]["*"] == "deny"
+        assert permissions["read"][contract_path] == "allow"
+        assert permissions["external_directory"][contract_path] == "allow"
 
 
 def test_structured_fixtures_use_canonical_list_grammar() -> None:

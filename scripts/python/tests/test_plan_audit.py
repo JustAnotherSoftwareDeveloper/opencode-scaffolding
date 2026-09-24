@@ -106,6 +106,7 @@ def _task(*, skills: list[str] | None = None, compound: bool = False) -> dict[st
         "verification": ["The report contains all three independently statused checks."],
         "expectedOutput": "One UTF-8 Markdown audit report.",
         "verificationCoverage": {"observable": ["Report sections and disposition are present."], "coverage": "complete"},
+        "dependencies": [],
         "antiPatternSignals": (
             ["implementation-plus-independent-verification"]
             if compound
@@ -121,7 +122,31 @@ def _plan(root: Path, tasks: list[dict[str, Any]], *, include_brief: bool = True
     _write(root / "tasks.md", "# Tasks\n\nProduce the immutable audit report\n")
     (root / "analysis").mkdir(parents=True, exist_ok=True)
     _write(root / "analysis/source.md", "# Copied source\nThe source supports the selected direction.\n")
-    _write(root / "tasks.json", json.dumps({"summary": "audit fixture", "slug": "audit-fixture", "tasks": tasks}, indent=2))
+    packet = {
+        "summary": "audit fixture",
+        "slug": "audit-fixture",
+        "tasks": tasks,
+        "boundaryReview": {
+            "requestResultInventory": {
+                "auditReport": {
+                    "result": "Produce one immutable plan audit report.",
+                    "kind": "immediate",
+                    "disposition": "represented-by-task",
+                },
+            },
+            "taskReviews": {
+                str(task.get("taskId") or f"task-{index + 1}"): {
+                    "immediateResult": str(task.get("expectedOutput", "Audit report")),
+                    "predecessorOutputs": [],
+                    "preAssignmentDisposition": "single-result",
+                    "acceptanceDisposition": "accepted",
+                }
+                for index, task in enumerate(tasks)
+            },
+            "warningDispositions": {},
+        },
+    }
+    _write(root / "tasks.json", json.dumps(packet, indent=2))
 
 
 def _collector(root: Path, *, task_contract: bool = False) -> list[dict[str, Any]]:
@@ -214,11 +239,10 @@ def test_compound_task_fails_only_atomicity_and_keeps_sections(tmp_path: Path) -
     assert result.checks[2].disposition == "PASS"
 
 
-def test_migration_compatible_omissions_are_conditional(tmp_path: Path) -> None:
+def test_optional_verification_omission_is_conditional(tmp_path: Path) -> None:
     raw, plan, _ = _input(tmp_path)
     task = _task()
-    for key in ("taskId", "verificationCoverage", "antiPatternSignals", "purposeOutputAlignment"):
-        task.pop(key)
+    task.pop("verification")
     _plan(plan, [task])
     result = plan_audit.audit(
         raw,
@@ -493,6 +517,49 @@ def test_blocking_evidence_gap_with_decision_ready_fails(tmp_path: Path) -> None
 
     assert any(item.criterion == "BLOCKING-RESEARCH" for item in result.checks[0].diagnostics)
     assert result.checks[0].disposition == "FAIL"
+
+
+@pytest.mark.parametrize("gap", [
+    "No direct reader study establishes that the revised prose improves comprehension or task success. This does not block the decision to align the bounded support artifacts, but it forbids such outcome claims.",
+    "No representative sample is available. This gap is non-blocking for the policy decision; it blocks claims of improved operational outcomes.",
+    "No external study is available. This does not block the decision; it blocks a measured improvement claim.",
+])
+def test_non_blocking_evidence_gap_does_not_fail_decision_ready(tmp_path: Path, gap: str) -> None:
+    raw, plan, proposal = _input(tmp_path)
+    label = f"Evidence Gap: {gap}"
+    _write(
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="")
+        .replace("readiness: review-ready", "readiness: decision-ready")
+        .replace("None.", label),
+    )
+    packet = json.loads((plan / "tasks.json").read_text(encoding="utf-8"))
+    packet["tasks"][0]["context"] += f" Preserve {label}"
+    _write(plan / "tasks.json", json.dumps(packet))
+
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+
+    assert result.checks[0].disposition == "PASS"
+    assert not any(item.criterion == "BLOCKING-RESEARCH" for item in result.checks[0].diagnostics)
+
+
+def test_explicit_decision_blocker_overrides_non_blocking_claim(tmp_path: Path) -> None:
+    raw, plan, proposal = _input(tmp_path)
+    label = "Evidence Gap: This does not block outcome claims, but it blocks the architecture selection."
+    _write(
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="")
+        .replace("readiness: review-ready", "readiness: decision-ready")
+        .replace("None.", label),
+    )
+    packet = json.loads((plan / "tasks.json").read_text(encoding="utf-8"))
+    packet["tasks"][0]["context"] += f" Preserve {label}"
+    _write(plan / "tasks.json", json.dumps(packet))
+
+    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+
+    assert result.checks[0].disposition == "FAIL"
+    assert any(item.criterion == "BLOCKING-RESEARCH" for item in result.checks[0].diagnostics)
 
 
 def test_source_drift_declared_not_indexed_blocks_incomplete_baseline(tmp_path: Path) -> None:

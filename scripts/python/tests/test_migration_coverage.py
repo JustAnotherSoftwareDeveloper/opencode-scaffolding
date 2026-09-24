@@ -155,7 +155,9 @@ def test_index_projection_and_precedence() -> None:
     assert json.loads(index.to_json())[0]["source"] == "project"
 
 
-def test_discovery_roots_and_success(tmp_path: Path) -> None:
+def test_discovery_roots_and_success(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     project = tmp_path / "project"
     config = tmp_path / "config"
     write_skill(project / ".opencode" / "skills")
@@ -182,7 +184,16 @@ def test_discovery_roots_and_success(tmp_path: Path) -> None:
         "arch",
         "extra-skill",
     }
-    assert find_git_root(tmp_path) is None
+    original_is_dir = Path.is_dir
+
+    def isolated_is_dir(path: Path) -> bool:
+        if path.name == ".git" and path.parent != tmp_path:
+            return False
+        return original_is_dir(path)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "is_dir", isolated_is_dir)
+        assert find_git_root(tmp_path) is None
     git = tmp_path / "git"
     (git / ".git").mkdir(parents=True)
     assert find_git_root(git / "child") == git

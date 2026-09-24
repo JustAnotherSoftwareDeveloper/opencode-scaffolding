@@ -15,8 +15,27 @@ def _packet(**overrides: object) -> dict[str, object]:
     data: dict[str, object] = {
         "summary": "Test packet for init",
         "slug": "test-packet-for-init",
+        "boundaryReview": {
+            "requestResultInventory": {
+                "init": {
+                    "result": "A packet file.",
+                    "kind": "immediate",
+                    "disposition": "represented-by-task",
+                }
+            },
+            "taskReviews": {
+                "init": {
+                    "immediateResult": "A packet file.",
+                    "predecessorOutputs": [],
+                    "preAssignmentDisposition": "single-result",
+                    "acceptanceDisposition": "accepted",
+                }
+            },
+            "warningDispositions": {},
+        },
         "tasks": [
             {
+                "taskId": "init",
                 "purpose": "Init a packet.",
                 "context": "x" * 200,
                 "filesToRead": [],
@@ -24,6 +43,13 @@ def _packet(**overrides: object) -> dict[str, object]:
                 "skills": ["demo"],
                 "executionInstructions": [{"step": 1, "action": "Run it."}],
                 "expectedOutput": "A packet file.",
+                "verificationCoverage": {"observable": ["Packet file exists."]},
+                "dependencies": [],
+                "antiPatternSignals": ["none"],
+                "purposeOutputAlignment": {
+                    "status": "aligned",
+                    "evidence": "Initialization publishes the packet file.",
+                },
             }
         ],
     }

@@ -4,7 +4,22 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from lib.shared.git import find_git_root
+
+
+@pytest.fixture
+def isolated_git_ancestors(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Hide unrelated ancestor repositories while retaining the test directory."""
+    original_is_dir = Path.is_dir
+
+    def isolated_is_dir(path: Path) -> bool:
+        if path.name == ".git" and path.parent != tmp_path:
+            return False
+        return original_is_dir(path)
+
+    monkeypatch.setattr(Path, "is_dir", isolated_is_dir)
 
 
 class TestFindGitRoot:
@@ -18,6 +33,7 @@ class TestFindGitRoot:
         result = find_git_root(nested)
         assert result == tmp_path.resolve()
 
+    @pytest.mark.usefixtures("isolated_git_ancestors")
     def test_root_not_found(self, tmp_path: Path) -> None:
         """Returns ``None`` when no ``.git/`` exists."""
         nested = tmp_path / "x" / "y"
@@ -31,13 +47,13 @@ class TestFindGitRoot:
         assert result is not None
         assert (result / ".git").is_dir()
 
+    @pytest.mark.usefixtures("isolated_git_ancestors")
     def test_dot_git_is_file_not_dir(self, tmp_path: Path) -> None:
         """A ``.git`` file (common in submodules) is not detected."""
         nested = tmp_path / "sub"
         nested.mkdir(parents=True)
         (tmp_path / ".git").write_text("gitdir: ../.git/modules/sub\n")
-        result = find_git_root(nested)
-        assert result is None
+        assert find_git_root(nested) is None
 
     def test_root_path_returned(self, tmp_path: Path) -> None:
         """The returned path is the git root itself, not a parent."""

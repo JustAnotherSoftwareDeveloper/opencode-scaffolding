@@ -362,6 +362,33 @@ def _unresolved_label_statements(text: str) -> list[str]:
     return [f"{label} {statement}".strip() for label, statement in pattern.findall(text)]
 
 
+def _blocks_decision_readiness(label: str) -> bool:
+    """Do not mistake an explicit non-blocking decision gap for blocking research.
+
+    A gap can still block outcome claims without blocking the bounded decision.
+    When the author explicitly says the gap is non-blocking, require a separate
+    affirmative decision/readiness blocker before contradicting that assertion.
+    Otherwise retain the existing conservative treatment of blocking wording.
+    """
+    statement = label.lower()
+    non_blocking = re.search(
+        r"\b(?:does|do|did|will|would|is|are)\s+not\s+block(?:ing)?\b"
+        r"|\b(?:doesn't|don't|won't)\s+block\b"
+        r"|\bnon[- ]blocking\b|\bnot\s+blocking\b",
+        statement,
+    )
+    if not non_blocking:
+        return bool(re.search(r"\bblock(?:s|ed|ing|er)?\b", statement))
+    # A distinct positive blocker for the decision overrides a non-blocking
+    # statement; blocking an outcome claim or measurement alone does not.
+    without_negation = statement[:non_blocking.start()] + statement[non_blocking.end():]
+    return bool(re.search(
+        r"\bblock(?:s|ed|ing)?\b[^.;]{0,120}\b(?:decision(?:-ready)?|readiness|selection|approval|adoption|rollout)\b"
+        r"|\b(?:decision(?:-ready)?|readiness|selection|approval|adoption|rollout)\b\s+is\s+blocked\b",
+        without_negation,
+    ))
+
+
 def _markdown_anchor(heading: str) -> str:
     anchor = heading.lower()
     anchor = re.sub(r"[^\w\s-]", "", anchor)
@@ -982,8 +1009,7 @@ def _proposal_check(inp: NormalizedInput, plan_text: str, tasks: Any, before: li
     readiness = str(proposal_frontmatter.get("readiness", ""))
     if readiness == "decision-ready":
         for label in parsed["labels"]:
-            lower_label = label.lower()
-            if lower_label.startswith("evidence gap:") and ("block" in lower_label or "blocks" in lower_label):
+            if label.lower().startswith("evidence gap:") and _blocks_decision_readiness(label):
                 diagnostics.append(
                     _diag(
                         "PC",

@@ -16,8 +16,27 @@ def _packet() -> dict:
     return {
         "summary": "Render a plan.",
         "slug": "render-a-plan",
+        "boundaryReview": {
+            "requestResultInventory": {
+                "render": {
+                    "result": "Markdown task plan.",
+                    "kind": "immediate",
+                    "disposition": "represented-by-task",
+                }
+            },
+            "taskReviews": {
+                "render": {
+                    "immediateResult": "Markdown task plan.",
+                    "predecessorOutputs": [],
+                    "preAssignmentDisposition": "single-result",
+                    "acceptanceDisposition": "accepted",
+                }
+            },
+            "warningDispositions": {},
+        },
         "tasks": [
             {
+                "taskId": "render",
                 "purpose": "Render Markdown.",
                 "context": VALID_CONTEXT,
                 "filesToRead": [],
@@ -25,6 +44,13 @@ def _packet() -> dict:
                 "skills": ["documentation"],
                 "executionInstructions": [{"step": 1, "action": "Render the task."}],
                 "expectedOutput": "Markdown task plan.",
+                "verificationCoverage": {"observable": ["Markdown output exists."]},
+                "dependencies": [],
+                "antiPatternSignals": ["none"],
+                "purposeOutputAlignment": {
+                    "status": "aligned",
+                    "evidence": "Rendering produces the Markdown task plan.",
+                },
             }
         ],
     }

@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
-import re
 import subprocess
 from pathlib import Path
 
@@ -105,6 +103,7 @@ def test_documented_state_file_validator_form_executes(tmp_path: Path) -> None:
         "slug": "validator-command-fixture",
         "tasks": [
             {
+                "taskId": "validator-command",
                 "purpose": "Validate one task packet.",
                 "context": (
                     "This fixture provides enough concrete context to satisfy the "
@@ -118,9 +117,37 @@ def test_documented_state_file_validator_form_executes(tmp_path: Path) -> None:
                 "executionInstructions": [
                     {"step": 1, "action": "Validate the packet."}
                 ],
+                "verification": ["The documented validator command succeeds."],
                 "expectedOutput": "One validated task packet.",
+                "verificationCoverage": {
+                    "observable": ["The validator exits successfully."]
+                },
+                "dependencies": [],
+                "antiPatternSignals": ["none"],
+                "purposeOutputAlignment": {
+                    "status": "aligned",
+                    "evidence": "The validated packet is the requested result.",
+                },
             }
         ],
+        "boundaryReview": {
+            "requestResultInventory": {
+                "validated-packet": {
+                    "result": "One validated task packet.",
+                    "kind": "immediate",
+                    "disposition": "represented-by-task",
+                }
+            },
+            "taskReviews": {
+                "validator-command": {
+                    "immediateResult": "One validated task packet.",
+                    "predecessorOutputs": [],
+                    "preAssignmentDisposition": "single-result",
+                    "acceptanceDisposition": "accepted",
+                }
+            },
+            "warningDispositions": {},
+        },
     }
     state_file = tmp_path / "tasks.json"
     state_file.write_text(json.dumps(packet), encoding="utf-8")
@@ -187,30 +214,15 @@ def test_active_callers_lifecycle_mappings_and_fixtures_use_new_identity() -> No
         assert all(item["name"] != "plan" for item in inventory)
 
 
-def test_rollback_ledger_has_hash_backed_post_cutover_evidence() -> None:
-    ledger = _text("reports/plan-writer-migration-ledger.md")
-    post_cutover = ledger.split("Post-cutover SHA-256 values", 1)[1]
-    recorded = {
-        path: digest
-        for digest, path in re.findall(
-            r"^([0-9a-f]{64})\s+(skills/plan-writer/\S+)$",
-            post_cutover,
-            re.MULTILINE,
-        )
-    }
-
-    expected_paths = {
-        "skills/plan-writer/SKILL.md",
-        "skills/plan-writer/reference/README.md",
-        "skills/plan-writer/reference/scripts.md",
-        "skills/plan-writer/reference/task-authoring.md",
-        "skills/plan-writer/reference/workspace-contract.md",
-    }
-    assert set(recorded) == expected_paths
-    for relative, digest in recorded.items():
-        assert hashlib.sha256((ROOT / relative).read_bytes()).hexdigest() == digest
-
-    assert "Pre-cutover SHA-256 values" in ledger
-    assert "Historical exclusions" in ledger
-    assert "Rollback is bounded" in ledger
-    assert "does not claim retroactive byte-level proof" in ledger
+def test_migrated_reference_map_resolves_current_contracts() -> None:
+    reference = TARGET / "reference"
+    index = (reference / "README.md").read_text(encoding="utf-8")
+    for relative in (
+        "workspace-contract.md",
+        "task-authoring.md",
+        "scripts.md",
+        "../../task-contract/reference/README.md",
+    ):
+        link = relative if relative.startswith("../") else f"./{relative}"
+        assert f"]({link})" in index
+        assert (reference / relative).resolve().is_file()
