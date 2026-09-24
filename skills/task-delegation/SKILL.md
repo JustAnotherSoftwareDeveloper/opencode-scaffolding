@@ -38,16 +38,22 @@ input`; known-empty resource arrays become `None`:
 ## EXPECTED OUTPUT
 ```
 
-Preserve explicit reads, writes, skills, and outcome requirements. Reads and skills are
-minimums for the worker, not closed sets. Writes are strong suggestions, not an exact
-authorization list: the worker may make a minor purpose-preserving adjustment and must
-explain it. Do not add broad or destructive patterns. Reject an ambiguous multi-task
-object unless one task is clearly selected.
+Preserve explicit reads, writes, skills, and outcome requirements. Reads are minimum
+starting context. For ordinary canonical tasks, `SKILLS` contains exactly one assigned
+operation owner plus zero to two passive documentation skills. The worker may add
+materially relevant documentation context, but it may not silently add or substitute a
+second operation owner; changing the operation owner is a supervisory adaptation that
+requires re-dispatch. Internal workflow packets may instead explicitly assign their
+single delegated workflow owner, such as `breakdown-tasks`. Writes are strong
+suggestions, not an exact authorization list: the worker may make a minor
+purpose-preserving adjustment and must explain it. Do not add broad or destructive
+patterns. Reject an ambiguous multi-task object unless one task is clearly selected.
 
 Before dispatch, the caller may improve any section while preserving the intended
 outcome. After dispatch, `purpose`, `details`, `executionInstructions`, `verification`,
-and `expectedOutput` are authoritative. Only `skills`, `filesToRead`, and
-`filesToWrite` may vary during execution.
+and `expectedOutput` are authoritative. `filesToRead` and `filesToWrite` may vary under
+the worker contract. `skills` may gain passive documentation context, but the assigned
+operation or delegated owner remains fixed until supervisory re-dispatch.
 
 ## Result Validation
 
@@ -69,31 +75,34 @@ content as envelope metadata.
 ## Scoped Planning Workflow
 
 When the executable skill is `breakdown-tasks`, validate the uncapped materially
-relevant planning profiles from the planning collector call separately from one to
-three executable operation/documentation assignments from the operation collector
- call. Require each assignment to preserve the collector-winning `name`, `class`, and
- `path`, existing `SKILL.md`
-files within their source roots, task-contract inspection, and two-pass
-reconciliation. Planning loads are passive and never grant execution or transitive
- authority. Stale paths or substituted paths, failed loads, irrelevant names, a name absent
- from the relevant array, class mismatch, or unresolved assignments block; do not
- repair by similarity.
+relevant planning profiles from the planning collector call separately from each
+generated task's exactly one `class: operation` owner plus zero to two
+`class: documentation` assignments from the operation/documentation collector call.
+Require each assignment to preserve the collector-winning `name`, `class`, and `path`,
+existing `SKILL.md` files within their source roots, task-contract inspection, and
+two-pass reconciliation. Use the exact collector-winning `generic-executor` when no
+specialized operation semantically owns a task. Planning loads are passive and never
+grant execution or transitive authority. Stale paths or substituted paths, failed
+loads, irrelevant names, a name absent from the relevant array, class mismatch,
+invalid class composition, or unresolved assignments block; do not repair by
+similarity.
 
-During ordinary execution, an operation or delegated worker may explicitly load a
-materially relevant `documentation` skill named by the packet or workflow. Treat that
-load as passive, non-transitive context: it cannot add steps, authority, tools, writes,
-delegation, or completion evidence. Ordinary execution may not load `planning` skills;
-keep inline/task-executor exact-declaration behavior unchanged.
+During ordinary execution, the assigned operation or delegated worker may explicitly
+load a materially relevant `documentation` skill named by the packet or discovered as
+needed. Treat that load as passive, non-transitive context: it cannot add steps,
+authority, tools, writes, delegation, or completion evidence. Ordinary execution may
+not load an additional operation owner or any `planning` skill; keep
+inline/task-executor exact-declaration behavior unchanged.
 
 ## Reporting Boundary
 
 Preserve the canonical worker envelope without adding a local grammar. `Skills loaded`
-contains executable skills only. Report passive documentation loads in `Reads relied
-on` as passive documentation with their collector-winning identity when applicable.
-Reserve `Planning context loaded` for passive planning profiles from the scoped planning
-collector; it is not an executable assignment or completion evidence. Do not claim
-runtime enforcement for loading, recursion, duplication, or passive behavior without
-loader-harness evidence.
+contains the assigned executable operation or delegated owner only. Report passive
+documentation loads in `Reads relied on` as passive documentation with their
+collector-winning identity when applicable. Reserve `Planning context loaded` for
+passive planning profiles from the scoped planning collector; it is not an executable
+assignment or completion evidence. Do not claim runtime enforcement for loading,
+recursion, duplication, or passive behavior without loader-harness evidence.
 
 ## Dispatch Boundary
 
