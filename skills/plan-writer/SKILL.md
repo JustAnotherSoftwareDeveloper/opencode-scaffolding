@@ -92,11 +92,22 @@ recorded decision authority explicitly authorized planning. Validation success,
 ### Skill Assignment and Publication
 
 9. **Assign skills to each task.** Present the complete draft and the operation/documentation array to the LLM.
-   Select one to three skills per task.
-   Block with explicit no-match evidence when no valid assignment exists.
-   Reconcile every selected name against the array.
-   Do not include the pre-authoring passive `task-contract` record in an executable `skills` array.
-   Do not score, rank, rerank, clip, or use lexical fallback.
+   Select exactly one `class: operation` execution owner for each task. Prefer the
+   specialized operation that clearly owns distinct lifecycle, artifact-contract,
+   orchestration, destructive-authority, or other special execution semantics. When
+   no specialized operation semantically fits, select the exact collector-winning
+   `generic-executor`; lack of a specialized semantic match is not a blocker.
+   Add zero to two materially relevant `class: documentation` skills as passive
+   execution guidance. Keep the canonical `skills` field flat: one operation owner
+   followed by any selected documentation skills. Do not include the pre-authoring
+   passive `task-contract` record in an executable `skills` array.
+   Reconcile every selected name, class, and path against the collector array and
+   confirm exactly one operation plus zero to two documentation skills before
+   publication. If multiple specialized operations appear relevant, resolve which one
+   owns the bounded result; do not publish multiple operation owners. Block on missing,
+   stale, substituted, mismatched, or failed required records, but do not use
+   `generic-executor` to hide those failures. Do not score, rank, rerank, clip, or use
+   lexical fallback.
 
 10. **Inspect contracts.** Read each selected skill's `SKILL.md` at its collector-winning `path` from the array.
     Verify the contract matches the task.
@@ -153,6 +164,9 @@ recorded decision authority explicitly authorized planning. Validation success,
 
 - Collect skills twice exactly as shown. Do not swap the arrays between phases.
 - Load the collector-winning `task-contract` documentation record before task authoring. Keep that load passive, documentation-only, and non-transitive; it is not an executable task assignment.
+- Every executable task has exactly one operation owner and zero to two documentation
+  skills; preserve that class composition while storing names in the flat `skills`
+  array.
 - Do not score, rank, rerank, clip, or use lexical fallback.
 - Do not manually populate, correct, reorder, or remove `skills`.
 - Require an author-selected packet slug in every published root. Never derive,
