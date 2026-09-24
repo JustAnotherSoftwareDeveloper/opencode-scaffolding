@@ -1,6 +1,7 @@
 # Progressive Disclosure
 
-Keep `SKILL.md` compact (under ~100 lines) and serve as a file index.
+Keep `SKILL.md` as a compact file index within the class-specific entry-point body
+budget in [the progressive-disclosure reference](./reference/progressive-disclosure.md).
 Push reference material into separate `.md` files.
 The agent reads `SKILL.md` to discover available files.
 Support files are consulted on demand for depth.

@@ -74,9 +74,19 @@ report an unlinked detail section by heading.
 
 ### DISC-001 — Disclosure Budget
 
-**Condition.** Entry-point body budgets are class-aware: `operation`/`delegated` ≤ 120
-nonblank lines, `inline` ≤ 100, and `planning`/`documentation` ≤ 80. Frontmatter, the
-H1, and link-only reference index lines are excluded.
+**Condition.** Count nonblank entry-point body lines, excluding frontmatter, the H1,
+and link-only reference index lines. Apply these class-specific maximums and advisory
+review thresholds:
+
+- `operation`: maximum 160; review above 120.
+- `delegated`: maximum 225; review above 180.
+- `inline`: maximum 250; review above 150.
+- `planning`: maximum 80; review above 65.
+- `documentation`: maximum 100; review above 80.
+
+An advisory threshold calls for a human check of whether the entry point stays useful
+and detailed material belongs in linked references. It is not a failed conformance
+check or a reason to compress readable steps solely to reduce the count.
 
 **Diagnostic evidence.** Report counted lines, class, limit, and the first line beyond
 the limit.
@@ -156,7 +166,7 @@ nearest header on line 1. Delete the temporary fixture after recording the diagn
 
 ### Disclosure And Duplication Fixture
 
-Use a generated or checked-in variant with 81 nonblank body lines for a
+Use a generated or checked-in variant with 101 nonblank body lines for a
 `documentation` entry point and repeat three normalized sentences from its linked
 reference. Expected disposition: `DISC-001` reports the count and limit, and
 `DISC-002` reports both duplicate ranges. A compact index with the same material
