@@ -11,7 +11,7 @@
   ],
   "cases": [
     {
-      "id": "python-script",
+      "id": "python-script-create",
       "kind": "positive",
       "mode": "task",
       "request": "write a Python script",
@@ -21,10 +21,30 @@
       }
     },
     {
-      "id": "python-tests",
+      "id": "python-script-edit",
+      "kind": "positive",
+      "mode": "task",
+      "request": "modify the existing Python CLI implementation",
+      "expected": {
+        "names": ["skill-script-python-writer"],
+        "paths": ["skills/skill-script-python-writer/SKILL.md"]
+      }
+    },
+    {
+      "id": "python-tests-create",
       "kind": "positive",
       "mode": "task",
       "request": "write pytest coverage",
+      "expected": {
+        "names": ["skill-script-python-test-writer"],
+        "paths": ["skills/skill-script-python-test-writer/SKILL.md"]
+      }
+    },
+    {
+      "id": "python-tests-edit",
+      "kind": "positive",
+      "mode": "task",
+      "request": "fix the existing pytest tests without changing implementation",
       "expected": {
         "names": ["skill-script-python-test-writer"],
         "paths": ["skills/skill-script-python-test-writer/SKILL.md"]
