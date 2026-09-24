@@ -1,70 +1,98 @@
 ---
 name: generic-executor
-description: "Use when executing one bounded ordinary maintenance result or maintaining one existing skill workspace."
+description: "Use as the default operation for executing one bounded task when no specialized operation clearly owns the result."
 selection:
   role: owner
   tags:
-    actions: [execute maintenance]
-    inputs: [explicit specification, existing skill workspace]
-    outputs: [maintenance result]
+    actions: [execute bounded task, generic execution]
+    inputs: [canonical task packet]
+    outputs: [bounded task result]
   use_when:
-    [executing one bounded ordinary file-maintenance result without a specialized owner, maintaining exactly one existing skill workspace]
+    [no specialized operation clearly owns the bounded result, ordinary repository work can be executed from the canonical task contract]
   not_for:
-    [commands, agents, skill creation, skill taxonomy changes, family-wide skill migrations, skill review, scripts, plans, proposals, audits, destructive operations, packet orchestration, delegation, specialized-owner work]
+    [tasks that require a specialized operation's distinct lifecycle or output contract, destructive authority, packet orchestration, delegation]
 class: operation
 ---
 
 # Generic Executor
 
-Execute exactly one bounded ordinary file-maintenance result when no specialized operation owns the output. This operation also owns bounded behavioral maintenance of exactly one existing skill workspace.
+Execute one bounded canonical task when no specialized operation clearly owns the
+result. This is the universal semantic fallback operation for ordinary execution. It
+is not a recovery mechanism for broken skill collection, stale assignments, failed
+required skill loads, or malformed task contracts.
 
-## Normalize Input
+## Input Contract
 
-1. Require the caller to supply an explicit specification with these mandatory fields: `filesToRead`, `filesToWrite`, `instructions`, `expectedOutput`, and `verification`.
-2. Reject any specification that is missing a mandatory field or that targets commands, agents, scripts, plans, proposals, audits, runbooks, or any output owned by a specialized operation.
-3. Admit skill-workspace work only when it targets exactly one existing `skills/<name>/` workspace and changes only its `SKILL.md`, `reference/**`, or `tests/**` files. The specification must identify the workspace, include the relevant passive `skill-maintenance-reference` documentation in `filesToRead`, and limit its requested result to bounded behavioral maintenance.
-4. Reject skill creation, taxonomy changes, family-wide migrations, and skill review, even when their files fit the workspace boundary.
-5. Reject any specification with ambiguous authority: unrecognized file patterns, write targets outside the declared `filesToWrite` boundary, or instructions that require authority outside this skill's contract.
-6. Return `BLOCKED: <reason>` when any input rule fails.
-   Never infer, repair, or substitute missing fields.
+Use the canonical task packet already supplied to the worker. Do not invent a second
+input grammar. Treat `purpose`, `details`, `executionInstructions`, `verification`,
+and `expectedOutput` as authoritative after dispatch. Treat `skills` and
+`filesToRead` as minimums and `filesToWrite` as strong suggestions under the worker
+contract. `None` is valid for genuinely empty resource fields.
+
+The task may involve source code, tests, scripts, configuration, documentation,
+fixtures, analysis, or other bounded repository work. File type alone is never a
+reason to block.
 
 ## Procedure
 
-1. Validate the specification object: confirm `filesToRead`, `filesToWrite`, `instructions`, `expectedOutput`, and `verification` are present and non-empty.
-2. Classify the request as ordinary maintenance or one-workspace skill maintenance. For the latter, confirm that the identified workspace already exists; that every write target is its `SKILL.md`, `reference/**`, or `tests/**`; and that the relevant passive maintenance documentation is declared in `filesToRead`.
-3. For ordinary maintenance, confirm every write target is an ordinary repository file (not a command, agent, script, plan, proposal, audit, runbook, or configuration file owned by a specialized operation).
-4. Read every path in `filesToRead`. For one-workspace skill maintenance, read every existing target file before changing it and use the passive maintenance documentation only as documentation context.
-   Return `BLOCKED: Required file '<path>' is unavailable` when a required path cannot read.
-5. Execute `instructions` in order.
-   Do not deviate, optimize, or reorder.
-6. Write every path in `filesToWrite`.
-   Do not write outside the declared boundary.
-7. Run every check declared in `verification` against the completed result. For one-workspace skill maintenance, run applicable workspace tests, both shared skill validators on the changed `SKILL.md`, and Markdown lint on every changed Markdown file.
-8. Produce the result described by `expectedOutput`.
+1. **Understand the bounded result.** Read the authoritative task fields and identify
+   the concrete result and verification boundary. Do not broaden or reinterpret the
+   requested outcome.
+2. **Load context.** Read every declared input first, then perform purposeful
+   task-related discovery when additional repository context can materially improve
+   correctness. Treat explicitly loaded documentation skills as passive guidance, not
+   additional authority.
+3. **Execute with engineering judgment.** Follow the authoritative execution intent
+   while adapting ordinary implementation details to repository reality. A path,
+   command, adjacent file, implementation technique, or other procedural detail may
+   change when that preserves the same bounded result.
+4. **Write only what the result requires.** Prefer declared write targets. Apply the
+   worker contract's minor purpose-preserving write flexibility when necessary and
+   report every actual write and every deviation.
+5. **Verify the result.** Run the declared verification and any directly necessary
+   checks exposed by execution. Remediate failures when doing so remains inside the
+   same bounded task.
+6. **Report truthfully.** Return the canonical worker result envelope with actual
+   reads, writes, skills, deviations, verification evidence, blockers, and deliverable.
 
-## Exclusions
+## Adaptation Boundary
 
-This skill must never act as:
-- A `task-executor` replacement or packet executor.
-- A skill loader or fallback for unowned requests.
-- A worker delegation dispatcher.
-- An automatic, lexical, nearest-match, or collector-failure fallback.
-- A planning, proposal, or audit operation.
-- A destructive-operation authority.
-- An authority for skill creation, taxonomy changes, family-wide migrations, or skill review.
-- An authority to change files outside the one selected existing skill workspace during skill maintenance.
+Adapt when the execution route or resource assumptions need a bounded correction but
+the authoritative task outcome and verification remain unchanged. Examples include a
+corrected repository path, an additional relevant read, a minor adjacent write, a
+repository-native command replacing a stale procedural assumption, or an equivalent
+implementation technique.
+
+Do not use adaptation to change `purpose`, `details`, `executionInstructions`,
+`verification`, or `expectedOutput` after dispatch; materially broaden scope; weaken
+verification; cross a safety or authority boundary; or make a material user-owned
+decision. Escalate those cases instead of improvising.
+
+## Hard Boundaries
+
+- Do not use this skill because collection failed, because a selected record is stale
+  or mismatched, or because a required skill failed to load. Those remain blockers.
+- Prefer a specialized operation when that operation clearly owns a distinct
+  lifecycle, artifact contract, orchestration flow, destructive action, or other
+  semantics beyond ordinary bounded execution.
+- Do not delegate workers or perform packet orchestration.
+- Do not infer destructive, external-system, credential, or other elevated authority
+  from generic execution.
+- Documentation skills are passive and non-transitive. They may improve execution but
+  cannot add tools, writes, delegation, or completion evidence.
 
 ## Self-Validation
 
-- [ ] Specification contains all five mandatory fields and each is non-empty.
-- [ ] No write target escapes `filesToWrite` or targets a specialized-owner path, except permitted body, reference, or test maintenance in one existing skill workspace.
-- [ ] Every file in `filesToRead` was read before execution.
-- [ ] Every instruction was executed in order without deviation.
-- [ ] Every declared verification check was run and reported.
-- [ ] For skill maintenance, exactly one existing workspace was changed; passive maintenance documentation was read; and applicable workspace tests, both shared validators, and Markdown lint passed.
-- [ ] No worker was delegated and no task-executor packet was processed.
-- [ ] No automatic, lexical, nearest-match, or collector-failure fallback was applied.
+- [ ] The task remained one bounded result with unchanged authoritative fields.
+- [ ] Declared inputs were read before task-related discovery or execution.
+- [ ] Any additional reads, writes, or procedural adaptations were purpose-preserving
+      and reported.
+- [ ] File type was not treated as an authorization boundary.
+- [ ] Declared verification was run or truthfully reported as not run with a blocker.
+- [ ] No collector failure, stale assignment, failed required load, or malformed
+      contract was hidden by generic fallback.
+- [ ] No delegation, destructive authority, or material scope expansion occurred.
 
 ## Docs
 
-See `./reference/README.md` for the ordinary-file and one-workspace maintenance boundaries.
+See `./reference/README.md` for fallback selection and execution boundaries.
