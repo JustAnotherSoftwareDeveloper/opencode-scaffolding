@@ -12,6 +12,8 @@ ASSIGNMENT = BREAKDOWN / "reference" / "skill-assignment.md"
 WORKFLOW = BREAKDOWN / "SKILL.md"
 SCHEMA = BREAKDOWN / "schema" / "task-packet.schema.json"
 PLAN_WRITER = ROOT / "skills" / "plan-writer" / "SKILL.md"
+WORKER = ROOT / "agents" / "worker.md"
+TASK_DELEGATION = ROOT / "skills" / "task-delegation" / "SKILL.md"
 
 
 def test_breakdown_assignment_requires_one_operation_plus_optional_docs() -> None:
@@ -37,6 +39,19 @@ def test_plan_writer_uses_same_assignment_composition() -> None:
     assert "zero to two materially relevant `class: documentation`" in text
     assert "do not publish multiple operation owners" in text
     assert "exactly one operation owner and zero to two documentation" in text
+
+
+def test_worker_cannot_silently_acquire_second_operation_owner() -> None:
+    worker = WORKER.read_text(encoding="utf-8")
+    delegation = TASK_DELEGATION.read_text(encoding="utf-8")
+
+    assert "do not add or substitute another operation skill inline" in worker
+    assert "do not add a second operation owner during execution" in worker
+    assert "supervisory adaptation may re-dispatch" in worker
+
+    assert "may not silently add or substitute a\nsecond operation owner" in delegation
+    assert "changing the operation owner is a supervisory adaptation" in delegation
+    assert "may gain passive documentation context" in delegation
 
 
 def test_schema_keeps_compatible_flat_one_to_three_skill_representation() -> None:
