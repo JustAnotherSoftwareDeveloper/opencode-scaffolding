@@ -97,13 +97,23 @@ constraints, files, and expected outcome. Block when either is absent.
 
 6. **Assign skills only after boundary acceptance.** Assign only after the completed
    pre-assignment review accepts the draft boundaries. Present the complete accepted
-   draft and operation and
-   documentation array to the LLM. Select one to three skills per task without
-   changing boundaries. Reconcile each selection against the winning `name`, `class`,
-   and `path`; block on no match, absence, stale or substituted path, class mismatch,
-   or unresolved assignment. Exclude passive `task-contract` from executable
-   `skills`. Do not score, rank, rerank, clip, repair, or use lexical or similarity
-   fallback.
+   draft and operation and documentation array to the LLM. For each task, select
+   materially relevant specialized operation and documentation skills without changing
+   the accepted boundary. When a specialized operation clearly owns a distinct
+   lifecycle, artifact contract, orchestration flow, destructive authority, or other
+   special execution semantics, select that operation. When no specialized operation
+   semantically fits, select the exact collector-winning `generic-executor` operation
+   as the execution owner; absence of a specialized semantic match is not a blocker.
+   Add materially relevant documentation skills when useful, keeping the total at one
+   to three skills per task. Exclude passive `task-contract` from executable `skills`.
+
+   Reconcile every selected skill, including `generic-executor`, against the winning
+   `name`, `class`, and `path`. Block on an absent name, stale or substituted path,
+   class mismatch, unresolved assignment, or failed required load. Do not use
+   `generic-executor` to conceal collector failure, a broken specialized collector
+   record, a failed selected skill load, malformed task metadata, or execution failure
+   inside a specialized operation that clearly owns the task. Do not score, rank,
+   rerank, clip, repair, or use lexical or similarity fallback.
 
 7. **Inspect contracts.** Read each selected skill's `SKILL.md` at its
    collector-winning `path`. Verify that the contract matches the task.
@@ -182,6 +192,10 @@ Return the relative published packet path.
   Do not provide an optional adoption, backwards-compatibility, migration, legacy,
   transition, prior-format, or alternate acceptance path.
 - The one-to-three limit applies to `skills` within each task.
+- A task with no specialized operation owner uses the exact collector-winning
+  `generic-executor`; lack of a specialized semantic match is not a reason to block.
+  Collector failures, stale or mismatched records, failed required skill loads, and
+  malformed contracts remain blockers and must not be hidden by generic fallback.
 - Fail closed. Publish no partial output.
 - Do not claim atomicity from schema validity, metadata presence, wording, a
   dependency, shared file, skill, order, destination, or final document. Break the
