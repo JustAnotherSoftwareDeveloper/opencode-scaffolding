@@ -14,7 +14,10 @@ operation/documentation phases.
 
 ## Planning Selection
 
-Show the request and the planning array to the LLM. Load every materially relevant profile, with no numeric cap. Load only selected names through the skill tool. A planning load is passive context and does not grant execution or write authority. An empty selection is valid when no planning concern exists.
+Show the request and the planning array to the LLM. Load every materially relevant
+profile, with no numeric cap. Load only selected names through the skill tool. A
+planning load is passive context and does not grant execution or write authority. An
+empty selection is valid when no planning concern exists.
 
 Block on a name absent from the planning array.
 
@@ -30,14 +33,36 @@ or load failure.
 
 ## Task Assignment
 
-Show the complete draft and the operation/documentation array to the LLM. Select one
-to three semantically fitting skills per task. A no-match decision blocks. Inspect
-selected contracts and reconcile each name against the array. The passive
-`task-contract` documentation record is context only, not an executable assignment;
-do not place it in a task's executable `skills` array.
+Show the complete accepted draft and the operation/documentation array to the LLM.
+For each task:
 
-Block on a name absent from the operation/documentation array.
+1. Select materially relevant specialized operation and documentation skills without
+   changing the accepted task boundary.
+2. When a specialized operation clearly owns the task's distinct lifecycle, artifact
+   contract, orchestration flow, destructive authority, or other special execution
+   semantics, select that operation.
+3. When no specialized operation semantically fits, select the collector-winning
+   `generic-executor` operation as the task's execution owner. A missing specialized
+   match is not a blocker.
+4. Add materially relevant documentation skills when they improve execution context.
+   Documentation is passive and does not replace the operation owner.
+5. Keep the total assignment at one to three skills. Exclude the passive
+   pre-authoring `task-contract` record from executable task assignments.
+6. Inspect selected contracts and reconcile every selected name against the collector
+   array's winning `name`, `class`, and `path`.
+
+`generic-executor` is a semantic fallback only. It must itself exist in the collector
+array as the exact winning `class: operation` record. Block if that record is absent,
+stale, substituted, mismatched, or cannot be loaded. Do not use it to conceal a
+collector failure, a failed required skill load, or an unresolved assignment to a
+known specialized owner.
+
+Block on any selected name absent from the operation/documentation array, stale or
+substituted path, class mismatch, or failed required load.
 
 ## Prohibited Semantics
 
-Do not score, rank, threshold, rerank, clip, use lexical or path fallback, or manually repair assignments. Do not recollect or rebuild metadata from names.
+Do not score, rank, threshold, rerank, clip, use lexical or path fallback, or manually
+repair assignments. Do not recollect or rebuild metadata from names. Do not choose
+`generic-executor` merely because a specialized collector record is broken; fallback
+applies only when no specialized operation semantically owns the accepted task.
