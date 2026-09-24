@@ -98,22 +98,31 @@ constraints, files, and expected outcome. Block when either is absent.
 6. **Assign skills only after boundary acceptance.** Assign only after the completed
    pre-assignment review accepts the draft boundaries. Present the complete accepted
    draft and operation and documentation array to the LLM. For each task, select
-   materially relevant specialized operation and documentation skills without changing
-   the accepted boundary. When a specialized operation clearly owns a distinct
-   lifecycle, artifact contract, orchestration flow, destructive authority, or other
-   special execution semantics, select that operation. When no specialized operation
+   exactly one `class: operation` execution owner without changing the accepted
+   boundary. When one specialized operation clearly owns a distinct lifecycle,
+   artifact contract, orchestration flow, destructive authority, or other special
+   execution semantics, select that operation. When no specialized operation
    semantically fits, select the exact collector-winning `generic-executor` operation
    as the execution owner; absence of a specialized semantic match is not a blocker.
-   Add materially relevant documentation skills when useful, keeping the total at one
-   to three skills per task. Exclude passive `task-contract` from executable `skills`.
+   Add zero to two materially relevant `class: documentation` skills when useful.
+   Documentation is passive and cannot replace or compete with the operation owner.
+   Store the result in the existing flat `skills` array: one operation owner followed
+   by zero to two documentation skills. Exclude passive `task-contract` from
+   executable `skills`.
 
    Reconcile every selected skill, including `generic-executor`, against the winning
-   `name`, `class`, and `path`. Block on an absent name, stale or substituted path,
-   class mismatch, unresolved assignment, or failed required load. Do not use
-   `generic-executor` to conceal collector failure, a broken specialized collector
-   record, a failed selected skill load, malformed task metadata, or execution failure
-   inside a specialized operation that clearly owns the task. Do not score, rank,
-   rerank, clip, repair, or use lexical or similarity fallback.
+   `name`, `class`, and `path`. Before publication, confirm the reconciled assignment
+   contains exactly one operation and zero to two documentation skills. If multiple
+   specialized operations appear relevant, resolve which one owns the bounded result;
+   do not publish multiple operation owners and do not change an accepted task boundary
+   merely because skill coverage overlaps. Block on an absent name, stale or
+   substituted path, class mismatch, unresolved assignment, failed required load, no
+   operation owner, more than one operation owner, or more than two documentation
+   skills. Do not use `generic-executor` to conceal collector failure, a broken
+   specialized collector record, a failed selected skill load, malformed task
+   metadata, or execution failure inside a specialized operation that clearly owns
+   the task. Do not score, rank, rerank, clip, repair, or use lexical or similarity
+   fallback.
 
 7. **Inspect contracts.** Read each selected skill's `SKILL.md` at its
    collector-winning `path`. Verify that the contract matches the task.
@@ -191,7 +200,9 @@ Return the relative published packet path.
   alongside the canonical packet, not a schema claim or mechanical proof of atomicity.
   Do not provide an optional adoption, backwards-compatibility, migration, legacy,
   transition, prior-format, or alternate acceptance path.
-- The one-to-three limit applies to `skills` within each task.
+- Every task's flat `skills` array contains exactly one operation owner and zero to two
+  documentation skills. Reconcile those classes against collector metadata before
+  publication; JSON schema cardinality alone does not prove the class composition.
 - A task with no specialized operation owner uses the exact collector-winning
   `generic-executor`; lack of a specialized semantic match is not a reason to block.
   Collector failures, stale or mismatched records, failed required skill loads, and
