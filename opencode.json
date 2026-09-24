@@ -95,6 +95,7 @@
         "read": {
           "*": "deny",
           "~/.config/opencode/output-contract-template.md": "allow",
+          "skills/breakdown-tasks/schema/task-packet.schema.json": "allow",
           ".plans/*/tasks.json": "allow",
           ".tasks/*.json": "allow",
           "*/.plans/*/tasks.json": "allow",
