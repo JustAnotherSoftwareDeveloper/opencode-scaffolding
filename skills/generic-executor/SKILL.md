@@ -25,9 +25,12 @@ required skill loads, or malformed task contracts.
 
 Use the canonical task packet already supplied to the worker. Do not invent a second
 input grammar. Treat `purpose`, `details`, `executionInstructions`, `verification`,
-and `expectedOutput` as authoritative after dispatch. Treat `skills` and
-`filesToRead` as minimums and `filesToWrite` as strong suggestions under the worker
-contract. `None` is valid for genuinely empty resource fields.
+and `expectedOutput` as authoritative after dispatch. Preserve the assigned operation
+owner. Declared documentation is passive context, and the worker may add materially
+relevant documentation context under its contract without adding another operation
+owner. Treat `filesToRead` as minimum starting context and `filesToWrite` as strong
+suggestions under the worker contract. `None` is valid for genuinely empty resource
+fields.
 
 The task may involve source code, tests, scripts, configuration, documentation,
 fixtures, analysis, or other bounded repository work. File type alone is never a
@@ -58,15 +61,16 @@ reason to block.
 ## Adaptation Boundary
 
 Adapt when the execution route or resource assumptions need a bounded correction but
-the authoritative task outcome and verification remain unchanged. Examples include a
-corrected repository path, an additional relevant read, a minor adjacent write, a
-repository-native command replacing a stale procedural assumption, or an equivalent
-implementation technique.
+the authoritative task outcome, assigned operation owner, and verification remain
+unchanged. Examples include a corrected repository path, an additional relevant read,
+a minor adjacent write, a repository-native command replacing a stale procedural
+assumption, or an equivalent implementation technique.
 
 Do not use adaptation to change `purpose`, `details`, `executionInstructions`,
-`verification`, or `expectedOutput` after dispatch; materially broaden scope; weaken
-verification; cross a safety or authority boundary; or make a material user-owned
-decision. Escalate those cases instead of improvising.
+`verification`, or `expectedOutput` after dispatch; replace the assigned operation
+owner; materially broaden scope; weaken verification; cross a safety or authority
+boundary; or make a material user-owned decision. Escalate those cases instead of
+improvising.
 
 ## Hard Boundaries
 
@@ -75,6 +79,8 @@ decision. Escalate those cases instead of improvising.
 - Prefer a specialized operation when that operation clearly owns a distinct
   lifecycle, artifact contract, orchestration flow, destructive action, or other
   semantics beyond ordinary bounded execution.
+- Do not add or substitute another operation owner during execution. An operation-owner
+  correction belongs to supervisory reassignment/re-dispatch.
 - Do not delegate workers or perform packet orchestration.
 - Do not infer destructive, external-system, credential, or other elevated authority
   from generic execution.
@@ -83,15 +89,17 @@ decision. Escalate those cases instead of improvising.
 
 ## Self-Validation
 
-- [ ] The task remained one bounded result with unchanged authoritative fields.
+- [ ] The task remained one bounded result with unchanged authoritative fields and
+      operation owner.
 - [ ] Declared inputs were read before task-related discovery or execution.
-- [ ] Any additional reads, writes, or procedural adaptations were purpose-preserving
-      and reported.
+- [ ] Any additional reads, writes, documentation context, or procedural adaptations
+      were purpose-preserving and reported.
 - [ ] File type was not treated as an authorization boundary.
 - [ ] Declared verification was run or truthfully reported as not run with a blocker.
 - [ ] No collector failure, stale assignment, failed required load, or malformed
       contract was hidden by generic fallback.
-- [ ] No delegation, destructive authority, or material scope expansion occurred.
+- [ ] No second operation owner, delegation, destructive authority, or material scope
+      expansion occurred.
 
 ## Docs
 
