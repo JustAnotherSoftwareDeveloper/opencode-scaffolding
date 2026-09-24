@@ -127,19 +127,30 @@
       }
     },
     "delegator": {
-      "description": "Dispatches decomposition to breakdown-tasks, and delegates each task to workers in serial. Does not perform implementation work directly.",
+      "description": "Dispatches decomposition to breakdown-tasks, supervises execution with read-only repository context, and delegates each task to workers in serial.",
       "mode": "primary",
       "model": "openai/gpt-6-sol",
-      "variant": "medium",
+      "variant": "high",
       "prompt": "{file:./agents/delegator.md}",
       "permission": {
         "*": "deny",
         "read": {
-          "*": "deny",
+          "*": "allow",
+          "skills/**": "deny",
+          ".opencode/skills/**": "deny",
+          ".claude/skills/**": "deny",
+          ".agents/skills/**": "deny",
+          "~/.config/opencode/skills/**": "deny",
+          ".env": "deny",
+          ".env.*": "deny",
+          "**/.env": "deny",
+          "**/.env.*": "deny",
+          "skills/breakdown-tasks/schema/task-packet.schema.json": "allow",
           "~/.config/opencode/output-contract-template.md": "allow",
           ".tasks/*.json": "allow",
           "*/.tasks/*.json": "allow"
         },
+        "glob": "allow",
         "external_directory": {
           "*": "deny",
           "~/.config/opencode/output-contract-template.md": "allow"
