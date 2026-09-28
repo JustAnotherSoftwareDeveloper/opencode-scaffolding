@@ -13,7 +13,8 @@ decision; do not fill every group.
 Start with the owned request and its input/output contract. Then list the nearest
 neighboring skills and the requests they own. Keep a tag only when changing or
 removing it could change selection. Prefer request vocabulary over implementation
-details.
+details. Keep each value atomic: express one concept per value. Check discoverability
+using request language and, where useful, concise aliases for the same owned request.
 
 ## Conditions And Aliases
 
@@ -30,8 +31,9 @@ express similarity, ownership, or a general relatedness list.
 
 Stop when the profile distinguishes its nearest neighbors. Reject tags that merely
 repeat the skill name, describe a shared implementation detail, fill an unused group,
-or name a one-off ticket. Do not use popularity, frequency, ranking, scores, paths,
-or compatibility/routing metadata to select a skill.
+name a one-off ticket, or duplicate a built-in value under another name. Do not use
+popularity, frequency, ranking, scores, paths, or compatibility/routing metadata to
+select a skill.
 
 ## Example
 

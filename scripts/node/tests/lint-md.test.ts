@@ -115,6 +115,15 @@ describe('lintFile', () => {
     })
   })
 
+  test('proposal profile detects tables as violations', async () => {
+    await withTempDir(async (dir) => {
+      const filePath = join(dir, 'proposal.md')
+      writeFileSync(filePath, '# Proposal\n\n| Col1 | Col2 |\n|------|------|\n| A    | B    |\n')
+      const result = await lintFile(filePath, 'proposal')
+      expect(result.violations.some((v) => v.ruleId === 'no-tables')).toBe(true)
+    })
+  })
+
   test('empty file returns no violations', async () => {
     await withTempDir(async (dir) => {
       const filePath = join(dir, 'empty.md')

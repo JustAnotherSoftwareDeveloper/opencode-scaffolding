@@ -22,6 +22,11 @@ source-documents:
 - [Verification Criteria](#verification-criteria)
 - [Sources](#sources)
 
+<!-- Use Title Case for authored non-core headings, including optional or domain-specific
+H2s and H3s. Preserve technical terminology and identifier capitalization, dynamic
+marker spelling, and the exact core H2 and table-of-contents text. Remove this comment
+before output. -->
+
 ## Recommendation
 
 {{selected_architecture_or_behavior_and_affected_boundary}}
@@ -54,8 +59,9 @@ output. -->
 - **Consequence:** {{benefit_cost_or_risk}}
 - **Disposition:** {{selected_rejected_or_deferred_and_why}}
 
-<!-- Repeat only for credible alternatives. Use a table only for genuinely comparable
-rows and columns. Remove this comment before output. -->
+<!-- Repeat only for credible alternatives. Compare them with parallel bullets or prose
+using the same differentiators, consequences, and dispositions. Remove this comment
+before output. -->
 
 ## Implementation Details
 

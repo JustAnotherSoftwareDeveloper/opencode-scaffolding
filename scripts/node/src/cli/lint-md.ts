@@ -4,7 +4,7 @@ import { cli } from "cleye";
 import { type LintResult, lintDirectory, lintFile } from "../lib/lint-md/core.ts";
 import { ExitCode } from "../lib/shared/exit-codes.ts";
 import { die, formatViolation } from "../lib/shared/format.ts";
-import { isExempted, resolveTarget } from "../lib/shared/path.ts";
+import { resolveTarget } from "../lib/shared/path.ts";
 
 cli({
   name: "lint-md",
@@ -26,10 +26,6 @@ async function main(): Promise<void> {
 
   if (!existsSync(resolvedPath)) {
     die(`Error: path not found: ${resolvedPath}`, ExitCode.INVALID_INPUT);
-  }
-
-  if (isExempted(resolvedPath)) {
-    process.exit(ExitCode.CLEAN);
   }
 
   let result: LintResult;

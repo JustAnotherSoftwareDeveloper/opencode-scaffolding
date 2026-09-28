@@ -20,7 +20,7 @@ class: planning
 that should resolve to this skill's canonical `name`; it must not create another
 skill, change ownership or class, or authorize routing, delegation, or loading.
 
-# `<<Skill Name>>` — Domain Planning Reference
+# Domain Planning Reference
 
 > **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
 

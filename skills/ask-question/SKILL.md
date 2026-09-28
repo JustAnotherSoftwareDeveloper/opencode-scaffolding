@@ -13,7 +13,7 @@ selection:
 class: inline
 ---
 
-# Ask Question
+# Clarify Material Ambiguity Before Work Proceeds
 
 This skill resolves ambiguity before work proceeds.
 Ask only questions whose answers would materially change the next step.
@@ -40,7 +40,7 @@ A question array of zero must never be returned.
   "properties": {
     "questions": {
       "type": "array",
-      "minItems": 2,
+      "minItems": 1,
       "maxItems": 5,
       "description": "Questions to ask the user via the question tool",
       "items": {
@@ -131,7 +131,7 @@ Ask about one file, test, behavior, constraint, or preference at a time.
 Use clear choices with a useful custom-answer escape hatch.
 Do not ask broad questions when a narrower question would decide the next step.
 
-Cover these dimensions across the 2-5 questions:
+Cover relevant dimensions across the 1-5 questions:
 
 - **Purpose**: what outcome is needed.
 - **Scope**: what is included or excluded.
@@ -141,10 +141,12 @@ Cover these dimensions across the 2-5 questions:
 ## Execution Plan
 
 1. Analyze [Input](#input) for areas needing clarification.
-2. Formulate 2-5 questions per [Question Guidelines](#question-guidelines).
+2. If no unanswered question would materially change the next step, gate the request as
+   blocked. Do not invoke the question tool or return an empty-answer completion.
+3. Formulate 1-5 questions per [Question Guidelines](#question-guidelines).
    See [Guardrails](#guardrails) for mandatory question rules.
-3. Invoke the `question` tool once with [Question Tool Input Schema](#question-tool-input-schema), passing all 2-5 questions in a single call.
-4. Return results using [Skill Output Schema](#skill-output-schema).
+4. Invoke the `question` tool once with [Question Tool Input Schema](#question-tool-input-schema), passing all 1-5 questions in a single call.
+5. Return results using [Skill Output Schema](#skill-output-schema).
 
 This is a single-pass process.
 Ask all clarifying questions in one invocation.
@@ -152,7 +154,7 @@ Do not perform follow-up rounds, multi-pass clarification, or iterative narrowin
 
 ## Guardrails
 
-- Always ask at least 2 questions and at most 5 questions.
+- Submit at least 1 question and at most 5 questions to the question tool.
 - Do not skip questions because the request appears clear — ask confirmation, scope, assumption, constraint, or verification-preference questions instead.
 - Ask only when the answer changes execution.
 - Do not ask what the request already answers.

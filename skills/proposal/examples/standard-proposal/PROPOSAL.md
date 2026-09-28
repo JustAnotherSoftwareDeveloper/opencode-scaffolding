@@ -1,5 +1,5 @@
 ---
-title: "Add proposal-directory linting"
+title: "Add Proposal-Directory Linting"
 slug: "add-proposal-directory-linting"
 created: "0"
 created-at: "1970-01-01T00:00:00Z"
@@ -10,7 +10,7 @@ source-documents:
   - "analysis/current-linter-boundary.md"
 ---
 
-# Add proposal-directory linting
+# Add Proposal-Directory Linting
 
 ## Table of Contents
 
@@ -48,13 +48,13 @@ uncaught exceptions.
 
 ## Options Considered
 
-### Keep file-only linting
+### Keep File-Only Linting
 
 - **Differentiator:** No CLI dispatch change.
 - **Consequence:** Source-manifest and workspace-link defects remain undetectable.
 - **Disposition:** Rejected because one-document integrity spans more than one file.
 
-### Add file-or-directory dispatch
+### Add File-or-Directory Dispatch
 
 - **Differentiator:** The target type selects a bounded validation profile.
 - **Consequence:** The CLI and library gain directory handling while file behavior stays
@@ -64,7 +64,7 @@ uncaught exceptions.
 
 ## Implementation Details
 
-### `scripts/node/src/lib/lint-md/core.ts` — dispatch by target type
+### `scripts/node/src/lib/lint-md/core.ts` — Dispatch by Target Type
 
 - **Change:** Preserve the file pipeline and route directories to proposal validation.
 - **Invariant:** Generic files keep their current rules, diagnostic ordering, and exit
@@ -73,7 +73,7 @@ uncaught exceptions.
 - **Failure behavior:** Unsupported targets return a stable input diagnostic.
 - **Verification dependency:** Library tests cover both target kinds.
 
-### `scripts/node/src/lib/lint-md/proposal.ts` — validate workspace identity
+### `scripts/node/src/lib/lint-md/proposal.ts` — Validate Workspace Identity
 
 - **Change:** Parse frontmatter, headings, copied sources, and relative links from
   `PROPOSAL.md`.
@@ -83,7 +83,7 @@ uncaught exceptions.
 - **Failure behavior:** Malformed YAML and missing sources produce stable rule IDs.
 - **Verification dependency:** Focused fixtures cover valid and invalid workspaces.
 
-### `scripts/node/src/cli/lint-md.ts` — preserve CLI behavior
+### `scripts/node/src/cli/lint-md.ts` — Preserve CLI Behavior
 
 - **Change:** Accept a file or directory and format aggregated diagnostics.
 - **Invariant:** Help text and established exit codes remain stable.

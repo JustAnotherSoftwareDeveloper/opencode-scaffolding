@@ -25,6 +25,8 @@ Map invocation context to one internal input object with these required fields:
 - **CLI interface** — Cleye command definition, arguments, and options for integration tests.
 - **Known edge cases** — Empty input, malformed input, boundary conditions relevant to this script.
 
+For the blocked-message formats below, substitute the **Script name** input value for the first `<name>` and the concrete shared-module name from **Module structure** for the second `<name>`; never emit `<name>` literally.
+
 `BLOCKED: Source script <name> not found — run skill-script-node-writer first.`
 `BLOCKED: Shared module <name> not found — create it under src/lib/shared/ first.`
 `BLOCKED: Scripts directory not found at scripts/node/.`

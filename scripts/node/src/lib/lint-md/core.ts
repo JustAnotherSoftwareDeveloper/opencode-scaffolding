@@ -22,16 +22,13 @@ export interface LintResult {
   filePath: string;
 }
 
-function buildPipeline(profile: LintProfile) {
-  const pipeline = remark().use(remarkGfm).use(remarkLint);
-
-  if (profile !== "proposal") {
-    pipeline.use(noTablesPlugin);
-  }
-
-  pipeline.use(remarkLintNoDuplicateHeadings).use(remarkLintNoHeadingPunctuation);
-
-  return pipeline;
+function buildPipeline() {
+  return remark()
+    .use(remarkGfm)
+    .use(remarkLint)
+    .use(noTablesPlugin)
+    .use(remarkLintNoDuplicateHeadings)
+    .use(remarkLintNoHeadingPunctuation);
 }
 
 /**
@@ -41,11 +38,11 @@ function buildPipeline(profile: LintProfile) {
  */
 export async function lintFile(
   filePath: string,
-  profile: LintProfile = "generic",
+  _profile: LintProfile = "generic",
 ): Promise<LintResult> {
   const fileContent = readFileSync(filePath, "utf-8");
 
-  const pipeline = buildPipeline(profile);
+  const pipeline = buildPipeline();
   const result = await pipeline.process(fileContent);
 
   const violations: Violation[] = result.messages.map((msg) => ({

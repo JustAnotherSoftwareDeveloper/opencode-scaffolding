@@ -11,8 +11,9 @@ content is maintained separately and is not part of this operation.
    `description`, `selection`, and `class`.
 3. Set `selection.role` to `owner`, `support`, or `reference`, then add only the
    grouped tags that change a selection decision.
-4. Add `use_when`, `not_for`, and `supports` only when they express request-facing
-   conditions or a directional support relationship.
+4. Add `selection.aliases`, `use_when`, `not_for`, and `supports` only when they
+   improve direct selection: aliases are recognition-only alternate wording for the
+   same owned request, conditions are request-facing, and `supports` is directional.
 5. Write the body for the selected class. Keep implementation instructions in the
    body, not in profile tags.
 6. Validate the completed file with the shared validator and Markdown checks.
@@ -33,9 +34,10 @@ content is maintained separately and is not part of this operation.
 - `selection` requires `role` and at least one non-empty grouped tag list.
 - Supported tag groups are `actions`, `inputs`, `outputs`, `topics`,
   `environments`, and `constraints`.
-- `use_when`, `not_for`, and `supports` are optional; arrays contain unique,
-  trimmed strings, and `supports` contains canonical skill names other than the
-  current skill.
+- `aliases`, `use_when`, `not_for`, and `supports` are optional. `selection.aliases`
+  are recognition-only alternate wording for the same owned request; arrays contain
+  unique, trimmed strings, and `supports` contains canonical skill names other than
+  the current skill.
 - Do not add `schema_version`, `cues`, `relationships`, `facets`, `routing`,
   `location`, `score`, `rank`, or `threshold`.
 
@@ -46,6 +48,12 @@ Run the repository's shared validators against each changed skill file:
 ```sh
 node scripts/validate-skills.js skills/<name>/SKILL.md
 uv run --project scripts/python python -m cli.validate_skill_md skills/<name>/SKILL.md
+```
+
+Run Markdown lint on each modified Markdown file:
+
+```sh
+bun run --cwd ~/.config/opencode/scripts/node lint:md -- <path>
 ```
 
 Both validators must pass. The active skill class must have numbered execution

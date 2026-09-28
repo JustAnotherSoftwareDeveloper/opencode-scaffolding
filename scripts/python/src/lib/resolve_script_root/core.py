@@ -2,8 +2,10 @@
 
 Resolution order:
 1. $OPENCODE_SCRIPTS_PYTHON (or OPENCODE_SCRIPTS_NODE / OPENCODE_SCRIPTS_SHELL)
-2. <project-root>/.opencode/scripts/<runtime>
-3. ~/.config/opencode/scripts/<runtime>
+2. Python: <project-root>/opencode/scripts/python
+   Node/shell: <project-root>/.opencode/scripts/<runtime>
+3. Python: ~/.config/opencode/scripts/python
+   Node/shell: ~/.config/opencode/scripts/<runtime>
 """
 
 from __future__ import annotations
@@ -43,7 +45,8 @@ def resolve_script_root(
 
     # 2. Project-local root
     pr = project_root or Path.cwd()
-    project_local = pr.resolve() / ".opencode" / "scripts" / runtime
+    project_segment = "opencode" if runtime == "python" else ".opencode"
+    project_local = pr.resolve() / project_segment / "scripts" / runtime
     if project_local.is_dir():
         return project_local.resolve(), "project-local"
 

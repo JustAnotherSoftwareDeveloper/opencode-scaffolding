@@ -1,5 +1,14 @@
 # Test Examples
 
+Treat these blocks as complete examples in their stated project context, not standalone snippets or line-count targets. Keep the
+setup, imports, dependencies, and assertions needed for their stated behavior and assumptions. Judge concision by relevance
+rather than line count: remove unrelated material, not context required for an example to be truthful or runnable. Use
+contrast when comparison is part of the teaching purpose.
+
+Before reusing a CLI example for a particular implementation, verify its expected output and exit codes against that CLI's
+source and tests. Examples 1 and 6 match this repository's current `scripts/node` `lint-md` CLI behavior and tests; the
+Markdown example blocks have not been extracted and run as standalone test files.
+
 ## Example 1: Bun.spawnSync CLI Integration Test with Temp Fixture
 
 ```typescript
@@ -14,7 +23,7 @@ import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
 let tmpDir: string
-const cliEntry = ['bun', 'src/cli/lint-md.ts']
+const cliPath = join(import.meta.dir, '../src/cli/lint-md.ts')
 
 beforeAll(() => {
   tmpDir = mkdtempSync(join(tmpdir(), 'lint-md-test-'))
@@ -25,29 +34,42 @@ afterAll(() => {
 })
 
 function runLintMd(...args: string[]) {
-  return Bun.spawnSync([...cliEntry, '--', ...args])
+  return Bun.spawnSync(
+    ['bun', 'run', cliPath, ...(args.length > 0 ? ['--', ...args] : [])],
+    { env: { ...process.env } },
+  )
 }
 
 describe('lint-md CLI', () => {
-  test('exits with code 0 on valid markdown file', () => {
+  test('valid markdown exits with code 0 and no output', () => {
     const filePath = join(tmpDir, 'valid.md')
-    writeFileSync(filePath, '# Hello World\n\nThis is valid.\n')
+    writeFileSync(filePath, '# Valid Heading\n\nSome content.\n')
 
     const result = runLintMd(filePath)
     expect(result.exitCode).toBe(0)
-    expect(result.stdout.toString()).toContain('violations')
+    expect(result.stdout.toString()).toBe('')
+    expect(result.stderr.toString()).toBe('')
   })
 
-  test('exits with code 3 on nonexistent file', () => {
+  test('file with violations exits with code 1 and reports them on stderr', () => {
+    const filePath = join(tmpDir, 'violations.md')
+    writeFileSync(filePath, '# Duplicate\n\nContent\n\n# Duplicate\n')
+
+    const result = runLintMd(filePath)
+    expect(result.exitCode).toBe(1)
+    expect(result.stderr.toString()).toContain('duplicate')
+  })
+
+  test('nonexistent path exits with code 3 and reports the missing path', () => {
     const result = runLintMd(join(tmpDir, 'nonexistent.md'))
     expect(result.exitCode).toBe(3)
-    expect(result.stderr.toString()).toContain('file not found')
+    expect(result.stderr.toString()).toContain('path not found')
   })
 
-  test('exits with code 3 on missing argument', () => {
+  test('no arguments exits with code 1 with a usage error from cleye', () => {
     const result = runLintMd()
-    expect(result.exitCode).toBe(3)
-    expect(result.stderr.toString()).toContain('no target file')
+    expect(result.exitCode).toBe(1)
+    expect(result.stderr.toString()).toContain('Missing required parameter')
   })
 })
 ```
@@ -190,20 +212,25 @@ test.each(testCases)('countTokens($input) -> $expected', ({ input, expected }) =
 ```typescript
 /**
  * Parameterized error-path tests for CLI.
- * Covers every non-zero exit code with a single describe block.
+ * Covers the regression-tested non-zero CLI paths with a single describe block.
  */
 
 import { describe, expect, test } from 'bun:test'
+import { join } from 'node:path'
+
+const cliPath = join(import.meta.dir, '../src/cli/lint-md.ts')
 
 const errorCases = [
-  { args: [] as string[], exitCode: 3, stderrContains: 'no target file' },
-  { args: ['nonexistent.md'], exitCode: 3, stderrContains: 'file not found' },
-  { args: ['--format', 'bogus', 'test.md'], exitCode: 3, stderrContains: 'invalid format' },
+  { args: [] as string[], exitCode: 1, stderrContains: 'Missing required parameter' },
+  { args: ['/nonexistent/path/file.md'], exitCode: 3, stderrContains: 'path not found' },
 ] as const
 
 describe.each(errorCases)('error: $args', ({ args, exitCode, stderrContains }) => {
   test(`exits with code ${exitCode}`, () => {
-    const result = Bun.spawnSync(['bun', 'src/cli/lint-md.ts', ...args])
+    const result = Bun.spawnSync(
+      ['bun', 'run', cliPath, ...(args.length > 0 ? ['--', ...args] : [])],
+      { env: { ...process.env } },
+    )
     expect(result.exitCode).toBe(exitCode)
     expect(result.stderr.toString()).toContain(stderrContains)
   })

@@ -20,9 +20,21 @@ class: delegated
 that should resolve to this skill's canonical `name`; it must not create another
 skill, change ownership or class, or authorize routing, delegation, or loading.
 
-# `<<Skill Name>>` — Delegated Worker
+# Delegated Worker
 
 > **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.
+
+> **Template slot declarations (remove this authoring-only note after substitution):** Before instantiating this template, replace every retained slot below with its concrete value from the stated source; no slot marker may remain in the filled skill.
+> - `<<skill-name>>` is the canonical skill name, sourced from the lowercase, hyphenated skill directory name; use the same value for the frontmatter `name` field.
+> - `<<trigger condition>>` is the orchestrator-side situation that should select this delegated skill, sourced from the intended delegation trigger and phrased from the orchestrator's perspective.
+> - `<<task subject>>` is the subject of the bounded operation this worker owns, sourced from its intended scope.
+> - `<<alias>>` is an optional alternate phrase that should resolve to the canonical `name`, sourced from recognition wording relevant to that skill. Substitute a recognition-only alias when one is useful; otherwise omit the optional `aliases` field rather than leaving the slot unresolved.
+> - `<<owned-operation>>` is the specific operation this skill owns, sourced from the operation the orchestrator will delegate.
+> - `<scripts-python-dir>` is the concrete Python scripts root resolved for the skill's project/global origin, or the `$OPENCODE_SCRIPTS_PYTHON` override, following `skill-architect` path-resolution rules.
+> - `<scripts-node-dir>` is the concrete Node scripts root resolved for the skill's project/global origin, or the `$OPENCODE_SCRIPTS_NODE` override, following `skill-architect` path-resolution rules.
+> - `<entry-point>` is the deterministic subtask's script entry point: for Python, the command registered in that scripts root's `pyproject.toml [project.scripts]`; for Node, the selected CLI script under `scripts/node/src/cli/`.
+> - `<args>` is the concrete CLI argument sequence needed to provide the prepared subtask input from step 2a (such as a file path or other CLI values); use no argument tokens when the selected script requires none.
+> Replace command slots in place while preserving the `uv run --project` and `bun run --cwd` invocation forms and the separate `[args]` optional-argument notation.
 
 One-line summary of what this worker accomplishes.
 

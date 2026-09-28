@@ -45,3 +45,15 @@ def test_dispatch_and_display_require_a_canonical_slug_without_derivation() -> N
     assert "preserve it unchanged" in dispatch
     assert "including its author-selected packet slug" in display
     assert "Do not restate or\nlocally validate slug grammar" in display
+
+
+def test_display_tasks_preserves_required_table_exception_contract() -> None:
+    display = (ROOT / "skills/display-tasks/SKILL.md").read_text(encoding="utf-8")
+
+    assert "A single Markdown table with no surrounding commentary." in display
+    assert (
+        "```markdown\n"
+        "| Purpose | Starting files | Suggested outputs | Skills |\n"
+        "| ------- | -------------- | ----------------- | ------ |\n"
+        "```"
+    ) in display

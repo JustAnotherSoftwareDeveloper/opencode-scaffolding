@@ -27,11 +27,17 @@ class: operation
 
 ## Required Fields
 
-- `name` matches the directory and uses lowercase letters, numbers, and hyphens.
+- `name` matches the directory, uses lowercase letters, numbers, and hyphens, and is
+  at most 128 characters (the schema limit).
 - `description` is one trimmed, single-line trigger statement of at most 1024 characters.
 - `selection.role` is `owner`, `support`, or `reference`.
 - `selection.tags` contains at least one non-empty group.
 - `class` is one of `operation`, `delegated`, `inline`, `planning`, or `documentation`.
+
+## Name Lifecycle
+
+Keep `name` stable after publication; this is a lifecycle convention, not a schema
+validation rule.
 
 ## Roles
 

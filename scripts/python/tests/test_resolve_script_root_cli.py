@@ -26,15 +26,18 @@ class TestResolveScriptRootCLI:
     def test_project_root_fallback_text(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """--project-root without env var falls through (no project-local)."""
+        """Legacy hidden Python path falls through to the exact global root."""
         monkeypatch.delenv("OPENCODE_SCRIPTS_PYTHON", raising=False)
+        home = tmp_path / "home"
+        monkeypatch.setenv("HOME", str(home))
+        legacy_project_local = tmp_path / ".opencode" / "scripts" / "python"
+        legacy_project_local.mkdir(parents=True)
         result = self.runner.invoke(
             main, ["--runtime", "python", "--project-root", str(tmp_path)]
         )
         assert result.exit_code == 0
-        # Falls through to global fallback since tmp_path has no
-        # .opencode/scripts/python dir
-        assert ".config/opencode/scripts/python" in result.output.strip()
+        expected = home / ".config" / "opencode" / "scripts" / "python"
+        assert result.output.strip() == str(expected.resolve())
 
     def test_json_format(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """--format json returns parseable JSON with path, runtime, and source."""
@@ -51,7 +54,7 @@ class TestResolveScriptRootCLI:
     ) -> None:
         """--format json with project-local resolution."""
         monkeypatch.delenv("OPENCODE_SCRIPTS_PYTHON", raising=False)
-        project_local = tmp_path / ".opencode" / "scripts" / "python"
+        project_local = tmp_path / "opencode" / "scripts" / "python"
         project_local.mkdir(parents=True)
         result = self.runner.invoke(
             main,
@@ -66,6 +69,7 @@ class TestResolveScriptRootCLI:
         )
         assert result.exit_code == 0
         data = json.loads(result.output)
+        assert data["path"] == str(project_local.resolve())
         assert data["runtime"] == "python"
         assert data["source"] == "project-local"
 
@@ -77,3 +81,6 @@ class TestResolveScriptRootCLI:
         assert "--runtime" in result.output
         assert "--project-root" in result.output
         assert "--format" in result.output
+        assert "./opencode/scripts/python" in result.output
+        assert ".opencode/scripts/<runtime>" in result.output
+        assert "~/.config/opencode/scripts/python" in result.output

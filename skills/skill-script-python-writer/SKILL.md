@@ -14,7 +14,7 @@ selection:
 class: operation
 ---
 
-# Skill Script Python Writer
+# Deterministic Python Script Implementation
 
 Create or edit one deterministic Python script implementation under `scripts/python/`.
 Own the implementation lifecycle for the selected script: CLI, library code,

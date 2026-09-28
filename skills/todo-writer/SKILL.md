@@ -14,7 +14,7 @@ selection:
 class: inline
 ---
 
-# Todo Writer
+# Replacing Todos From Canonical Tasks
 
 Manage todo items through the `todowrite` tool.
 The `todowrite` tool performs a **full replacement** of all todo entries.

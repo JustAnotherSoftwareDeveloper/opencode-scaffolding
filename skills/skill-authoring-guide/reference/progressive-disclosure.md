@@ -12,7 +12,7 @@ that the metadata validators currently implement them. A checker reports the fil
 1-based source line, rule ID, and a short diagnostic. A pass means no diagnostic for
 that rule. When a rule explicitly permits an exception, the exception must name the
 rule, reason, reviewer, and expiry or permanent disposition; it is not a silent pass.
-`TABLE-001` permits no exception.
+`TABLE-001` permits only the narrow exception stated in its condition.
 
 ### H1-001 — One H1
 
@@ -30,8 +30,13 @@ headings other than the H1 use Title Case. A heading must not restate the skill 
 
 ### TABLE-001 — No Tables
 
-**Condition.** No Markdown table separator row is present. This policy applies to
-prose and examples; use bullets, ordered lists, paragraphs, definition lists, or
+**Condition.** No Markdown table separator row is present, except for the exact fenced
+table example under `Output Format` in `skills/display-tasks/SKILL.md` and that skill's
+required single Markdown table output with no surrounding commentary. This user-approved
+exception exists because `display-tasks` requires both a concrete format example and a
+single-table renderer output, and applies only while those requirements remain in force.
+It does not permit any other table in `display-tasks`, another skill, or proposal
+content. Otherwise, use bullets, ordered lists, paragraphs, definition lists, or
 subsection headings according to their semantic purpose.
 
 **Diagnostic evidence.** Report the separator line and nearest table header line when
@@ -40,11 +45,24 @@ available.
 ### PLACE-001 — Placeholders
 
 **Condition.** No unresolved template markers remain: `TODO`, `TBD`, `FIXME`,
-`<...>`, `${...}`, `{{...}}`, or bracketed instructional placeholders such as
-`[insert ...]`.
+`<<...>>`, `<...>`, `${...}`, `{{...}}`, or bracketed instructional placeholders such
+as `[insert ...]`. When declaring a new reusable value slot, use `<<name>>` (replacing
+`name` with a descriptive slot name) unless the consuming format requires another
+spelling. Preserve existing required path, command, output, and template syntax
+verbatim: do not replace required tokens with literal values or convert their
+delimiters. This notation choice does not approve a marker by itself. For each retained
+reusable slot, the same template or required-format definition must explicitly declare
+the slot, define the value it represents (or how that value is supplied or generated),
+and require its substitution when the template or format is instantiated. Delimiters
+alone do not establish that a marker is an approved slot. A marker that leaves
+instructional content unfinished, or lacks any part of this declaration, remains
+unresolved and violates this rule.
 
-**Diagnostic evidence.** Report the exact token and line. Code examples may suppress
-a token only with an explicit fixture annotation.
+**Diagnostic evidence.** Report the exact unresolved token and line. For each retained
+reusable slot, record the token's use line and the declaration location in the same
+template or required-format definition, and verify that the declaration defines the
+value (or its source) and requires substitution. Code examples may suppress a token
+only with an explicit fixture annotation.
 
 ### STEP-001 — Numbered Steps
 

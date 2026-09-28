@@ -10,7 +10,7 @@ source-documents:
   - "design/current-key-lifecycle.md"
 ---
 
-# Rotate service signing keys without downtime
+# Rotate Service Signing Keys Without Downtime
 
 ## Table of Contents
 
@@ -18,9 +18,9 @@ source-documents:
 - [Technical Rationale](#technical-rationale)
 - [Questions](#questions)
 - [Security and Reliability](#security-and-reliability)
-  - [Security boundary](#security-boundary)
-  - [Performance and capacity](#performance-and-capacity)
-  - [Migration and rollback](#migration-and-rollback)
+  - [Security Boundary](#security-boundary)
+  - [Performance and Capacity](#performance-and-capacity)
+  - [Migration and Rollback](#migration-and-rollback)
 - [Options Considered](#options-considered)
 - [Implementation Details](#implementation-details)
 - [Verification Criteria](#verification-criteria)
@@ -53,26 +53,26 @@ and supports immediate revocation independent of normal rotation.
 
 ## Security and Reliability
 
-### Security boundary
+### Security Boundary
 
 Only the signing service reads private key material. Verifiers receive public keys and
 reject unknown, revoked, expired, or algorithm-mismatched `kid` values. Audit records
 must identify key state changes without logging private material.
 
-### Performance and capacity
+### Performance and Capacity
 
 Verifier lookup remains constant-time by `kid`. The public-key set is bounded to the
 primary key, one retiring key, and emergency recovery material; unbounded history is
 not served. Cache refresh must not block requests using an already cached valid key.
 
-### Migration and rollback
+### Migration and Rollback
 
 Rollout proceeds through dual-verification, primary-signing switch, old-key retirement,
 and deletion after token expiry. Rollback restores the prior primary while both public
 keys remain available. Emergency revocation overrides overlap and may invalidate
 outstanding tokens; operators must observe that consequence explicitly.
 
-### Failure modes
+### Failure Modes
 
 - **Unknown `kid`:** Reject the token and increment a regional diagnostic counter.
 - **Refresh failure:** Continue verifying cached valid keys, alert, and block retirement.
@@ -81,19 +81,19 @@ outstanding tokens; operators must observe that consequence explicitly.
 
 ## Options Considered
 
-### Replace the key immediately
+### Replace the Key Immediately
 
 - **Differentiator:** Only one public key exists at a time.
 - **Consequence:** Tokens issued before verifier refresh can fail across regions.
 - **Disposition:** Rejected because it violates continuous verification.
 
-### Use a bounded dual-key window
+### Use a Bounded Dual-Key Window
 
 - **Differentiator:** One key signs while two public keys verify temporarily.
 - **Consequence:** Rotation tolerates propagation delay at the cost of bounded overlap.
 - **Disposition:** Selected because controls limit exposure and preserve availability.
 
-### Serve every historical public key
+### Serve Every Historical Public Key
 
 - **Differentiator:** Old tokens remain verifiable indefinitely.
 - **Consequence:** Key-set growth and exposure are unbounded.
@@ -101,7 +101,7 @@ outstanding tokens; operators must observe that consequence explicitly.
 
 ## Implementation Details
 
-### Key registry — model primary, retiring, and revoked states
+### Key Registry — Model Primary, Retiring, and Revoked States
 
 - **Change:** Persist key identity, algorithm, public material, state, activation time,
   and retirement deadline.
@@ -112,14 +112,14 @@ outstanding tokens; operators must observe that consequence explicitly.
 - **Failure behavior:** Invalid transitions are rejected atomically.
 - **Verification dependency:** State-transition and persistence tests cover rollback.
 
-### Token issuer — emit the primary key identity
+### Token Issuer — Emit the Primary Key Identity
 
 - **Change:** Sign with the primary key and emit its `kid` in every token header.
 - **Invariant:** Claims and token lifetime remain compatible.
 - **Failure behavior:** Missing primary material stops issuance and emits an alert.
 - **Verification dependency:** Golden-token tests assert headers and signatures.
 
-### Verifier cache — accept the bounded public-key set
+### Verifier Cache — Accept the Bounded Public-Key Set
 
 - **Change:** Refresh key states asynchronously and select public keys by `kid`.
 - **Invariant:** Unknown or revoked identities fail closed.
@@ -130,7 +130,7 @@ outstanding tokens; operators must observe that consequence explicitly.
 - **Verification dependency:** Regional latency, stale-cache, revocation, and load tests
   cover the path.
 
-### Rotation controller — gate retirement on observations
+### Rotation Controller — Gate Retirement on Observations
 
 - **Change:** Advance key state only after verifier refresh and issuance metrics meet
   the rollout thresholds.

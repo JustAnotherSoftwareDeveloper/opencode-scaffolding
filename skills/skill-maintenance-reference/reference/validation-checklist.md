@@ -12,6 +12,8 @@
   `score`, `rank`, or `threshold` remains in active metadata.
 - The profile distinguishes owned, neighboring, paraphrased, unrelated, and
   low-overlap requests without ranking or scoring instructions.
+- Cross-check related active guidance to ensure it names the same required profile
+  fields and validation behavior as the current profile contract.
 - Run both shared validators on each changed active skill:
 
 ```sh

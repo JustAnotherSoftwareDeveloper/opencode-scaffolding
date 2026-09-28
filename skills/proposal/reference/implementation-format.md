@@ -18,9 +18,9 @@ defines the implementation boundary for planning; it is not a companion file or 
 
 ## Concrete examples
 
-### Operation contract
+### Operation Contract
 
-#### `skills/proposal/SKILL.md` — Create one authored proposal document
+#### `skills/proposal/SKILL.md` — Create One Authored Proposal Document
 
 - Replace numbered-file generation with one metadata-bearing `PROPOSAL.md` and copied
   source directories.
@@ -28,28 +28,28 @@ defines the implementation boundary for planning; it is not a companion file or 
   workspace immutability.
 - Verify the operation with profile, Markdown, workspace, and source-manifest checks.
 
-### Validator interface
+### Validator Interface
 
-#### `lint-md` — Dispatch proposal directories to workspace validation
+#### `lint-md` — Dispatch Proposal Directories to Workspace Validation
 
 - Preserve existing generic file behavior and exit codes.
 - Parse proposal frontmatter with a maintained YAML parser; report parse errors as
   stable violations rather than uncaught exceptions.
-- Permit comparison tables only in the proposal profile and verify directory behavior
-  with focused library and CLI tests.
+- Reject Markdown tables in proposal content and verify directory behavior with focused
+  library and CLI tests.
 
-### Schema migration
+### Schema Migration
 
-#### `source-documents` — Reconcile copied sources with in-document `Sources`
+#### `source-documents` — Reconcile Copied Sources with In-Document `Sources`
 
 - Require each safe relative manifest path to resolve to one copied regular file and
   one matching internal source entry.
 - Reject traversal, absolute paths, unsafe symlinks, missing files, and duplicate or
   mismatched identities.
 
-### Downstream consumer
+### Downstream Consumer
 
-#### `plan-audit` — Read implementation and verification traceability from `PROPOSAL.md`
+#### `plan-audit` — Read Implementation and Verification Traceability from `PROPOSAL.md`
 
 - Replace fixed numbered-file reads with heading and frontmatter parsing.
 - Preserve immutable snapshots, finding identity, status precedence, and report-only

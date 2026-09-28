@@ -17,6 +17,10 @@ Every proposal contains these H2 sections exactly once and in this order:
 7. **Verification Criteria** — tests and observations demonstrating completion.
 8. **Sources** — copied-source identity and bounded external bibliography.
 
+Use Title Case for generated proposal headings other than these eight fixed core H2
+labels. Preserve the core labels' exact wording, capitalization, and order, and preserve
+the seven table-of-contents entries exactly as shown in the skeleton.
+
 A domain-specific H2 may appear between `Questions` and `Options Considered` when it
 adds substantial decision-relevant design detail. Every H2 appears in the table of
 contents. Include H3 entries only for major technical review workstreams; never list
@@ -52,8 +56,7 @@ no question of a type remains.
 ### Options Considered
 
 Compare only credible alternatives. Give comparable options parallel differentiators,
-consequences, trade-offs, evidence, and dispositions. A table is permitted when rows
-and columns are genuinely comparable; otherwise use parallel bullets or prose.
+consequences, trade-offs, evidence, and dispositions. Use parallel bullets or prose.
 
 ### Implementation Details
 
@@ -101,8 +104,8 @@ lifecycle transition.
 - **Complex:** add justified security, performance, reliability, data-flow, migration,
   rollback, operational, or failure-mode subsections inside the same document.
 
-No word, sentence, bullet, table, or section-length quota applies. Add detail only when
-it changes review, implementation, risk, or verification.
+No word, sentence, bullet, or section-length quota applies. Add detail only when it
+changes review, implementation, risk, or verification.
 
 ## Complete skeleton
 

@@ -1,12 +1,17 @@
-"""CLI entry point for resolve-script-root — resolve scripts/python/ root path.
+"""CLI entry point for resolve-script-root — resolve a runtime script root.
 
 This script is invoked as:
   uv run --directory <scripts-python-dir> resolve-script-root [options]
 
-It resolves the correct scripts/<runtime>/ directory based on:
+The Python project-local root is ./opencode/scripts/python, relative to the
+project root. Node and shell project-local roots remain under
+<project-root>/.opencode/scripts/<runtime>.
+The Python global fallback is ~/.config/opencode/scripts/python.
+
+Resolution order:
 1. $OPENCODE_SCRIPTS_PYTHON (highest priority)
-2. <project-root>/.opencode/scripts/<runtime>
-3. ~/.config/opencode/scripts/<runtime> (global fallback)
+2. Runtime-specific project-local root
+3. Runtime-specific global root
 
 Exit codes:
   0 — Success, path printed to stdout.
@@ -48,7 +53,11 @@ def main(
     project_root: str | None,
     format: str,
 ) -> None:
-    """Resolve the scripts/<runtime>/ root directory path.
+    """Resolve the runtime script root using the override, project, then global.
+
+    Python projects use ./opencode/scripts/python as their project-local root;
+    their global root is ~/.config/opencode/scripts/python. Node and shell retain
+    .opencode/scripts/<runtime> as their project-local root.
 
     Prints the resolved path and exits 0 on success.
     """

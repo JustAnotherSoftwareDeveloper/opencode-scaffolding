@@ -1,6 +1,9 @@
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export const EXEMPTED_PATH = "skills/display-tasks/SKILL.md";
+
+const REPOSITORY_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../../../..");
 
 export function resolveTarget(argv: string[]): string | null {
   const dashDashIndex = argv.indexOf("--");
@@ -16,5 +19,5 @@ export function resolveTarget(argv: string[]): string | null {
 }
 
 export function isExempted(resolvedPath: string): boolean {
-  return resolvedPath.endsWith(EXEMPTED_PATH);
+  return resolve(resolvedPath) === resolve(REPOSITORY_ROOT, EXEMPTED_PATH);
 }

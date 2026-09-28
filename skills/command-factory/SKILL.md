@@ -13,7 +13,7 @@ selection:
 class: operation
 ---
 
-# Command Factory
+# Building OpenCode Commands
 
 Create or update one bounded OpenCode command file under `commands/`.
 

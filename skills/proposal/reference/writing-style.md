@@ -44,8 +44,20 @@ uniformity. These are review rules, not lexical bans, readability scores, or quo
   performance, reliability, failure modes, and verification evidence when material.
 - Use bullets for independent parallel points and numbers for sequences.
 - Use bold labels only when they help comparison or retrieval.
-- Use a table only for genuinely comparable options, interfaces, or compatibility
-  states. Human review decides whether a table improves comprehension.
+- Do not use Markdown tables in proposal content. Use bullets, ordered lists,
+  paragraphs, definition lists, or subsection headings according to semantic purpose.
+  `TABLE-001` remains the sole authority for its exact `display-tasks` exception; this
+  proposal reference grants no table exception.
+- Use Title Case for non-core proposal headings, including optional or domain-specific
+  H2s and H3s. Preserve established technical terminology, identifiers, and other
+  capitalization that carries technical meaning.
+- Keep the exact wording, capitalization, and order of the eight required core H2
+  labels from `proposal-format.md`: `Table of Contents`, `Recommendation`,
+  `Technical Rationale`, `Questions`, `Options Considered`, `Implementation Details`,
+  `Verification Criteria`, and `Sources`. Preserve the seven fixed core TOC labels and
+  link text exactly as shown there, and do not include `Table of Contents` in its own
+  contents.
+- This guidance does not authorize rewriting historical `.proposals/` workspaces.
 
 ## Preserve evidence meaning
 

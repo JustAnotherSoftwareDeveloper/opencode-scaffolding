@@ -100,7 +100,7 @@ Use temp directories (`mktemp -d`) for writable test fixtures. The `teardown()` 
 
 Each test file should cover:
 
-1. **`--help` output** — Verify `bash src/<script-name>.sh --help` exits 2 with usage text.
+1. **`--help` output** — Verify `bash src/<script-name>.sh --help` exits with exact status 2 and prints usage text.
 2. **Success path** — Verify normal execution produces correct JSON output on stdout.
 3. **Failure path** — Verify error conditions produce `Error:` on stderr and non-zero exit.
 4. **Argument validation** — Verify missing required args produce exit 2 with error on stderr.

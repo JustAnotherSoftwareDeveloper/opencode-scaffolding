@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
-import { join } from 'node:path'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 function withTempDir(fn: (dir: string) => void): void {
   const dir = mkdtempSync(join(tmpdir(), 'lint-md-cli-test-'))
@@ -14,6 +14,7 @@ function withTempDir(fn: (dir: string) => void): void {
 
 const cliPath = join(import.meta.dir, '../src/cli/lint-md.ts')
 const fixturesDir = join(import.meta.dir, 'fixtures', 'proposal-workspaces')
+const displayTasksSkillPath = join(import.meta.dir, '../../../skills/display-tasks/SKILL.md')
 
 describe('lint-md CLI', () => {
   test('valid markdown file exits 0 with no stderr output', () => {
@@ -122,7 +123,64 @@ describe('lint-md CLI', () => {
     })
   })
 
-  test('proposal workspace accepts tables', () => {
+  test('canonical display-tasks fenced table example passes ordinary lint', () => {
+    const source = readFileSync(displayTasksSkillPath, 'utf8')
+    expect(source).toContain(
+      [
+        '```markdown',
+        '| Purpose | Starting files | Suggested outputs | Skills |',
+        '| ------- | -------------- | ----------------- | ------ |',
+        '```',
+      ].join('\n'),
+    )
+
+    const result = Bun.spawnSync(['bun', 'run', cliPath, '--', displayTasksSkillPath], {
+      env: { ...process.env },
+    })
+
+    expect(result.exitCode).toBe(0)
+    expect(result.stderr.toString()).toBe('')
+  })
+
+  test('lookalike display-tasks file with an extra table fails ordinary lint', () => {
+    withTempDir((dir) => {
+      const lookalikeDir = join(dir, 'skills', 'display-tasks')
+      const filePath = join(lookalikeDir, 'SKILL.md')
+      mkdirSync(lookalikeDir, { recursive: true })
+      writeFileSync(
+        filePath,
+        [
+          '# Display Tasks',
+          '',
+          '## Output Format',
+          '',
+          '```markdown',
+          '| Purpose | Starting files | Suggested outputs | Skills |',
+          '| ------- | -------------- | ----------------- | ------ |',
+          '```',
+          '',
+          '## Additional Content',
+          '',
+          '| Extra | Table |',
+          '| ----- | ----- |',
+          '| value | value |',
+          '',
+          '# Display Tasks',
+        ].join('\n'),
+      )
+
+      const result = Bun.spawnSync(['bun', 'run', cliPath, '--', filePath], {
+        env: { ...process.env },
+      })
+
+      const stderr = result.stderr.toString()
+      expect(result.exitCode).toBe(1)
+      expect(stderr).toContain('no-tables')
+      expect(stderr).toContain('no-duplicate-headings')
+    })
+  })
+
+  test('proposal workspace rejects tables with a no-tables violation', () => {
     withTempDir((dir) => {
       const proposalPath = join(dir, 'PROPOSAL.md')
       const sourcePath = join(dir, 'src.md')
@@ -188,7 +246,8 @@ describe('lint-md CLI', () => {
         env: { ...process.env } },
       )
 
-      expect(result.exitCode).toBe(0)
+      expect(result.exitCode).toBe(1)
+      expect(result.stderr.toString()).toContain('no-tables')
     })
   })
 })

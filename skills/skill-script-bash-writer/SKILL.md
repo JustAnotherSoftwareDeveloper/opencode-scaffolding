@@ -66,7 +66,7 @@ Each check is a yes/no assertion.
 - Format check passes — `make -C scripts/shell format-check` exits zero.
 - Tests pass — `make -C scripts/shell test` exits zero, with all tests passing.
 - Coverage passes — `make -C scripts/shell coverage` exits zero with >=100% coverage (bashcov, `fail_under=100`).
-- Entry point `--help` works — `bash src/<script-name>.sh --help` exits zero and prints usage.
+- Entry point `-h`/`--help` is a valid informational request — it prints usage without a usage-error diagnostic and exits 2 under the shared exit-code policy.
 - Entry point errors on missing required arg — `bash src/<script-name>.sh` exits 2 with error on stderr.
 
 ## Expected Output

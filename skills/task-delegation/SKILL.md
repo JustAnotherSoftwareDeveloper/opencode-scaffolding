@@ -14,7 +14,7 @@ selection:
 class: inline
 ---
 
-# Task Delegation
+# Worker Packet Construction And Result Review
 
 Construct one worker packet from loose task information, dispatch exactly one worker,
 and assess the complete returned report. This skill supplies shared policy; the caller

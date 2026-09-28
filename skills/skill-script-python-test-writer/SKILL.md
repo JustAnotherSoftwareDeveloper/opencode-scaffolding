@@ -35,7 +35,7 @@ Capture these fields:
 - **CLI interface** — Existing Click command decorators, arguments, options, exit behavior, and output contract when applicable.
 - **Existing tests** — Current unit, CLI, fixture, and conftest coverage for the selected script.
 - **Known edge cases** — Empty input, malformed input, boundary conditions, regression cases, or failures relevant to the requested result.
-- **Coverage target** — Existing project coverage requirement, defaulting to configured `fail_under` behavior.
+- **Coverage target** — Required 100% line coverage for the selected source scope in `./reference/coverage-strategy.md`; do not defer to a lower configured coverage target.
 
 Read the source implementation and existing tests before editing tests. Treat the
 implementation as the behavioral baseline unless the request explicitly identifies an
@@ -70,24 +70,24 @@ Each step is one imperative action. Do not delegate sub-tasks.
    unrelated fixtures and avoid moving local setup into shared scope without a clear
    reuse benefit.
 
-5. **Validate and remediate.** Run the affected pytest targets, configured coverage
-   enforcement, and Ruff checks on changed test files. Remediate test defects within
-   the requested test scope. If failures reveal that the implementation itself must
-   change, return `BLOCKED` or `PARTIAL` with the implementation mismatch instead of
-   editing source code under this operation.
+5. **Validate and remediate.** Run the affected pytest targets with 100% coverage
+   enforcement for the selected source scope, and run Ruff checks on changed test files.
+   Remediate test defects within the requested test scope. If failures reveal that the
+   implementation itself must change, return `BLOCKED` or `PARTIAL` with the
+   implementation mismatch instead of editing source code under this operation.
 
 ## Validation
 
 Use the strongest applicable checks for the changed test surface:
 
 - `uv run pytest <affected test targets> --tb=short`
-- `uv run pytest --cov --cov-fail-under=<configured target> --tb=short` when the project coverage gate applies
+- `uv run pytest <affected test targets> --cov=<selected source paths> --cov-report=term-missing --cov-fail-under=100 --tb=short`
 - `uv run ruff check <changed test files>`
 - Run broader regression tests when the changed fixtures or helpers affect multiple script test suites.
 
-A failed coverage gate should trigger targeted additional coverage when missing tests
-are genuinely within scope. Do not add meaningless assertions or weaken configured
-coverage to satisfy the number.
+When the coverage gate reports gaps, add targeted tests for missing behavior only when
+that behavior falls within the selected source scope. Do not add meaningless assertions
+or weaken the required 100% target to satisfy the gate.
 
 ## Expected Output
 
@@ -99,8 +99,8 @@ required by the requested test result. Typical affected files include:
 - `tests/conftest.py`
 - existing shared test helpers when directly relevant
 
-Report which tests were created versus edited, what behavior or regression they cover,
-and the validation actually run.
+List the tests created versus edited, the behaviors or regressions they cover, and the
+validation actually run in your report.
 
 ## Self-Validation
 

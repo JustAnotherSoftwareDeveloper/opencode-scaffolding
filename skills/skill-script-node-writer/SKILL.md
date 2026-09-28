@@ -15,7 +15,7 @@ selection:
 class: operation
 ---
 
-# Skill Script Node Writer
+# Generate TypeScript Node Scripts
 
 ## Normalize Input
 

@@ -32,8 +32,9 @@ Factory and template maintenance are separate operations.
 - [Authoring style](./reference/authoring-style.md) — Semantic prose forms, headings,
   examples, and discrimination rules for filled content.
 - [Progressive disclosure](./reference/progressive-disclosure.md) — Compact entry
-  points, deterministic conformance evidence, and the unqualified no-table rule
-  (`TABLE-001`).
+  points, deterministic conformance evidence, and `TABLE-001`'s narrow exception for
+  only the exact fenced `Output Format` example in `display-tasks/SKILL.md` and its
+  required single Markdown table renderer output with no surrounding commentary.
 
 Read the relevant reference before editing. Validate the completed profile and examples
 with the repository skill validator.

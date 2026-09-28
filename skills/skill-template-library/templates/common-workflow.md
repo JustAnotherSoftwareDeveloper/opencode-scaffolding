@@ -1,3 +1,35 @@
+<!--
+Template-only slot declarations. On instantiation, replace every declared slot with
+the value from its source below; no slot may remain. Use one Workflow Name value in
+both occurrences. Remove this comment from the instantiated workflow; it is not part
+of the workflow output.
+
+- Workflow Name (title and metadata line): replace both occurrences with the author-
+  supplied name of the practice described by Purpose and Descriptive Sequence.
+- optional skill (metadata line): replace with the author-supplied name of a skill
+  actually associated with this workflow, or with empty text when none is associated.
+- Description (metadata line): replace with an author-supplied brief description of
+  the workflow, grounded in the scope described by Purpose.
+- one-sentence trigger condition: replace with one sentence stating the intended-use
+  condition under which the described practice applies, supplied by the workflow
+  author.
+- Purpose prompt: replace with one or two author-supplied sentences describing the
+  practice's actual outcome and scope.
+- Phase 1 Name, Phase 2 Name, and Phase 3 Name: replace each with the author-supplied
+  name of that actual phase in the practice's sequence.
+- Each phase description: replace with the author-supplied account of that phase's
+  actual practice, inputs, outputs, and key decisions.
+- Artifacts prompt: replace with a bullet list of actual files, configuration,
+  evidence, or state associated with the practice as inputs or outputs, supplied by
+  the workflow author.
+- Validation Context prompt: replace with a bullet list of actual evidence or
+  criteria by which a consuming operation may assess the workflow outcome, supplied
+  by the workflow author.
+- Prerequisites prompt: replace with a bullet list of the actual context, decisions,
+  access, or inputs assumed by the practice, supplied by the workflow author.
+- Notes prompt: replace with a bullet list of actual assumptions, boundaries, failure
+  modes, or gotchas specific to the practice, supplied by the workflow author.
+-->
 # `<<Workflow Name>>`
 
 > **Editorial constraint:** Do not use Markdown tables when filling this template. Use bullet lists, definition lists, or subsection headings for structured data.

@@ -17,3 +17,11 @@ old metadata shape as compatibility data.
 
 Historical analyses and reports may be preserved as historical artifacts, but
 they are not active guidance and must not be used to construct profiles.
+
+## Disposition of the Former Migration Archive
+
+The former monolithic-skill decomposition narrative and section mapping, partial-
+migration instructions, old-layout creation/removal checklist, legacy-path checks,
+and old cross-reference list describe a completed historical migration. They are
+retired, not procedures for migrating active skills to the current profile, and are
+intentionally not reproduced here. No legacy migration steps or paths are reactivated.

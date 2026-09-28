@@ -1,4 +1,5 @@
 import { describe, expect, test, spyOn } from 'bun:test'
+import { resolve } from 'node:path'
 import { formatViolation, die } from '../src/lib/shared/format.ts'
 import { resolveTarget, isExempted } from '../src/lib/shared/path.ts'
 
@@ -87,18 +88,25 @@ describe('resolveTarget', () => {
   test('returns first argument after -- when multiple follow', () => {
     expect(resolveTarget([...baseArgs, '--', 'file1.md', 'file2.md'])).toBe('file1.md')
   })
+
+  test('returns null when -- has no following argument', () => {
+    expect(resolveTarget([...baseArgs, '--'])).toBeNull()
+  })
 })
 
 describe('isExempted', () => {
-  test('returns true for path ending in the exempted suffix', () => {
-    expect(isExempted('/any/path/skills/display-tasks/SKILL.md')).toBe(true)
+  test('returns true for the canonical repository path', () => {
+    const canonicalPath = resolve(import.meta.dir, '../../../skills/display-tasks/SKILL.md')
+    expect(isExempted(canonicalPath)).toBe(true)
   })
 
-  test('returns false for a normal markdown path', () => {
-    expect(isExempted('/any/path/normal.md')).toBe(false)
-  })
-
-  test('returns false for a path similar to but not matching the exempted suffix', () => {
-    expect(isExempted('/any/path/skills/display-tasks/OTHER.md')).toBe(false)
+  test.each([
+    '/any/path/skills/display-tasks/SKILL.md',
+    '/any/path/skills/display-tasks/SKILL.md.backup',
+    '/any/path/skills/display-tasks-extra/SKILL.md',
+    '/any/path/skills/display-tasks/OTHER.md',
+    '/any/path/normal.md',
+  ])('returns false for non-canonical path %s', (path) => {
+    expect(isExempted(path)).toBe(false)
   })
 })

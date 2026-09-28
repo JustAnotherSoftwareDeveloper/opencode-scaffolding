@@ -3,9 +3,9 @@
 Generated scripts live under `scripts/python/` within either the global or project-local root.
 Both roots follow the same directory layout; the difference is their filesystem location and resolution priority.
 
-> **Path resolution rules are authoritative in `skill-architect` (platform-layout-context).**  
-> This file provides only script-python-writer-specific conventions (directory layout, pyproject.toml).  
-> See the platform-layout-context document for: Global/Project-Local resolution order, environment variable override (`$OPENCODE_SCRIPTS_PYTHON`), skill-origin-based root selection, resolution shell snippet, and shared-lib precedence rules.
+> **Path resolution rules are canonical in [`platform-layout-and-discovery.md`](../../skill-architect/platform-layout-and-discovery.md).**
+> This file provides only script-python-writer-specific conventions (directory layout, pyproject.toml).
+> The checked-in Python resolver first honors a non-empty `OPENCODE_SCRIPTS_PYTHON` override, then checks the project-local root `<project-root>/opencode/scripts/python` (`./opencode/scripts/python` relative to the project root), selecting it only when it is a directory. Otherwise, it returns the global fallback `~/.config/opencode/scripts/python` without checking whether that directory exists. These paths describe verified resolver behavior, not host-level skill discovery, loading, or invocation policy; this file does not define skill-origin-based root selection.
 
 ## Directory Layout (Both Roots)
 

@@ -1,6 +1,7 @@
 # Selection Profile Style
 
 Use imperative, active prose and exact field names. Keep one decision per sentence.
+Use one term per concept. Omit filler and tutorial preambles.
 Use one H1 per file, Title Case headings, ordered lists for procedures, and bullets for
 rules. Use fenced YAML for metadata examples. Keep examples short and contrastive.
 
@@ -15,6 +16,13 @@ Choose prose structure by meaning:
 
 Do not use Markdown tables in filled content. Do not create an accuracy or comparison
 exception; use the semantic forms above instead.
+
+`TABLE-001` has one exception, approved by the user, because `display-tasks` requires
+both a concrete format example and a single-table renderer output. It applies only while
+those requirements remain in force, and covers only the exact fenced table example under
+`Output Format` in `skills/display-tasks/SKILL.md` and that skill's required single
+Markdown table with no surrounding commentary. It does not permit any other table in
+`display-tasks`, another skill, or proposal content.
 
 Describe `selection` as evidence for direct selection. Name the six tag groups exactly:
 `actions`, `inputs`, `outputs`, `topics`, `environments`, and `constraints`. Explain

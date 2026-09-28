@@ -83,8 +83,12 @@ Return `BLOCKED:` for every non-complete or invalid result.
    Insert the full input verbatim into `## DETAILS`.
    Set `## FILES TO READ` to `None` unless the effective request identifies required source-document paths.
     Keep `## FILES TO WRITE` as the literal bounded pattern `.tasks/<epoch-milliseconds>-<packet-slug>.json`.
-    Do not resolve either placeholder; `breakdown-tasks` selects the packet slug and
-    preserves it under the canonical schema.
+    Generate the epoch value from the current Unix epoch time in milliseconds when
+    constructing the packet. Supply the concrete value in `## EXECUTION INSTRUCTIONS`
+    and require the decomposition author to substitute it for `<epoch-milliseconds>`
+    in the concrete published and returned path. Do not resolve `<packet-slug>` in
+    the bounded pattern; the decomposition author selects it and preserves it
+    unchanged in the canonical root.
    Keep `## SKILLS` hardcoded to `breakdown-tasks`.
 4. **Validate the packet.**
    Confirm all 8 standard packet sections are present.

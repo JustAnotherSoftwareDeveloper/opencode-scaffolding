@@ -42,15 +42,14 @@ One row per item in `tasks`.
 
 ## Extraction Rules
 
-1. **Purpose** — Extract from `tasks[*].purpose`.
-   Truncate to 80 characters if longer.
-2. **Starting files** — Extract `tasks[*].filesToRead` into a compact comma-separated
-   list of basenames. Strip paths to basenames when they share a common prefix.
-   If empty or absent, render `none`.
-3. **Suggested outputs** — Extract `tasks[*].filesToWrite` the same way.
-   If empty or absent, render `none`.
-4. **Skills** — Extract `tasks[*].skills` and join elements with `,`.
-   If empty or absent, render `none`.
+- **Purpose** — Extract from `tasks[*].purpose`. Truncate to 80 characters if longer.
+- **Starting files** — Extract `tasks[*].filesToRead` into a compact comma-separated
+  list of basenames. Strip paths to basenames when they share a common prefix.
+  If empty or absent, render `none`.
+- **Suggested outputs** — Extract `tasks[*].filesToWrite` the same way.
+  If empty or absent, render `none`.
+- **Skills** — Extract `tasks[*].skills` and join elements with `,`.
+  If empty or absent, render `none`.
 
 ## Execution Plan
 
@@ -71,6 +70,6 @@ One row per item in `tasks`.
 - Do not modify or execute the packet contents.
   This is a rendering helper only.
 - Do not accept non-canonical packet shapes.
-- Preserve the packet slug unchanged in memory. Do not render it: packet-slug
-  display is deferred pending the repository maintainer's display-policy decision.
+- Preserve the packet slug unchanged in memory. Do not render it until the repository
+  maintainer decides its display policy.
 - Do not normalize arrays, single task objects, or plaintext packets.

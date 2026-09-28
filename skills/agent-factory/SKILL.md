@@ -13,7 +13,7 @@ selection:
 class: operation
 ---
 
-# Agent Factory
+# Creating Bounded OpenCode Agents
 
 Create or update one bounded OpenCode agent file under `agents/`.
 

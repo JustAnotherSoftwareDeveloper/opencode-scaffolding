@@ -40,6 +40,8 @@ Use Shell for:
 
 ### Python Invocation
 
+Before invoking, replace `<entry-point>` with the selected Python command name registered in `[project.scripts]` in `~/.config/opencode/scripts/python/pyproject.toml`.
+
 ```shell
 uv run --project ~/.config/opencode/scripts/python <entry-point> [args]
 ```
@@ -52,6 +54,8 @@ uv run --project ~/.config/opencode/scripts/python <entry-point> [args]
 - Non-interactive; exit non-zero on failure; errors to stderr.
 
 ### Node Invocation
+
+Before invoking, replace `<script-name>` with the selected script's kebab-case **Script name** input. It must match the script key in `~/.config/opencode/scripts/node/package.json` and the basename in `src/cli/<script-name>.ts`; use that same concrete name in the command and every `<script-name>` path below.
 
 ```shell
 bun run --cwd ~/.config/opencode/scripts/node <script-name> [args]
@@ -67,6 +71,8 @@ bun run --cwd ~/.config/opencode/scripts/node <script-name> [args]
 - Non-interactive; exit non-zero on failure; errors to stderr.
 
 ### Shell Invocation
+
+Before invoking, replace `<target>` with the Make target for the selected shell entry point, using the target declared in `~/.config/opencode/scripts/shell/Makefile` (and the task's **Makefile target name** input when supplied).
 
 ```shell
 make -C ~/.config/opencode/scripts/shell <target> [args]

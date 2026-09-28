@@ -15,7 +15,7 @@ teardown() {
 
 @test '<script-name>: --help prints usage and exits 2' {
   run bash src/<script-name>.sh --help
-  assert_failure
+  assert_failure 2
   assert_output --partial 'Usage:'
   assert_output --partial '<script-name>'
 }
