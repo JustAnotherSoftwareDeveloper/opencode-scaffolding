@@ -8,7 +8,8 @@ permission:
     ".plans/**/*.json": "allow"
     ".tasks/**/*.json": "allow"
     "skills/breakdown-tasks/schema/task-packet.schema.json": "allow"
-    "/home/michael/.config/opencode/output-contract-template.md": "allow"
+    "output-contract-template.md": "allow"
+    "*/output-contract-template.md": "allow"
   skill:
     "display-tasks": "allow"
     "task-delegation": "allow"
@@ -36,9 +37,11 @@ plan.
    and display its guidance-oriented Markdown summary before execution. This is a
    presentation step only and grants no replanning authority.
 
-3. **Execute eligible tasks serially.** Read
-   `/home/michael/.config/opencode/output-contract-template.md` before the first
-   dispatch. Process the approved task graph in packet order, one worker at a time.
+3. **Execute eligible tasks serially.** Read `output-contract-template.md`
+   relative to the OpenCode configuration directory before the first dispatch.
+   Use the relative path when running in that directory; do not hard-code a
+   user's home directory. Process the approved task graph in packet order, one
+   worker at a time.
 
    Before dispatching a task, inspect its declared `dependencies` and the preserved
    reports for those predecessor task IDs:
@@ -67,7 +70,7 @@ plan.
 ## Guardrails
 
 - Read only the selected task JSON file, the canonical task-packet schema, and
-  `/home/michael/.config/opencode/output-contract-template.md`.
+  the configuration-local `output-contract-template.md`.
 - Load only `display-tasks` and `task-delegation`.
 - Delegate all task work to `worker` through `task-delegation`.
 - Preserve the approved canonical packet root, packet slug, task objects, task order,
@@ -77,6 +80,5 @@ plan.
   belongs to `delegator` before approval.
 - Execute workers serially. Dependency state determines eligibility; array order is
   only the deterministic traversal order.
-- Preserve the complete envelope defined by
-  `/home/michael/.config/opencode/output-contract-template.md` without extraction or
-  rewriting.
+- Preserve the complete envelope defined by the configuration-local
+  `output-contract-template.md` without extraction or rewriting.
