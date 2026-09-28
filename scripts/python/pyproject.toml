@@ -18,6 +18,7 @@ dependencies = [
 collect-skills = "cli.collect_skills:main"
 evaluate-semantic-selection = "cli.evaluate_semantic_selection:main"
 example = "cli.example:main"
+get-task = "cli.get_task:main"
 init-task-packet = "cli.init_task_packet:main"
 render-task-markdown = "cli.render_task_markdown:main"
 resolve-script-root = "cli.resolve_script_root:main"
