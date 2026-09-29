@@ -1,4 +1,4 @@
-# Command Factory Reference
+# Command File Requirements
 
 Keep writes bounded to one `commands/<name>.md` file.
 Require supported frontmatter, explicit workflow and constraints, resolvable skill

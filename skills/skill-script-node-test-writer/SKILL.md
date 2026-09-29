@@ -33,7 +33,7 @@ For the blocked-message formats below, substitute the **Script name** input valu
 
 ## Procedure
 
-Each step is one imperative action.
+Use numbered steps for ordered stages and nested bullets for independent requirements.
 Do not delegate sub-tasks.
 
 1. **Parse input** — Read the source script files under `src/cli/<name>.ts` and `src/lib/<name>/`.
@@ -42,26 +42,26 @@ Do not delegate sub-tasks.
    Read `src/lib/shared/exit-codes.ts` for expected exit code constants.
 
 2. **Generate unit test file** — Write `tests/<script-name>.test.ts` with:
-   Imports using `bun:test` globals (`describe`, `expect`, `it`, `beforeAll`, `afterAll`).
-   Direct imports from `src/lib/<script-name>/<module>` (no barrel files).
-   One `describe` block per module with `it` cases covering nominal and edge-case inputs.
-   `mkdtempSync` from `node:fs` for temporary fixture directories.
-   `beforeAll` / `afterAll` for fixture setup and teardown using `rmSync` with `recursive: true`.
-   Coverage for error paths and exception handling.
-   Assertions using `expect().toBe()`, `expect().toEqual()`, `expect().toThrow()`.
+   - Import the `bun:test` globals (`describe`, `expect`, `it`, `beforeAll`, `afterAll`).
+   - Import directly from `src/lib/<script-name>/<module>`; do not use barrel files.
+   - Add one `describe` block per module with `it` cases covering nominal and edge-case inputs.
+   - Create temporary fixture directories with `mkdtempSync` from `node:fs`.
+   - Set up and tear down fixtures with `beforeAll` / `afterAll`, using `rmSync` with `recursive: true`.
+   - Cover error paths and exception handling.
+   - Assert behavior with `expect().toBe()`, `expect().toEqual()`, and `expect().toThrow()`.
 
 3. **Generate CLI integration test file** — Write `tests/<script-name>.cli.test.ts` with:
-   `Bun.spawnSync` based tests covering all CLI arguments and options.
-   Pattern: `const result = Bun.spawnSync(['bun', 'src/cli/<script-name>.ts', ...args])`.
-   Assertions on `result.exitCode` and `result.stdout.toString()` / `result.stderr.toString()`.
-   `mkdtempSync` for temporary fixture files used as CLI arguments.
-   Parameterized error-path tests for non-zero exit conditions using `describe.each` or `it.each`.
-   Reference `./reference/cli-conventions.md` from `skill-script-node-writer` for expected CLI behavior.
+   - Use `Bun.spawnSync`-based tests to cover all CLI arguments and options.
+   - Use this pattern: `const result = Bun.spawnSync(['bun', 'src/cli/<script-name>.ts', ...args])`.
+   - Assert `result.exitCode` and `result.stdout.toString()` / `result.stderr.toString()`.
+   - Create temporary fixture files for CLI arguments with `mkdtempSync`.
+   - Parameterize error-path tests for non-zero exit conditions with `describe.each` or `it.each`.
+   - Use the inspected CLI definition and any CLI conventions supplied as read-only task context for expected behavior; do not load a second operation owner.
 
 4. **Update package.json** — Add test script entries under `"scripts"`:
-   `"test:<script-name>" = "bun test tests/<script-name>.test.ts"`.
-   `"test:<script-name>:cli" = "bun test tests/<script-name>.cli.test.ts"`.
-   `"test" = "... && bun test tests/<script-name>.test.ts tests/<script-name>.cli.test.ts"` (appended to existing chain).
+   - `"test:<script-name>" = "bun test tests/<script-name>.test.ts"`.
+   - `"test:<script-name>:cli" = "bun test tests/<script-name>.cli.test.ts"`.
+   - `"test" = "... && bun test tests/<script-name>.test.ts tests/<script-name>.cli.test.ts"` (appended to existing chain).
 
 5. **Validate and report** — Run tests and type check.
    `bun test tests/<script-name>.test.ts tests/<script-name>.cli.test.ts`
@@ -98,4 +98,4 @@ The `skill-node-script-conventions` skill holds shared reference documentation f
 
 ### CLI Conventions (Script Writer)
 
-See `skill-script-node-writer` (cli-conventions) for expected CLI behavior (cleye decorators, argument parsing, exit codes) to test against.
+The `cli-conventions` reference belongs to `skill-script-node-writer`, a separate operation. Consult it only when supplied as read-only task context; do not load that operation as a second owner. Otherwise, inspect the source CLI for cleye decorators, argument parsing, and exit codes.

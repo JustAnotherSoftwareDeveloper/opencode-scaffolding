@@ -21,7 +21,7 @@ It publishes one coupled six-concern scope for the approved architecture. The co
 documents describe context; they do not authorize execution, loading, changes, or
 completion.
 
-## Six concern documents
+## Six Concern Documents
 
 - [Taxonomy and ownership map](taxonomy-and-ownership-map.md) — five classes and one canonical owner per approved outcome.
 - [Class boundary and loading matrix](class-boundary-loading-matrix.md) — class contracts and asymmetric passive loading.
@@ -30,7 +30,7 @@ completion.
 - [Dependency direction and non-transitivity](dependency-direction-and-non-transitivity.md) — permitted context direction and authority limits.
 - [Migration and acceptance evidence](migration-and-acceptance-evidence.md) — implementation gates and evidence posture.
 
-## Supporting references
+## Supporting References
 
 - [Class boundary rules](class-boundary-rules.md) — side-effect, delegation, and cross-skill boundary rules.
 - [Skill class taxonomy](class-taxonomy.md) — the five valid classes and their passive or executable contracts.
@@ -38,7 +38,7 @@ completion.
 - [Platform layout context](platform-layout-context.md) — historical layout and script-resolution context.
 - [Selection profile schema](references/skill-selection-profile.schema.json) — the local metadata schema used by this family.
 
-## Shared contract
+## Shared Contract
 
 The six documents share the coupling rationale that taxonomy, ownership, class
 boundaries, layout, workflow meaning, dependency direction, and acceptance evidence

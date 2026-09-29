@@ -1,42 +1,80 @@
 # Skills
 
-Active skills are indexed by class and selection role. Read the entry point
-only when the request matches its profile; use each skill's references for
-deeper contract details.
+Browse these broad work-area groups to find a likely skill. Read its entry point
+only when the profile matches your request, then use its references for deeper
+contract details.
 
 ## Planning References
 
-- `planning-pipeline-architecture` — lifecycle and handoff planning.
-- `skill-architect` — skill class boundaries and platform layout.
+- [`planning-pipeline-architecture`][planning-architecture] —
+  lifecycle and handoff planning.
+- [`skill-architect`][architect] — skill class boundaries and platform layout.
 
 ## Documentation References
 
-- `skill-authoring-guide` — authoring rules and selection-profile guidance.
-- `skill-bash-conventions` — shared Bash conventions.
-- `skill-maintenance-reference` — maintenance and migration reference.
-- `skill-node-script-conventions` — shared Node and TypeScript conventions.
-- `skill-template-library` — canonical profiles, templates, schemas, and snippets.
+- [`skill-authoring-guide`][authoring] —
+  authoring rules and selection-profile guidance.
+- [`skill-bash-conventions`][bash-conventions] — shared Bash conventions.
+- [`customize-opencode`][packet-engine] — reference for OpenCode worker-packet
+  execution behavior, not configuration edits.
+- [`skill-maintenance-reference`][maintenance] — maintenance and migration
+  reference.
+- [`skill-node-script-conventions`][node-conventions] — shared Node and
+  TypeScript conventions.
+- [`skill-template-library`][templates] — canonical profiles, templates, schemas,
+  and snippets.
 
 ## Operations
 
-- `breakdown-tasks` — decompose requests into bounded task packets.
-- `customize-opencode` — modify OpenCode configuration and behavior.
-- `display-tasks` — render canonical task summaries.
-- `plan-writer` — create executable plan workspaces.
-- `proposal` — create evidence-based decision proposals.
-- `todo-writer` — write todo entries from task output.
+- [`breakdown-tasks`][decomposition] — decompose requests into bounded task
+  packets.
+- [`display-tasks`][display] — render canonical task summaries.
+- [`plan-writer`][plan-writing] — create executable plan workspaces.
+- [`proposal`][proposals] — create evidence-based decision proposals.
+- [`todo-writer`][todos] — write todo entries from task output.
 
 ## Analysis and Inline Work
 
-- `ask-question` — resolve material ambiguity with focused questions.
-- `generic-analysis` — produce evidence-calibrated analysis.
-- `task-executor` — execute one canonical task packet inline.
+- [`ask-question`][questions] — resolve material ambiguity with focused
+  questions.
+- [`generic-analysis`][analysis] — produce evidence-calibrated analysis.
+- [`task-executor`][inline-execution] — execute one canonical task packet
+  inline.
 
 ## Factory and Script Workers
 
-- `skill-factory` — create or update skill workspaces.
-- `skill-script-bash-writer` / `skill-script-bash-test-writer` — Bash scripts and tests.
-- `skill-script-node-writer` / `skill-script-node-test-writer` — Node scripts and tests.
-- `skill-script-python-writer` / `skill-script-python-test-writer` — Python scripts and tests.
-- `task-delegation` — adapt loose work into a worker packet.
-- `dispatch-decompose` — dispatch decomposition to a worker.
+- [`skill-factory`][skill-factory] — create or update skill workspaces.
+- [`skill-script-bash-writer`][bash-writer] /
+  [`skill-script-bash-test-writer`][bash-tests] — Bash scripts and tests.
+- [`skill-script-node-writer`][node-writer] /
+  [`skill-script-node-test-writer`][node-tests] — Node scripts and tests.
+- [`skill-script-python-writer`][python-writer] /
+  [`skill-script-python-test-writer`][python-tests] — Python scripts and tests.
+- [`task-delegation`][delegation] — adapt loose work into a worker packet.
+- [`dispatch-decompose`][dispatch] — dispatch decomposition to a worker.
+
+[planning-architecture]: ./planning-pipeline-architecture/SKILL.md
+[architect]: ./skill-architect/SKILL.md
+[authoring]: ./skill-authoring-guide/SKILL.md
+[bash-conventions]: ./skill-bash-conventions/SKILL.md
+[maintenance]: ./skill-maintenance-reference/SKILL.md
+[node-conventions]: ./skill-node-script-conventions/SKILL.md
+[templates]: ./skill-template-library/SKILL.md
+[decomposition]: ./breakdown-tasks/SKILL.md
+[packet-engine]: ./customize-opencode/SKILL.md
+[display]: ./display-tasks/SKILL.md
+[plan-writing]: ./plan-writer/SKILL.md
+[proposals]: ./proposal/SKILL.md
+[todos]: ./todo-writer/SKILL.md
+[questions]: ./ask-question/SKILL.md
+[analysis]: ./generic-analysis/SKILL.md
+[inline-execution]: ./task-executor/SKILL.md
+[skill-factory]: ./skill-factory/SKILL.md
+[bash-writer]: ./skill-script-bash-writer/SKILL.md
+[bash-tests]: ./skill-script-bash-test-writer/SKILL.md
+[node-writer]: ./skill-script-node-writer/SKILL.md
+[node-tests]: ./skill-script-node-test-writer/SKILL.md
+[python-writer]: ./skill-script-python-writer/SKILL.md
+[python-tests]: ./skill-script-python-test-writer/SKILL.md
+[delegation]: ./task-delegation/SKILL.md
+[dispatch]: ./dispatch-decompose/SKILL.md

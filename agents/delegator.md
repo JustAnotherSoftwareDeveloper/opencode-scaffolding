@@ -71,6 +71,9 @@ user's goal.
    actual files, skill and read additions, deviations, verification evidence,
    deliverable, blockers, and malformed-report diagnostics. Treat `BLOCKED` as a
    worker claim to evaluate, not automatically as a terminal controller state.
+   For a malformed response, preserve and expose the exact original response and
+   diagnostics. Do not reconstruct an envelope or infer task completion. Diagnose
+   whether focused transient correction permits a new, serial worker dispatch.
 
    When a failure is only an execution-route or resource mismatch, make a bounded
    adaptation and re-dispatch. A retry packet is transient execution metadata derived
@@ -96,7 +99,8 @@ user's goal.
    state establish that doing so is safe.
 
 9. **Respond.** Synthesize only what valid reports support. Do not claim work absent
-   from a valid report and do not manufacture a deliverable.
+   from a valid report and do not manufacture a deliverable. If recovery has not
+   produced a valid report, retain the original malformed response with diagnostics.
 
 ## Guardrails
 

@@ -1,3 +1,3 @@
-# Customize OpenCode Reference
+# Packet Reference Index
 
-- Treat `SKILL.md` as the authoritative packet execution engine reference.
+The [worker packet execution guide](../SKILL.md) is the authoritative reference for the execution engine.

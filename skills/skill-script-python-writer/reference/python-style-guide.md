@@ -108,9 +108,9 @@ Prefer `list[X]` over `List[X]`, `dict[K, V]` over `Dict[K, V]`.
 
 Use `# pragma: no cover` sparingly and only for these three categories:
 
-1. **`__main__` guard** — The `if __name__ == "__main__": main()` block is exempted by convention.
-2. **Unreachable defensive code** — Branches that exist only for type narrowing and cannot be triggered in practice.
-3. **Version-gated fallbacks** — Code paths for older Python versions when the target is py312.
+- **`__main__` guard** — The `if __name__ == "__main__": main()` block is exempted by convention.
+- **Unreachable defensive code** — Branches that exist only for type narrowing and cannot be triggered in practice.
+- **Version-gated fallbacks** — Code paths for older Python versions when the target is py312.
 
 All other branches, error paths, and edge cases must be covered by tests.
 If `# pragma: no cover` appears outside these three categories, re-examine the test generation rather than exempting coverage.

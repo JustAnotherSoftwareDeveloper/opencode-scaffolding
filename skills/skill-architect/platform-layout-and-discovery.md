@@ -10,7 +10,7 @@ passive documentation stores, bounded operation entries, and script roots.
 Applies when interpreting the skill-authoring family inventory and its indexes without
 turning locations into execution instructions.
 
-## Non-goals
+## Non-Goals
 
 This document does not create, move, refresh, scan, or write files, and does not
 authorize tools, delegation, loading, or completion. It does not specify or claim
@@ -26,12 +26,14 @@ authority does not imply host-level enforcement.
 
 ## Scope
 
-Skills use a directory entry point named `SKILL.md`. The planning authority keeps
-its six concern documents beside that entry point. The authoring, template/schema,
-and maintenance material remains in the three passive documentation stores.
-Operation entries retain their own bounded contracts. These locations describe
-inventory structure and discovery context; they do not imply that target-state
-files, indexes, or migrations are already complete.
+- Skills use a directory entry point named `SKILL.md`.
+- The planning authority keeps its six concern documents beside that entry point.
+- Authoring, template/schema, and maintenance material remains in the three passive
+  documentation stores.
+- Operation entries retain their own bounded contracts.
+
+These locations describe inventory structure and discovery context; they do not imply
+that target-state files, indexes, or migrations are already complete.
 
 ## Script roots
 
@@ -71,14 +73,14 @@ project segment does not apply to them:
 These Node and shell paths are recorded separately and are not changed by the Python
 root rule.
 
-## Evidence status
+## Evidence Status
 
 The Python root order and paths above are verified against the checked-in resolver and
 its tests. This evidence concerns that utility only; it does not establish host-level
 skill discovery or loading behavior. Target-state publication status is limited to the
 indexed six-document scope represented here.
 
-## Shared passive-contract verification
+## Shared Passive-Contract Verification
 
 This concern is coupled to the indexed scope and contains reference context only.
 It grants no execution authority, implicit or transitive loading, tool use, file

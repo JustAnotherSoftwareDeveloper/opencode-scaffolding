@@ -199,14 +199,23 @@ def check_docs_last_section(skill_dir: Path) -> CheckResult:
 
 
 def check_reference_readme_exists(skill_dir: Path) -> CheckResult:
-    """Check 6: reference/README.md exists."""
-    path = skill_dir / "reference" / "README.md"
+    """Check 6: local reference files have a root reference/README.md index."""
+    reference_dir = skill_dir / "reference"
+    path = reference_dir / "README.md"
     if path.is_file():
         return CheckResult(
             "reference-readme-exists", True, "reference/README.md exists"
         )
+    if not reference_dir.is_dir() or not any(
+        candidate.is_file() for candidate in reference_dir.rglob("*")
+    ):
+        return CheckResult(
+            "reference-readme-exists", True, "No local reference files to index"
+        )
     return CheckResult(
-        "reference-readme-exists", False, "reference/README.md not found"
+        "reference-readme-exists",
+        False,
+        "Local reference files exist but reference/README.md is missing",
     )
 
 

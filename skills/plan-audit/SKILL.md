@@ -18,7 +18,7 @@ selection:
 class: operation
 ---
 
-# Plan Audit
+# Reviewing Proposal-Derived Plan Snapshots
 
 Audit one immutable plan/proposal snapshot and publish one external report. The
 operation is evidence-only: it never edits an audited tree, repairs a finding,

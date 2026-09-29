@@ -2,6 +2,8 @@
 
 Follow conventions in `skill-bash-conventions` (set-flags, quoting-conventions, shellcheck-rules, error-handling, function-naming, cross-platform) for set flags, quoting, shellcheck directives, error handling, function naming, and portability.
 
+Use `<script-name>` for the supplied kebab-case script name and `<project-root>` for the root of the current project. Replace both slots with their concrete values wherever they appear in these path examples.
+
 ## Directory Layout
 
 Every bash script project under `scripts/shell/` follows this structure:
@@ -59,7 +61,7 @@ Per-script libraries are sourced with a `# shellcheck source=` directive:
 source "${SCRIPT_DIR}/../lib/<script-name>/core.sh"
 ```
 
-### Library Sourcing (not self-executing)
+### Library Sourcing (Not Self-Executing)
 
 Library files under `lib/`:
 - Must **not** have `set -euo pipefail` at the top (the caller sets these flags).

@@ -74,7 +74,8 @@ def test_frontmatter_and_shared_contract_are_cut_over_before_authoring() -> None
         "Load the shared task contract before authoring"
     ) < workflow.index("**Author tasks.**")
     assert "passive, documentation-only, and non-transitive" in workflow
-    assert "../task-contract/reference/README.md" in workflow
+    assert "already-loaded `task-contract` documentation skill" in workflow
+    assert "../task-contract/reference/README.md" not in workflow
     assert "proposal-derived" in workflow
     assert "Never modify source documents" in workflow
     assert "init-task-packet" in workflow
@@ -181,9 +182,9 @@ def test_active_callers_lifecycle_mappings_and_fixtures_use_new_identity() -> No
     assert "`plan-writer` - Create copied-source task-plan workspaces." in _text(
         "agents/planner.md"
     )
-    assert "`plan-writer` — create executable plan workspaces." in _text(
-        "skills/README.md"
-    )
+    index = _text("skills/README.md")
+    assert "[`plan-writer`][plan-writing] — create executable plan workspaces." in index
+    assert "[plan-writing]: ./plan-writer/SKILL.md" in index
     assert "supports: [breakdown-tasks, plan-writer]" in _text(
         "skills/task-contract/SKILL.md"
     )
@@ -221,8 +222,7 @@ def test_migrated_reference_map_resolves_current_contracts() -> None:
         "workspace-contract.md",
         "task-authoring.md",
         "scripts.md",
-        "../../task-contract/reference/README.md",
     ):
-        link = relative if relative.startswith("../") else f"./{relative}"
-        assert f"]({link})" in index
+        assert f"](./{relative})" in index
         assert (reference / relative).resolve().is_file()
+    assert "Load the `task-contract` documentation skill" in index

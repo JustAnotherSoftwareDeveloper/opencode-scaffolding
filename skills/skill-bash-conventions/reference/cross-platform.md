@@ -13,7 +13,7 @@ Scripts that require bash 4+ features must declare `# Requires: bash >= 4.0` and
 **GNU/BSD command differences:**
 
 - **`sed -i`** — Use `sed -i.bak 's/foo/bar/' file` for a portable two-step that works on both GNU and BSD.
-  This creates a `.bak` backup that must be removed afterward.
+  Remove the `.bak` backup afterward.
 - **`date`** — Detect via `date --version 2>/dev/null || true` and branch.
   GNU: `date -d 'yesterday'` for relative dates.
   BSD: `date -v-1d` for relative arithmetic.

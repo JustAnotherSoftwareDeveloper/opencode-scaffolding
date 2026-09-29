@@ -1,5 +1,9 @@
 # Update Workflow
 
+Use `<name>` as the workspace-path slot below. Set it to the canonical `name` of the
+skill being maintained, then replace the slot with that value when identifying the
+target workspace under `skills/`.
+
 1. Determine whether the target `skills/<name>/` workspace is being created or
    updated, then read every existing target file.
 2. Identify the minimal affected scope before editing: a single file (including

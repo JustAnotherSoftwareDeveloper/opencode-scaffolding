@@ -13,7 +13,7 @@ selection:
 class: inline
 ---
 
-# Task Executor
+# Inline Execution Contract
 
 Execute one approved canonical task object inline in the current primary-agent
 context. This skill is the execution engine used by `executor-simple`; it does not
@@ -35,10 +35,11 @@ Return the deliverable defined by `expectedOutput`.
 
 - Return the clean deliverable when execution completes and all declared verification
   checks pass.
-- Return `PARTIAL: <deliverable and explanation>` when a useful deliverable exists but
-  a declared verification check fails or a non-blocking portion remains incomplete.
-- Return `BLOCKED: <reason>` when validation, a required skill/input, or execution
-  prevents producing a usable deliverable.
+- Return `PARTIAL:` followed by the deliverable and an explanation when a useful
+  deliverable exists but a declared verification check fails or a non-blocking portion
+  remains incomplete.
+- Return `BLOCKED:` followed by the reason when validation, a required skill/input, or
+  execution prevents producing a usable deliverable.
 
 ## Skill Contract
 
@@ -109,4 +110,4 @@ collector metadata that is absent from the task packet.
 
 ## Docs
 
-See [Reference](./reference/README.md) for additional inline-execution guidance.
+See [Reference](./reference/README.md) for a concise inline-execution overview.

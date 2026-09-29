@@ -14,7 +14,9 @@ Examples:
 # Good
 local dirname="${1:?directory is required}"
 printf '%s\n' "Processing: ${dirname}"
-mapfile -t files < <(ls -1 "${dirname}"/*.sh 2>/dev/null) || true
+files=("${dirname}"/*.sh)
+# An unmatched glob is literal in Bash; keep an empty list in that case.
+[[ -e "${files[0]}" || -L "${files[0]}" ]] || files=()
 
 # Bad
 dirname=$1

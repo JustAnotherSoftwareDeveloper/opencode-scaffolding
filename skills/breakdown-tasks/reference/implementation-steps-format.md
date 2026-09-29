@@ -18,14 +18,14 @@ The format uses a three-level Markdown hierarchy:
 
 ## Format Rules
 
-1. **One H3 per drafted task result** — Each H3 subheader represents one change
+- **One H3 per drafted task result** — Each H3 subheader represents one change
    boundary as reviewed against the shared task contract.
-2. **H2 groups parallel-capable steps** — Multiple H3s under one H2 may be executed
+- **H2 groups parallel-capable steps** — Multiple H3s under one H2 may be executed
    in parallel.
-3. **Bullets are 1-2 sentences** — Concise but complete; no truncation.
-4. **Selective bolding** — Bold key elements: file paths, reasons, impacts, and
+- **Bullets are 1-2 sentences** — Concise but complete; no truncation.
+- **Selective bolding** — Bold key elements: file paths, reasons, impacts, and
    "What."
-5. **All steps self-contained** — Include What, Where, and Why; impact is optional.
+- **All steps self-contained** — Include What, Where, and Why; impact is optional.
 
 ## Complete Example
 

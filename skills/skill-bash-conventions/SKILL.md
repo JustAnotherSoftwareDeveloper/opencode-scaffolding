@@ -14,7 +14,7 @@ selection:
 class: documentation
 ---
 
-# Bash Script Conventions — Documentation Store
+# Documentation Store
 
 This skill is a passive data store for shared bash script convention documentation on the OpenCode platform.
 It does not auto-read any files when loaded.

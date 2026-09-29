@@ -17,7 +17,7 @@ selection:
 class: documentation
 ---
 
-# skill-maintenance-reference — Documentation Store
+# Maintenance Reference
 
 This skill is a passive data store for the current direct-selection maintenance
 contract. It does not auto-read files when loaded.
@@ -27,10 +27,10 @@ contract. It does not auto-read files when loaded.
 Read the documentation files listed below as needed for your current task.
 The bulleted list provides the mapping of files to their purpose.
 
-- `reference/update-workflow.md` — Defines current-scope update workflow and content integrity rules.
-- `reference/migration-guide.md` — Defines outright migration to the current profile.
-- `reference/validation-checklist.md` — Lists shared-contract validation checks.
-- `reference/gotchas.md` — Catalogues current profile maintenance pitfalls.
+- [Update workflow](reference/update-workflow.md) — Defines current-scope update workflow and content integrity rules.
+- [Migration guide](reference/migration-guide.md) — Defines outright migration to the current profile.
+- [Validation checklist](reference/validation-checklist.md) — Lists shared-contract validation checks.
+- [Gotchas](reference/gotchas.md) — Catalogues current profile maintenance pitfalls.
 
 Choose the relevant files based on what you need to learn or reference.
 Read only those files.

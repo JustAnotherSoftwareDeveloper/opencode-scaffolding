@@ -11,6 +11,10 @@ branch-coverage threshold.
 
 Coverage is measured against these source paths:
 
+Replace `<script_name>` with the selected script's library-directory name found in the
+existing `src/lib/` tree, and replace `<module>` with a shared module's filename stem
+from `src/lib/shared/`, before measuring coverage.
+
 - `src/cli/*.py` — CLI entry points tested via `CliRunner.invoke()` in CLI integration test files
 - `src/lib/<script_name>/*.py` — Per-script library modules tested via direct function calls in unit test files
 - `src/lib/shared/*.py` — Shared library modules tested via `tests/test_shared_<module>.py`
@@ -20,9 +24,10 @@ Coverage is measured against these source paths:
 
 ## Required Coverage Target
 
-The required target is **100% line coverage for the selected source scope above**. Keep
-`fail_under = 100` in the coverage configuration; do not defer to a lower configured
-target or reduce the selected source scope to make the threshold pass.
+Require **100% line coverage for the selected source scope above**. Enforce that target
+for the task's test invocation with an explicit `--cov-fail-under=100` argument; do not
+accept a lower threshold for that invocation or reduce the selected source scope to make
+the target pass.
 
 If the first run is below 100%, retry once with targeted tests for the uncovered,
 in-scope behavior. On a second failure, return `PARTIAL` and report the failing test
@@ -30,7 +35,13 @@ names, measured coverage when available, and the remaining coverage gaps. Do not
 the result as complete, weaken the threshold, or add tests for behavior that does not
 apply just to force the percentage.
 
-## pyproject.toml Coverage Configuration
+## Example `pyproject.toml` Coverage Configuration
+
+This is an illustrative project configuration, not the required per-task coverage gate
+or the current repository configuration. Enforce the selected-source target with the
+explicit test command. The separate project-wide Python 100% target and configuration
+change remain deferred; do not change project configuration as part of this test-only
+workflow.
 
 ```toml
 [tool.coverage.run]
@@ -117,31 +128,31 @@ Use `# pragma: no cover` sparingly and only for these three categories, and only
 the stated conditions actually hold. Keep each exclusion narrow; do not hide reachable
 behavior or compensate for missing tests:
 
-1. **`__main__` guard** — The `if __name__ == "__main__": main()` dispatch may be
-   exempted by convention when the `main` behavior is covered through the tested CLI
-   entry point. Limit the exclusion to the dispatch line:
+- **`__main__` guard** — The `if __name__ == "__main__": main()` dispatch may be
+  exempted by convention when the `main` behavior is covered through the tested CLI
+  entry point. Limit the exclusion to the dispatch line:
 
-   ```python
-   if __name__ == "__main__":
-       main()  # pragma: no cover
-   ```
+  ```python
+  if __name__ == "__main__":
+      main()  # pragma: no cover
+  ```
 
-2. **Unreachable defensive code** — A defensive branch may be excluded only when the
-   supported input and dependency contracts establish that it cannot be reached. A
-   type annotation or an untested assumption alone is not evidence of unreachability; if
-   the path can occur, test it:
+- **Unreachable defensive code** — A defensive branch may be excluded only when the
+  supported input and dependency contracts establish that it cannot be reached. A
+  type annotation or an untested assumption alone is not evidence of unreachability; if
+  the path can occur, test it:
 
-   ```python
-   # The selected API contract guarantees that result is not None.
-   if result is None:  # pragma: no cover
-       raise RuntimeError("unreachable")
-   ```
+  ```python
+  # The selected API contract guarantees that result is not None.
+  if result is None:  # pragma: no cover
+      raise RuntimeError("unreachable")
+  ```
 
-3. **Version-gated fallbacks** — A fallback for an older Python version may be excluded
-   when that version is outside the project's declared supported runtime (for example,
-   an older-version fallback when the target is Python 3.12). If that version is
-   supported, the fallback is applicable and must be tested in the supported runtime
-   matrix.
+- **Version-gated fallbacks** — A fallback for an older Python version may be excluded
+  when that version is outside the project's declared supported runtime (for example,
+  an older-version fallback when the target is Python 3.12). If that version is
+  supported, the fallback is applicable and must be tested in the supported runtime
+  matrix.
 
 All other executable lines and applicable reachable error paths must be covered by
 tests. If `# pragma: no cover` appears outside these three categories, re-examine the

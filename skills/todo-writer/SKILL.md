@@ -22,18 +22,18 @@ Send the complete todo array in every call.
 
 ## Input
 
-Canonical `breakdown-tasks` JSON output plus caller-provided `status` and `priority`.
-The root object must contain only `summary` and `tasks`.
-The `tasks` array must contain task objects with `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, and `expectedOutput`.
-Task objects may also contain `verification`.
-Each item in `tasks` becomes one todo item.
-The `tasks[*].purpose` field maps to todo `content`.
+- Canonical `breakdown-tasks` JSON output plus caller-provided `status` and `priority`.
+- The root object must contain only `summary` and `tasks`.
+- The `tasks` array must contain task objects with `purpose`, `context`, `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, and `expectedOutput`.
+- Task objects may also contain `verification`.
+- Each item in `tasks` becomes one todo item.
+- The `tasks[*].purpose` field maps to todo `content`.
 
 ## Output
 
-The `todowrite` tool invoked with a `todos` array.
+Invoke the `todowrite` tool with a `todos` array.
 The tool returns success or failure.
-No structured output is returned to the caller.
+The `todowrite` tool returns no structured output to the caller.
 
 ### Todowrite Tool Input Schema
 

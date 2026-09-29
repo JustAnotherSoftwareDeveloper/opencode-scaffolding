@@ -79,11 +79,13 @@ recorded decision authority explicitly authorized planning. Validation success,
    Block on an absent name, stale path, class mismatch, or load failure.
 
 8. **Author tasks.** Require the author to select one packet slug and write a
-    schema-valid canonical packet root. Preserve the selected packet slug unchanged;
-    its fields and constraints are owned by the canonical
-    [task-packet schema](../breakdown-tasks/schema/task-packet.schema.json), not this
-    workflow.
-   Follow [task-authoring rules](reference/task-authoring.md) and consume the shared [task-contract semantics](../task-contract/reference/README.md) for task identity, atomicity, result and verification alignment, dependencies, coupling, traceability, and authoring metadata.
+    schema-valid canonical packet root. Preserve the selected packet slug unchanged.
+    The canonical task-packet schema used in validation step 13 owns the
+    packet-root fields and constraints, not this workflow.
+   Follow [task-authoring rules](reference/task-authoring.md) and consume the
+   already-loaded `task-contract` documentation skill for task identity,
+   atomicity, result and verification alignment, dependencies, coupling,
+   traceability, and authoring metadata.
    Preserve copied relative source paths in `filesToRead`.
    Extract proposal-derived implementation details, verification criteria, and questions from one PROPOSAL.md and its copied sources.
    Preserve source-derived and proposal-derived requirements, constraints, decisions, and verification criteria in each task `context`.
@@ -179,7 +181,8 @@ recorded decision authority explicitly authorized planning. Validation success,
 
 ## Docs
 
-- `reference/workspace-contract.md`
-- `reference/task-authoring.md`
-- `reference/scripts.md`
-- `../task-contract/reference/README.md`
+- [Workspace contract](reference/workspace-contract.md)
+- [Task-authoring rules](reference/task-authoring.md)
+- [Script contracts](reference/scripts.md)
+- Consult the reference index of the loaded `task-contract` documentation skill
+  for shared task semantics; do not link into another skill's directory.

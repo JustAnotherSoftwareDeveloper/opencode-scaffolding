@@ -1,98 +1,72 @@
 # TaskPacket Field Reference
 
-This table mirrors `../../schema/task-packet.schema.json`. The schema is
+This reference summarizes the structure in
+[`task-packet.schema.json`](../../schema/task-packet.schema.json). The schema is
 authoritative for types, requiredness, and constraints. The loaded `task-contract`
 documentation skill is authoritative for task identity, atomicity, result and
 verification alignment, dependency and coupling meaning, traceability, and
-authoring metadata. This table does not duplicate those semantics.
+authoring metadata. These notes cover structure, not those shared semantics.
 
 ## Boundary Guidance
 
 Review task boundaries using the loaded documentation skill's named **Atomicity
 and alignment**, **Dependencies and coupling**, and **Traceability and metadata**
-references. The fields below are structural interface notes only.
+references. The fields below describe the JSON interface only.
 
 ## Root-Level Fields
 
-- **`slug`**
-  - Required: yes
-  - Description: Author-selected packet identity, preserved unchanged by publishers
-    and consumers. Its type and constraints belong exclusively to the canonical
-    [task-packet schema](../../schema/task-packet.schema.json).
+The root must be an object with exactly these required fields:
 
-- **`summary`**
-  - Type: `string`
-  - Required: yes
-  - Constraints: `maxLength`: 2000
-  - Description: Schema-level summary of the overall request, scope, and constraints.
+- **`summary`** — Required string describing the overall request, goal, scope, and
+  constraints.
+- **`slug`** — Required author-selected string identifying the packet. It has a
+  `minLength` of 1, a `maxLength` of 80, and must match the schema's lowercase
+  ASCII kebab-case pattern. Publishers and consumers preserve it unchanged.
+- **`tasks`** — Required array of `TaskPacket` objects with at least one item and
+  no maximum item count.
+- **`boundaryReview`** — Required object containing the required
+  `requestResultInventory`, `taskReviews`, and `warningDispositions` members. The
+  schema defines their nested structures and constraints.
 
-- **`tasks`**
-  - Type: `array` of `TaskPacket`
-  - Required: yes
-  - Constraints: `minItems`: 1; no maximum
-  - Description: An ordered, uncapped list of delegation packets. The smaller results
-    needed to satisfy the request determine task count.
+The root schema rejects additional properties.
 
-## TaskPacket Fields
+## Required TaskPacket Fields
 
-- **`purpose`**
-  - Type: `string`
-  - Required: yes
-  - Constraints: `maxLength`: 200
-  - Description: Schema field whose shared semantic role is defined by the loaded
-    documentation skill's named **Task identity** reference.
+Each task must contain the following fields. The task schema rejects additional
+properties.
 
-- **`context`**
-  - Type: `string`
-  - Required: yes
-  - Constraints: `minLength`: 200, `maxLength`: 8000
-  - Description: Task-specific request details, constraints, decisions, and boundary
-    rationale. Use the shared task identity and traceability references for meaning.
+- **`taskId`** — Required string matching the schema's stable task-identity
+  pattern.
+- **`purpose`** — Required string. The shared
+  **Task identity** reference defines its meaning.
+- **`context`** — Required string. Use the shared task identity and traceability
+  references for its meaning.
+- **`filesToRead`** — Required array of strings with unique items. It may be empty.
+  These are explicit input paths.
+- **`filesToWrite`** — Required array of strings with unique items. It may be
+  empty. These paths or bounded patterns define the write boundary.
+- **`skills`** — Required array of unique strings with at least one and at most
+  three entries. The assignment contract defines the required class composition.
+- **`executionInstructions`** — Required array with one to five step objects.
+  Each step requires an integer `step` of at least 1 and a string `action`; its
+  string `verification` is optional. The operation owns the ordered procedure.
+- **`expectedOutput`** — Required string describing the precise `Deliverable`
+  payload.
+- **`verificationCoverage`** — Required object with an `observable` array of at
+  least one unique string. Its `coverage` value is optional and, when present,
+  must be `complete`, `partial`, or `unknown`.
+- **`dependencies`** — Required array of unique edge objects. Each edge requires
+  a schema-valid `taskId`; its non-empty string `reason` is optional.
+- **`antiPatternSignals`** — Required array of unique strings. Values must come
+  from the schema's declared signal enum.
+- **`purposeOutputAlignment`** — Required object with both `status` and
+  non-empty string `evidence`. `status` must be `aligned`, `needs-review`, or
+  `not-aligned`.
 
-- **`filesToRead`**
-  - Type: `array` of `string`
-  - Required: yes
-  - Constraints: `uniqueItems`: true
-  - Description: Explicit input paths. Preserve predecessor artifacts and source
-    references according to the shared dependency and traceability references.
+## Optional TaskPacket Fields
 
-- **`filesToWrite`**
-  - Type: `array` of `string`
-  - Required: yes
-  - Constraints: `uniqueItems`: true
-  - Description: Explicit paths or bounded patterns the worker may create, modify,
-    or delete. Coupling meaning belongs to the shared dependencies and coupling
-    reference.
-
-- **`skills`**
-  - Type: `array` of `string`
-  - Required: yes
-  - Constraints: `uniqueItems`: true, `minItems`: 1, `maxItems`: 3
-  - Description: One to three skills the worker must load. This operation-specific
-    assignment limit applies per task and does not limit task count.
-
-- **`executionInstructions`**
-  - Type: `array` of `object`
-  - Required: yes
-  - Constraints: `minItems`: 1, `maxItems`: 5
-  - Item fields:
-    - `step` (`integer`, required, `minimum`: 1)
-    - `action` (`string`, required) — A concrete, verifiable action.
-    - `verification` (`string`, optional) — Evidence that the step succeeded.
-  - Description: Ordered actions that produce the task's result. The operation owns
-    this packet procedure; result and verification alignment follow the shared
-    task-contract reference.
-
-- **`verification`**
-  - Type: `array` of `string`
-  - Required: no
-  - Constraints: `minItems`: 1, `uniqueItems`: true
-  - Description: Checks for the complete result. Use the shared verification
-    alignment reference when defining coverage.
-
-- **`expectedOutput`**
-  - Type: `string`
-  - Required: yes
-  - Constraints: `maxLength`: 2000
-  - Description: Precise description of the single `Deliverable` payload. Its
-    semantic alignment is defined by the shared task-contract reference.
+- **`verification`** — Optional array of unique strings. If present, it must
+  contain at least one item.
+- **`couplingRationale`** — Optional object. It requires non-empty string values
+  for `rationale`, `sharedResult`, and `verification`; the non-empty string
+  `group` is optional.

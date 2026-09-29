@@ -1,4 +1,4 @@
-# Agent Factory Reference
+# Agent File Requirements
 
 Keep writes bounded to one `agents/<name>.md` file.
 Require supported frontmatter, explicit operating guidance and guardrails,

@@ -16,6 +16,10 @@
   fields and validation behavior as the current profile contract.
 - Run both shared validators on each changed active skill:
 
+  Use `<name>` as the skill-name slot in these commands. Take its value from the
+  profile's canonical `name` field, which must match the skill directory, and replace
+  the slot in each command before running it.
+
 ```sh
 node scripts/validate-skills.js skills/<name>/SKILL.md
 uv run --project scripts/python python -m cli.validate_skill_md skills/<name>/SKILL.md

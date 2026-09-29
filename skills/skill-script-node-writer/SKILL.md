@@ -42,22 +42,22 @@ Do not delegate sub-tasks.
    Validate script name is kebab-case.
    Validate dependencies exist in `package.json` or add them.
 
-2. **Select platform** — Default to Python for general-purpose scripts.
-   Choose Node only when the task requires Node-specific libraries (remark ecosystem, filesystem-heavy operations, or npm ecosystem tools).
-   See `./reference/path-layout.md` for platform selection context.
+2. **Select platform** — For general-purpose script requests outside this Node-specific operation, default to Python.
+   Within this operation, choose Node only when the task requires Node-specific libraries (remark ecosystem, filesystem-heavy operations, or npm ecosystem tools).
+   See [./reference/path-layout.md](./reference/path-layout.md) for platform selection context.
 
 3. **Generate CLI entry point** — Write `src/cli/<script-name>.ts` with a cleye command definition, typed arguments and options, JSON stdout output via `process.stdout.write`, and error handling via `process.stderr.write` with `process.exit`.
-   Follow conventions in `./reference/cli-conventions.md`.
+   Follow conventions in [./reference/cli-conventions.md](./reference/cli-conventions.md).
 
 4. **Generate lib modules** — Write `src/lib/<script-name>/core.ts` with typed function signatures, explicit return types, and imports from `lib/shared/*` where applicable.
-   Follow conventions in `./reference/path-layout.md`.
+   Follow conventions in [./reference/path-layout.md](./reference/path-layout.md).
 
 5. **Register dependencies in package.json** — Add required npm packages under `dependencies` or `devDependencies`.
    Add a script entry under `"scripts"`: `<script-name> = "bun src/cli/<script-name>.ts"`.
-   Follow conventions in `./reference/tooling-config.md`.
+   Follow conventions in [./reference/tooling-config.md](./reference/tooling-config.md).
 
 6. **Ensure tooling config** — Create or update `biome.json` and `tsconfig.json` if absent.
-   Follow conventions in `./reference/tooling-config.md`.
+   Follow conventions in [./reference/tooling-config.md](./reference/tooling-config.md).
 
 7. **Run validation** — Execute type check, lint, and `--help` verification.
    Report `BLOCKED: <step> failed — <details>` on any failure.
@@ -99,5 +99,5 @@ Generated scripts must adhere to the shared conventions defined in `skill-node-s
 
 ## Docs
 
-See `./reference/README.md` for this skill's reference file index.
+See [./reference/README.md](./reference/README.md) for this skill's reference file index.
 See `skill-node-script-conventions` (reference-README) for the shared conventions reference file index.

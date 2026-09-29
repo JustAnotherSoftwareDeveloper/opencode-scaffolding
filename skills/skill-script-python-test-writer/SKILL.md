@@ -14,7 +14,7 @@ selection:
 class: operation
 ---
 
-# Skill Script Python Test Writer
+# Write Focused Pytest Coverage
 
 Create or edit pytest coverage for one existing Python script under `scripts/python/`.
 Own test-only work: adding coverage, repairing stale tests, refactoring test structure,
@@ -43,6 +43,9 @@ implementation defect, in which case stop rather than silently changing source c
 
 `BLOCKED: Source script <name> not found — create or identify the implementation first.`
 `BLOCKED: Scripts directory not found at scripts/python/.`
+
+Replace `<name>` in the first blocked message with the script name recorded under
+**Script identity** before returning that message.
 
 ## Procedure
 
@@ -80,6 +83,12 @@ Each step is one imperative action. Do not delegate sub-tasks.
 
 Use the strongest applicable checks for the changed test surface:
 
+Before running these command patterns, replace `<affected test targets>` with the
+affected test paths identified from the requested result and existing suite, and
+replace `<changed test files>` with the concrete paths of modified test files. Replace
+`<selected source paths>` with the exact files selected under
+`./reference/coverage-strategy.md`, then run the commands with those concrete paths.
+
 - `uv run pytest <affected test targets> --tb=short`
 - `uv run pytest <affected test targets> --cov=<selected source paths> --cov-report=term-missing --cov-fail-under=100 --tb=short`
 - `uv run ruff check <changed test files>`
@@ -93,6 +102,10 @@ or weaken the required 100% target to satisfy the gate.
 
 A created or updated pytest suite under `scripts/python/tests/`, limited to files
 required by the requested test result. Typical affected files include:
+
+Replace `<script_name>` in these illustrative filenames with the selected script name
+from **Script identity** before creating or reporting a test file. Keep `_cli` for the
+CLI test filename.
 
 - `tests/test_<script_name>.py`
 - `tests/test_<script_name>_cli.py`

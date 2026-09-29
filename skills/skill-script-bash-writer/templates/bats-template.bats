@@ -14,22 +14,23 @@ teardown() {
 }
 
 @test '<script-name>: --help prints usage and exits 2' {
-  run bash src/<script-name>.sh --help
+  run --separate-stderr bash src/<script-name>.sh --help
   assert_failure 2
-  assert_output --partial 'Usage:'
-  assert_output --partial '<script-name>'
+  [[ "$stderr" == *'Usage:'* ]]
+  [[ "$stderr" == *'<script-name>'* ]]
+  [[ "$stderr" != *'Error:'* ]]
 }
 
 @test '<script-name>: missing required argument prints error and exits 2' {
-  run bash src/<script-name>.sh
-  assert_failure
-  assert_stderr --partial 'Error:'
+  run --separate-stderr bash src/<script-name>.sh
+  assert_failure 2
+  [[ "$stderr" == *'Error:'* ]]
 }
 
 @test '<script-name>: errors on non-existent input file' {
-  run bash src/<script-name>.sh /nonexistent/path
+  run --separate-stderr bash src/<script-name>.sh /nonexistent/path
   assert_failure
-  assert_stderr --partial 'Error:'
+  [[ "$stderr" == *'Error:'* ]]
 }
 
 @test '<script-name>: processes valid input file' {
@@ -46,7 +47,7 @@ teardown() {
   local input_file="${TEST_TEMP}/input.txt"
   printf 'test data\n' > "${input_file}"
 
-  run bash src/<script-name>.sh -v "${input_file}"
+  run --separate-stderr bash src/<script-name>.sh -v "${input_file}"
   assert_success
-  assert_stderr --partial 'Info:'
+  [[ "$stderr" == *'Info:'* ]]
 }

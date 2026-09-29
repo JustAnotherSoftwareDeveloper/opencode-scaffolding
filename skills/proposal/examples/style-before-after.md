@@ -5,7 +5,7 @@ Each rewrite keeps the technical meaning while removing robotic phrasing, adding
 concrete detail, clarifying uncertainty ownership, exposing compatibility impact,
 and making verification observable.
 
-## Robotic prose
+## Robotic Prose
 
 **Before**
 
@@ -21,7 +21,7 @@ and making verification observable.
 (`not a regular file`), and boundary (`inside the workspace`). It removes passive
 construction and empty qualifiers without losing the rule.
 
-## Weak implementation detail
+## Weak Implementation Detail
 
 **Before**
 
@@ -38,7 +38,7 @@ construction and empty qualifiers without losing the rule.
 exact checks, and the diagnostic output shape. A reviewer can locate the boundary
 without guessing.
 
-## Ambiguous uncertainty
+## Ambiguous Uncertainty
 
 **Before**
 
@@ -56,7 +56,7 @@ without guessing.
 an owner decision. The rewrite makes the task discoverable and states whether the
 gap blocks readiness.
 
-## Hidden compatibility impact
+## Hidden Compatibility Impact
 
 **Before**
 
@@ -72,7 +72,7 @@ gap blocks readiness.
 **Why:** The rewrite names the old path, the new path, and the explicit consequence
 for callers. A reviewer can assess the migration surface without searching.
 
-## Unverifiable acceptance language
+## Unverifiable Acceptance Language
 
 **Before**
 
@@ -88,7 +88,7 @@ for callers. A reviewer can assess the migration surface without searching.
 completion evidence. The reader does not need to agree with an assessment; they
 can run the workspace.
 
-## Evidence boundary
+## Evidence Boundary
 
 These examples demonstrate information density and precision, not measured reader
 outcomes. A human reviewer still judges whether a proposal's prose, structure, and

@@ -13,7 +13,7 @@ selection:
 class: planning
 ---
 
-# Planning Pipeline Architecture — Domain Planning Reference
+# Planning Lifecycle And Handoffs
 
 This reference describes planning states, artifacts, owners, and handoffs across
 analysis, proposal, plan, and audit work.
@@ -50,14 +50,14 @@ non-redundant, and scoped.
 
 ## References
 
-- `./reference/analysis-only.md`
-- `./reference/proposal-only.md`
-- `./reference/plan-only.md`
-- `./reference/analysis-to-proposal.md`
-- `./reference/analysis-to-plan.md`
-- `./reference/proposal-to-plan.md`
-- `./reference/analysis-to-proposal-to-plan.md`
-- `./reference/proposal-derived-audit-lifecycle.md`
+- [Analysis Only](./reference/analysis-only.md)
+- [Proposal Only](./reference/proposal-only.md)
+- [Plan Only](./reference/plan-only.md)
+- [Analysis To Proposal](./reference/analysis-to-proposal.md)
+- [Analysis To Plan](./reference/analysis-to-plan.md)
+- [Proposal To Plan](./reference/proposal-to-plan.md)
+- [Analysis To Proposal To Plan](./reference/analysis-to-proposal-to-plan.md)
+- [Proposal-Derived Audit Lifecycle](./reference/proposal-derived-audit-lifecycle.md)
 
 ## Self-Validation
 
@@ -69,4 +69,4 @@ non-redundant, and scoped.
 
 ## Docs
 
-See `./reference/README.md` for the lifecycle workflow index.
+See the [lifecycle workflow index](./reference/README.md).

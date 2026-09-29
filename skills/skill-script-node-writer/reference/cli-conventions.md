@@ -143,4 +143,13 @@ async function main(): Promise<void> {
 await main()
 ```
 
-This example illustrates: cleye name/version/parameters declaration, type annotations on every function signature, `node:fs` and `node:path` imports for filesystem operations, separate error classes caught with friendly messages to stderr and non-zero exit, JSON or structured output via process.stdout/process.stderr, core logic delegated to lib modules, top-level `await main()` pattern for async scripts, and explicit `process.exit()` calls on all exit paths.
+This example demonstrates these conventions:
+
+- Declare the cleye name, version, and parameters.
+- Add type annotations to every function signature.
+- Import `node:fs` and `node:path` for filesystem operations.
+- Distinguish invalid input from processing failures, write friendly messages to stderr, and exit with a non-zero code.
+- Emit JSON or structured results through `process.stdout`, and status or error messages through `process.stderr`.
+- Delegate core logic to lib modules.
+- Use top-level `await main()` for async scripts.
+- Call `process.exit()` explicitly on every exit path.

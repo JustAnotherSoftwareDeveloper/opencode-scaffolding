@@ -31,9 +31,9 @@ teardown() {
 }
 
 @test 'example: errors on missing argument' {
-  run bash src/example.sh
-  assert_failure
-  assert_stderr --partial 'Error:'
+  run --separate-stderr bash src/example.sh
+  assert_failure 2
+  [[ "$stderr" == *'Error:'* ]]
 }
 ```
 
@@ -42,7 +42,8 @@ teardown() {
 Use the standard bats-core assertion ecosystem, installed system-wide via package manager:
 
 - **`bats-support`** — Helper utilities for other assertion libs. Install: `bats-support` (apt/brew) or `@bats-core/support` (npm).
-- **`bats-assert`** — Provides `assert_success`, `assert_failure`, `assert_output`, `assert_stderr`, `assert_line`, `refute_output`. Install: `bats-assert` (apt/brew) or `@bats-core/assert` (npm).
+- **`bats-assert`** — Provides `assert_success`, `assert_failure`, `assert_output`, `assert_line`, and `refute_output`. Install: `bats-assert` (apt/brew) or `@bats-core/assert` (npm).
+- **Bats stderr capture** — With Bats 1.10+, use `run --separate-stderr` and check `$stderr` directly; `bats-assert` does not provide `assert_stderr`.
 - **`bats-file`** — Provides `assert_file_exist`, `assert_dir_exist`, `assert_not_empty`, `assert_file_contains`. Install: `bats-file` (apt/brew) or `@bats-core/file` (npm).
 
 **Loading in setup:**
@@ -98,13 +99,15 @@ Use temp directories (`mktemp -d`) for writable test fixtures. The `teardown()` 
 
 ## Test Coverage Expectations
 
+In these examples, `<script-name>` denotes the script's supplied kebab-case name; substitute that value in the script path.
+
 Each test file should cover:
 
-1. **`--help` output** — Verify `bash src/<script-name>.sh --help` exits with exact status 2 and prints usage text.
-2. **Success path** — Verify normal execution produces correct JSON output on stdout.
-3. **Failure path** — Verify error conditions produce `Error:` on stderr and non-zero exit.
-4. **Argument validation** — Verify missing required args produce exit 2 with error on stderr.
-5. **Edge cases** — Verify empty input, missing files, invalid options, and boundary conditions.
+- **`--help` output** — Verify `bash src/<script-name>.sh --help` exits with exact status 2 and prints usage text.
+- **Success path** — Verify normal execution produces correct JSON output on stdout.
+- **Failure path** — Verify error conditions produce `Error:` on stderr and non-zero exit.
+- **Argument validation** — Verify missing required args produce exit 2 with error on stderr.
+- **Edge cases** — Verify empty input, missing files, invalid options, and boundary conditions.
 
 ## Local Validation Workflow
 

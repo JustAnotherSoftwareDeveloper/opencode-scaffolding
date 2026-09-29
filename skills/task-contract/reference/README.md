@@ -1,4 +1,4 @@
-# Task Contract Reference
+# Shared Task Semantics Index
 
 This index maps the passive references for the shared task contract.
 

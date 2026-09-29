@@ -20,7 +20,7 @@ selection:
 class: documentation
 ---
 
-# Task Contract — Documentation Store
+# Shared Task Semantics
 
 This skill is a passive data store for shared task identity, atomicity, alignment,
 dependency, coupling, traceability, and authoring metadata semantics.

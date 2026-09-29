@@ -1,12 +1,12 @@
 # Tooling Configuration
 
 Every `scripts/node/` root must contain a `package.json`, `biome.json`, and `tsconfig.json`.
-These files are generated or updated alongside each new script.
+Create or update these files alongside each new script.
 
 > **Resolution order** — See `skill-architect` (platform-layout-context) for script-root resolution precedence (env var → project-local → global).
 > **Path layout** — See `path-layout.md` for directory structure and import conventions.
 
-## biome.json
+## Configure `biome.json`
 
 Biome enforces code formatting and lint rules.
 Create or update `biome.json` at the `scripts/node/` root.
@@ -57,7 +57,7 @@ Create or update `biome.json` at the `scripts/node/` root.
 
 See `typescript-node-style-guide.md` > Biome Lint Rule Catalog for the full rule category breakdown.
 
-## tsconfig.json
+## Configure `tsconfig.json`
 
 TypeScript configuration for Bun-compatible compilation.
 
@@ -97,7 +97,7 @@ TypeScript configuration for Bun-compatible compilation.
 
 **Run type checking:** `bun run --cwd <scripts-node-dir> tsc --noEmit`.
 
-## package.json
+## Configure `package.json`
 
 ```json
 {

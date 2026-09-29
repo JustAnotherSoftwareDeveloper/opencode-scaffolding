@@ -93,6 +93,11 @@ plan.
    dependencies are satisfied. A failure in one branch does not automatically stop an
    independent branch.
 
+   Preserve the exact original response and diagnostics for any malformed worker
+   result. Do not turn it into a valid envelope or infer completion. Escalate
+   correction and any re-dispatch to a supervisor; this executor does not repair
+   the approved packet or invent a result for dependent tasks.
+
 4. **Return execution results.** Preserve worker envelopes exactly as returned and
    clearly identify tasks that were not dispatched because their dependencies were not
    satisfied. Do not synthesize completion for skipped or malformed tasks.

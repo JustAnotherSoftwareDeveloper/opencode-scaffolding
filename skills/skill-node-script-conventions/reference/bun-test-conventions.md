@@ -180,7 +180,7 @@ The test writer reads generated source files to determine module structure and g
 - `src/cli/<name>.ts` → `tests/<name>.cli.test.ts`
 - `src/lib/<name>/core.ts` → `tests/<name>.test.ts`
 - `src/lib/<name>/rules.ts` → Coverage included in `tests/<name>.test.ts`
-- `src/lib/shared/<module>.ts` → `tests/<module>.test.ts` |
+- `src/lib/shared/<module>.ts` → `tests/<module>.test.ts`
 
 ### Unit Test Imports (Direct)
 

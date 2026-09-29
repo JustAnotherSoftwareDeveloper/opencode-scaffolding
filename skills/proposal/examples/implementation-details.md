@@ -3,9 +3,9 @@
 This example demonstrates the concrete change shape expected inside a proposal's
 `Implementation Details` section. It is not a runbook or a companion file.
 
-## Proposal operation contract
+## Proposal Operation Contract
 
-### `skills/proposal/SKILL.md` — Create one authored `PROPOSAL.md`
+### `skills/proposal/SKILL.md` — Create One Authored `PROPOSAL.md`
 
 - **Change:** Replace numbered-file generation with one metadata-bearing document and
   copied-source directories.
@@ -16,7 +16,7 @@ This example demonstrates the concrete change shape expected inside a proposal's
 - **Verification dependency:** Profile validation, Markdown lint, workspace lint, and
   source-manifest checks.
 
-### `skills/proposal/reference/proposal-format.md` — Define the one-document order
+### `skills/proposal/reference/proposal-format.md` — Define the One-Document Order
 
 - **Change:** Replace the nine-section taxonomy with the eight core H2 sequence plus
   optional domain subsections.
@@ -25,9 +25,9 @@ This example demonstrates the concrete change shape expected inside a proposal's
 - **Verification dependency:** The reference contract is internally consistent and
   relative links resolve.
 
-## Proposal templates
+## Proposal Templates
 
-### `skills/proposal/templates/PROPOSAL.md` — Provide one active template
+### `skills/proposal/templates/PROPOSAL.md` — Provide One Active Template
 
 - **Change:** Supply one template with the eight required H2 headings, compact prompts,
   and removable authoring scaffolding.
@@ -36,9 +36,9 @@ This example demonstrates the concrete change shape expected inside a proposal's
 - **Verification dependency:** Generated output excludes placeholders, comments, and
   legacy authored artifacts.
 
-## Deterministic validator
+## Deterministic Validator
 
-### `scripts/node/src/lib/lint-md/proposal.ts` — Add workspace validation
+### `scripts/node/src/lib/lint-md/proposal.ts` — Add Workspace Validation
 
 - **Change:** Parse `PROPOSAL.md` frontmatter and headings, enforce required metadata
   and heading order, reconcile copied sources with the manifest, and validate
@@ -50,15 +50,15 @@ This example demonstrates the concrete change shape expected inside a proposal's
 - **Verification dependency:** Library tests assert stable rule IDs for each
   deterministic check.
 
-### `scripts/node/src/lib/lint-md/core.ts` — Dispatch by target type
+### `scripts/node/src/lib/lint-md/core.ts` — Dispatch by Target Type
 
 - **Change:** Route files to the existing generic pipeline and directories to proposal
   validation.
 - **Verification dependency:** Both paths are exercised by library and CLI tests.
 
-## Downstream consumers
+## Downstream Consumers
 
-### `skills/plan-audit/scripts/plan_audit.py` — Parse one `PROPOSAL.md` baseline
+### `skills/plan-audit/scripts/plan_audit.py` — Parse One `PROPOSAL.md` Baseline
 
 - **Change:** Read the recommendation, implementation targets, verification criteria,
   questions, and source identity from headings and frontmatter instead of fixed
@@ -68,16 +68,16 @@ This example demonstrates the concrete change shape expected inside a proposal's
 - **Verification dependency:** The migrated parser responds to existing test fixtures
   with stable diagnostics.
 
-### `scripts/python/tests/test_plan_audit.py` — Migrate fixtures in place
+### `scripts/python/tests/test_plan_audit.py` — Migrate Fixtures in Place
 
 - **Change:** Replace the eleven-file proposal fixture with one-document fixtures and
   add coverage for missing sections, traceability, source drift, and label loss.
 - **Verification dependency:** The existing test module passes with clean lint and
   coverage.
 
-## Conformance tests
+## Conformance Tests
 
-### `scripts/node/tests/lint-md.test.ts` — Add workspace tests
+### `scripts/node/tests/lint-md.test.ts` — Add Workspace Tests
 
 - **Change:** Add positive one-document cases and negative fixtures for each
   deterministic workspace rule.

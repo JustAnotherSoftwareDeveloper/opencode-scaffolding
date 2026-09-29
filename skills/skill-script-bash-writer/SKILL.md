@@ -14,14 +14,14 @@ selection:
 class: operation
 ---
 
-# Skill Script Bash Writer
+# Build Registered Bash Script Workspaces
 
 ## Normalize Input
 
 Map invocation context to one internal input object.
 Define these required fields:
 
-- **Script name** — kebab-case entry point name (e.g., `count-tokens`, `validate-json`). Corresponding file: `src/<script-name>.sh`.
+- **Script name** — kebab-case entry point name (e.g., `count-tokens`, `validate-json`). Use the supplied name in place of `<script-name>` in generated paths, target names, commands, and output patterns. Corresponding file: `src/<script-name>.sh`.
 - **Purpose** — What the script computes, processes, or orchestrates.
 - **Input contract** — CLI arguments, stdin format, or file paths the script reads.
 - **Output contract** — stdout format (JSON preferred), exit codes, stderr behavior.
@@ -36,7 +36,8 @@ Define these required fields:
 
 ## Procedure
 
-Each step is one imperative action.
+Each numbered step is one phase; its accompanying requirements specify the work to
+complete within that phase.
 Do not delegate sub-tasks.
 
 1. **Parse requirements** — Extract script name, purpose, input/output contracts, dependencies, and skill consumers from the normalized input.
@@ -45,17 +46,17 @@ Do not delegate sub-tasks.
 
 2. **Generate CLI entry point** — Write `src/<script-name>.sh` with `#!/usr/bin/env bash` and `set -euo pipefail`, `SCRIPT_DIR` resolution via `${BASH_SOURCE[0]}`, sourcing `../lib/shared/common.sh` for `die()`, `err()`, `info()`, `require()`, `parse_args()` function with getopts, `usage()` function with full help text, `main()` function as the entry point, JSON stdout format, `Error:` prefix on stderr, standard exit codes (0, 1, 2, 3), and `main "$@"` at the bottom.
    Follow conventions in `skill-bash-conventions` (cli-conventions, exit-codes, json-output-conventions, error-handling).
-   See `templates/cli-template.sh` for the canonical structure.
+   See the [CLI template](templates/cli-template.sh) for the canonical structure.
 
-3. **Generate lib modules** — Write `src/lib/<script-name>/core.sh` with sourced functions, bash-specific features (`[[ ]]`, arrays), argument validation with `${1:?error_msg}`, stdout output and stderr errors, and no side-effect execution at load time.
-   Follow conventions in `./reference/path-layout.md` and `skill-bash-conventions` (set-flags, quoting-conventions, shellcheck-rules, function-naming, cross-platform).
+3. **Generate lib modules** — Write `lib/<script-name>/core.sh` with sourced functions, bash-specific features (`[[ ]]`, arrays), argument validation with `${1:?error_msg}`, stdout output and stderr errors, and no side-effect execution at load time.
+   Follow conventions in [path layout](reference/path-layout.md) and `skill-bash-conventions` (set-flags, quoting-conventions, shellcheck-rules, function-naming, cross-platform).
 
 4. **Register in Makefile** — Add a `.PHONY` target `run-<script-name>` that invokes `"$(SCRIPT_DIR)src/<script-name>.sh" [args]`. Add help text line to the `help` target. Target added after `deps-check` and before `clean` (alphabetical order).
 
 5. **Generate test file** — Write `tests/<script-name>.bats` with `setup()` loading bats-assert and bats-support, `teardown()` cleanup, tests for `--help` output, success path, failure path, and argument validation. Use `run bash ...` pattern for CLI invocation tests and temp directories for file-based tests.
-   Follow conventions in `./reference/testing-conventions.md`.
+   Follow conventions in [testing conventions](reference/testing-conventions.md).
 
-6. **Run validation** — Execute `make -C scripts/shell lint` (shellcheck), `make -C scripts/shell format-check` (shfmt), `make -C scripts/shell test` (bats), and `bash src/<script-name>.sh --help` (entry point works).
+6. **Run validation** — Execute `make -C scripts/shell check` (lint, format-check, tests, and 100% coverage). From `scripts/shell/`, run `bash src/<script-name>.sh --help` and verify usage on stderr without an `Error:` diagnostic and status 2.
    Report `BLOCKED: <step> failed — <details>` on any failure.
 
 ## Self-Validation
@@ -74,7 +75,7 @@ Each check is a yes/no assertion.
 One or more files under `scripts/shell/`:
 
 - `src/<script-name>.sh` — CLI entry point with getopts, JSON output, error handling, and help text.
-- `src/lib/<script-name>/core.sh` — Core logic module with sourced functions.
+- `lib/<script-name>/core.sh` — Core logic module with sourced functions.
 - `tests/<script-name>.bats` — bats-core test file with coverage of success, failure, and edge cases.
 
 `Makefile` updated with `.PHONY` target and help text.
@@ -96,7 +97,7 @@ This skill consumes shared reference documentation from the `skill-bash-conventi
 
 See `./reference/` for this skill's reference files:
 
-- `path-layout.md` — Directory layout, resolution order, lib/shared sourcing rules.
-- `testing-conventions.md` — bats-core setup, assertion libraries, mock patterns, fixtures.
+- [Path layout](reference/path-layout.md) — Directory layout, resolution order, lib/shared sourcing rules.
+- [Testing conventions](reference/testing-conventions.md) — bats-core setup, assertion libraries, mock patterns, fixtures.
 
 See `skill-bash-conventions` (reference-README) for the shared conventions reference file index.

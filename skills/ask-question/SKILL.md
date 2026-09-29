@@ -20,7 +20,7 @@ Ask only questions whose answers would materially change the next step.
 
 ## Input
 
-Free-form prompt from caller containing a user request that may require clarification.
+The caller provides a free-form prompt containing a user request that may require clarification.
 
 - **Request text**: What the user wants to accomplish.
 - **Provided context**: Files, directories, constraints, or background already mentioned.
@@ -28,8 +28,9 @@ Free-form prompt from caller containing a user request that may require clarific
 
 ## Output
 
-Clarifying answers returned to the caller.
-A question array of zero must never be returned.
+Return clarifying answers after a question-tool call. Never submit an empty
+`questions` array to that tool. The output schema may contain an empty `answers`
+array, but it does not authorize a no-ambiguity completion.
 
 ### Question Tool Input Schema
 
@@ -141,8 +142,9 @@ Cover relevant dimensions across the 1-5 questions:
 ## Execution Plan
 
 1. Analyze [Input](#input) for areas needing clarification.
-2. If no unanswered question would materially change the next step, gate the request as
-   blocked. Do not invoke the question tool or return an empty-answer completion.
+2. If no unanswered question would materially change the next step, return
+   `BLOCKED: No unanswered question would materially change the next step.`
+   Do not invoke the question tool or return an empty-answer completion.
 3. Formulate 1-5 questions per [Question Guidelines](#question-guidelines).
    See [Guardrails](#guardrails) for mandatory question rules.
 4. Invoke the `question` tool once with [Question Tool Input Schema](#question-tool-input-schema), passing all 1-5 questions in a single call.
@@ -155,7 +157,8 @@ Do not perform follow-up rounds, multi-pass clarification, or iterative narrowin
 ## Guardrails
 
 - Submit at least 1 question and at most 5 questions to the question tool.
-- Do not skip questions because the request appears clear — ask confirmation, scope, assumption, constraint, or verification-preference questions instead.
+- The no-question `BLOCKED` branch takes precedence over the question minimum.
+  Do not invent confirmation or preference questions to satisfy `minItems: 1`.
 - Ask only when the answer changes execution.
 - Do not ask what the request already answers.
 - Return answers without filtering.

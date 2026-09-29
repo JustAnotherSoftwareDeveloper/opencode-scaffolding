@@ -1,47 +1,46 @@
 # Task Authoring
 
 This file defines the plan workflow's source-to-task authoring procedure.
-The shared [task-contract reference](../../task-contract/reference/README.md) owns
+The loaded `task-contract` documentation skill owns
 task identity, atomicity, one-result and verification alignment, dependency and
 coupling meaning, source and proposal traceability, and authoring metadata.
 Do not restate those invariants here.
 
-Require the author to select a packet slug and produce the canonical packet root.
-Preserve that packet slug unchanged. The canonical root fields and slug constraints
-belong to the [task-packet schema](../../breakdown-tasks/schema/task-packet.schema.json);
-do not restate or locally validate them here.
+- Require the author to select a packet slug and produce the canonical packet root.
+  Preserve that packet slug unchanged. The canonical root fields and slug constraints
+  belong to the canonical task-packet schema used by the validation workflow;
+  do not restate or locally validate them here.
 
-Produce TaskDraft objects without a `skills` field after reviewing boundaries
-against the shared task contract.
+- Produce TaskDraft objects without a `skills` field after reviewing boundaries
+  against the shared task contract.
 
-Extract proposal-derived scope, decisions, implementation details, verification
-criteria, and questions from one PROPOSAL.md and its copied sources. Do not
-require a separate implementation document; implementation detail lives inside
-PROPOSAL.md as Implementation Details.
+- Extract proposal-derived scope, decisions, implementation details, verification
+  criteria, and questions from one PROPOSAL.md and its copied sources. Do not
+  require a separate implementation document; implementation detail lives inside
+  PROPOSAL.md as Implementation Details.
 
-Preserve source-derived requirements, recommendation constraints, concrete
-implementation targets, compatibility, and exclusions in each task `context`.
+- Preserve source-derived requirements, recommendation constraints, concrete
+  implementation targets, compatibility, and exclusions in each task `context`.
 
-Preserve source-derived requirements in each task `context`.
+- Use copied relative source paths in `filesToRead` when a worker must inspect a
+  source document. Include proposal and predecessor artifacts when they supply
+  material input to the task.
 
-Use copied relative source paths in `filesToRead` when a worker must inspect a
-source document. Include proposal and predecessor artifacts when they supply
-material input to the task.
+- Include only fields accepted by the existing TaskDraftList contract.
 
-Include only fields accepted by the existing TaskDraftList contract.
+- Do not select skills by score, rank, path, threshold, or fallback. Assign skills
+  inline from the collected operation/documentation array after task-boundary
+  authoring. The passive `task-contract` record is context only and never an
+  executable task assignment.
 
-Do not select skills by score, rank, path, threshold, or fallback. Assign skills
-inline from the collected operation/documentation array after task-boundary
-authoring. The passive `task-contract` record is context only and never an
-executable task assignment.
+- Keep execution instructions ordered, concrete, and limited to one worker
+  unit of work.
 
-Keep execution instructions ordered, concrete, and limited to one worker unit of work.
+- Label unresolved material as `Open Question:` in task context.
 
-Label unresolved material as `Open Question:` in task context.
+- Label unverified material as `Assumption:` in task context.
 
-Label unverified material as `Assumption:` in task context.
+- Label missing material evidence as `Evidence Gap:` in task context.
 
-Label missing material evidence as `Evidence Gap:` in task context.
-
-Research questions remain labeled as researchable uncertainty. Do not convert a
-research question into an owner decision without evidence work.
+- Keep research questions labeled as researchable uncertainty. Do not convert a
+  research question into an owner decision without evidence work.

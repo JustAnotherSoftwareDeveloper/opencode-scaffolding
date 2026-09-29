@@ -137,7 +137,7 @@ def test_collect_skills_empty_directory(monkeypatch, tmp_path):
 
 Shared fixtures in `conftest.py` eliminate duplication across test files.
 
-### conftest.py
+### Fixture Setup in `conftest.py`
 
 ```python
 """Shared fixtures for all tests in scripts/python."""
@@ -237,6 +237,10 @@ def test_count_tokens_various_inputs(text, expected):
 ## Unit Test vs Integration Test Pattern
 
 Generated test suites maintain a clear separation between unit and integration tests.
+
+Replace `<script_name>` in these example paths with the selected script name from its
+existing source files, and use the resulting concrete path when creating or locating
+tests.
 
 - **Unit test**: `tests/test_<script_name>.py` — `lib.*` functions in isolation. Key tool: Direct function calls, `tmp_path` for file I/O
 - **CLI integration test**: `tests/test_<script_name>_cli.py` — Full CLI pipeline from argument parsing to output. Key tool: `CliRunner.invoke()`, `isolated_filesystem()`

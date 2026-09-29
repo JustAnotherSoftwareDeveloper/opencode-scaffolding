@@ -1,4 +1,4 @@
-# Generic Executor Reference
+# Fallback Selection And Boundaries
 
 `generic-executor` is the default operation for one bounded task when no specialized
 operation clearly owns the result. It is a semantic fallback, not a failure fallback.

@@ -14,7 +14,7 @@ selection:
 class: delegated
 ---
 
-# Breakdown Tasks
+# Decompose Requests Into Worker-Ready Tasks
 
 <!-- markdownlint-disable MD007 MD013 -->
 

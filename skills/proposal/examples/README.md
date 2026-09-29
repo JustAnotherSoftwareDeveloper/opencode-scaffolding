@@ -6,7 +6,7 @@ These authored fixtures demonstrate the active [proposal format](../reference/pr
 [writing style](../reference/writing-style.md). They are examples, not templates or
 evidence that the format improves reader comprehension.
 
-## Example workspaces
+## Example Workspaces
 
 - **[Short proposal](./short-proposal/PROPOSAL.md):** One bounded template change with
   compact implementation and verification detail and no unnecessary optional sections.
@@ -19,7 +19,16 @@ Each workspace contains one authored `PROPOSAL.md` plus only the copied source f
 declared in its frontmatter. The examples retain `Assumption:`, `Evidence Gap:`, and
 `Open Question:` as stable labels under `Questions`.
 
-## Deterministic checks
+## Supporting Examples
+
+- **[Implementation details](./implementation-details.md):** A focused example of
+  component-level change descriptions for a proposal's `Implementation Details`
+  section.
+- **[Style before and after](./style-before-after.md):** Paired rewrites showing
+  active prose, concrete technical detail, uncertainty ownership, and observable
+  verification.
+
+## Deterministic Checks
 
 Workspace and Markdown validation can establish observable contract properties:
 
@@ -35,7 +44,7 @@ Workspace and Markdown validation can establish observable contract properties:
 A passing check does not establish technical correctness, prose quality, question
 researchability, architecture quality, or reader comprehension.
 
-## Formal engineering review
+## Formal Engineering Review
 
 A reviewer should be able to identify and accurately paraphrase:
 

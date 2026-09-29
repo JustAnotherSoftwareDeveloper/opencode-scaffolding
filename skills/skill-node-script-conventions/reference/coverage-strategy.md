@@ -2,7 +2,7 @@
 
 ## Measurement Tool
 
-Coverage is measured via Bun's built-in coverage tooling.
+Use Bun's built-in coverage tooling to measure coverage.
 
 **Run coverage:**
 
@@ -17,7 +17,7 @@ bun test --coverage
 - `--coverage-reporter lcov` — LCOV format for CI integration
 - `--coverage-dir <path>` — Output directory (default: `coverage/`)
 
-Coverage is measured at the **line level** via c8 (Bun's integrated coverage engine).
+Bun measures coverage at the **line level** via c8 (Bun's integrated coverage engine).
 The `text` reporter prints specific uncovered lines on failure.
 
 ## Source Coverage Boundaries
@@ -32,7 +32,7 @@ Only `src/` is measured. The `tests/` directory and `node_modules/` are excluded
 
 ## Threshold Policy
 
-### fail_under = 100 (Recommended)
+### Required Generated Suite Coverage And Recommended `fail_under = 100` Threshold
 
 Every generated test suite must achieve 100% line coverage.
 If coverage drops below 100, the test generation retries once with expanded edge-case tests.

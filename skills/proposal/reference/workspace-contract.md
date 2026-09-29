@@ -4,7 +4,7 @@ This forward-only contract governs newly authored or deliberately revised propos
 workspaces. Historical `.proposals/` workspaces remain immutable evidence and are not
 accepted as new output shapes.
 
-## Workspace shape
+## Workspace Shape
 
 ```text
 .proposals/<epoch-ms>-<summary-slug>/
@@ -21,7 +21,7 @@ active legacy aliases.
 The workspace name uses a 13-digit epoch-millisecond prefix and lowercase kebab-case
 slug. Creation must not replace an existing workspace.
 
-## Source path and file safety
+## Source Path and File Safety
 
 Each supplied source path must resolve from `$CWD` to a regular file inside `$CWD`.
 Reject directories, devices, sockets, missing paths, absolute manifest paths, path
@@ -93,7 +93,7 @@ Unresolved owner decisions prevent `review-ready`. Blocking evidence gaps preven
 cannot decide whether prose is technically correct or a question is genuinely
 researchable; human review owns those judgments.
 
-## Publication integrity
+## Publication Integrity
 
 Published output contains no unresolved placeholder, authoring comment, template
 instruction, duplicate heading, stale link, undeclared copied source, legacy authored

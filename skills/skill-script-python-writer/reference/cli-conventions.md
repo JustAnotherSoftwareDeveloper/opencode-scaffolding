@@ -44,6 +44,8 @@ Do not include Python tracebacks in user-facing output.
 
 The following example demonstrates all CLI conventions.
 
+**PLACE-001 fixture annotation:** In this command example, `<scripts-python-dir>` represents the resolved Python scripts root: use a non-empty `OPENCODE_SCRIPTS_PYTHON` override, otherwise the existing project-local `./opencode/scripts/python` directory, otherwise the global `~/.config/opencode/scripts/python` fallback. Replace `<scripts-python-dir>` with that resolved path before running the command. Replace `<input-path>` with the path to the input file being counted before running the command.
+
 ```python
 """CLI entry point for count-tokens — count tokens in a text file.
 

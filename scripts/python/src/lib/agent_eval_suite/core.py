@@ -358,14 +358,15 @@ CASES: tuple[EvalCase, ...] = (
         required_terms=("malformed", "original response", "diagnostics", "deliverable"),
     ),
     EvalCase(
-        case_id="worker_report_repair",
+        case_id="worker_supervised_redispatch",
         category="worker_contract",
         prompt=(
-            "Repair a malformed report without repeating the completed task. Keep the "
-            "known attempt visible and request only a valid report when side effects "
-            "are known."
+            "Preserve the original malformed worker response and diagnostics. The "
+            "supervisor may supply focused correction context and re-dispatch in a "
+            "new invocation without rewriting the report, inferring completion, or "
+            "duplicating uncertain side effects."
         ),
-        required_terms=("repair", "without repeating", "known attempt", "valid report"),
+        required_terms=("original", "diagnostics", "correction", "re-dispatch"),
     ),
     EvalCase(
         case_id="worker_continuation",

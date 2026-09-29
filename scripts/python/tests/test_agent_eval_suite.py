@@ -66,7 +66,7 @@ def test_worker_contract_cases_cover_required_categories() -> None:
         "worker_flexible_resources",
         "worker_authoritative_fields",
         "worker_malformed_evidence",
-        "worker_report_repair",
+        "worker_supervised_redispatch",
         "worker_continuation",
         "worker_list_envelope",
         "worker_no_op",

@@ -1,11 +1,10 @@
 # Task Granularity
 
-Choose boundaries by repeatedly making the requested problem smaller. The loaded
-`task-contract` documentation skill's
-[atomicity rule](../../../task-contract/reference/atomicity-and-alignment.md) owns
-the split and stopping tests. Its
-[dependency rule](../../../task-contract/reference/dependencies-and-coupling.md)
-owns handoffs and coupling.
+Choose boundaries by repeatedly making the requested problem smaller. Load the
+`task-contract` documentation skill through the skill tool and consult its
+**Atomicity and alignment** reference for split and stopping tests and its
+**Dependencies and coupling** reference for handoffs and coupling. Those
+references remain owned by `task-contract`.
 
 ## Make The Problem Smaller
 

@@ -37,6 +37,7 @@ from lib.skill_validator.checks import (
     check_no_examples_section,
     check_no_placeholders,
     check_one_sentence_per_line,
+    check_reference_readme_exists,
 )
 from lib.skill_validator.registry import run_all
 from lib.validate_skill_meta.core import (
@@ -287,6 +288,7 @@ def test_skill_validator_checks_and_cli(tmp_path: Path) -> None:
     assert check_description_prefix(skill.parent).passed
     assert check_class_valid(skill.parent).passed
     assert check_docs_last_section(skill.parent).passed
+    assert check_reference_readme_exists(skill.parent).passed
     assert check_no_examples_section(skill.parent).passed
     assert check_one_sentence_per_line(skill.parent).passed
     assert check_no_declarative_voice(skill.parent).passed
@@ -307,3 +309,44 @@ def test_skill_validator_checks_and_cli(tmp_path: Path) -> None:
     assert run_all(bad)["checks"]
     result = CliRunner().invoke(validator_main, [str(bad)])
     assert result.exit_code == 1
+
+
+def test_reference_readme_is_required_only_for_local_reference_files(
+    tmp_path: Path,
+) -> None:
+    skill_dir = write_skill(tmp_path).parent
+    assert check_reference_readme_exists(skill_dir).passed
+    assert all(check["passed"] for check in run_all(skill_dir)["checks"])
+
+    reference_dir = skill_dir / "reference"
+    reference_dir.mkdir()
+    (reference_dir / "empty").mkdir()
+    assert check_reference_readme_exists(skill_dir).passed
+
+    index_path = reference_dir / "README.md"
+    index_path.write_text("# Reference Index\n", encoding="utf-8")
+    assert check_reference_readme_exists(skill_dir).passed
+    index_path.unlink()
+
+    nested = reference_dir / "nested"
+    nested.mkdir()
+    (nested / "rules.md").write_text("# Rules\n", encoding="utf-8")
+    missing_index = check_reference_readme_exists(skill_dir)
+    assert not missing_index.passed
+    assert "reference/README.md" in missing_index.detail
+    assert not all(check["passed"] for check in run_all(skill_dir)["checks"])
+
+    index_path.write_text("# Reference Index\n", encoding="utf-8")
+    assert check_reference_readme_exists(skill_dir).passed
+    assert all(check["passed"] for check in run_all(skill_dir)["checks"])
+
+
+def test_reference_readme_condition_does_not_waive_docs_last_section(
+    tmp_path: Path,
+) -> None:
+    skill = write_skill(tmp_path)
+    skill.write_text(
+        skill.read_text(encoding="utf-8") + "## Guardrails\n", encoding="utf-8"
+    )
+    assert check_reference_readme_exists(skill.parent).passed
+    assert not check_docs_last_section(skill.parent).passed

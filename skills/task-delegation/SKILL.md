@@ -25,7 +25,7 @@ work. An executor must preserve an already approved task plan unchanged.
 
 Accept plaintext, JSON, YAML, key-value lists, or mixed notes. Map aliases to exactly
 these eight sections and mark genuinely uninferable values `UNKNOWN — not provided in
-input`; known-empty resource arrays become `None`:
+input`. Use `None` for known-empty resource arrays:
 
 ```text
 ## PURPOSE
@@ -38,16 +38,19 @@ input`; known-empty resource arrays become `None`:
 ## EXPECTED OUTPUT
 ```
 
-Preserve explicit reads, writes, skills, and outcome requirements. Reads are minimum
-starting context. For ordinary canonical tasks, `SKILLS` contains exactly one assigned
-operation owner plus zero to two passive documentation skills. The worker may add
-materially relevant documentation context, but it may not silently add or substitute a
-second operation owner; changing the operation owner is a supervisory adaptation that
-requires re-dispatch. Internal workflow packets may instead explicitly assign their
-single delegated workflow owner, such as `breakdown-tasks`. Writes are strong
-suggestions, not an exact authorization list: the worker may make a minor
-purpose-preserving adjustment and must explain it. Do not add broad or destructive
-patterns. Reject an ambiguous multi-task object unless one task is clearly selected.
+- Preserve explicit reads, writes, skills, and outcome requirements.
+- Treat reads as minimum starting context.
+- For ordinary canonical tasks, require exactly one assigned operation owner plus zero
+  to two passive documentation skills in `SKILLS`.
+- Let the worker add materially relevant documentation context, but do not let it add
+  or substitute a second operation owner. Changing the operation owner requires
+  supervisory adaptation and re-dispatch.
+- Internal workflow packets may instead explicitly assign their single delegated
+  workflow owner, such as `breakdown-tasks`.
+- Treat writes as strong suggestions, not an exact authorization list. Allow minor,
+  purpose-preserving adjustments only when the worker explains them. Do not add broad
+  or destructive patterns.
+- Reject an ambiguous multi-task object unless one task is clearly selected.
 
 Before dispatch, the caller may improve any section while preserving the intended
 outcome. After dispatch, `purpose`, `details`, `executionInstructions`, `verification`,
@@ -62,11 +65,13 @@ It is the sole authority for the envelope grammar, required fields, vocabularies
 reconciliation rules, status invariants, and payload boundary. Reject any report that
 does not conform to that contract; do not maintain a second grammar in this skill.
 
-If validation fails, the malformed report is not a deliverable, but do not discard it:
-return or expose the original response together with precise diagnostics (missing or
-misordered headings, invalid labels, malformed records, failed reconciliation, or
+If validation fails, the malformed report is not a deliverable. Preserve the exact
+original response and expose it to the supervisor with precise diagnostics (missing
+or misordered headings, invalid labels, malformed records, failed reconciliation, or
 status/payload contradiction). Never translate malformed output into a valid report
-and never use parser failure as evidence that the task itself was completed.
+or use parser failure as evidence that the task itself was completed. The supervisor
+may supply focused correction context and re-dispatch the task in a new invocation;
+the original response and diagnostics remain available and unchanged.
 
 Treat the payload boundary defined by
 `~/.config/opencode/output-contract-template.md` as opaque. Do not parse payload
@@ -74,18 +79,22 @@ content as envelope metadata.
 
 ## Scoped Planning Workflow
 
-When the executable skill is `breakdown-tasks`, validate the uncapped materially
-relevant planning profiles from the planning collector call separately from each
-generated task's exactly one `class: operation` owner plus zero to two
-`class: documentation` assignments from the operation/documentation collector call.
-Require each assignment to preserve the collector-winning `name`, `class`, and `path`,
-existing `SKILL.md` files within their source roots, task-contract inspection, and
-two-pass reconciliation. Use the exact collector-winning `generic-executor` when no
-specialized operation semantically owns a task. Planning loads are passive and never
-grant execution or transitive authority. Stale paths or substituted paths, failed
-loads, irrelevant names, a name absent from the relevant array, class mismatch,
-invalid class composition, or unresolved assignments block; do not repair by
-similarity.
+When the executable skill is `breakdown-tasks`:
+
+- Validate the uncapped materially relevant planning profiles from the planning
+  collector separately from each generated task's assignments from the
+  operation/documentation collector.
+- Require each generated task to have exactly one `class: operation` owner and zero to
+  two `class: documentation` assignments.
+- Preserve each assignment's collector-winning `name`, `class`, and `path`, use
+  existing `SKILL.md` files within their source roots, inspect `task-contract`, and
+  perform two-pass reconciliation.
+- Use the exact collector-winning `generic-executor` when no specialized operation
+  semantically owns a task.
+- Treat planning loads as passive; they never grant execution or transitive authority.
+- Block on stale or substituted paths, failed loads, irrelevant names, names absent
+  from the relevant array, class mismatches, invalid class composition, or unresolved
+  assignments. Never repair these by similarity.
 
 During ordinary execution, the assigned operation or delegated worker may explicitly
 load a materially relevant `documentation` skill named by the packet or discovered as
@@ -96,23 +105,25 @@ inline/task-executor exact-declaration behavior unchanged.
 
 ## Reporting Boundary
 
-Preserve the canonical worker envelope without adding a local grammar. `Skills loaded`
-contains the assigned executable operation or delegated owner only. Report passive
-documentation loads in `Reads relied on` as passive documentation with their
-collector-winning identity when applicable. Reserve `Planning context loaded` for
-passive planning profiles from the scoped planning collector; it is not an executable
-assignment or completion evidence. Do not claim runtime enforcement for loading,
-recursion, duplication, or passive behavior without loader-harness evidence.
+- Preserve the canonical worker envelope without adding a local grammar.
+- Put only the assigned executable operation or delegated owner in `Skills loaded`.
+- Report passive documentation loads in `Reads relied on` as passive documentation,
+  with their collector-winning identity when applicable.
+- Reserve `Planning context loaded` for passive planning profiles from the scoped
+  planning collector. It is not an executable assignment or completion evidence.
+- Do not claim runtime enforcement for loading, recursion, duplication, or passive
+  behavior without loader-harness evidence.
 
 ## Dispatch Boundary
 
 Launch exactly one worker task per invocation with the complete plaintext packet. Do not
 rewrite the worker's valid envelope, extract only its status, or silently broaden the
-caller's authority. When a result is malformed, the delegator does not stop at a
-fixed decision tree — troubleshoot the failure, infer the worker's intent from
-partial evidence, and choose whatever reasonable next step reaches the intended
-outcome. The only inviolable constraints are the task tool, one worker per
-invocation, and no silent authority creep.
+caller's authority. For a malformed result, return the original response and
+diagnostics for supervisory review. A supervisor may correct only the transient
+execution context and re-dispatch the complete task in a subsequent invocation;
+preserve the approved task's authoritative fields and do not infer completion or
+silently repair the malformed response. Keep the task tool, one worker per
+invocation, and no silent authority creep as hard boundaries.
 
 ## Execution Steps
 
@@ -122,6 +133,7 @@ invocation, and no silent authority creep.
 3. Validate the packet and dispatch exactly one worker.
 4. Read `~/.config/opencode/output-contract-template.md`, then validate the complete
    envelope, resource reconciliation, status, and payload against it.
-5. If malformed, troubleshoot and infer the narrowest correction; do not stop at the
-   first validation failure unless the evidence is genuinely insufficient.
+5. If malformed, preserve the original response and precise diagnostics for the
+   supervisor to decide a focused correction and re-dispatch. Do not treat the
+   malformed response as a deliverable or alter it into a valid envelope.
 6. When valid, return the report unchanged.

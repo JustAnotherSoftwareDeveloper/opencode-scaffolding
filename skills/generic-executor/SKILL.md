@@ -14,7 +14,7 @@ selection:
 class: operation
 ---
 
-# Generic Executor
+# Bounded Task Execution
 
 Execute one bounded canonical task when no specialized operation clearly owns the
 result. This is the universal semantic fallback operation for ordinary execution. It

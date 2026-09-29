@@ -1,13 +1,47 @@
 # Task Validation
 
-Validation checks for decomposition output correctness.
-Verify output against these checks.
-Rework affected packet(s) if any check fails.
+Check the packet's structure before reviewing its request-aware task boundaries.
+Rework affected packets when a structural or semantic check fails.
 
 The loaded `task-contract` documentation skill owns the meaning of task identity,
 atomicity, result and verification alignment, dependencies, coupling, traceability,
 and authoring metadata. The checks below are the breakdown-tasks operation's
 validation procedure and diagnostics; they do not replace that passive reference.
+
+## Structural And Schema Checks
+
+- **JSON validity** — Require the complete output to parse as JSON.
+- **Canonical root** — Validate the complete object against the canonical
+  [task-packet schema](../../schema/task-packet.schema.json). The required root
+  fields are `summary`, `slug`, `tasks`, and `boundaryReview`; additional root
+  fields are not allowed.
+- **Required task fields** — Every task requires `taskId`, `purpose`, `context`,
+  `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`,
+  `expectedOutput`, `verificationCoverage`, `dependencies`,
+  `antiPatternSignals`, and `purposeOutputAlignment`. Additional task fields are
+  not allowed. `verification` and `couplingRationale` are optional and must
+  satisfy their schema definitions when present.
+- **Schema constraints** — Use the schema for field types, nested structures,
+  requiredness, enums, array bounds, and string constraints. Do not substitute a
+  partial local field list for schema validation.
+- **Execution-step structure** — The task validator additionally requires
+  `executionInstructions.step` values to be sequential integers starting at 1,
+  without gaps or duplicates. The schema itself requires only an integer of at
+  least 1 for each step.
+- **File-array structure** — `filesToRead` and `filesToWrite` are required string
+  arrays and may be empty. Reject empty or duplicate entries and placeholder
+  paths.
+- **Structural consistency** — Check task identity uniqueness, non-empty
+  `verificationCoverage.observable`, valid dependency references, acyclic
+  dependencies, and overlapping write targets unless the tasks share a matching
+  coupling group or the later task depends on the earlier writer.
+- **Skill-array structure** — Enforce the schema's one-to-three unique string
+  entries per task. This structural limit does not establish skill suitability
+  or class composition.
+
+Structural validation checks the packet interface and structural consistency.
+It does not establish semantic atomicity or accept the packet for display or
+dispatch.
 
 ## Atomicity Checks
 
@@ -45,33 +79,17 @@ validation procedure and diagnostics; they do not replace that passive reference
   change, and produced deliverable is represented. Do not reject, merge, or pad
   tasks based on packet size. Keep verification evidence with its result unless
   explicitly requested as a deliverable. Enforce one to three skills separately.
-
-- **JSON validity** — The entire output must be parseable as valid JSON.
-- **Canonical root** — Validate the entire parsed object against the canonical
-  [task-packet schema](../../schema/task-packet.schema.json), including the
-  author-selected packet slug. Do not restate or locally validate root grammar.
-- **Schema compliance** — Every task must have `purpose`, `context`,
-  `filesToRead`, `filesToWrite`, `skills`, `executionInstructions`, and
-  `expectedOutput`. Missing or extra keys are a blocker.
-- **executionInstructions step numbering** — Steps must be sequential integers
-  starting at 1 with no gaps or duplicates.
-- **executionInstructions verifiability** — Each step must have a concrete,
-  observable action. Reword vague actions such as `"improve"`, `"optimize"`, or
-  unspecified `"refactor"` actions.
-- **filesToRead / filesToWrite — arrays of file paths** — These arrays may be empty
-  when a task has no file inputs or outputs. Each present element must be a non-empty
-  string path.
-- **Type correctness** — `filesToRead`, `filesToWrite`, and `skills` are string
-  arrays. `executionInstructions` is an array of step records. Optional
-  `verification` is an array of strings. `purpose`, `context`, and `expectedOutput`
-  are strings.
-- **Optional fields** — `verification` is optional. If present, validate it against
-  the schema.
 - **No combined tasks** — Apply the shared atomicity contract. No packet may bundle
   separate results under one `purpose`. Multiple actions are allowed when they only
   produce or verify one result; verb count is not a boundary test.
+- **Verifiable instructions** — Require each action to name a concrete, observable
+  result. Reword vague actions such as `"improve"`, `"optimize"`, or unspecified
+  `"refactor"` actions.
+
+## Assignment Fit
+
 - **Skill-name reasonableness** — Each `skills` entry must be appropriate for the
-  task's purpose and context.
+  task's purpose and context. Schema validity does not prove that a skill fits.
 
 ## Final Request-Aware Acceptance
 

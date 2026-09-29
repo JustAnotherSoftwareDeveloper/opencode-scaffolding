@@ -6,7 +6,7 @@ No other classes are valid.
 If uncertain, lean toward `operation`.
 If the skill is a passive data store consumed by other skills, choose `documentation`.
 
-## operation
+## Operation
 
 **Template**: `./templates/operation.SKILL.template.md`
 
@@ -26,7 +26,7 @@ For tasks requiring Node-specific libraries (see the Node Script Support decisio
 See platform-layout-context.md for Node resolution conventions.
 For CLI tools, shell scripting, and Makefile orchestration, scripts may be written in Bash and invoked via Make (see platform-layout-context.md for shell resolution conventions).
 
-## delegated
+## Delegated
 
 **Template**: `./templates/delegated.SKILL.template.md`
 
@@ -37,7 +37,7 @@ Includes final workers and workflow stages (including decomposers) invoked by a 
 - **Delegation**: Participates in delegation pipelines as a subtask receiver.
 - **Execution steps**: Yes — numbered prefixes define the workflow.
 
-## inline
+## Inline
 
 **Template**: `./templates/inline.SKILL.template.md`
 
@@ -50,7 +50,7 @@ No worker or sub-skill orchestration as its own workflow.
 - **Execution steps**: Yes — numbered prefixes define the workflow.
 - **Lifetime**: Ephemeral — load it for one reasoning pass, then discard.
 
-## planning
+## Planning
 
 **Template**: `./templates/planning.SKILL.template.md`
 
@@ -62,7 +62,7 @@ Documents structural knowledge about the codebase.
 - **Execution steps**: Defines none — uses passive content sections instead.
 - **Purpose**: Answers "what exists, how it fits together, and what constraints apply" — not "what steps do I execute."
 
-## documentation
+## Documentation
 
 **Template**: `./templates/documentation.SKILL.template.md`
 

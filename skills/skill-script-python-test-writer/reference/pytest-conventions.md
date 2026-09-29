@@ -1,5 +1,11 @@
 # Pytest Conventions
 
+In the patterns throughout this reference, `<script_name>` is the selected library
+package name from its existing `src/lib/` directory, `<module>` is the referenced
+module's name from its source filename, and `<name>` is the selected script identifier
+from its existing CLI filename or library directory. Substitute these source-derived
+names when applying import, path, or test-name patterns or reporting blocked outcomes.
+
 ## Naming Conventions
 
 - Test files start with `test_` prefix (e.g., `test_count_tokens.py`, `test_count_tokens_cli.py`).
@@ -171,7 +177,7 @@ def test_cli_error_paths(args, expected_exit_code, expected_substring):
 
 The test writer reads generated source files to determine module structure and automatically generates corresponding tests.
 
-## BLOCKED Edge Case Handling
+## Handling `BLOCKED` Outcomes
 
 - If the source CLI or lib files do not exist: `BLOCKED: Source script <name> not found — run skill-script-python-writer first.`
 - If a shared module referenced by the script does not exist: `BLOCKED: Shared module <name> not found — create it under src/lib/shared/ first.`

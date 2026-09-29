@@ -12,22 +12,24 @@ requirements, and open engineering decisions for `plan-writer`.
 
 ## Sequence
 
-- `Proposal recorded` is owned by `proposal` and is represented by the proposal
-  workspace, its source set, and its authoritative baseline.
-- `Proposal authorization confirmed` is the required gate before planning. It
-  requires either a recorded accepted lifecycle state or `decision-ready` plus
-  explicit planning authorization from the recorded decision authority. Recording,
-  publication, validation, `review-ready`, and recency do not cause this transition.
-- `Plan authored` is owned by `plan-writer` and is represented by the plan workspace
-  with `tasks.json`, `tasks.md`, and preserved source context.
-- A published proposal-derived plan transitions to `Audit pending`, owned by
-  `plan-audit`, with the exact plan snapshot and proposal baseline identified.
-- `plan-audit` produces either `Audit passed` or `Audit findings` in its external
-  Markdown report. Findings identify bounded remediation by finding ID; the audit
-  owner does not repair the plan.
-- Findings transition to a `plan-writer`-owned bounded fix, then to a revised plan
-  and a mandatory re-audit. The full state description is in the
-  [proposal-derived audit lifecycle](./proposal-derived-audit-lifecycle.md).
+1. `Proposal recorded` is owned by `proposal` and is represented by the proposal
+   workspace, its source set, and its authoritative baseline.
+2. `Proposal authorization confirmed` is the required gate before planning. It
+   requires either a recorded accepted lifecycle state or `decision-ready` plus
+   explicit planning authorization from the recorded decision authority. Recording,
+   publication, validation, `review-ready`, and recency do not cause this transition.
+3. `Plan authored` is owned by `plan-writer` and is represented by the plan workspace
+   with `tasks.json`, `tasks.md`, and preserved source context.
+4. A published proposal-derived plan transitions to `Audit pending`, owned by
+   `plan-audit`, with the exact plan snapshot and proposal baseline identified.
+5. `plan-audit` produces either `Audit passed` or `Audit findings` in its external
+   Markdown report:
+   - **`Audit passed`:** the external report records the pass disposition.
+   - **`Audit findings`:** the report identifies bounded remediation by finding ID;
+     the audit owner does not repair the plan.
+6. Findings transition to a `plan-writer`-owned bounded fix, then to a revised plan
+   and mandatory re-audit. The full state description is in the
+   [proposal-derived audit lifecycle](./proposal-derived-audit-lifecycle.md).
 
 ## Artifacts
 

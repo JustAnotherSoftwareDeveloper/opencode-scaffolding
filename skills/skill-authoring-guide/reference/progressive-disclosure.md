@@ -85,7 +85,13 @@ context.
 
 **Condition.** A compact index links each referenced detail file. Each relative target
 resolves from the source file, stays inside the repository, and has non-empty link
-text.
+text. Within a skill workspace, link only to that skill's own files. For shared
+reference content owned by another skill, name and load the relevant documentation
+skill through the skill tool rather than linking into its directory. The top-level
+`skills/README.md` index may link to skill entry points; it is not a skill workspace.
+Require `reference/README.md` only when a skill has local files under `reference/`.
+Do not create an empty reference index solely to satisfy a validator check; the
+independent `## Docs` section rule is unaffected.
 
 **Diagnostic evidence.** Report the source line, target, and resolution failure;
 report an unlinked detail section by heading.

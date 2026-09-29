@@ -133,4 +133,4 @@ Launch exactly one worker task per invocation.
 
 ## Docs
 
-See `./reference/README.md` for supporting notes.
+Open the [reference directory](./reference/README.md).

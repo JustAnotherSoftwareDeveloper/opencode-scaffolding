@@ -1,3 +1,3 @@
-# dispatch-decompose
+# Reference Directory
 
-Reference directory for dispatch-decompose skill.
+Use this directory for guidance on dispatching decomposition requests.

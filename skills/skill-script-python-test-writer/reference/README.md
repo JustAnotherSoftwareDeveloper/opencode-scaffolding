@@ -1,5 +1,5 @@
-# Reference Files — skill-script-python-test-writer
+# Testing References
 
-- `reference/pytest-conventions.md` — Naming conventions, CliRunner usage, unit test import patterns, fixture-based setup, parameterized tests, paired script/test mapping, BLOCKED edge case handling, and conftest.py fixture examples.
-- `reference/coverage-strategy.md` — Line-level pytest-cov measurement, source coverage boundaries, fail_under=100 enforcement, edge case identification checklist, error path testing via parametrize, coverage exemptions, and pyproject.toml coverage configuration snippet.
-- `reference/test-examples.md` — File-based tests with `isolated_filesystem()` and `tmp_path`, mock-based tests with `unittest.mock.patch` and `monkeypatch`, conftest fixture usage, `@pytest.mark.parametrize` examples, and unit vs integration test pattern comparison.
+- [Pytest conventions](pytest-conventions.md) — Use these rules for test names, `CliRunner`, direct imports, fixtures, parameterization, source-to-test mapping, `BLOCKED` outcomes, and shared setup.
+- [Coverage strategy](coverage-strategy.md) — Measure line coverage for the selected source scope, apply its 100% target, choose relevant edge cases, test handled errors, and understand the example configuration.
+- [Test examples](test-examples.md) — Adapt examples for isolated CLI filesystems, `tmp_path`, mocks, `monkeypatch`, shared fixtures, parameterized tests, and unit-versus-CLI coverage.

@@ -57,7 +57,7 @@ Sources closes the traceability path. Copied internal entries reconcile exactly 
 frontmatter `source-documents`; external bibliography entries remain identifiable but
 outside the copied-source manifest.
 
-## Optional technical subsections
+## Optional Technical Subsections
 
 Add a subsection only when its concern changes the decision or review:
 
