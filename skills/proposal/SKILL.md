@@ -49,57 +49,41 @@ is unknown.
    decision-maker, choices, and consequence of deferral. Never convert missing
    research into an owner decision.
 5. Create one metadata-bearing `PROPOSAL.md` from
-   [the active template](./templates/PROPOSAL.md). It is the decision,
-   implementation, verification, and source-traceability artifact. Do not create
-   numbered section files, a separate implementation document, a separate source
-   index, or active aliases for legacy artifacts.
-6. Write the core H2 sections in this order: `Table of Contents`, `Recommendation`,
-   `Technical Rationale`, `Questions`, `Options Considered`,
-   `Implementation Details`, `Verification Criteria`, and `Sources`. Add a
-   domain-specific H2 between `Questions` and `Options Considered` only when it adds
-   decision-relevant technical detail. Omit optional subsections that add no useful
-   information; do not omit a core H2.
-7. Populate the document using the [proposal format](./reference/proposal-format.md),
-   [writing style](./reference/writing-style.md), and
-   [implementation format](./reference/implementation-format.md). Lead with the
-   selected architecture or behavior. Use neutral, direct engineering prose, stable
-   component names, focused paragraphs, parallel lists, selective citations, and
-   explicit interfaces, invariants, dependencies, compatibility, migration, failure
-   modes, and rollback constraints when material. Keep implementation detail concrete
-   enough for planning without turning the proposal into a runbook.
-8. Keep evaluation criteria in rationale or option comparison distinct from
-   completion evidence in `Verification Criteria`. Map every intended result to a
-   test, inspection, metric, observation, or bounded human-review task. Do not claim
-   that structural lint proves technical correctness, prose quality, researchability,
-   or reader comprehension.
-9. Write valid YAML frontmatter in `PROPOSAL.md`, including `title`, `slug`, `created`,
-   `created-at`, `status`, `readiness`, `decision-owner`, and `source-documents`.
-   New workspaces start with `status: draft`. Use only `not-ready`, `review-ready`, or
-   `decision-ready` for readiness. Derive readiness from evidence and question state:
-   unresolved owner decisions prevent `review-ready`; blocking research gaps prevent
-   `decision-ready`; and `decision-ready` requires an explicit decision record ready
-   for the decision authority. Lifecycle status, readiness, acceptance, and approval
-   are independent facts. Never infer approval from `review-ready` or mutate metadata
-   to manufacture authorization.
-10. Treat frontmatter `source-documents` as the canonical copied-source manifest.
-    Every entry must be a safe relative path to one copied regular file and must appear
-    exactly once as an internal entry under `Sources`; every copied source must appear
-    in both places. External bibliography entries may appear in `Sources` but are not
-    copied-source manifest entries. Use descriptive links and preserve source identity
-    without fabricating metadata.
-11. Label decision-dependent unverified claims `Assumption: <statement>`. Keep
-    `Assumption:`, `Evidence Gap:`, and `Open Question:` distinct and machine-stable;
-    do not add `Research Question:` or `Decision Question:` aliases. Put evidence and
-    labels next to the claims they qualify.
-12. Build a non-recursive table of contents that links every H2 exactly once in
-    document order, excludes its own heading, and includes major H3 implementation or
-    verification workstreams when they are needed for technical review. Verify every
-    internal anchor and relative link.
-13. Remove all authoring prompts, comments, and placeholders before publication.
-    Reject duplicate headings, stale TOC entries, unsupported aliases, undeclared
-    sources, legacy authored files, and source-manifest drift. Run applicable
-    workspace, Markdown, and relative-link checks, then perform a human engineering
-    review for decision clarity, technical completeness, and comprehension limits.
+    [the active template](./templates/PROPOSAL.md), as the sole authored decision,
+    implementation, verification, and source-traceability artifact. No companion
+    implementation/source files or active legacy aliases. See [proposal format, core
+    document order](./reference/proposal-format.md#core-document-order).
+6. Write the required core sections in the order defined by [proposal
+    format](./reference/proposal-format.md#core-document-order); add an optional
+    domain-specific H2 only in its permitted position when it adds decision-relevant
+    technical detail.
+7. Apply [proposal format](./reference/proposal-format.md), [writing
+    style](./reference/writing-style.md), and [implementation
+    format](./reference/implementation-format.md). Keep implementation details concrete
+    enough for planning, not a runbook.
+8. Distinguish option-evaluation criteria from completion evidence and map every
+    intended result to observable verification. Structural checks do not establish
+    technical correctness, prose quality, researchability, or comprehension; see
+    [proposal format, Verification Criteria](./reference/proposal-format.md#verification-criteria)
+    and [writing style, Human evidence boundary](./reference/writing-style.md#human-evidence-boundary).
+9. Establish readiness from evidence and question state without implying approval or
+    acceptance. Use [proposal format, Metadata and readiness](./reference/proposal-format.md#metadata-and-readiness)
+    and [workspace contract, Frontmatter](./reference/workspace-contract.md#frontmatter)
+    for exact metadata and readiness rules.
+10. Reconcile copied-source identity through the canonical `source-documents` manifest
+    and `Sources`; use [workspace contract, Source manifest and Sources
+    identity](./reference/workspace-contract.md#source-manifest-and-sources-identity).
+11. Keep `Assumption:`, `Evidence Gap:`, and `Open Question:` distinct and do not turn
+    researchable uncertainty into an owner decision; use [proposal format,
+    Questions](./reference/proposal-format.md#questions) and [workspace contract,
+    Evidence and Questions](./reference/workspace-contract.md#evidence-and-questions).
+12. Verify the table of contents, anchors, and relative links under [workspace
+    contract, Document structure](./reference/workspace-contract.md#document-structure).
+13. Before publication, run applicable workspace, Markdown, and relative-link checks,
+    then perform a human engineering review for decision clarity and technical
+    completeness. Keep deterministic evidence separate from human judgments; see
+    [workspace contract, Publication Integrity](./reference/workspace-contract.md#publication-integrity)
+    and [writing style, Human evidence boundary](./reference/writing-style.md#human-evidence-boundary).
 14. Apply this contract only to newly authored or deliberately revised proposals.
     Leave historical `.proposals/` workspaces byte-for-byte unchanged. Do not add
     migration adapters, generic lifecycle phases, assignments, estimates, approval

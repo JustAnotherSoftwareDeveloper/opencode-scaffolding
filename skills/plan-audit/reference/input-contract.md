@@ -12,6 +12,10 @@ The operation accepts one object with these fields:
   inventory. It is historical comparison evidence only.
 - `auditOutput` — a new caller-declared Markdown path.
 
+Declare the report inside a dedicated evidence directory such as `.evidence/`.
+Do not place loose audit reports in the workspace root. Prepare the parent before
+invocation; the audit does not create it or silently choose another destination.
+
 An authoritative baseline must contain `PROPOSAL.md` with valid YAML frontmatter
 (`title`, `slug`, `status`, `readiness`, `decision-owner`, `source-documents`),
 the required H2 sections (`Recommendation`, `Technical Rationale`, `Questions`,

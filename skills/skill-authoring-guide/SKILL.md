@@ -31,6 +31,8 @@ Factory and template maintenance are separate operations.
   negative, and neighboring requests.
 - [Authoring style](./reference/authoring-style.md) — Semantic prose forms, headings,
   examples, and discrimination rules for filled content.
+- [Skill cross-references](./reference/cross-references.md) — Explicit skill loading
+  and the canonical skill-to-document reference syntax.
 - [Progressive disclosure](./reference/progressive-disclosure.md) — Compact entry
   points, deterministic conformance evidence, and `TABLE-001`'s narrow exception for
   only the exact fenced `Output Format` example in `display-tasks/SKILL.md` and its

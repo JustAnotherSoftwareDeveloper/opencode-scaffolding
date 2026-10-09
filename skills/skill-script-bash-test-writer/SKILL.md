@@ -137,12 +137,9 @@ Do not load `skill-script-bash-writer` as a second operation owner; inspect the 
 script and any writer conventions already supplied as read-only task context.
 All generated tests must conform to the applicable conventions.
 
-- **Exit codes (`skill-bash-conventions`)** — Standard
-  exit codes: 0 success, 1 runtime error, 2 usage error, and 3 environment error.
-- **JSON output (`skill-bash-conventions`)** — stdout
-  JSON contract and stderr diagnostic conventions for test assertions.
-- **ShellCheck (`skill-bash-conventions`)** — Adopted
-  ShellCheck rule policies enforced by lint.
+- **Exit codes** — `skill-bash-conventions -> reference/exit-codes.md`.
+- **JSON stdout/stderr** — `skill-bash-conventions -> reference/json-output-conventions.md`.
+- **ShellCheck policies** — `skill-bash-conventions -> reference/shellcheck-rules.md`.
 - **Testing conventions (supplied writer context)** — bats-core setup/teardown,
   assertion libraries, PATH-based mocks, fixtures under
   `fixtures/<script-name>/`, coverage, and validation.

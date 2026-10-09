@@ -40,7 +40,8 @@ constraints, files, and expected outcome. Block when either is absent.
 2. **Select and load planning skills.** Present the request and planning array to
    the LLM. Select every materially relevant planning skill. Load each selection
    with the skill tool. Block on an absent name, stale path, or load failure. Allow
-   an empty selection only when no planning concern exists.
+   an empty selection only when no planning concern exists. Reading `SKILL.md`
+   does not substitute for loading a planning or documentation skill.
 
 3. **Collect operation and documentation skills.** Run:
 
@@ -69,9 +70,11 @@ constraints, files, and expected outcome. Block when either is absent.
    it again if it still contains more than one immediate result. Prefer too many small
    tasks over one compound task. When uncertain, split.
 
-   Apply the loaded `task-contract` documentation skill's named **Atomicity and
-   alignment**, **Dependencies and coupling**, and **Traceability and metadata**
-   references. Hold predecessor outputs fixed when testing whether dependent results
+    Apply the loaded documentation references
+    `task-contract -> reference/atomicity-and-alignment.md`,
+    `task-contract -> reference/dependencies-and-coupling.md`, and
+    `task-contract -> reference/traceability-and-metadata.md`.
+    Hold predecessor outputs fixed when testing whether dependent results
    can be accepted or retried separately. Treat lifecycle stages as separate tasks by
    default. Known-file reading may support one task, but source discovery, findings,
    decisions, changes, and independently executable checks are separate results. Do
@@ -124,8 +127,11 @@ constraints, files, and expected outcome. Block when either is absent.
    the task. Do not score, rank, rerank, clip, repair, or use lexical or similarity
    fallback.
 
-7. **Inspect contracts.** Read each selected skill's `SKILL.md` at its
-   collector-winning `path`. Verify that the contract matches the task.
+7. **Verify selected contracts.** Load each selected documentation skill with the
+   skill tool before relying on its guidance; reading its `SKILL.md` is not a load.
+   For operation assignments, inspect the collector-winning `SKILL.md` without
+   executing that future task's operation. Verify every contract matches its task.
+   Block on a stale or substituted path, class mismatch, or required load failure.
 
 8. **Write the completed draft.** Add the reconciled `skills` arrays without
     changing boundaries or metadata. Require the author to select one packet slug.

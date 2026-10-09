@@ -82,20 +82,19 @@ One or more files under `scripts/node/`:
 
 ## Shared Conventions
 
-This skill consumes shared reference documentation from the `skill-node-script-conventions` skill. All generated scripts must conform to these conventions.
+Load `skill-node-script-conventions` as passive documentation for authoritative shared
+conventions. Apply the applicable cross-references below;
+generated scripts must conform to their shared policies.
 
-- **`skill-node-script-conventions` (typescript-node-style-guide)** — TypeScript/Node style guide: Biome lint rule catalog, strict-mode flag breakdown, import ordering convention, naming conventions table, type annotation patterns, and coverage exemption conventions.
-- **`skill-node-script-conventions` (shared-lib-rules)** — Five rules for shared library modules under `src/lib/shared/`: no CLI entry points, 100% coverage, consumer documentation in module-level JSDoc, domain-based naming, and extraction discipline.
-- **`skill-node-script-conventions` (path-layout)** — Directory and file path conventions for Node scripts — `src/` layout, test layout, import conventions with `.ts` extensions, and module organization principles.
-- **`skill-node-script-conventions` (tooling-config)** — Tooling configuration for `biome.json` (single quotes, semicolons asNeeded, indent 2, lineWidth 120), `tsconfig.json` (module: Preserve, types: [bun], strict flags), and `package.json` (bun deps, cleye, script entries).
-- **`skill-node-script-conventions` (bun-test-conventions)** — Conventions for `bun:test` test files: globals, `Bun.spawnSync` CLI test pattern, fixture setup, parameterized tests, mocking patterns, and paired source-to-test file mapping.
-- **`skill-node-script-conventions` (coverage-strategy)** — Coverage measurement via `bun --coverage`, source path boundaries, `fail_under = 100` threshold policy, 6-category edge case identification checklist, error path testing requirements, and c8 exemption conventions.
-- **`skill-node-script-conventions` (test-examples)** — Complete runnable test examples covering CLI integration tests, file-based unit tests, module mocking, spy patterns, parameterized tests, and shared fixture helpers.
-- **`skill-node-script-conventions` (reference-README)** — Index of all reference files in the conventions skill with one-sentence descriptions.
+- **TypeScript/Node style** — `skill-node-script-conventions -> reference/typescript-node-style-guide.md`: Biome rules, strict-mode flags, import ordering, naming, type annotations, and coverage exemptions.
+- **Shared libraries** — `skill-node-script-conventions -> reference/shared-lib-rules.md`, especially “Five Shared Module Rules”: shared-module entry-point, coverage, consumer documentation, naming, and extraction rules.
+- **Paths and layout** — `skill-node-script-conventions -> reference/path-layout.md`, “Directory Layout (Both Roots),” “Import Conventions,” and “Module Organization Principles.” Keep this operation's platform decision above; the reference does not replace it.
+- **Tooling and configuration** — `skill-node-script-conventions -> reference/tooling-config.md`, “Configure `biome.json`,” “Configure `tsconfig.json`,” and “Configure `package.json`.”
+- **Bun tests** — `skill-node-script-conventions -> reference/bun-test-conventions.md`, “Naming Conventions,” “bun:test Globals,” “CLI Integration Tests with Bun.spawnSync,” “Fixture Setup Pattern (mkdtempSync / rmSync),” “Parameterized Tests,” “Test Isolation Conventions,” and “Mocking Patterns.”
+- **Coverage** — `skill-node-script-conventions -> reference/coverage-strategy.md`, “Measurement Tool,” “Source Coverage Boundaries,” “Required Generated Suite Coverage And Recommended `fail_under = 100` Threshold,” “Edge Case Identification Checklist,” “Error Path Testing,” and “Coverage Exemption Conventions.”
+- **Examples** — `skill-node-script-conventions -> reference/test-examples.md` provides complete CLI, unit, mocking, spy, parameterized, and fixture examples.
 
-## Style Guide Coverage
-
-Generated scripts must adhere to the shared conventions defined in `skill-node-script-conventions`. That skill covers naming conventions, path and project layout, tooling configuration (biome.json, tsconfig.json, package.json), testing conventions, and coverage strategy — load it for authoritative reference.
+See the loaded `skill-node-script-conventions` entry point for the full reference inventory.
 
 ## Docs
 

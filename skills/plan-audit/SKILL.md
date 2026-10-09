@@ -35,6 +35,10 @@ per-file manifest. The operation populates `assignmentInventory` from its one fr
 collector run; any caller-supplied inventory is historical comparison evidence only
 and never replaces that fresh result.
 
+Keep audit reports in a dedicated evidence directory such as `.evidence/`, not as
+loose files in the workspace root. The caller must create the report parent before
+invoking the audit; do not silently redirect a declared output path.
+
 An authoritative baseline must contain `PROPOSAL.md` with valid frontmatter
 (`title`, `slug`, `status`, `readiness`, `decision-owner`, `source-documents`),
 the required H2 sections (`Recommendation`, `Technical Rationale`, `Questions`,
@@ -59,9 +63,14 @@ fallback is incomplete.
 
    Retain its complete JSON array and provenance; a failed or invalid run
    blocks skill assignment and does not permit a persisted inventory fallback.
-3. Reconcile and read the exact fresh `task-contract` documentation winner as
-   passive semantic context; it grants no authority, execution, or completion
-   evidence. Then read the proposal baseline (PROPOSAL.md plus declared copied
+3. Reconcile and load the exact fresh `task-contract` documentation winner with the
+    skill tool before semantic checks. Load other selected documentation skills before
+    relying on their guidance; reading `SKILL.md` is not a substitute for a load.
+    Use `task-contract -> reference/atomicity-and-alignment.md`,
+    `task-contract -> reference/dependencies-and-coupling.md`, and
+    `task-contract -> reference/traceability-and-metadata.md` as passive semantic
+    context; they grant no authority, execution, or completion evidence.
+    Then read the proposal baseline (PROPOSAL.md plus declared copied
    sources), plan packet,
    rendered task document, and selected skill contracts. Create a sorted SHA-256
    manifest containing every resolved input path, byte length, and digest before

@@ -27,8 +27,8 @@ Map invocation context to one internal input object with these required fields:
 
 For the blocked-message formats below, substitute the **Script name** input value for the first `<name>` and the concrete shared-module name from **Module structure** for the second `<name>`; never emit `<name>` literally.
 
-`BLOCKED: Source script <name> not found — run skill-script-node-writer first.`
-`BLOCKED: Shared module <name> not found — create it under src/lib/shared/ first.`
+`BLOCKED: Source script <name> not found under scripts/node/.`
+`BLOCKED: Shared module <name> not found under src/lib/shared/.`
 `BLOCKED: Scripts directory not found at scripts/node/.`
 
 ## Procedure
@@ -41,27 +41,28 @@ Do not delegate sub-tasks.
    Identify shared lib dependencies (`from 'lib/shared/*'`) for separate test generation.
    Read `src/lib/shared/exit-codes.ts` for expected exit code constants.
 
-2. **Generate unit test file** — Write `tests/<script-name>.test.ts` with:
-   - Import the `bun:test` globals (`describe`, `expect`, `it`, `beforeAll`, `afterAll`).
-   - Import directly from `src/lib/<script-name>/<module>`; do not use barrel files.
-   - Add one `describe` block per module with `it` cases covering nominal and edge-case inputs.
-   - Create temporary fixture directories with `mkdtempSync` from `node:fs`.
-   - Set up and tear down fixtures with `beforeAll` / `afterAll`, using `rmSync` with `recursive: true`.
-   - Cover error paths and exception handling.
-   - Assert behavior with `expect().toBe()`, `expect().toEqual()`, and `expect().toThrow()`.
+2. **Generate unit test file** — Write `tests/<script-name>.test.ts` for the inspected
+   `src/lib/<script-name>/` modules. Keep one `describe` block per module and use
+   `toBe`, `toEqual`, and `toThrow` as appropriate to its behavior. Assert observed
+   behavior, including applicable nominal, edge, error, and exception cases; do not
+   infer behavior from convention examples. Follow these loaded documentation references
+   for reusable test mechanics:
+   - `skill-node-script-conventions -> reference/bun-test-conventions.md`
+   - `skill-node-script-conventions -> reference/path-layout.md`
+   - `skill-node-script-conventions -> reference/coverage-strategy.md`
+   - `skill-node-script-conventions -> reference/test-examples.md`
 
-3. **Generate CLI integration test file** — Write `tests/<script-name>.cli.test.ts` with:
-   - Use `Bun.spawnSync`-based tests to cover all CLI arguments and options.
-   - Use this pattern: `const result = Bun.spawnSync(['bun', 'src/cli/<script-name>.ts', ...args])`.
-   - Assert `result.exitCode` and `result.stdout.toString()` / `result.stderr.toString()`.
-   - Create temporary fixture files for CLI arguments with `mkdtempSync`.
-   - Parameterize error-path tests for non-zero exit conditions with `describe.each` or `it.each`.
-   - Use the inspected CLI definition and any CLI conventions supplied as read-only task context for expected behavior; do not load a second operation owner.
+3. **Generate CLI integration test file** — Write `tests/<script-name>.cli.test.ts`
+   to exercise each applicable argument and option in the inspected CLI definition
+   and its observed output and exit behavior. Use source-derived expectations;
+   shared conventions and examples do not override the source. Follow the same four
+   shared references for reusable CLI testing mechanics. CLI conventions supplied
+   as read-only task context may inform the work; do not load a second operation owner.
 
 4. **Update package.json** — Add test script entries under `"scripts"`:
-   - `"test:<script-name>" = "bun test tests/<script-name>.test.ts"`.
-   - `"test:<script-name>:cli" = "bun test tests/<script-name>.cli.test.ts"`.
-   - `"test" = "... && bun test tests/<script-name>.test.ts tests/<script-name>.cli.test.ts"` (appended to existing chain).
+   - Register `test:<script-name>` and `test:<script-name>:cli` using the commands in
+     `skill-node-script-conventions -> reference/tooling-config.md#configure-packagejson`.
+   - Append `&& bun test tests/<script-name>.test.ts tests/<script-name>.cli.test.ts` to the existing `"test"` command, preserving its existing chain.
 
 5. **Validate and report** — Run tests and type check.
    `bun test tests/<script-name>.test.ts tests/<script-name>.cli.test.ts`
@@ -74,7 +75,8 @@ Do not delegate sub-tasks.
 Each check is a yes/no assertion.
 
 - All generated tests pass (`bun test --tb=short`).
-- No `.skip` or `.todo` modifiers exist on any `it` or `describe` in generated files.
+- No `.skip` or `.todo` modifiers exist in generated files; see
+  `skill-node-script-conventions -> reference/bun-test-conventions.md#test-structure`.
 - Type check passes (`bunx tsc --noEmit` on test files).
 
 ## Expected Output
@@ -89,12 +91,17 @@ All tests pass, no skipped tests, and type check is clean.
 
 ## Docs
 
-This skill has no standalone reference directory.
-See the following shared convention skills for reference documentation:
+This skill has no standalone reference directory. Load `skill-node-script-conventions`
+as passive documentation, not an execution dependency. Consult its exact `reference/`
+files named here; do not load a second operation owner.
 
 ### Shared Node Script Conventions
 
-The `skill-node-script-conventions` skill holds shared reference documentation for all Node/TypeScript testing conventions. Load it via the skill tool for authoritative guidance on bun-test-conventions, coverage-strategy, path-layout, tooling-config, shared-lib-rules, and typescript-node-style-guide. Procedure steps above reference specific topics within that skill.
+Apply `skill-node-script-conventions -> reference/typescript-node-style-guide.md`
+to generated test code. `skill-node-script-conventions -> reference/shared-lib-rules.md`
+applies when the inspected source includes `src/lib/shared/` modules. These references
+do not define the implementation baseline, task scope, outputs, retries, or operation
+ownership.
 
 ### CLI Conventions (Script Writer)
 

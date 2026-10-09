@@ -23,14 +23,26 @@ required skill loads, or malformed task contracts.
 
 ## Input Contract
 
-Use the canonical task packet already supplied to the worker. Do not invent a second
-input grammar. Treat `purpose`, `details`, `executionInstructions`, `verification`,
-and `expectedOutput` as authoritative after dispatch. Preserve the assigned operation
-owner. Declared documentation is passive context, and the worker may add materially
-relevant documentation context under its contract without adding another operation
-owner. Treat `filesToRead` as minimum starting context and `filesToWrite` as strong
-suggestions under the worker contract. `None` is valid for genuinely empty resource
-fields.
+Use the supplied canonical task packet; its outcome and assigned operation owner are
+binding, and no second input grammar applies. Treat `purpose`, `details`,
+`executionInstructions`, `verification`, and `expectedOutput` as authoritative after
+dispatch. Load `customize-opencode` as passive documentation for packet grammar.
+Consult its loaded sections through these cross-references:
+
+- `customize-opencode -> #core-contract` and `customize-opencode -> #packet-sections`
+  for packet scope and field meanings.
+- `customize-opencode -> #files-to-read`, `customize-opencode -> #files-to-write`,
+  and `customize-opencode -> #skills` for resource descriptions.
+- `customize-opencode -> #sentinel-values` for empty resource values.
+
+This documentation reference grants no execution authority.
+
+The worker contract governs resource flexibility where the reference describes stricter
+write or named-skill boundaries. Treat `filesToRead` as minimum starting context and
+`filesToWrite` as strong suggestions under that contract. Additional documentation
+context may be loaded only when materially relevant; it stays passive and cannot add
+another operation owner. These rules do not override explicit task prohibitions or
+authorize broader, destructive, unrelated, or outcome-changing writes.
 
 The task may involve source code, tests, scripts, configuration, documentation,
 fixtures, analysis, or other bounded repository work. File type alone is never a

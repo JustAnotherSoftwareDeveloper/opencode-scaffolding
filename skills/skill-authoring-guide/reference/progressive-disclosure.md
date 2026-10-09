@@ -87,7 +87,10 @@ context.
 resolves from the source file, stays inside the repository, and has non-empty link
 text. Within a skill workspace, link only to that skill's own files. For shared
 reference content owned by another skill, name and load the relevant documentation
-skill through the skill tool rather than linking into its directory. The top-level
+or planning skill through the skill tool and use the syntax in
+[Skill Cross-References](cross-references.md), such as
+`task-contract -> reference/task-identity.md`, rather than linking into its directory.
+Reading that skill's `SKILL.md` cannot substitute for loading it. The top-level
 `skills/README.md` index may link to skill entry points; it is not a skill workspace.
 Require `reference/README.md` only when a skill has local files under `reference/`.
 Do not create an empty reference index solely to satisfy a validator check; the

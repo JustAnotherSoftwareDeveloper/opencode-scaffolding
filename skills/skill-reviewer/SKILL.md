@@ -32,11 +32,10 @@ prose-policy owner when semantic form selection and `TABLE-001` apply.
 1. Identify the skill class and applicable contracts.
 2. Inspect the complete skill workspace and referenced local resources.
 3. Run available deterministic validation without changing the skill.
-4. Compare observed content with the applicable contracts and templates. Check that
-   bullets represent peer rules, ordered lists represent order-dependent procedures,
-   paragraphs carry connected reasoning, definition lists map terms to definitions,
-   subsection headings separate reviewable concerns, and filled content contains no
-   Markdown tables.
+4. Compare observed content with the applicable contracts and templates. Assess prose
+   form against `skill-authoring-guide -> reference/authoring-style.md`
+   (`Choose prose structure by meaning` and `Do not use Markdown tables`) and
+   `skill-authoring-guide -> reference/progressive-disclosure.md` (`TABLE-001 — No Tables`).
 5. Separate deterministic conformance evidence from human clarity judgment. Do not
    treat lint as proof of readability, comprehension, navigation quality, or task
    success.

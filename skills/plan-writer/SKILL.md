@@ -57,10 +57,11 @@ recorded decision authority explicitly authorized planning. Validation success,
    Capture stdout.
    Block on non-zero exit.
 
-5. **Select and load planning skills.** Present the source-backed request and the planning array to the LLM.
-   Select every materially relevant planning skill.
-   Load each selected skill with the skill tool.
-   Block on a name absent from the array, a stale path, or a load failure.
+5. **Select and load planning skills.** Present the source-backed request and planning array to the LLM.
+   Select every materially relevant planning skill and load each with the skill tool.
+   Reconcile its name and path against the collector winner. Reading its `SKILL.md`
+   does not substitute for loading it. Block on an absent name, stale path, or load
+   failure. Treat successful planning loads as passive context, not execution assignments.
 
 6. **Collect operation and documentation skills.** Run:
 
@@ -82,10 +83,13 @@ recorded decision authority explicitly authorized planning. Validation success,
     schema-valid canonical packet root. Preserve the selected packet slug unchanged.
     The canonical task-packet schema used in validation step 13 owns the
     packet-root fields and constraints, not this workflow.
-   Follow [task-authoring rules](reference/task-authoring.md) and consume the
-   already-loaded `task-contract` documentation skill for task identity,
-   atomicity, result and verification alignment, dependencies, coupling,
-   traceability, and authoring metadata.
+    Follow [task-authoring rules](reference/task-authoring.md). For shared task
+    semantics, use the already-loaded `task-contract` documentation skill. Consult
+    `task-contract -> reference/task-identity.md`,
+    `task-contract -> reference/atomicity-and-alignment.md`,
+    `task-contract -> reference/dependencies-and-coupling.md`, and
+    `task-contract -> reference/traceability-and-metadata.md`. These references are
+    passive and non-transitive; they add no workflow or authority.
    Preserve copied relative source paths in `filesToRead`.
    Extract proposal-derived implementation details, verification criteria, and questions from one PROPOSAL.md and its copied sources.
    Preserve source-derived and proposal-derived requirements, constraints, decisions, and verification criteria in each task `context`.
@@ -111,8 +115,11 @@ recorded decision authority explicitly authorized planning. Validation success,
    `generic-executor` to hide those failures. Do not score, rank, rerank, clip, or use
    lexical fallback.
 
-10. **Inspect contracts.** Read each selected skill's `SKILL.md` at its collector-winning `path` from the array.
-    Verify the contract matches the task.
+10. **Verify selected contracts.** Load each selected documentation skill with the
+    skill tool before relying on its guidance; reading its `SKILL.md` is not a load.
+    For operation assignments, inspect the collector-winning `SKILL.md` without
+    executing that future task's operation. Verify every contract matches its task.
+    Block on a stale or substituted path, class mismatch, or required load failure.
 
 11. **Write the completed draft.** Write the completed canonical packet root with
     every task's `skills` populated to the workspace as `draft.json`, retaining the
@@ -174,7 +181,10 @@ recorded decision authority explicitly authorized planning. Validation success,
 - Require an author-selected packet slug in every published root. Never derive,
   normalize, or locally validate it; defer to the canonical task-packet schema.
 - Fail closed. Leave no partial outputs.
-- Planning loads are passive context. Only task-declared skills are executable.
+- Planning and documentation skills must be loaded with the skill tool before use.
+  Their loads are passive and non-transitive, not execution assignments; filesystem
+  inspection of `SKILL.md` cannot stand in for a load. Only the assigned operation
+  owner executes each task.
 - Preserve source files, source paths, proposal traceability, task field order, and task context.
 - Fail closed on an unauthorized proposal-to-plan transition. Never infer proposal
   acceptance or decision authority.
@@ -184,5 +194,6 @@ recorded decision authority explicitly authorized planning. Validation success,
 - [Workspace contract](reference/workspace-contract.md)
 - [Task-authoring rules](reference/task-authoring.md)
 - [Script contracts](reference/scripts.md)
-- Consult the reference index of the loaded `task-contract` documentation skill
-  for shared task semantics; do not link into another skill's directory.
+- Consult the four exact task-contract references named in step 8 through the loaded
+  documentation skill; do not link into another skill's directory. They remain
+  passive and non-transitive and add no workflow or authority.

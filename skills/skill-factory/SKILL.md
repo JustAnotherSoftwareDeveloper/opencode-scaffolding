@@ -30,22 +30,24 @@ Create or update one skill workspace and validate its direct-selection profile.
 ## Normalize Input
 
 1. Determine the skill name, mode, class, requirements, and source material.
-2. Load `skill-authoring-guide` as the canonical prose-policy owner and load the
-   relevant class and maintenance references; use template guidance separately when
-   needed. Treat semantic form selection and `TABLE-001` as one policy for changed
-   filled content.
-3. Derive the profile from the owned request, inputs, outputs, and nearest competitors.
+2. Load `skill-authoring-guide` and read its relevant canonical references for
+   frontmatter, tags, authoring style, trigger evaluation, and progressive disclosure.
+   Use `skill-authoring-guide -> reference/cross-references.md` for shared pointers;
+   reading a skill's `SKILL.md` never replaces its skill-tool load.
+   Load relevant class and maintenance references; use template guidance separately
+   when needed. The guide owns authoring policy; these references do not replace this
+   factory workflow.
+3. Derive the profile from the owned request, inputs, outputs, and nearest competitors,
+   applying `skill-authoring-guide -> reference/tagging-guide.md` and
+   `skill-authoring-guide -> reference/trigger-evaluation.md`.
 
 ## Procedure
 
 1. Read `./reference/workflow-create-update.md` in full and confirm the request is limited to one workspace.
-2. Create or update only `name`, `description`, `selection`, and `class` frontmatter, plus supported profile fields only when explicitly required.
-3. Set `selection.role` and grouped tags from the request contract; add concise `use_when`, `not_for`, or directional `supports` values only when they improve selection.
+2. Create or update only `name`, `description`, `selection`, and `class` frontmatter, plus supported profile fields only when explicitly required; follow `skill-authoring-guide -> reference/frontmatter-rules.md`.
+3. Apply `skill-authoring-guide -> reference/tagging-guide.md` and `skill-authoring-guide -> reference/trigger-evaluation.md` when deriving grouped tags and selection conditions from the request contract.
 4. Preserve the skill body and update all relevant examples or evaluation cases with the profile.
-5. Apply the loaded guide's prose policy to changed filled content: use bullets for peer
-   rules, ordered lists for order-dependent procedures, paragraphs for connected
-   reasoning, definition lists for term-and-definition material, and subsection
-   headings for separately reviewable concerns; reject Markdown tables.
+5. Apply `skill-authoring-guide -> reference/authoring-style.md` and `skill-authoring-guide -> reference/progressive-disclosure.md` to changed filled content, including semantic form and `TABLE-001` policy.
 6. Validate every changed `SKILL.md` with the shared profile validator before handoff.
 7. Run the repository Markdown lint command on every modified Markdown file.
 8. Perform a separate human review of semantic form choice; lint does not establish
@@ -57,11 +59,8 @@ passive reference authority belong to their canonical owners.
 
 ## Self-Validation
 
-- Confirm the metadata contains exactly the current profile shape: `name`, `description`, `selection`, and `class`, with no obsolete routing fields.
-- Confirm tags are grouped by request-facing actions, inputs, outputs, topics, environments, or constraints and are the smallest sufficient set.
-- Confirm `use_when` and `not_for` distinguish owned requests from neighboring requests without scoring, ranking, path, registry, or compatibility guidance.
-- Confirm changed filled content applies the canonical semantic-form policy and
-  contains no Markdown tables.
+- Review the profile against `skill-authoring-guide -> reference/frontmatter-rules.md`, `skill-authoring-guide -> reference/tagging-guide.md`, and `skill-authoring-guide -> reference/trigger-evaluation.md`; correct profile discrepancies in the target workspace. Report canonical-policy conflicts without changing the guide under this task.
+- Review changed filled content against `skill-authoring-guide -> reference/authoring-style.md` and `skill-authoring-guide -> reference/progressive-disclosure.md`, including semantic form and `TABLE-001`.
 - Confirm deterministic lint evidence remains separate from human clarity judgment.
 - Confirm the shared validator passes before declaring the workspace complete.
 

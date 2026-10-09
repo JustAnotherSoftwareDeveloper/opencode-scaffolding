@@ -82,16 +82,17 @@ One or more files under `scripts/shell/`:
 
 ## Shared Conventions
 
-This skill consumes shared reference documentation from the `skill-bash-conventions` skill. All generated scripts must conform to these conventions.
+Load `skill-bash-conventions` as passive documentation. All generated scripts must
+follow its applicable shared conventions. Consult:
 
-- **`skill-bash-conventions` (set-flags)** — Mandatory `set -euo pipefail` with caveats for each flag and library file rules.
-- **`skill-bash-conventions` (quoting-conventions)** — Google Shell Style Guide quoting rules: variable quoting, command substitution quoting, array usage, and `$()` over backticks.
-- **`skill-bash-conventions` (shellcheck-rules)** — Adopted ShellCheck rule policies with severity (Error/Warning/Style) and rationale for each.
-- **`skill-bash-conventions` (error-handling)** — Unified `die()`, `err()`, `info()` helpers, trap cleanup pattern, and named exit code constants.
-- **`skill-bash-conventions` (function-naming)** — snake_case script-level functions, `::` namespace-prefixed library functions, uppercase constants, and private underscore prefix.
-- **`skill-bash-conventions` (exit-codes)** — Standard exit code convention: 0 success, 1 runtime error, 2 usage error, 3 environment error.
-- **`skill-bash-conventions` (json-output-conventions)** — stdout JSON contract and stderr diagnostic message conventions.
-- **`skill-bash-conventions` (cross-platform)** — Bash 3.2+ target, GNU/BSD command differences, and portable path resolution using `${BASH_SOURCE[0]}`.
+- `skill-bash-conventions -> reference/set-flags.md`
+- `skill-bash-conventions -> reference/quoting-conventions.md`
+- `skill-bash-conventions -> reference/shellcheck-rules.md`
+- `skill-bash-conventions -> reference/error-handling.md`
+- `skill-bash-conventions -> reference/function-naming.md`
+- `skill-bash-conventions -> reference/exit-codes.md`
+- `skill-bash-conventions -> reference/json-output-conventions.md`
+- `skill-bash-conventions -> reference/cross-platform.md`
 
 ## Docs
 
