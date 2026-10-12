@@ -140,8 +140,6 @@
     "delegator": {
       "description": "Dispatches decomposition to breakdown-tasks, supervises execution with read-only repository context, and delegates each task to workers in serial.",
       "mode": "primary",
-      "model": "openai/gpt-6-sol",
-      "variant": "high",
       "prompt": "{file:./agents/delegator.md}",
       "permission": {
         "*": "deny",
