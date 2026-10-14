@@ -35,7 +35,7 @@ Capture these fields:
 - **CLI interface** — Existing Click command decorators, arguments, options, exit behavior, and output contract when applicable.
 - **Existing tests** — Current unit, CLI, fixture, and conftest coverage for the selected script.
 - **Known edge cases** — Empty input, malformed input, boundary conditions, regression cases, or failures relevant to the requested result.
-- **Coverage target** — Required 100% line coverage for the selected source scope in `./reference/coverage-strategy.md`; do not defer to a lower configured coverage target.
+- **Coverage target** — The complete maintained production-source denominator and 100% unit-only line target in `./reference/coverage-strategy.md`; do not reduce the denominator or defer to a lower target.
 
 Read the source implementation and existing tests before editing tests. Treat the
 implementation as the behavioral baseline unless the request explicitly identifies an
@@ -58,45 +58,63 @@ Each step is one imperative action. Do not delegate sub-tasks.
    `./reference/coverage-strategy.md`.
 
 2. **Create or edit unit tests.** Add missing unit-test files or modify existing ones
-   under `tests/` as required. Cover nominal behavior, edge cases, error paths, and
-   regressions relevant to the requested result. Use direct imports, `tmp_path`,
-   `pytest.mark.parametrize`, mocks, and fixtures where appropriate. Preserve useful
-   existing coverage and avoid rewriting unrelated tests.
+   under `tests/` as required. Call production behavior directly, including CLI
+   callbacks or helpers when they bypass Click invocation and isolate external effects.
+   A unit test may reach library behavior through a CLI callable path; a direct
+   `lib.*` import is not mandatory. Assert the observable contract, including relevant
+   values, state or file effects, and expected exceptions. Preserve useful existing
+   coverage and avoid rewriting unrelated tests.
 
-3. **Create or edit CLI integration tests.** Add or modify `CliRunner` coverage when
-   the script exposes a CLI. Cover the applicable arguments/options, successful output,
-   exit codes, error conditions, and filesystem behavior. Do not require a CLI test
-   file for scripts that do not expose a CLI.
+3. **Classify every test exactly once.** Give each collected test exactly one effective
+   `unit` or `integration` classification. Collection must reject a test with neither
+   classification or both. Keep direct-call tests that isolate production behavior in
+   the unit class; classify `CliRunner`, console-entry-point, subprocess, and workflow
+   execution as integration. A workflow that combines modules or systems is
+   integration even when it also exercises unit-level behavior.
 
-4. **Maintain shared test fixtures.** Update `tests/conftest.py` or shared test helpers
+4. **Create or edit CLI integration tests.** Add or modify `CliRunner` coverage when
+   the script exposes a CLI. Cover applicable argument parsing, successful output, exit
+   codes, error conditions, and filesystem behavior. Do not require a CLI test file for
+   scripts that do not expose a CLI. Integration execution never contributes to the
+   unit-only coverage result.
+
+5. **Maintain shared test fixtures.** Update `tests/conftest.py` or shared test helpers
    only when the requested test result genuinely needs reusable setup. Preserve
    unrelated fixtures and avoid moving local setup into shared scope without a clear
    reuse benefit.
 
-5. **Validate and remediate.** Run the affected pytest targets with 100% coverage
-   enforcement for the selected source scope, and run Ruff checks on changed test files.
-   Remediate test defects within the requested test scope. If failures reveal that the
-   implementation itself must change, return `BLOCKED` or `PARTIAL` with the
-   implementation mismatch instead of editing source code under this operation.
+6. **Validate and remediate.** Run the complete unit classification against every
+   maintained production module under `src/cli/` and `src/lib/` with the required 100%
+   line-only gate. Run the full suite separately with its own coverage data and result;
+   do not combine its execution with, append it to, or substitute it for unit coverage.
+   Run Ruff checks on changed test files. Remediate test defects within the requested
+   test scope. If failures reveal that the implementation itself must change, return
+   `BLOCKED` or `PARTIAL` with the implementation mismatch instead of editing source
+   code under this operation.
 
 ## Validation
 
 Use the strongest applicable checks for the changed test surface:
 
-Before running these command patterns, replace `<affected test targets>` with the
-affected test paths identified from the requested result and existing suite, and
-replace `<changed test files>` with the concrete paths of modified test files. Replace
-`<selected source paths>` with the exact files selected under
-`./reference/coverage-strategy.md`, then run the commands with those concrete paths.
+Replace `<affected test targets>` with the relevant paths and `<changed test files>`
+with the concrete modified test files. The affected-test command is a focused diagnostic,
+not a substitute for the complete unit-only gate. Use the approved project configuration
+for the gate; its command shape is shown below and must run from `scripts/python/`.
 
 - `uv run pytest <affected test targets> --tb=short`
-- `uv run pytest <affected test targets> --cov=<selected source paths> --cov-report=term-missing --cov-fail-under=100 --tb=short`
+- `COVERAGE_FILE=.coverage.unit uv run pytest -c pyproject.toml -o addopts= tests -m unit --cov=cli --cov=lib --cov-config=pyproject.toml --cov-report=term-missing --cov-fail-under=100`
 - `uv run ruff check <changed test files>`
 - Run broader regression tests when the changed fixtures or helpers affect multiple script test suites.
 
-When the coverage gate reports gaps, add targeted tests for missing behavior only when
-that behavior falls within the selected source scope. Do not add meaningless assertions
-or weaken the required 100% target to satisfy the gate.
+The unit gate selects every test classified as `unit`, measures all maintained `cli`
+and `lib` production modules, and uses fresh `.coverage.unit` data. Do not filter the
+unit set by path, keyword, changed file, ignore option, or marker beyond the complete
+`unit` class. Run any retained full-suite aggregate separately with fresh `.coverage.full`
+data, its own report and status, and a separately defined threshold (the accepted policy
+keeps the existing 85% aggregate as a distinct compatibility gate). Never call that
+aggregate unit coverage. When the unit gate reports gaps, add targeted tests only for
+supported behavior within the fixed denominator, then rerun the complete unit gate. Do
+not add meaningless assertions, omit modules, or weaken the 100% line threshold.
 
 ## Expected Output
 
@@ -120,10 +138,14 @@ validation actually run in your report.
 - [ ] Source implementation and existing relevant tests were read before editing.
 - [ ] Test changes correspond to existing or explicitly requested implementation behavior.
 - [ ] Existing useful coverage was preserved unless the request required changing it.
-- [ ] Unit, CLI, fixture, and edge-case coverage were added or edited only where applicable.
+- [ ] Every test has exactly one effective `unit` or `integration` classification; missing or double classifications are rejected.
+- [ ] Unit tests use direct calls, including callable CLI logic where appropriate; `lib.*` imports are not mandatory.
+- [ ] All maintained `src/cli` and `src/lib` production modules remain in the 100% unit line denominator; no branch threshold is substituted.
+- [ ] CLI entry-point and workflow integration coverage is separate from the complete unit-only run and its data.
+- [ ] Assertions check supported behavior rather than merely executing code.
 - [ ] No Python implementation file was modified under this test-only operation.
 - [ ] Relevant pytest, coverage, and Ruff checks were run or truthfully reported as blocked.
-- [ ] No skipped tests or meaningless assertions were introduced to hide failures.
+- [ ] No skipped tests, module omissions, coverage exclusions, or meaningless assertions were introduced to hide failures.
 
 ## Docs
 

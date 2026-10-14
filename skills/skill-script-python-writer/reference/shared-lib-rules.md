@@ -1,7 +1,11 @@
 # Shared Library Rules
 
-Shared utility modules live in `src/lib/shared/` and are imported by multiple scripts.
-This follows the "Scripts plus lib" pattern where cross-script utilities are organized by domain rather than by consumer script.
+Keep `src/cli/` adapters thin: they handle command input, wiring, and the established
+CLI contract rather than owning reusable behavior. `src/lib/` is one internal library
+root. Feature-specific behavior belongs to its cohesive feature or domain package, even
+when multiple CLI adapters use it. Reserve `src/lib/shared/` for small, domain-neutral
+primitives reused across domains; a second command consumer alone does not make
+behavior shared.
 
 ## Five Shared Module Rules
 
@@ -11,69 +15,60 @@ Every shared module must follow these conventions:
   They are imported, never invoked via `uv run`.
   No entry point registration in `[project.scripts]`.
 
-- **100% test coverage** — Shared modules must meet the same `fail_under = 100` coverage target as per-script packages.
-  Tests live in `tests/test_shared_<module>.py`.
+- **100% test coverage** — Shared modules must meet the existing `fail_under = 100`
+  coverage requirement.
+  Tests live under `tests/` using the `test_shared_*.py` naming convention.
 
-- **Consumer documentation** — Each shared module must declare its consumer scripts in a module-level docstring:
+- **Consumer documentation** — Each shared module must name its consuming feature or
+  domain packages in a module-level docstring when those consumers are established:
 
   ```python
-  """File/path utilities shared by: collect-skills, count-tokens, validate-skill."""
+  """Small path primitives used by collection and rendering packages."""
   ```
 
-- **Domain-based naming** — Module names describe the utility domain (`files.py`, `schema.py`, `git.py`), not the consuming script.
-  This prevents rename churn when new scripts import the same module.
+- **Domain-based naming** — Package and module names describe the cohesive feature or
+  primitive, not whichever CLI happens to call them. This keeps ownership with the
+  behavior rather than its current consumers.
 
-- **Extraction rule** — Keep utility code in a per-script lib package until a second script needs it.
-  Extract to `src/lib/shared/` only when the function or class is imported by two or more scripts.
-  Premature extraction is discouraged — a single consumer does not justify shared placement.
+- **Canonical behavior and placement** — Before adding behavior, locate the canonical
+  implementation and its tests, then check whether equivalent behavior already exists.
+  Extend the canonical implementation rather than copying it. Keep feature-specific
+  behavior in its cohesive feature/domain package. Use `src/lib/shared/` only for a
+  small, domain-neutral primitive reused across domains; consumer count alone is not an
+  extraction rule.
+
+Preserve existing package and module names and paths unless an inventory-grounded
+decision identifies a specific minimal change. Do not rename packages to match
+illustrative examples or to follow a CLI consumer.
 
 ## File Layout
 
-**PLACE-001 fixture annotation:** In this layout, `<script_name>` represents the Python `snake_case` package identifier derived from the selected script's name. Replace it with that identifier in the package path before using the layout.
+**PLACE-001 fixture annotation:** In this layout, `<feature_or_domain>` is the
+`snake_case` package identifier for a cohesive capability. Replace it with that
+identifier before using the example.
 
 ```text
 scripts/python/
   src/
-    cli/                          # CLI entry points (click)
+    cli/                          # thin Click command adapters
     lib/
-      <script_name>/              # per-script lib packages
+      <feature_or_domain>/         # cohesive feature/domain behavior
         __init__.py
         core.py
-      shared/                     # shared utilities (cross-script)
+      shared/                     # optional small domain-neutral primitives
         __init__.py               # empty or re-exports
-        files.py                  # file/path utilities (glob, read, write, path resolution)
-        schema.py                 # JSON Schema validation utilities
-        git.py                    # Git-root walkup utilities
-        output.py                 # Stdout/stderr formatting helpers
   tests/
-    test_shared_files.py
-    test_shared_schema.py
+    test_<feature_or_domain>.py
 ```
 
-Modules are organized by domain (`files.py`, `schema.py`, `git.py`, `output.py`) not by consumer script.
-This prevents duplication when multiple scripts need the same utility.
-
-## Import Convention
-
-Shared modules are imported using the dotted path `lib.shared.<module>`:
+CLI adapters and feature packages may import internal library modules using
+package-qualified paths. For example:
 
 ```python
-from lib.shared.files import find_files_by_glob
-from lib.shared.schema import validate_json_schema
+from lib.collect_skills import parser
+from lib.skill_metadata import normalize_skill_metadata
 ```
 
-This convention works identically in CLI entry points, per-script lib modules, and tests because the existing `sys.path.insert(0, WORKSPACE_ROOT)` pattern (where `WORKSPACE_ROOT = src/`) resolves `lib.shared.<module>` regardless of which script or test imports it.
-
-**Import from a CLI entry point** (`src/cli/<script_name>.py`):
-
-```python
-import click
-from lib.shared.files import resolve_path
-from lib.<script_name>.core import compute
-```
-
-**Import from a per-script lib module** (`src/lib/<script_name>/core.py`):
-
-```python
-from lib.shared.schema import validate_json_schema
-```
+These are internal project imports. A public `lib.*` API or separate library
+distribution is not required, and this guidance does not guarantee external import
+compatibility or direct-source invocation behavior.

@@ -1,11 +1,14 @@
 # Python Style Guide
 
-Every generated script and lib module must conform to the project's lint and type-check rules.
-These are enforced by `ruff.toml` and `pyrightconfig.json` at `scripts/python/`.
+Every generated script and library module must follow the project's bounded
+Google-inspired style policy and type-check rules. Ruff enforces selected structural
+rules; human review remains responsible for exceptions and documentation meaning.
+These policies are configured in `ruff.toml` and `pyrightconfig.json` at
+`scripts/python/`.
 
-## Ruff Lint Rules
+## Approved Ruff Profile
 
-The project enforces these ruff rule categories:
+The project retains Ruff, the `py312` target, and these existing lint categories:
 
 - **E** (pycodestyle errors): Syntax errors, indentation, line breaks.
 - **F** (pyflakes): Unused imports, undefined names, duplicate arguments.
@@ -16,10 +19,56 @@ The project enforces these ruff rule categories:
 - **B** (flake8-bugbear): Logical bugs: mutable defaults, bare `except:`, `del` on locals.
 - **SIM** (flake8-simplify): Simplify expressions: `if bool(x)` to `if x`, merge nested `if` blocks.
 - **ARG** (flake8-unused-arguments): Unused function arguments (suppress with `_` prefix).
+- **D** (pydocstyle): Selected docstring checks using Ruff's Google convention, with
+  `D400` selected explicitly.
 
-**Target version:** `py312` — use 3.12 features (type parameter syntax, pathlib.Path methods, itertools.batched).
-**Line length:** 88 characters (matching the Black-compatible default).
-**Format:** Generated scripts should be formatted via `uv run ruff format` before submission.
+Use Python 3.12 features supported by the `py312` target, such as type parameter
+syntax, `pathlib.Path` methods, and `itertools.batched`.
+
+The project style policy sets both Ruff formatter `line-length` and
+`lint.pycodestyle.max-line-length` to 80. Keep `E501` active. The `D` rules use
+Ruff's Google pydocstyle convention; `D400` is added explicitly to require a period at
+the end of a docstring summary.
+
+## Line Length And Formatting
+
+Keep Python source and test lines within 80 characters where practical. Use only narrow,
+reviewed exceptions, such as an unavoidable long import or URL, or a line the formatter
+cannot wrap below the limit without harming clarity. Keep each exception specific and
+explain its justification during review; do not raise the project-wide limit or broadly
+suppress `E501`.
+
+Run Ruff formatting and linting as separate checks. Format with `uv run ruff format`
+and lint with `uv run ruff check`. Formatting wraps lines on a best-effort basis and
+does not replace the active `E501` check; a formatted file may still have a linted
+long-line finding. Ruff formatting also does not sort imports; the `I` rules own import
+sorting.
+
+Do not enable docstring-code formatting unless it is separately authorized. Formatting
+code examples inside a docstring is independent of the prose and documentation rules.
+
+## Docstrings
+
+Use triple-double-quoted docstrings. Start with a concise, single-line summary no longer
+than 80 characters, ending in a period. Put any longer explanation after a blank line.
+The explicit `D400` selection enforces the local summary-period rule; it is a bounded
+policy choice, not a claim that this punctuation rule restates every Google requirement.
+
+Write function and method docstrings when they are public API, nontrivial, or contain
+non-obvious logic. Describe caller-visible syntax and behavior rather than narrating
+irrelevant implementation details. Add useful `Args:`, `Returns:` or `Yields:`, and
+`Raises:` sections when they clarify the interface. Omit sections when the signature or
+summary already makes the relevant information clear; do not add empty or repetitive
+sections.
+
+Ruff's selected Google pydocstyle rules can check docstring structure, but cannot decide
+whether a docstring is needed, whether its account of behavior is accurate, or whether
+its interface sections are useful. Review those questions for meaning and caller
+relevance.
+
+This is a bounded Google-inspired subset, not full conformance to the Google Python
+Style Guide. Only the requirements stated in this guide are adopted as this project's
+policy; Ruff's Google convention does not automatically enforce the complete guide.
 
 ## Pyright Type-Check Settings
 
@@ -47,7 +96,7 @@ Within each block, imports are alphabetically sorted.
 
 1. Standard library — `os`, `pathlib`, `sys`, `json`, `collections.abc`.
 2. Third-party — `click`, `yaml`, `jsonschema`.
-3. Local — `lib.shared.*`, `lib.<script_name>.*`.
+3. Local — `lib.shared.*`, `lib.skill_metadata.*`.
 
 Separate groups with a blank line:
 
@@ -75,9 +124,12 @@ from lib.count_tokens.core import count_tokens
 - **Classes** (`TokenCounter`, `FileValidator`): `PascalCase`.
 - **Constants** (`WORKSPACE_ROOT`, `DEFAULT_ENCODING`): `UPPER_CASE`.
 - **Entry point names (pyproject.toml)** (`count-tokens`, `validate-skill`): `kebab-case`.
-- **Test files** (`test_count_tokens.py`): `test_<module>.py`.
-- **Test functions** (`test_count_tokens_with_file()`): `test_<descriptive_name>`.
-- **Test classes** (`TestCountTokensCLI`): `Test<Feature>`.
+- **Test files** (`test_count_tokens.py`): use the `test_` prefix and the tested
+  module's `snake_case` name.
+- **Test functions** (`test_count_tokens_with_file()`): use the `test_` prefix and a
+  descriptive `snake_case` name.
+- **Test classes** (`TestCountTokensCLI`): use the `Test` prefix and a descriptive
+  `PascalCase` name.
 
 ## Type Annotation Style
 

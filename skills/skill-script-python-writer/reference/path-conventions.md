@@ -3,39 +3,60 @@
 Generated scripts live under `scripts/python/` within either the global or project-local root.
 Both roots follow the same directory layout; the difference is their filesystem location and resolution priority.
 
-> **Path resolution rules are canonical in the `skill-architect` planning reference
-> named `platform-layout-and-discovery`.** Do not load that planning skill during
-> ordinary script execution; use the verified resolver behavior below.
-> This file provides only script-python-writer-specific conventions (directory layout, pyproject.toml).
-> The checked-in Python resolver first honors a non-empty `OPENCODE_SCRIPTS_PYTHON` override, then checks the project-local root `<project-root>/opencode/scripts/python` (`./opencode/scripts/python` relative to the project root), selecting it only when it is a directory. Otherwise, it returns the global fallback `~/.config/opencode/scripts/python` without checking whether that directory exists. These paths describe verified resolver behavior, not host-level skill discovery, loading, or invocation policy; this file does not define skill-origin-based root selection.
+> Do not load a planning skill during ordinary script execution; the checked-in resolver
+> behavior is stated here for context. This file covers the script-writer-specific
+> conventions for path resolution, directory layout, and `pyproject.toml`.
+
+The checked-in Python resolver first honors a non-empty `OPENCODE_SCRIPTS_PYTHON`
+override, then checks `./opencode/scripts/python` relative to the project root,
+selecting it only when that directory exists. Otherwise, it returns the global fallback
+`~/.config/opencode/scripts/python` without checking whether that directory exists.
+These paths describe verified resolver behavior, not host-level skill discovery,
+loading, or invocation policy; this file does not define skill-origin-based root
+selection.
 
 ## Directory Layout (Both Roots)
 
-**PLACE-001 fixture annotation:** In this layout, `<script_name>` represents the Python `snake_case` identifier derived from the selected script's name. Replace it with that identifier at each path before using the layout.
+Keep one `src/cli/` directory for thin command adapters and one `src/lib/` root for
+internal library code. Organize implementation packages by cohesive feature or domain,
+not one package per CLI command. Adapters handle command input, wiring, and the
+established CLI contract; reusable behavior belongs to its canonical feature/domain
+package.
+
+**PLACE-001 fixture annotation:** In this layout, `<command_module>` is the `snake_case`
+Python module name for a CLI command, `<feature_or_domain>` is a `snake_case` package
+name for a cohesive capability, and `<test_module>` is a `snake_case` test subject.
+Replace each placeholder with its concrete identifier before using the layout.
 
 ```text
 scripts/python/
   src/
-    cli/<script_name>.py        # click CLI (main entry point)
-    lib/<script_name>/          # library package (one per script)
+    cli/<command_module>.py     # thin Click command adapter
+    lib/<feature_or_domain>/     # cohesive feature/domain implementation
       __init__.py
-      core.py                   # core logic
-      formats.py                # I/O formatting (if needed)
-      validators.py             # validation logic (if needed)
+      core.py                   # canonical behavior, when needed
+    lib/shared/                  # optional narrow shared primitives
   tests/
-    test_<script_name>.py       # unit tests for lib/
-    test_<script_name>_cli.py   # integration tests for CLI
+    test_<test_module>.py       # tests for the owning implementation
+    test_<command_module>_cli.py # tests for the command contract
 ```
 
-## pyproject.toml Hatchling Packages
+Preserve existing package and module names and paths unless an inventory-grounded
+decision identifies a specific minimal change. Do not rename a package merely to match
+an illustrative example or because another command consumes it.
 
-Hatchling with explicit `packages` does not auto-discover subpackages.
-`src/lib/shared/` is a subpackage of `lib` and must be explicitly listed:
+Before adding behavior, locate the canonical implementation and its tests and check for
+equivalent behavior. Extend the canonical implementation rather than copying it. Keep
+`src/lib/shared/` only for small, domain-neutral primitives reused across domains; a
+second command consumer alone does not justify extraction.
 
-```toml
-[tool.hatch.build.targets.wheel]
-packages = ["src/cli", "src/lib", "src/lib/shared"]
-```
+## Package Configuration
 
-This is the only change needed in `pyproject.toml` for shared lib support.
-The existing `[tool.coverage.run] source = ["cli", "lib"]` already covers `lib.shared.*` modules.
+The current `scripts/python/pyproject.toml` lists `src/cli` and `src/lib` as wheel
+package roots. That records the checked-in configuration; do not infer nested-package
+or resource inclusion from the directory tree alone. This layout guidance does not
+authorize additional package roots or assert built-artifact contents.
+
+The `lib.*` import paths describe internal project dependencies. This layout does not
+require a public `lib.*` API or a separate library distribution, and it does not
+guarantee external imports or direct-source invocation modes.

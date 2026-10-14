@@ -58,11 +58,15 @@ Each step is one imperative action. Do not delegate sub-tasks.
    existing implementation as required. Preserve unrelated behavior and public
    interfaces unless the request requires changing them.
    - CLI entry points live at `src/cli/<script_name>.py` and follow
-     `./reference/cli-conventions.md`.
-   - Library code lives under `src/lib/<script_name>/` and follows
-     `./reference/python-style-guide.md` and `./reference/shared-lib-rules.md`.
-   - Prefer `pathlib.Path`, typed signatures, shared library helpers, deterministic
-     output, and the repository's existing conventions.
+     `./reference/cli-conventions.md`. Here, `<script_name>` is the `snake_case`
+     module stem derived by replacing hyphens in a kebab-case entry-point name with
+     underscores; for an existing script, use its actual module stem. Replace the
+     token with that stem when identifying the concrete path.
+   - Library code belongs to a cohesive feature/domain package under the single
+     `src/lib/` root and follows `./reference/path-conventions.md`,
+     `./reference/python-style-guide.md`, and `./reference/shared-lib-rules.md`.
+   - Prefer `pathlib.Path`, typed signatures, the canonical feature/domain
+     implementation, deterministic output, and the repository's existing conventions.
 
 3. **Reconcile dependencies and registration.** Add, update, or remove dependencies
    only when required by the implementation. Create or update the `[project.scripts]`
@@ -92,7 +96,10 @@ script has identical files:
 - Type-check affected implementation with `uv run pyright` using the project config.
 - Run the relevant pytest targets; run project coverage enforcement when the affected
   package participates in the configured coverage gate.
-- For a registered CLI, verify `uv run --project ~/.config/opencode/scripts/python <script-name> --help` exits zero.
+- For a registered CLI, verify
+  `uv run --project ~/.config/opencode/scripts/python <script-name> --help` exits
+  zero. Here, `<script-name>` is the registered kebab-case command name; replace it
+  with that name before running the command.
 
 Do not require creation of files that the selected script architecture does not need.
 Do not weaken existing validation or coverage requirements merely to make an edit pass.
@@ -102,9 +109,18 @@ Do not weaken existing validation or coverage requirements merely to make an edi
 A created or updated Python script implementation under `scripts/python/`, including
 only the files required by the requested result. Typical affected files include:
 
+**PLACE-001 fixture annotation:** In the path patterns below, `<script_name>` is the
+Python module stem: for a kebab-case entry-point name, replace hyphens with
+underscores; for an existing script, use its actual module stem. Substitute the
+resulting stem before identifying concrete files. `<feature_or_domain>` is the
+`snake_case` package for the cohesive feature or domain that owns reusable behavior,
+as specified in `reference/path-conventions.md`; substitute that package's concrete
+name. Preserve existing package and module names unless an inventory-grounded decision
+identifies a specific minimal change.
+
 - `src/cli/<script_name>.py`
-- `src/lib/<script_name>/__init__.py`
-- `src/lib/<script_name>/core.py` or other existing package modules
+- `src/lib/<feature_or_domain>/__init__.py`
+- `src/lib/<feature_or_domain>/core.py` or other existing package modules
 - `tests/test_<script_name>.py`
 - `tests/test_<script_name>_cli.py`
 - `pyproject.toml`
