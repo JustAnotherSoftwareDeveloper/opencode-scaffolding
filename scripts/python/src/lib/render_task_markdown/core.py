@@ -78,7 +78,9 @@ def _render(data: dict[str, Any]) -> str:
         for step in task["executionInstructions"]:
             lines.append(f"{step['step']}. {_inline_text(step['action'])}")
             if "verification" in step:
-                lines.append(f"   Verification: {_inline_text(step['verification'])}")
+                lines.append(
+                    f"   Verification: {_inline_text(step['verification'])}"
+                )
         if "verification" in task:
             lines.extend(["", "### Verification", ""])
             lines.extend(f"- {item}" for item in task["verification"])
@@ -92,7 +94,7 @@ def _inline_text(value: str) -> str:
 
 
 def _write_text_new(path: Path, text: str, *, overwrite: bool = False) -> None:
-    """Atomically create *path*, replacing it only when explicitly authorized."""
+    """Atomically create *path*, replacing it only when authorized."""
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists() and not overwrite:
         raise FileExistsError(f"Output file already exists: {path}")

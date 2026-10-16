@@ -20,7 +20,8 @@ def find_git_root(start: Path | None = None) -> Path | None:
 
     Returns:
         The absolute path of the first ancestor that contains a ``.git/``
-        directory, or ``None`` if no ``.git/`` is found up to the filesystem root.
+        directory, or ``None`` if no ``.git/`` is found before the filesystem
+        root.
     """
     if start is None:
         start = Path.cwd()

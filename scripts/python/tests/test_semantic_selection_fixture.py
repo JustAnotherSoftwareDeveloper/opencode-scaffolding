@@ -9,10 +9,19 @@ from typing import Any
 import pytest
 import yaml
 
+pytestmark = pytest.mark.integration
+
 ROOT = Path(__file__).parents[1]
 FIXTURE = ROOT / "test-data" / "semantic-selection-cases.json"
 SKILLS_ROOT = ROOT.parents[1] / "skills"
-RANKING_FIELDS = {"rank", "ranking", "score", "scores", "threshold", "confidence"}
+RANKING_FIELDS = {
+    "rank",
+    "ranking",
+    "score",
+    "scores",
+    "threshold",
+    "confidence",
+}
 
 
 def _data() -> dict[str, Any]:
@@ -24,24 +33,34 @@ def _inventory(data: dict[str, Any]) -> dict[str, dict[str, str]]:
 
 
 def test_fixture_has_deterministic_schema_and_no_ranking_fields() -> None:
+    """Verify fixture schema is deterministic and omits ranking fields."""
     data = _data()
     assert data["schema_version"] == 1
     assert isinstance(data["inventory"], list) and data["inventory"]
     assert isinstance(data["cases"], list) and data["cases"]
-    assert len({item["name"] for item in data["inventory"]}) == len(data["inventory"])
+    assert len({item["name"] for item in data["inventory"]}) == len(
+        data["inventory"]
+    )
     assert len({case["id"] for case in data["cases"]}) == len(data["cases"])
     assert not RANKING_FIELDS.intersection(_all_keys(data))
 
 
 def _all_keys(value: Any) -> set[str]:
     if isinstance(value, dict):
-        return set(value) | set().union(*(_all_keys(item) for item in value.values()))
+        return set(value) | set().union(
+            *(_all_keys(item) for item in value.values())
+        )
     if isinstance(value, list):
-        return set().union(*(_all_keys(item) for item in value)) if value else set()
+        return (
+            set().union(*(_all_keys(item) for item in value))
+            if value
+            else set()
+        )
     return set()
 
 
 def test_frozen_inventory_records_resolve_to_matching_skill_files() -> None:
+    """Verify frozen inventory paths resolve to matching skill files."""
     data = _data()
     for item in data["inventory"]:
         path = ROOT.parents[1] / item["path"]
@@ -58,6 +77,7 @@ def test_frozen_inventory_records_resolve_to_matching_skill_files() -> None:
 def test_expected_names_and_paths_resolve_against_frozen_inventory(
     section: str,
 ) -> None:
+    """Verify expected skill names and paths match the frozen inventory."""
     data = _data()
     inventory = _inventory(data)
     for case in data[section]:
@@ -71,12 +91,14 @@ def test_expected_names_and_paths_resolve_against_frozen_inventory(
 
 
 def test_supported_task_cases_obey_one_to_three_cardinality() -> None:
+    """Verify supported task cases contain at most three selected skills."""
     for case in _data()["cases"]:
         if case["mode"] == "task":
             assert len(case["expected"]["names"]) <= 3
 
 
 def test_invalid_contract_cases_are_explicitly_invalid() -> None:
+    """Verify invalid contract fixtures exercise explicit invalid cases."""
     data = _data()
     inventory = _inventory(data)
     assert {case["id"] for case in data["invalid_contract_cases"]} == {

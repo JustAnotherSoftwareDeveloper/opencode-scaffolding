@@ -8,10 +8,14 @@ import pytest
 
 from lib.shared.git import find_git_root
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
-def isolated_git_ancestors(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Hide unrelated ancestor repositories while retaining the test directory."""
+def isolated_git_ancestors(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Hide unrelated ancestor repositories during tests."""
     original_is_dir = Path.is_dir
 
     def isolated_is_dir(path: Path) -> bool:

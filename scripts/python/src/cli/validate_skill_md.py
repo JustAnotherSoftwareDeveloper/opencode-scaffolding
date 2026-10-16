@@ -1,4 +1,4 @@
-"""Validate a complete skill entry point against the hard-cut profile contract."""
+"""Validate a complete skill entry point against the profile contract."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from typing import Any
 import click
 import yaml
 
-from lib.shared.skill_metadata import SkillMetadataError, normalize_skill_metadata
+from lib.skill_metadata import SkillMetadataError, normalize_skill_metadata
 
 _ACTIVE = {"operation", "delegated", "inline"}
 _PASSIVE = {"planning", "documentation"}
@@ -32,7 +32,7 @@ def _body_errors(body: str, skill_class: str) -> list[str]:
 
 
 def validate_skill_file(path: Path) -> dict[str, Any]:
-    """Return the same small result shape for every invalidity, without raising."""
+    """Return a consistent result shape for invalid files without raising."""
     errors: list[str] = []
     if not path.is_file():
         return {"valid": False, "errors": [f"File not found: {path}"]}
@@ -64,18 +64,25 @@ def validate_skill_file(path: Path) -> dict[str, Any]:
 
     if profile.name != path.parent.name:
         errors.append(
-            f"name '{profile.name}' does not match directory '{path.parent.name}'"
+            f"name '{profile.name}' does not match directory "
+            f"'{path.parent.name}'"
         )
     errors.extend(_body_errors(body, profile.skill_class))
-    if profile.skill_class in _PASSIVE and profile.selection.role != "reference":
+    if (
+        profile.skill_class in _PASSIVE
+        and profile.selection.role != "reference"
+    ):
         errors.append(
-            "planning and documentation classes must use selection.role reference"
+            "planning and documentation classes must use "
+            "selection.role reference"
         )
     return {"valid": not errors, "errors": errors}
 
 
 @click.command(name="validate-skill-md")
-@click.argument("skill_paths", type=click.Path(dir_okay=False), nargs=-1, required=True)
+@click.argument(
+    "skill_paths", type=click.Path(dir_okay=False), nargs=-1, required=True
+)
 def main(skill_paths: tuple[str, ...]) -> None:
     """Validate one or more complete SKILL.md files."""
     results = [validate_skill_file(Path(value)) for value in skill_paths]

@@ -7,7 +7,10 @@ import re
 from pathlib import Path
 from typing import Any
 
+import pytest
 import yaml
+
+pytestmark = pytest.mark.integration
 
 ROOT = Path(__file__).resolve().parents[3]
 SKILL_ROOT = ROOT / "skills" / "planning-pipeline-architecture"
@@ -35,6 +38,7 @@ def _normalized(value: str) -> str:
 
 
 def test_selection_fixture_uses_exact_current_owners_and_paths() -> None:
+    """Verify the selection fixture names current owners and skill paths."""
     data = _fixture()
     inventory = {item["name"]: item for item in data["inventory"]}
     assert data["schema_version"] == 1
@@ -65,6 +69,7 @@ def test_selection_fixture_uses_exact_current_owners_and_paths() -> None:
 
 
 def test_proposal_derived_lifecycle_has_the_mandatory_reaudit_loop() -> None:
+    """Verify planning preserves its mandatory re-audit loop."""
     text = _text(
         "skills/planning-pipeline-architecture/reference/proposal-derived-audit-lifecycle.md"
     )
@@ -93,6 +98,7 @@ def test_proposal_derived_lifecycle_has_the_mandatory_reaudit_loop() -> None:
 
 
 def test_blocked_handoffs_preserve_exact_needed_input_and_impact() -> None:
+    """Verify blocked handoffs specify exact inputs and resulting impacts."""
     data = _fixture()
     text = _text(
         "skills/planning-pipeline-architecture/reference/proposal-derived-audit-lifecycle.md"
@@ -106,7 +112,10 @@ def test_blocked_handoffs_preserve_exact_needed_input_and_impact() -> None:
         assert _normalized(handoff["impact"]) in lowered
 
 
-def test_direct_plan_only_keeps_publication_without_an_automatic_audit() -> None:
+def test_direct_plan_only_keeps_publication_without_an_automatic_audit() -> (
+    None
+):
+    """Verify plan-only publication does not trigger an automatic audit."""
     text = _text("skills/planning-pipeline-architecture/reference/plan-only.md")
     lowered = text.lower()
     assert "plan-writer" in text
@@ -117,6 +126,7 @@ def test_direct_plan_only_keeps_publication_without_an_automatic_audit() -> None
 
 
 def test_planning_reference_is_passive_and_non_transitive() -> None:
+    """Verify planning references stay passive and non-transitive."""
     files = [SKILL, *sorted(REFERENCE_ROOT.glob("*.md"))]
     combined = "\n".join(path.read_text(encoding="utf-8") for path in files)
     forbidden_operational_markers = (
@@ -128,8 +138,12 @@ def test_planning_reference_is_passive_and_non_transitive() -> None:
         "```",
     )
     lowered = combined.lower()
-    assert all(marker not in lowered for marker in forbidden_operational_markers)
-    assert not re.search(r"(?im)^\s*(load|run|write|create|delegate)\s+the\s", combined)
+    assert all(
+        marker not in lowered for marker in forbidden_operational_markers
+    )
+    assert not re.search(
+        r"(?im)^\s*(load|run|write|create|delegate)\s+the\s", combined
+    )
     assert "passive" in lowered
     assert "non-transitive" in lowered
     assert "no execution" in lowered
@@ -137,6 +151,7 @@ def test_planning_reference_is_passive_and_non_transitive() -> None:
 
 
 def test_planning_reference_links_resolve() -> None:
+    """Verify all local links in planning lifecycle references resolve."""
     files = [SKILL, *sorted(REFERENCE_ROOT.glob("*.md"))]
     for path in files:
         text = path.read_text(encoding="utf-8")

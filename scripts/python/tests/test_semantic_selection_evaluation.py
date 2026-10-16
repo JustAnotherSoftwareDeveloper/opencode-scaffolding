@@ -12,11 +12,14 @@ from lib.semantic_selection_evaluation.core import (
     load_fixture,
 )
 
+pytestmark = pytest.mark.unit
+
 ROOT = Path(__file__).parents[3]
 FIXTURE = Path(__file__).parents[1] / "test-data/semantic-selection-cases.json"
 
 
 def test_deterministic_covers_every_canonical_case() -> None:
+    """Verify deterministic evaluation covers every canonical case."""
     result = evaluate_fixture(load_fixture(FIXTURE), root=ROOT)
     assert result["passed"] is True
     assert result["fixture_cases"] == 10
@@ -25,14 +28,16 @@ def test_deterministic_covers_every_canonical_case() -> None:
 
 
 def test_deterministic_resolves_paths_and_allows_uncapped_planning() -> None:
+    """Verify evaluation resolves skill paths and permits uncapped planning."""
     result = evaluate_fixture(load_fixture(FIXTURE), root=ROOT)
-    assert result["cases"]["planning-lifecycle-reference"]["resolved_paths"] == [
-        str(ROOT / "skills/planning-pipeline-architecture/SKILL.md")
-    ]
+    assert result["cases"]["planning-lifecycle-reference"][
+        "resolved_paths"
+    ] == [str(ROOT / "skills/planning-pipeline-architecture/SKILL.md")]
     assert result["cases"]["three-skill-task-cardinality"]["passed"] is True
 
 
 def test_invalid_contracts_are_reported_without_fallback() -> None:
+    """Verify invalid selection contracts fail without fallback behavior."""
     fixture = load_fixture(FIXTURE)
     for invalid in fixture["invalid_contract_cases"]:
         case = dict(invalid)
@@ -44,9 +49,14 @@ def test_invalid_contracts_are_reported_without_fallback() -> None:
         assert result["cases"][case["id"]]["error"] == invalid["error"]
 
 
-def test_configured_llm_preserves_settings_and_rejects_malformed_output() -> None:
+def test_configured_llm_preserves_settings_and_rejects_malformed_output() -> (
+    None
+):
+    """Verify configured LLM settings persist and bad output is rejected."""
     fixture = load_fixture(FIXTURE)
-    responses = {case["id"]: case["expected"]["names"] for case in fixture["cases"]}
+    responses = {
+        case["id"]: case["expected"]["names"] for case in fixture["cases"]
+    }
     responses["python-script-task"] = "not json"
     result = evaluate_fixture(
         fixture,
@@ -69,22 +79,32 @@ def test_configured_llm_preserves_settings_and_rejects_malformed_output() -> Non
 
 
 def test_unknown_name_and_path_fail_closed() -> None:
+    """Verify unknown skill names and paths fail closed."""
     fixture = load_fixture(FIXTURE)
     fixture["cases"] = [
         {
             "id": "bad",
             "mode": "task",
-            "expected": {"names": ["missing"], "paths": ["skills/missing/SKILL.md"]},
+            "expected": {
+                "names": ["missing"],
+                "paths": ["skills/missing/SKILL.md"],
+            },
         }
     ]
     result = evaluate_fixture(fixture, root=ROOT)
     assert result["passed"] is False
-    assert result["cases"]["bad"]["error"] == "expected skill is absent from inventory"
+    assert (
+        result["cases"]["bad"]["error"]
+        == "expected skill is absent from inventory"
+    )
 
 
 def test_configured_llm_rejects_unsupported_response_name() -> None:
+    """Verify configured LLM output rejects unsupported skill names."""
     fixture = load_fixture(FIXTURE)
-    responses = {case["id"]: case["expected"]["names"] for case in fixture["cases"]}
+    responses = {
+        case["id"]: case["expected"]["names"] for case in fixture["cases"]
+    }
     responses["python-script-task"] = ["invented"]
     result = evaluate_fixture(
         fixture, root=ROOT, mode="configured-llm", responses=responses
@@ -95,6 +115,7 @@ def test_configured_llm_rejects_unsupported_response_name() -> None:
 
 
 def test_missing_inventory_file_blocks_evaluation(tmp_path: Path) -> None:
+    """Verify a missing frozen inventory blocks evaluation."""
     fixture = {
         "inventory": [{"name": "x", "path": "missing", "class": "inline"}],
         "cases": [],

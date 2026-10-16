@@ -71,11 +71,19 @@ def run_all(skill_dir: Path) -> dict[str, Any]:
         try:
             result = check_fn(skill_dir)
             results.append(
-                {"name": result.name, "passed": result.passed, "detail": result.detail}
+                {
+                    "name": result.name,
+                    "passed": result.passed,
+                    "detail": result.detail,
+                }
             )
         except Exception as exc:
             results.append(
-                {"name": check_name, "passed": False, "detail": f"Exception: {exc}"}
+                {
+                    "name": check_name,
+                    "passed": False,
+                    "detail": f"Exception: {exc}",
+                }
             )
 
     return {

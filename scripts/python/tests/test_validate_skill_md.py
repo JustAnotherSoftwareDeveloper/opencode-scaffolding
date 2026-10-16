@@ -1,11 +1,17 @@
+"""Unit tests for validating skill Markdown files."""
+
 from pathlib import Path
 
+import pytest
 import yaml
 
 from cli.validate_skill_md import validate_skill_file
 
+pytestmark = pytest.mark.unit
+
 
 def profile(name: str = "demo", **updates: object) -> dict[str, object]:
+    """Build a default skill profile for validation fixtures."""
     value: dict[str, object] = {
         "name": name,
         "description": "Use when validating a demo skill",
@@ -21,6 +27,7 @@ def write_skill(
     data: dict[str, object],
     body: str = "\n1. Validate the input.\n",
 ) -> Path:
+    """Write a skill Markdown fixture and return its path."""
     directory = tmp_path / str(data["name"])
     directory.mkdir()
     path = directory / "SKILL.md"
@@ -32,6 +39,7 @@ def write_skill(
 
 
 def test_valid_profile_and_body(tmp_path: Path) -> None:
+    """Verify a valid skill profile and body pass validation."""
     assert validate_skill_file(write_skill(tmp_path, profile())) == {
         "valid": True,
         "errors": [],
@@ -39,12 +47,16 @@ def test_valid_profile_and_body(tmp_path: Path) -> None:
 
 
 def test_obsolete_and_unknown_fields_are_rejected(tmp_path: Path) -> None:
-    result = validate_skill_file(write_skill(tmp_path, profile(schema_version="1")))
+    """Verify obsolete and unknown profile fields are rejected."""
+    result = validate_skill_file(
+        write_skill(tmp_path, profile(schema_version="1"))
+    )
     assert not result["valid"]
     assert any("obsolete" in error for error in result["errors"])
 
 
 def test_passive_class_requires_reference_and_no_steps(tmp_path: Path) -> None:
+    """Verify passive skills require reference material and prohibit steps."""
     data = profile(
         **{
             "class": "planning",
@@ -60,6 +72,7 @@ def test_passive_class_requires_reference_and_no_steps(tmp_path: Path) -> None:
 
 
 def test_name_and_path_are_checked(tmp_path: Path) -> None:
+    """Verify a skill's filename and path must match the profile contract."""
     path = write_skill(tmp_path, profile())
     path.rename(path.parent / "README.md")
     assert any(

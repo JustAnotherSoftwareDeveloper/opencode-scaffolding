@@ -7,4 +7,9 @@ from lib.semantic_selection_evaluation.core import (
     load_responses,
 )
 
-__all__ = ["EvaluationError", "evaluate_fixture", "load_fixture", "load_responses"]
+__all__ = [
+    "EvaluationError",
+    "evaluate_fixture",
+    "load_fixture",
+    "load_responses",
+]

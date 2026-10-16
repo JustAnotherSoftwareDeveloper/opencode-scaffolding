@@ -10,6 +10,8 @@ from click.testing import CliRunner
 
 from cli.init_task_packet import main
 
+pytestmark = pytest.mark.integration
+
 
 def _packet(**overrides: object) -> dict[str, object]:
     data: dict[str, object] = {
@@ -58,6 +60,7 @@ def _packet(**overrides: object) -> dict[str, object]:
 
 
 def test_publishes_and_prints_path(tmp_path: Path) -> None:
+    """Verify packet publication writes and prints the output path."""
     result = CliRunner().invoke(
         main,
         ["--output-dir", str(tmp_path)],
@@ -71,6 +74,7 @@ def test_publishes_and_prints_path(tmp_path: Path) -> None:
 
 
 def test_rejects_invalid_json(tmp_path: Path) -> None:
+    """Verify invalid JSON is rejected before packet publication."""
     result = CliRunner().invoke(
         main,
         ["--output-dir", str(tmp_path)],
@@ -80,6 +84,7 @@ def test_rejects_invalid_json(tmp_path: Path) -> None:
 
 
 def test_rejects_non_object(tmp_path: Path) -> None:
+    """Verify non-object JSON input is rejected."""
     result = CliRunner().invoke(
         main,
         ["--output-dir", str(tmp_path)],
@@ -89,6 +94,7 @@ def test_rejects_non_object(tmp_path: Path) -> None:
 
 
 def test_rejects_missing_summary(tmp_path: Path) -> None:
+    """Verify packets without a summary are rejected."""
     result = CliRunner().invoke(
         main,
         ["--output-dir", str(tmp_path)],
@@ -99,6 +105,7 @@ def test_rejects_missing_summary(tmp_path: Path) -> None:
 
 
 def test_rejects_empty_summary(tmp_path: Path) -> None:
+    """Verify packets with a blank summary are rejected."""
     result = CliRunner().invoke(
         main,
         ["--output-dir", str(tmp_path)],
@@ -108,7 +115,10 @@ def test_rejects_empty_summary(tmp_path: Path) -> None:
 
 
 def test_rejects_existing_destination(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setattr("cli.init_task_packet.time.time_ns", lambda: 1_000_000_000)
+    """Verify publication rejects an existing destination file."""
+    monkeypatch.setattr(
+        "cli.init_task_packet.time.time_ns", lambda: 1_000_000_000
+    )
     result = CliRunner().invoke(
         main,
         ["--output-dir", str(tmp_path)],
@@ -125,6 +135,7 @@ def test_rejects_existing_destination(tmp_path: Path, monkeypatch) -> None:
 
 
 def test_preserves_supplied_slug(tmp_path: Path) -> None:
+    """Verify packet publication preserves the supplied slug."""
     result = CliRunner().invoke(
         main,
         ["--output-dir", str(tmp_path)],
@@ -134,10 +145,15 @@ def test_preserves_supplied_slug(tmp_path: Path) -> None:
     path = Path(result.output.strip())
     assert "deploy-api-gateway" in path.name
     assert path.suffix == ".json"
-    assert json.loads(path.read_text(encoding="utf-8"))["slug"] == "deploy-api-gateway"
+    assert (
+        json.loads(path.read_text(encoding="utf-8"))["slug"]
+        == "deploy-api-gateway"
+    )
 
 
-def test_accepts_non_ascii_summary_without_deriving_a_slug(tmp_path: Path) -> None:
+def test_accepts_non_ascii_summary_without_deriving_a_slug(
+    tmp_path: Path,
+) -> None:
     """Summary text is opaque; publication uses the supplied ASCII identity."""
     result = CliRunner().invoke(
         main,
@@ -162,6 +178,7 @@ def test_accepts_non_ascii_summary_without_deriving_a_slug(tmp_path: Path) -> No
 def test_rejects_missing_or_malformed_supplied_slug(
     tmp_path: Path, slug: object
 ) -> None:
+    """Verify missing and malformed supplied slugs are rejected."""
     packet = _packet()
     if slug is None:
         packet.pop("slug")
@@ -180,6 +197,7 @@ def test_rejects_missing_or_malformed_supplied_slug(
 
 
 def test_help_works() -> None:
+    """Verify the CLI help option succeeds and names the command."""
     result = CliRunner().invoke(main, ["--help"])
     assert result.exit_code == 0
     assert "init-task-packet" in result.output

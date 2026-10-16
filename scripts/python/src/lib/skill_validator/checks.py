@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from lib.collect_skills.parser import SKILL_NAME_RE
-from lib.shared.skill_metadata import SkillMetadataError, normalize_skill_metadata
+from lib.skill_metadata import SkillMetadataError, normalize_skill_metadata
 
 from .helpers import (
     DEFAULT_DESCRIPTION_PREFIX,
@@ -117,7 +117,9 @@ def check_description_prefix(skill_dir: Path) -> CheckResult:
     fm = _parse_frontmatter(content)
     if fm is None:
         return CheckResult(
-            "description-prefix", False, "Cannot check description: frontmatter invalid"
+            "description-prefix",
+            False,
+            "Cannot check description: frontmatter invalid",
         )
 
     desc = fm.get("description", "")
@@ -129,7 +131,8 @@ def check_description_prefix(skill_dir: Path) -> CheckResult:
                 "description-prefix",
                 True,
                 "Description starts with "
-                f"'{PLANNING_DESCRIPTION_PREFIX}' as required for planning class",
+                f"'{PLANNING_DESCRIPTION_PREFIX}' as required for "
+                "planning class",
             )
         return CheckResult(
             "description-prefix",
@@ -166,7 +169,9 @@ def check_class_valid(skill_dir: Path) -> CheckResult:
 
     skill_class = fm.get("class", "")
     if skill_class in VALID_CLASSES:
-        return CheckResult("class-valid", True, f"Class '{skill_class}' is valid")
+        return CheckResult(
+            "class-valid", True, f"Class '{skill_class}' is valid"
+        )
     valid_list = ", ".join(sorted(VALID_CLASSES))
     return CheckResult(
         "class-valid",
@@ -190,7 +195,9 @@ def check_docs_last_section(skill_dir: Path) -> CheckResult:
 
     last_heading = headings[-1].strip()
     if last_heading == "Docs":
-        return CheckResult("docs-last-section", True, "Last H2 section is '## Docs'")
+        return CheckResult(
+            "docs-last-section", True, "Last H2 section is '## Docs'"
+        )
     return CheckResult(
         "docs-last-section",
         False,
@@ -227,7 +234,9 @@ def check_no_examples_section(skill_dir: Path) -> CheckResult:
 
     if re.search(r"^##\s+Examples\b", content, re.MULTILINE):
         return CheckResult(
-            "no-examples-section", False, "SKILL.md contains an '## Examples' section"
+            "no-examples-section",
+            False,
+            "SKILL.md contains an '## Examples' section",
         )
     return CheckResult("no-examples-section", True, "No examples section found")
 
@@ -239,12 +248,14 @@ def check_one_sentence_per_line(skill_dir: Path) -> CheckResult:
 
     if not md_files:
         return CheckResult(
-            "one-sentence-per-line", False, "No .md files found in skill directory"
+            "one-sentence-per-line",
+            False,
+            "No .md files found in skill directory",
         )
 
     for md_file in md_files:
-        # Skip files in schemas/ and templates/ per style guide exceptions.
-        # Also skip reference/ — these are documentation with looser conventions.
+        # Skip schemas/ and templates/ per the style-guide exceptions.
+        # Reference files use looser documentation conventions too.
         if _is_in_skip_directory(
             md_file, skill_dir, frozenset({"schemas", "templates", "reference"})
         ):
@@ -254,7 +265,7 @@ def check_one_sentence_per_line(skill_dir: Path) -> CheckResult:
         lines = text.split("\n")
         for i, line in enumerate(lines, 1):
             stripped = line.strip()
-            # Skip frontmatter, headings, empty lines, list items, and code fences.
+            # Skip frontmatter, headings, empty lines, list items, and fences.
             if not stripped:
                 continue
             if stripped.startswith("---"):
@@ -271,18 +282,21 @@ def check_one_sentence_per_line(skill_dir: Path) -> CheckResult:
                 continue
             if stripped.startswith(">"):
                 continue
-            # Check for multiple sentences on one line in prose paragraphs
-            # Multiple sentence endings followed by spaces indicate joined sentences.
+            # Detect multiple sentence endings followed by spaces in prose.
             matches = list(SENTENCE_END_PATTERN.finditer(stripped))
             if len(matches) > 1:
-                violations.append(f"{md_file.name}:{i}: multiple sentences on one line")
+                violations.append(
+                    f"{md_file.name}:{i}: multiple sentences on one line"
+                )
 
     if violations:
         # Show first 5 violations
         detail_lines = violations[:5]
         if len(violations) > 5:
             detail_lines.append(f"... and {len(violations) - 5} more")
-        return CheckResult("one-sentence-per-line", False, "; ".join(detail_lines))
+        return CheckResult(
+            "one-sentence-per-line", False, "; ".join(detail_lines)
+        )
     return CheckResult(
         "one-sentence-per-line", True, "All .md files use one sentence per line"
     )
@@ -316,8 +330,7 @@ def check_no_declarative_voice(skill_dir: Path) -> CheckResult:
             if re.match(r"^\d+\.", stripped):
                 continue
 
-            # Heuristic: check for passive voice patterns or hedging in prose lines
-            # Only flag in body text that looks like a procedural instruction
+            # Check for passive voice or hedging in procedural prose lines.
             if PASSIVE_VOICE_PATTERNS.search(stripped):
                 violations.append(f"{md_file.name}:{i}: '{stripped[:80]}'")
 
@@ -325,7 +338,9 @@ def check_no_declarative_voice(skill_dir: Path) -> CheckResult:
         detail_lines = violations[:5]
         if len(violations) > 5:
             detail_lines.append(f"... and {len(violations) - 5} more")
-        return CheckResult("no-declarative-voice", False, "; ".join(detail_lines))
+        return CheckResult(
+            "no-declarative-voice", False, "; ".join(detail_lines)
+        )
     return CheckResult(
         "no-declarative-voice",
         True,
@@ -358,7 +373,9 @@ def check_no_placeholders(skill_dir: Path) -> CheckResult:
         if len(violations) > 5:
             detail_lines.append(f"... and {len(violations) - 5} more")
         return CheckResult("no-placeholders", False, "; ".join(detail_lines))
-    return CheckResult("no-placeholders", True, "No unreplaced <<placeholders>> found")
+    return CheckResult(
+        "no-placeholders", True, "No unreplaced <<placeholders>> found"
+    )
 
 
 def check_cross_references_exist(skill_dir: Path) -> CheckResult:
@@ -385,14 +402,17 @@ def check_cross_references_exist(skill_dir: Path) -> CheckResult:
                 alt_path = (md_file.parent / path_str).resolve()
                 if not alt_path.is_file():
                     broken_refs.append(
-                        f"in {md_file.name}: '{link}' -> {ref_path.name} (not found)"
+                        f"in {md_file.name}: '{link}' -> {ref_path.name} "
+                        "(not found)"
                     )
 
     if broken_refs:
         detail_lines = broken_refs[:5]
         if len(broken_refs) > 5:
             detail_lines.append(f"... and {len(broken_refs) - 5} more")
-        return CheckResult("cross-references-exist", False, "; ".join(detail_lines))
+        return CheckResult(
+            "cross-references-exist", False, "; ".join(detail_lines)
+        )
     return CheckResult(
         "cross-references-exist",
         True,

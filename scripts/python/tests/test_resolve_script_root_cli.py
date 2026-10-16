@@ -10,6 +10,8 @@ from click.testing import CliRunner
 
 from cli.resolve_script_root import main
 
+pytestmark = pytest.mark.integration
+
 
 class TestResolveScriptRootCLI:
     """Integration tests for the resolve-script-root CLI."""
@@ -40,9 +42,11 @@ class TestResolveScriptRootCLI:
         assert result.output.strip() == str(expected.resolve())
 
     def test_json_format(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """--format json returns parseable JSON with path, runtime, and source."""
+        """--format json returns JSON with path, runtime, and source."""
         monkeypatch.setenv("OPENCODE_SCRIPTS_PYTHON", "/override/path")
-        result = self.runner.invoke(main, ["--runtime", "python", "--format", "json"])
+        result = self.runner.invoke(
+            main, ["--runtime", "python", "--format", "json"]
+        )
         assert result.exit_code == 0
         data = json.loads(result.output)
         assert data["path"] == "/override/path"

@@ -5,10 +5,15 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.integration
+
 ROOT = Path(__file__).resolve().parents[3]
 
 
 def test_executor_exposes_only_bounded_read_only_task_selection() -> None:
+    """Verify executor task selection is bounded and read-only."""
     config = json.loads((ROOT / "opencode.json").read_text(encoding="utf-8"))
     permissions = config["agent"]["executor"]["permission"]
     commands = permissions["bash"]
@@ -18,11 +23,16 @@ def test_executor_exposes_only_bounded_read_only_task_selection() -> None:
         prefix = f"uv run --project scripts/python get-task {path} "
         for selector in ("--id *", "--index *"):
             assert commands[prefix + selector] == "allow"
-        validator = f"uv run --project scripts/python validate-task-structure {path} "
+        validator = (
+            f"uv run --project scripts/python validate-task-structure {path} "
+        )
         assert (
             commands[
                 validator
-                + "--schema skills/breakdown-tasks/schema/task-packet.schema.json"
+                + (
+                    "--schema "
+                    "skills/breakdown-tasks/schema/task-packet.schema.json"
+                )
             ]
             == "allow"
         )
@@ -32,6 +42,7 @@ def test_executor_exposes_only_bounded_read_only_task_selection() -> None:
 
 
 def test_executor_requires_full_object_before_worker_dispatch() -> None:
+    """Verify workers receive a complete task object before dispatch."""
     contract = (ROOT / "agents/executor.md").read_text(encoding="utf-8")
     assert "get-task PATH --index N" in contract
     assert "Never send a task ID, plan path, summary" in contract

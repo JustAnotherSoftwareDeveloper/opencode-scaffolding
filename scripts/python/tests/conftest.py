@@ -9,6 +9,7 @@ correctly against the ``src/lib/`` and ``src/cli/`` layouts.
 from __future__ import annotations
 
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -20,6 +21,30 @@ if TYPE_CHECKING:
 _PROJECT_SRC = Path(__file__).resolve().parents[1] / "src"
 if str(_PROJECT_SRC) not in sys.path:
     sys.path.insert(0, str(_PROJECT_SRC))
+
+
+def _classification_errors(items: list[pytest.Item]) -> list[str]:
+    """Return collected tests that lack exactly one test classification."""
+    errors: list[str] = []
+    for item in items:
+        is_unit = item.get_closest_marker("unit") is not None
+        is_integration = item.get_closest_marker("integration") is not None
+        if is_unit == is_integration:
+            errors.append(item.nodeid)
+    return errors
+
+
+@pytest.hookimpl(hookwrapper=True, tryfirst=True)
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> Iterator[None]:
+    """Reject missing or conflicting classifications before marker selection."""
+    errors = _classification_errors(items)
+    yield
+    if errors:
+        details = ", ".join(errors)
+        raise pytest.UsageError(
+            "Every collected test must have exactly one of 'unit' or "
+            f"'integration'; invalid tests: {details}"
+        )
 
 
 @pytest.fixture

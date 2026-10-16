@@ -5,6 +5,10 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.integration
+
 
 def test_agent_eval_suite_list_cases() -> None:
     """Verify --list-cases outputs JSON with cases."""
@@ -55,7 +59,9 @@ def test_agent_eval_suite_requires_model_for_inspect(tmp_path: Path) -> None:
     assert "requires" in result.stderr.lower() or "Error" in result.stderr
 
 
-def test_agent_eval_suite_requires_model_for_terminal_bench(tmp_path: Path) -> None:
+def test_agent_eval_suite_requires_model_for_terminal_bench(
+    tmp_path: Path,
+) -> None:
     """Verify --run-terminal-bench requires --tb-model."""
     output_path = tmp_path / "inspect_task.py"
     result = subprocess.run(

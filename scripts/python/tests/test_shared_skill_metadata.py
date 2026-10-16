@@ -7,15 +7,18 @@ import copy
 import pytest
 from jsonschema import Draft202012Validator, ValidationError
 
-from lib.shared.skill_metadata import (
+from lib.skill_metadata import (
     SkillMetadataError,
     load_skill_metadata_schema,
     normalize_skill_metadata,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def profile() -> dict[str, object]:
+    """Provide a representative skill metadata profile for tests."""
     return {
         "name": "make-script",
         "description": "Create a deterministic script",
@@ -37,22 +40,28 @@ def profile() -> dict[str, object]:
 
 
 def test_normalizes_and_preserves_authored_order(profile):
+    """Verify metadata normalization preserves authored tag order."""
     result = normalize_skill_metadata(profile)
     assert result.selection.tags.actions == ("create", "generate")
-    assert result.selection.to_dict()["use_when"] == ["a script must be created"]
+    assert result.selection.to_dict()["use_when"] == [
+        "a script must be created"
+    ]
     assert result.to_dict()["metadata"] == {"team": "tools"}
 
 
 def test_schema_is_valid_and_accepts_example(profile):
+    """Verify the metadata schema accepts the valid example profile."""
     schema = load_skill_metadata_schema()
     Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema).validate(profile)
 
 
 @pytest.mark.parametrize(
-    "field", ["schema_version", "cues", "relationships", "location", "score", "rank"]
+    "field",
+    ["schema_version", "cues", "relationships", "location", "score", "rank"],
 )
 def test_rejects_obsolete_fields(profile, field):
+    """Verify obsolete metadata fields are rejected."""
     candidate = copy.deepcopy(profile)
     candidate[field] = []
     with pytest.raises(SkillMetadataError, match="obsolete"):
@@ -60,6 +69,7 @@ def test_rejects_obsolete_fields(profile, field):
 
 
 def test_rejects_unknown_fields_and_empty_groups(profile):
+    """Verify unknown fields and empty selection groups are rejected."""
     candidate = copy.deepcopy(profile)
     candidate["selection"]["tags"]["actions"] = []
     with pytest.raises(SkillMetadataError, match="non-empty"):
@@ -71,6 +81,7 @@ def test_rejects_unknown_fields_and_empty_groups(profile):
 
 
 def test_rejects_duplicate_and_self_support(profile):
+    """Verify duplicate and self-referential support entries are rejected."""
     candidate = copy.deepcopy(profile)
     candidate["selection"]["supports"] = [
         "skill-authoring-guide",
@@ -84,6 +95,7 @@ def test_rejects_duplicate_and_self_support(profile):
 
 
 def test_schema_rejects_unknown_and_empty_root_values(profile):
+    """Verify the schema rejects unknown fields and empty root groups."""
     schema = load_skill_metadata_schema()
     invalid = {
         **profile,

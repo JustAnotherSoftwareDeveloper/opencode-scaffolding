@@ -10,6 +10,8 @@ from lib.shared.schema import (
     validate_type,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestValidateRequiredKeys:
     """Tests for ``validate_required_keys()``."""
@@ -40,7 +42,9 @@ class TestValidateRequiredKeys:
 
     def test_extra_keys_ignored(self) -> None:
         """Keys in data but not in required are ignored."""
-        result = validate_required_keys({"name": "test", "extra": "ignored"}, ["name"])
+        result = validate_required_keys(
+            {"name": "test", "extra": "ignored"}, ["name"]
+        )
         assert result == []
 
 
@@ -105,7 +109,9 @@ class TestValidateJsonSchema:
         errors = validate_json_schema(instance, schema)
         assert len(errors) > 0
 
-    def test_not_a_dict_no_jsonschema(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_not_a_dict_no_jsonschema(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Instance must be a dict when jsonschema is absent."""
         monkeypatch.setattr("lib.shared.schema._HAS_JSONSCHEMA", False)
         errors = validate_json_schema("not a dict", {"required": ["name"]})
@@ -126,5 +132,7 @@ class TestValidateJsonSchema:
     ) -> None:
         """Non-list ``required`` in schema returns empty list."""
         monkeypatch.setattr("lib.shared.schema._HAS_JSONSCHEMA", False)
-        errors = validate_json_schema({"name": "test"}, {"required": "not-a-list"})
+        errors = validate_json_schema(
+            {"name": "test"}, {"required": "not-a-list"}
+        )
         assert errors == []

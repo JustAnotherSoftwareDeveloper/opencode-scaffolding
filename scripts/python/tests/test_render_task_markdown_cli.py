@@ -5,9 +5,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from click.testing import CliRunner
 
 from cli.render_task_markdown import main
+
+pytestmark = pytest.mark.integration
 
 VALID_CONTEXT = "x" * 200
 
@@ -42,9 +45,13 @@ def _packet() -> dict:
                 "filesToRead": [],
                 "filesToWrite": [],
                 "skills": ["documentation"],
-                "executionInstructions": [{"step": 1, "action": "Render the task."}],
+                "executionInstructions": [
+                    {"step": 1, "action": "Render the task."}
+                ],
                 "expectedOutput": "Markdown task plan.",
-                "verificationCoverage": {"observable": ["Markdown output exists."]},
+                "verificationCoverage": {
+                    "observable": ["Markdown output exists."]
+                },
                 "dependencies": [],
                 "antiPatternSignals": ["none"],
                 "purposeOutputAlignment": {
@@ -57,6 +64,7 @@ def _packet() -> dict:
 
 
 def test_cli_renders_markdown(tmp_path: Path) -> None:
+    """Verify the CLI writes a rendered Markdown task plan."""
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
         input_file = Path.cwd() / "tasks.json"
@@ -76,6 +84,7 @@ def test_cli_renders_markdown(tmp_path: Path) -> None:
 
 
 def test_cli_overwrites_only_with_explicit_flag(tmp_path: Path) -> None:
+    """Verify the CLI overwrites existing Markdown only with the flag."""
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
         input_file = Path.cwd() / "tasks.json"
@@ -99,6 +108,7 @@ def test_cli_overwrites_only_with_explicit_flag(tmp_path: Path) -> None:
 
 
 def test_cli_rejects_invalid_json(tmp_path: Path) -> None:
+    """Verify the CLI reports invalid task JSON."""
     input_file = tmp_path / "tasks.json"
     input_file.write_text("not json")
     result = CliRunner().invoke(
@@ -115,6 +125,7 @@ def test_cli_rejects_invalid_json(tmp_path: Path) -> None:
 
 
 def test_cli_rejects_output_outside_cwd(tmp_path: Path) -> None:
+    """Verify the CLI rejects output paths outside its working directory."""
     input_file = tmp_path / "tasks.json"
     input_file.write_text(json.dumps(_packet()))
     result = CliRunner().invoke(

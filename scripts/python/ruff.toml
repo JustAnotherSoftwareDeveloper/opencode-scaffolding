@@ -1,7 +1,18 @@
 target-version = "py312"
-line-length = 88
+line-length = 80
 
 [lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "ARG"]
+extend-select = ["D", "D400"]
+# Keep E501 active; any permitted overlength lines require narrow review.
+# Avoid only the Ruff formatter-conflicting rules listed by the locked version.
+ignore = ["E111", "E114", "E117", "W191", "D206", "D300"]
+
+[lint.pycodestyle]
+max-line-length = 80
+
+[lint.pydocstyle]
+convention = "google"
 
 [format]
+docstring-code-format = false

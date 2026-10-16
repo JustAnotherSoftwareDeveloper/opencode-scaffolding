@@ -16,14 +16,15 @@ import jsonschema
 
 
 def _validate_file_array(arr: list[Any], path: str, label: str) -> list[str]:
-    """Validate a file path array: all strings, no duplicates, no empty strings."""
+    """Validate that a file array contains unique, non-empty strings."""
     errors: list[str] = []
 
     seen: set[str] = set()
     for i, item in enumerate(arr):
         if not isinstance(item, str):
             errors.append(
-                f"{path}.{label}[{i}]: expected string, got {type(item).__name__}"
+                f"{path}.{label}[{i}]: expected string, got "
+                f"{type(item).__name__}"
             )
         elif item == "":
             errors.append(f"{path}.{label}[{i}]: empty string not allowed")
@@ -37,7 +38,9 @@ def _validate_file_array(arr: list[Any], path: str, label: str) -> list[str]:
     return errors
 
 
-def _validate_execution_steps(steps: list[dict[str, Any]], path: str) -> list[str]:
+def _validate_execution_steps(
+    steps: list[dict[str, Any]], path: str
+) -> list[str]:
     """Validate execution instruction steps are sequential starting at 1."""
     errors: list[str] = []
     for i, step in enumerate(steps, start=1):
@@ -71,7 +74,9 @@ def _root_schema_errors(
     )
 
 
-def validate_root(packet: Any, schema: dict[str, Any]) -> tuple[bool, list[str]]:
+def validate_root(
+    packet: Any, schema: dict[str, Any]
+) -> tuple[bool, list[str]]:
     """Validate a complete task-packet root against its canonical schema.
 
     This validates the enclosing object, including its required ``summary`` and
@@ -123,15 +128,20 @@ def _validate_boundary_review(packet: dict[str, Any]) -> list[str]:
     for task_id, task_review in task_reviews.items():
         assert isinstance(task_review, dict)
         has_evidence = "indivisibilityEvidence" in task_review
-        retained = task_review["preAssignmentDisposition"] == "retained-indivisible"
-        accepted = task_review["acceptanceDisposition"] == "accepted-indivisible"
+        retained = (
+            task_review["preAssignmentDisposition"] == "retained-indivisible"
+        )
+        accepted = (
+            task_review["acceptanceDisposition"] == "accepted-indivisible"
+        )
         if has_evidence and not (retained and accepted):
             diagnostics.append(
                 _diagnostic(
                     "ERROR",
                     "boundary-review-indivisibility-evidence",
                     f"boundaryReview.taskReviews.{task_id}.indivisibilityEvidence",
-                    "is only valid for a retained, accepted-indivisible review.",
+                    "is only valid for a retained, "
+                    "accepted-indivisible review.",
                 )
             )
 
@@ -153,14 +163,16 @@ def _validate_boundary_review(packet: dict[str, Any]) -> list[str]:
         if warning["disposition"] == "accepted-indivisible":
             task_review = task_reviews.get(task_id)
             if not isinstance(task_review, dict) or (
-                task_review.get("acceptanceDisposition") != "accepted-indivisible"
+                task_review.get("acceptanceDisposition")
+                != "accepted-indivisible"
             ):
                 diagnostics.append(
                     _diagnostic(
                         "ERROR",
                         "boundary-review-warning-consistency",
                         path,
-                        "accepted-indivisible requires the referenced task review "
+                        "accepted-indivisible requires the referenced "
+                        "task review "
                         "to be accepted-indivisible.",
                     )
                 )
@@ -203,7 +215,8 @@ def _validate_metadata(tasks: list[dict[str, Any]]) -> list[str]:
         if isinstance(dependencies, list):
             for edge_index, edge in enumerate(dependencies):
                 if not isinstance(edge, dict):
-                    continue  # JSON Schema supplies the precise type diagnostic.
+                    # JSON Schema supplies the precise type diagnostic.
+                    continue
                 target = edge.get("taskId")
                 edge_path = f"{path}.dependencies[{edge_index}]"
                 if target not in known:
@@ -212,7 +225,8 @@ def _validate_metadata(tasks: list[dict[str, Any]]) -> list[str]:
                             "ERROR",
                             "dependency-reference",
                             edge_path,
-                            f"unknown taskId {target!r}; use one of {sorted(known)!r}.",
+                            f"unknown taskId {target!r}; use one of "
+                            f"{sorted(known)!r}.",
                         )
                     )
                 elif target == identities[index]:
@@ -221,7 +235,8 @@ def _validate_metadata(tasks: list[dict[str, Any]]) -> list[str]:
                             "ERROR",
                             "dependency-cycle",
                             edge_path,
-                            "self-reference creates a cycle; reference a prior or "
+                            "self-reference creates a cycle; "
+                            "reference a prior or "
                             "independent task.",
                         )
                     )
@@ -297,8 +312,10 @@ def _validate_metadata(tasks: list[dict[str, Any]]) -> list[str]:
                         "ERROR",
                         "write-target-conflict",
                         f"tasks[{index}].filesToWrite",
-                        f"write target {target!r} is also owned by tasks[{previous}]; "
-                        "split the target or document one shared coupling group.",
+                        f"write target {target!r} is also owned by "
+                        f"tasks[{previous}]; "
+                        "split the target or document one shared "
+                        "coupling group.",
                     )
                 )
     return diagnostics
@@ -319,13 +336,13 @@ def validate(packet: Any, schema: dict[str, Any]) -> tuple[bool, list[str]]:
     * type correctness via JSON Schema validation
 
     Args:
-        packet: Canonical packet root containing packet metadata, tasks, and closed
-            boundary-review evidence. Rootless task arrays are rejected.
+        packet: Canonical packet root with metadata, tasks, and closed
+            boundary-review evidence; rootless task arrays are rejected.
         schema: The full task-packet JSON Schema (with definitions).
 
     Returns:
-        ``(True, diagnostics)`` when no structural error exists. A successful result
-        is structural-interface evidence only; it is not semantic atomicity approval.
+        ``(True, diagnostics)`` when no structural error exists. Success proves
+        structural-interface validity, not semantic atomicity.
     """
     root_valid, root_errors = validate_root(packet, schema)
     if not root_valid:
@@ -356,7 +373,9 @@ def validate(packet: Any, schema: dict[str, Any]) -> tuple[bool, list[str]]:
     hard_errors = [error for error in errors if error.startswith("ERROR ")]
     # Unprefixed structural errors remain hard.
     hard_errors.extend(
-        error for error in errors if not error.startswith(("WARNING ", "ERROR "))
+        error
+        for error in errors
+        if not error.startswith(("WARNING ", "ERROR "))
     )
     if hard_errors:
         return False, errors
@@ -378,6 +397,7 @@ def auto_fix(tasks: list[dict[str, Any]]) -> bool:
 
     Args:
         tasks: List of task dicts to fix (modified in place).
+
     Returns:
         ``True`` when at least one skills array changed.
     """
@@ -410,13 +430,13 @@ def auto_fix_task_structure(
     writes back, and re-validates up to 3 times.
 
     Args:
-        state_path: Path to .tasks state file (JSON object with ``tasks`` array).
+        state_path: Path to the .tasks JSON state file containing ``tasks``.
         schema: The full task-packet JSON Schema.
 
     Returns:
         ``{"valid": True, "fixed": True}`` when auto-fix resolved all errors,
         ``{"valid": True, "fixed": False}`` when already valid,
-        ``{"valid": False, "errors": [...]}`` when errors remain after fix attempts.
+        ``{"valid": False, "errors": [...]}`` when errors remain after fixing.
     """
     state_path = Path(state_path)
 
@@ -430,7 +450,9 @@ def auto_fix_task_structure(
     # The only permitted pre-validation exception is a skills-array violation
     # that auto_fix() can remove. Every other canonical-root violation is
     # rejected before task checks and, importantly, before any write.
-    if not isinstance(parsed, dict) or not isinstance(parsed.get("tasks"), list):
+    if not isinstance(parsed, dict) or not isinstance(
+        parsed.get("tasks"), list
+    ):
         return {
             "valid": False,
             "errors": _format_root_errors(root_errors),
@@ -473,7 +495,7 @@ def auto_fix_task_structure(
 def _only_repairable_skills_errors(
     errors: list[jsonschema.ValidationError],
 ) -> bool:
-    """Whether every root-schema error is a skills array limit/duplicate error."""
+    """Return whether all errors are repairable skills-array constraints."""
     return bool(errors) and all(
         list(error.absolute_path)[-1:] == ["skills"]
         and error.validator in {"maxItems", "uniqueItems"}

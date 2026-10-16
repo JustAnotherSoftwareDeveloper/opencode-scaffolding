@@ -42,28 +42,20 @@ packages = ["src/cli", "src/lib"]
 package = true
 
 [tool.coverage.run]
+branch = false
+data_file = ".coverage.full"
 source = ["cli", "lib"]
-omit = [
-    "*/tests/*",
-    "*/test_*",
-    "*/.tox/*",
-    "*/venv/*",
-    "*/env/*",
-    "*/agent_eval_suite/*",
-]
 
 [tool.coverage.report]
 fail_under = 85
 exclude_lines = [
-    "pragma: no cover",
     "if __name__ == .__main__.:",
-    "if TYPE_CHECKING:",
-    "class .*\\bProtocol\\):",
-    "@(abc\\.)?abstractmethod",
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov=cli --cov=lib --cov-report=term-missing --cov-fail-under=85"
+addopts = "--cov=cli --cov=lib --cov-config=pyproject.toml --cov-report=term-missing --cov-fail-under=85"
 markers = [
-    "skip_coverage: Skip coverage checks for this test",
+    "unit: Direct-call unit test included in the complete unit coverage run",
+    "integration: CLI, entry-point, subprocess, or workflow integration test",
+    "skip_coverage: Legacy marker; does not suppress pytest-cov measurement",
 ]

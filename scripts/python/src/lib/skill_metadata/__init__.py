@@ -13,8 +13,21 @@ SkillRole = Literal["owner", "support", "reference"]
 SkillClass = Literal[
     "operation", "delegated", "inline", "planning", "documentation"
 ]
-TAG_GROUPS = ("actions", "inputs", "outputs", "topics", "environments", "constraints")
-OPTIONAL_FIELDS = ("version", "license", "compatibility", "metadata", "permission")
+TAG_GROUPS = (
+    "actions",
+    "inputs",
+    "outputs",
+    "topics",
+    "environments",
+    "constraints",
+)
+OPTIONAL_FIELDS = (
+    "version",
+    "license",
+    "compatibility",
+    "metadata",
+    "permission",
+)
 _NAME = re.compile(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$")
 _ROOT = {"name", "description", "selection", "class", *OPTIONAL_FIELDS}
 _SELECTION = {"role", "aliases", "tags", "use_when", "not_for", "supports"}
@@ -37,6 +50,8 @@ class SkillMetadataError(ValueError):
 
 @dataclass(frozen=True)
 class SelectionTags:
+    """Selection descriptors grouped by tag family."""
+
     actions: tuple[str, ...] = ()
     inputs: tuple[str, ...] = ()
     outputs: tuple[str, ...] = ()
@@ -45,6 +60,7 @@ class SelectionTags:
     constraints: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, list[str]]:
+        """Return non-empty tag groups as JSON-compatible lists."""
         return {
             group: list(getattr(self, group))
             for group in TAG_GROUPS
@@ -54,6 +70,8 @@ class SelectionTags:
 
 @dataclass(frozen=True)
 class SelectionProfile:
+    """A skill's selection role, tags, and optional relationship hints."""
+
     role: SkillRole
     tags: SelectionTags
     aliases: tuple[str, ...] = ()
@@ -62,7 +80,11 @@ class SelectionProfile:
     supports: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
-        result: dict[str, Any] = {"role": self.role, "tags": self.tags.to_dict()}
+        """Return this profile as JSON-compatible data."""
+        result: dict[str, Any] = {
+            "role": self.role,
+            "tags": self.tags.to_dict(),
+        }
         if self.aliases:
             result["aliases"] = list(self.aliases)
         for key, value in (
@@ -77,6 +99,8 @@ class SelectionProfile:
 
 @dataclass(frozen=True)
 class SkillMetadata:
+    """Normalized frontmatter values for one skill."""
+
     name: str
     description: str
     selection: SelectionProfile
@@ -84,6 +108,7 @@ class SkillMetadata:
     optional: Mapping[str, Any]
 
     def to_dict(self) -> dict[str, Any]:
+        """Return required fields and authored optionals as a dictionary."""
         result = {
             "name": self.name,
             "description": self.description,
@@ -102,7 +127,9 @@ def _text(value: Any, field: str, max_length: int = 128) -> str:
         or "\n" in value
         or "\r" in value
     ):
-        raise SkillMetadataError(f"{field} must be a trimmed single-line string")
+        raise SkillMetadataError(
+            f"{field} must be a trimmed single-line string"
+        )
     if len(value) > max_length:
         raise SkillMetadataError(f"{field} exceeds {max_length} characters")
     return value
@@ -158,15 +185,24 @@ def normalize_skill_metadata(data: Mapping[str, Any]) -> SkillMetadata:
         )
     role = raw_selection.get("role")
     if role not in ("owner", "support", "reference"):
-        raise SkillMetadataError("selection.role must be owner, support, or reference")
+        raise SkillMetadataError(
+            "selection.role must be owner, support, or reference"
+        )
     raw_tags = raw_selection.get("tags")
     if not isinstance(raw_tags, Mapping) or not raw_tags:
-        raise SkillMetadataError("selection.tags must contain at least one tag group")
+        raise SkillMetadataError(
+            "selection.tags must contain at least one tag group"
+        )
     unknown = set(raw_tags) - set(TAG_GROUPS)
     if unknown:
-        raise SkillMetadataError(f"unknown tag groups: {', '.join(sorted(unknown))}")
+        raise SkillMetadataError(
+            f"unknown tag groups: {', '.join(sorted(unknown))}"
+        )
     tags = SelectionTags(
-        **{group: _items(raw_tags[group], f"tags.{group}") for group in raw_tags}
+        **{
+            group: _items(raw_tags[group], f"tags.{group}")
+            for group in raw_tags
+        }
     )
     aliases = (
         _items(raw_selection["aliases"], "selection.aliases")
@@ -184,7 +220,9 @@ def normalize_skill_metadata(data: Mapping[str, Any]) -> SkillMetadata:
         else ()
     )
     if name in supports:
-        raise SkillMetadataError("selection.supports cannot contain the skill itself")
+        raise SkillMetadataError(
+            "selection.supports cannot contain the skill itself"
+        )
     optional: dict[str, Any] = {}
     for key in OPTIONAL_FIELDS:
         if key in data:

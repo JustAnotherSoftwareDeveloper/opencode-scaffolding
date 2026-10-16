@@ -3,9 +3,8 @@
 
 Validates complete task packets against the task-packet JSON Schema.
 
-Invocation:
-  uv run --directory <scripts-python-dir> validate-task-structure \\
-      [file-path | --stdin] --schema PATH
+Invoke ``validate-task-structure`` with a file path or ``--stdin`` and
+provide the schema path with ``--schema PATH``.
 
 Exit codes:
   0 — The packet's structural interface is valid. This is not semantic
@@ -19,6 +18,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import cast
 
 import click
 
@@ -69,19 +69,22 @@ def main(
     auto_fix: bool,
     schema: str,
 ) -> None:
-    """Validate canonical task-packet roots from FILE_PATH, --stdin, or --state-file
-    against a JSON Schema.
+    """Validate canonical task-packet roots against a JSON Schema.
 
-    Every input mode validates the complete canonical task-packet root, including
-    required boundaryReview evidence, then its tasks. A successful result is
-    structural-interface evidence only; it does not approve semantic atomicity.
+    Accept a file path, ``--stdin``, or ``--state-file`` as input.
+
+    Every input mode validates the complete canonical task-packet root,
+    including required boundaryReview evidence, then its tasks. A successful
+    result is structural-interface evidence only; it does not approve semantic
+    atomicity.
     Outputs ``{"valid": true}`` or ``{"valid": false, "errors": [...]}``
     to stdout.
     """
     # --- Resolve input ---
     if state_file and (stdin or file_path):
         click.echo(
-            "Error: --state-file is mutually exclusive with file_path and --stdin.",
+            "Error: --state-file is mutually exclusive with "
+            "file_path and --stdin.",
             err=True,
         )
         raise SystemExit(2)
@@ -117,13 +120,15 @@ def main(
     # --- Auto-fix mode ---
     if auto_fix:
         try:
-            result: dict = auto_fix_task_structure(Path(state_file), schema_dict)  # type: ignore[arg-type]
+            auto_fix_result: dict = auto_fix_task_structure(
+                Path(cast(str, state_file)), schema_dict
+            )
         except Exception as exc:
             click.echo(f"Error: auto-fix failed: {exc}", err=True)
             raise SystemExit(2) from exc
 
-        click.echo(json.dumps(result))
-        if not result.get("valid"):
+        click.echo(json.dumps(auto_fix_result))
+        if not auto_fix_result.get("valid"):
             raise SystemExit(1)
         return
 

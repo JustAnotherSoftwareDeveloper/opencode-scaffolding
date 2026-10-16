@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     import jsonschema as _jsonschema
 
 # jsonschema is an existing project dependency (see pyproject.toml).
-# Import is deferred so the module can be imported when jsonschema is unavailable.
+# Defer the import so this module remains importable without jsonschema.
 try:
     import jsonschema as _jsonschema
 
@@ -51,7 +51,8 @@ def validate_type(
 
     Args:
         data: The dictionary to check.
-        schema: A mapping of field name to expected type (e.g. ``{"count": int}``).
+        schema: A mapping of field names to expected types, such as
+            ``{"count": int}``.
 
     Returns:
         A list of error messages (empty if all types match).
@@ -61,7 +62,8 @@ def validate_type(
         if key in data and not isinstance(data[key], expected_type):
             actual = type(data[key]).__name__
             errors.append(
-                f"Field {key!r}: expected {expected_type.__name__}, got {actual}"
+                f"Field {key!r}: expected {expected_type.__name__}, "
+                f"got {actual}"
             )
     return errors
 

@@ -56,13 +56,15 @@ def main(
     """Resolve the runtime script root using the override, project, then global.
 
     Python projects use ./opencode/scripts/python as their project-local root;
-    their global root is ~/.config/opencode/scripts/python. Node and shell retain
-    .opencode/scripts/<runtime> as their project-local root.
+    their global root is ~/.config/opencode/scripts/python. Node and shell
+    retain .opencode/scripts/<runtime> as their project-local root.
 
     Prints the resolved path and exits 0 on success.
     """
     pr = Path(project_root) if project_root else None
-    resolved_path, source = resolve_script_root(runtime=runtime, project_root=pr)
+    resolved_path, source = resolve_script_root(
+        runtime=runtime, project_root=pr
+    )
 
     if format == "json":
         output = {

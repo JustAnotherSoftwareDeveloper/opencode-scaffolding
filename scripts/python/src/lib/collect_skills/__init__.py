@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from lib.shared.skill_metadata import (
+from lib.skill_metadata import (
     SelectionProfile,
     SelectionTags,
     normalize_skill_metadata,

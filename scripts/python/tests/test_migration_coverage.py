@@ -18,7 +18,10 @@ from lib.collect_skills.discovery import (
     get_standard_search_roots,
 )
 from lib.collect_skills.models import Skill, SkillIndex
-from lib.collect_skills.parser import extract_frontmatter, validate_skill_frontmatter
+from lib.collect_skills.parser import (
+    extract_frontmatter,
+    validate_skill_frontmatter,
+)
 from lib.collect_skills.skill_md import parse_skill_md
 from lib.semantic_selection_evaluation.core import (
     EvaluationError,
@@ -48,6 +51,7 @@ from lib.validate_skill_meta.core import (
 
 
 def profile(name: str = "demo-skill", **extra: object) -> dict[str, object]:
+    """Build a skill metadata profile for migration tests."""
     value: dict[str, object] = {
         "name": name,
         "description": "Use when testing direct selection",
@@ -58,7 +62,10 @@ def profile(name: str = "demo-skill", **extra: object) -> dict[str, object]:
     return value
 
 
-def write_skill(root: Path, name: str = "demo-skill", **changes: object) -> Path:
+def write_skill(
+    root: Path, name: str = "demo-skill", **changes: object
+) -> Path:
+    """Write a skill Markdown fixture and return its path."""
     data = profile(name, **changes)
     directory = root / name
     directory.mkdir(parents=True, exist_ok=True)
@@ -76,7 +83,9 @@ def write_skill(root: Path, name: str = "demo-skill", **changes: object) -> Path
     return path
 
 
+@pytest.mark.unit
 def test_models_parser_and_skill_md_edges(tmp_path: Path) -> None:
+    """Verify parser and skill Markdown handling for valid frontmatter."""
     skill = write_skill(tmp_path)
     parsed = extract_frontmatter(skill)
     assert parsed is not None and parsed["name"] == "demo-skill"
@@ -92,25 +101,36 @@ def test_models_parser_and_skill_md_edges(tmp_path: Path) -> None:
         {"selection": {"role": "owner", "tags": {"actions": ["x", "x"]}}},
     ],
 )
-def test_metadata_rejects_scalar_and_selection_edges(change: dict[str, object]) -> None:
-    from lib.shared.skill_metadata import SkillMetadataError, normalize_skill_metadata
+@pytest.mark.unit
+def test_metadata_rejects_scalar_and_selection_edges(
+    change: dict[str, object],
+) -> None:
+    """Verify metadata normalization rejects invalid selection values."""
+    from lib.skill_metadata import SkillMetadataError, normalize_skill_metadata
 
     with pytest.raises(SkillMetadataError):
         normalize_skill_metadata({**profile(), **change})
 
 
+@pytest.mark.unit
 def test_metadata_rejects_invalid_role_and_optional_metadata() -> None:
-    from lib.shared.skill_metadata import SkillMetadataError, normalize_skill_metadata
+    """Verify invalid selection roles and metadata are rejected."""
+    from lib.skill_metadata import SkillMetadataError, normalize_skill_metadata
 
     with pytest.raises(SkillMetadataError):
         normalize_skill_metadata(
-            {**profile(), "selection": {"role": "bad", "tags": {"actions": ["x"]}}}
+            {
+                **profile(),
+                "selection": {"role": "bad", "tags": {"actions": ["x"]}},
+            }
         )
     with pytest.raises(SkillMetadataError):
         normalize_skill_metadata({**profile(), "metadata": "not an object"})
 
 
+@pytest.mark.unit
 def test_parser_and_skill_md_malformed_inputs(tmp_path: Path) -> None:
+    """Verify malformed frontmatter and skill metadata fail closed."""
     no_front = tmp_path / "none.md"
     no_front.write_text("body", encoding="utf-8")
     assert extract_frontmatter(no_front) is None
@@ -132,7 +152,9 @@ def test_parser_and_skill_md_malformed_inputs(tmp_path: Path) -> None:
     )
 
 
+@pytest.mark.unit
 def test_index_projection_and_precedence() -> None:
+    """Verify skill index projection and source precedence."""
     index = SkillIndex()
     first = Skill(
         "same",
@@ -143,12 +165,20 @@ def test_index_projection_and_precedence() -> None:
         metadata={"x": 1},
     )
     project = Skill(
-        "same", class_="operation", source="project", path="/.opencode/skills/SKILL.md"
+        "same",
+        class_="operation",
+        source="project",
+        path="/.opencode/skills/SKILL.md",
     )
     index.add(first)
     index.add(project)
     index.add(
-        Skill("same", class_="operation", source="archive", path="/archive/SKILL.md")
+        Skill(
+            "same",
+            class_="operation",
+            source="archive",
+            path="/archive/SKILL.md",
+        )
     )
     assert index.resolve()[0] is project
     assert index.warnings
@@ -156,9 +186,11 @@ def test_index_projection_and_precedence() -> None:
     assert json.loads(index.to_json())[0]["source"] == "project"
 
 
+@pytest.mark.unit
 def test_discovery_roots_and_success(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Verify skill discovery across configured roots and archives."""
     project = tmp_path / "project"
     config = tmp_path / "config"
     write_skill(project / ".opencode" / "skills")
@@ -200,11 +232,15 @@ def test_discovery_roots_and_success(
     assert find_git_root(git / "child") == git
 
 
+@pytest.mark.unit
 def test_discovery_failure_paths(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    """Verify discovery reports invalid roots, files, and symlinks."""
     index = SkillIndex()
-    discover_skills_from_root(tmp_path / "missing", "extra", index, verbose=True)
+    discover_skills_from_root(
+        tmp_path / "missing", "extra", index, verbose=True
+    )
     discover_skills_from_root(tmp_path / "file", "extra", index)
     (tmp_path / "file").write_text("x", encoding="utf-8")
     discover_skills_from_root(tmp_path / "file", "extra", index, verbose=True)
@@ -219,10 +255,14 @@ def test_discovery_failure_paths(
     dangling.mkdir()
     (dangling / "SKILL.md").symlink_to(tmp_path / "missing-skill.md")
     discover_skills_from_root(tmp_path, "extra", index)
-    assert any("invalid symlink" in item for item in vars(index)["_discovery_errors"])
+    assert any(
+        "invalid symlink" in item for item in vars(index)["_discovery_errors"]
+    )
 
 
+@pytest.mark.unit
 def test_semantic_loaders_and_contract_errors(tmp_path: Path) -> None:
+    """Verify fixture loaders and semantic contracts reject invalid inputs."""
     missing = tmp_path / "missing.json"
     with pytest.raises(EvaluationError):
         load_fixture(missing)
@@ -253,16 +293,24 @@ def test_semantic_loaders_and_contract_errors(tmp_path: Path) -> None:
         evaluate_fixture(bad_case, root=tmp_path)
 
 
+@pytest.mark.integration
 def test_evaluation_cli(tmp_path: Path) -> None:
+    """Verify semantic evaluation CLI success and error responses."""
     fixture = tmp_path / "fixture.json"
-    fixture.write_text(json.dumps({"inventory": [], "cases": []}), encoding="utf-8")
-    result = CliRunner().invoke(evaluate_main, [str(fixture), "--root", str(tmp_path)])
+    fixture.write_text(
+        json.dumps({"inventory": [], "cases": []}), encoding="utf-8"
+    )
+    result = CliRunner().invoke(
+        evaluate_main, [str(fixture), "--root", str(tmp_path)]
+    )
     assert result.exit_code == 0 and '"passed": true' in result.output
     bad = CliRunner().invoke(evaluate_main, [str(tmp_path / "bad.json")])
     assert bad.exit_code != 0 and "Error:" in bad.stderr
 
 
+@pytest.mark.integration
 def test_validate_skill_meta_core_and_cli(tmp_path: Path) -> None:
+    """Verify skill metadata validation APIs and CLI output."""
     path = write_skill(tmp_path)
     assert _extract_frontmatter(path.read_text()) is not None
     assert _extract_frontmatter("body") is None
@@ -270,7 +318,9 @@ def test_validate_skill_meta_core_and_cli(tmp_path: Path) -> None:
     assert validate_skill_file(path)["valid"]
     missing = validate_skill_file(tmp_path / "missing")
     assert not missing["valid"]
-    result = CliRunner().invoke(meta_main, [str(path), "--format", "text", "--verbose"])
+    result = CliRunner().invoke(
+        meta_main, [str(path), "--format", "text", "--verbose"]
+    )
     assert result.exit_code == 0 and "VALID" in result.output
     invalid = tmp_path / "invalid.md"
     invalid.write_text("---\nname: bad name\n---\n", encoding="utf-8")
@@ -279,10 +329,14 @@ def test_validate_skill_meta_core_and_cli(tmp_path: Path) -> None:
     assert result.exit_code == 1 and "INVALID" in result.output
 
 
+@pytest.mark.integration
 def test_skill_validator_checks_and_cli(tmp_path: Path) -> None:
+    """Verify skill validator checks and CLI error reporting."""
     skill = write_skill(tmp_path)
     (skill.parent / "reference").mkdir()
-    (skill.parent / "reference" / "README.md").write_text("# docs", encoding="utf-8")
+    (skill.parent / "reference" / "README.md").write_text(
+        "# docs", encoding="utf-8"
+    )
     assert check_frontmatter_valid(skill.parent).passed
     assert check_name_matches_dir(skill.parent).passed
     assert check_description_prefix(skill.parent).passed
@@ -297,7 +351,8 @@ def test_skill_validator_checks_and_cli(tmp_path: Path) -> None:
     bad = tmp_path / "bad"
     bad.mkdir()
     (bad / "SKILL.md").write_text(
-        "## Examples\nThis is used. It should fail.\n<<x>>\n[link](./missing.md)",
+        "## Examples\nThis is used. It should fail.\n<<x>>\n"
+        "[link](./missing.md)",
         encoding="utf-8",
     )
     assert not check_frontmatter_valid(bad).passed
@@ -311,9 +366,11 @@ def test_skill_validator_checks_and_cli(tmp_path: Path) -> None:
     assert result.exit_code == 1
 
 
+@pytest.mark.unit
 def test_reference_readme_is_required_only_for_local_reference_files(
     tmp_path: Path,
 ) -> None:
+    """Verify a reference README is required only for local documents."""
     skill_dir = write_skill(tmp_path).parent
     assert check_reference_readme_exists(skill_dir).passed
     assert all(check["passed"] for check in run_all(skill_dir)["checks"])
@@ -341,9 +398,11 @@ def test_reference_readme_is_required_only_for_local_reference_files(
     assert all(check["passed"] for check in run_all(skill_dir)["checks"])
 
 
+@pytest.mark.unit
 def test_reference_readme_condition_does_not_waive_docs_last_section(
     tmp_path: Path,
 ) -> None:
+    """Verify a reference README does not waive the final-docs-section rule."""
     skill = write_skill(tmp_path)
     skill.write_text(
         skill.read_text(encoding="utf-8") + "## Guardrails\n", encoding="utf-8"

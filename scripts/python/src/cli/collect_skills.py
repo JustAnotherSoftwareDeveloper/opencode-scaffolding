@@ -22,7 +22,7 @@ import click
 
 from lib.collect_skills.discovery import discover_all_skills
 from lib.collect_skills.models import SkillIndex
-from lib.shared.skill_class import SkillClass
+from lib.collect_skills.skill_class import SkillClass
 
 VALID_CLASS_NAMES = [c.value for c in SkillClass]
 

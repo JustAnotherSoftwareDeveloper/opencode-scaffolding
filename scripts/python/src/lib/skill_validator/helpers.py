@@ -47,7 +47,7 @@ SENTENCE_END_PATTERN = re.compile(r"[.!?][\s'\u2019\u201d]")
 def _is_in_skip_directory(
     file_path: Path, skill_dir: Path, dirs: frozenset[str]
 ) -> bool:
-    """Check if a file resides within one of the given subdirectories of skill_dir."""
+    """Check whether a file resides in a named subdirectory of *skill_dir*."""
     try:
         rel = file_path.relative_to(skill_dir)
     except ValueError:

@@ -6,7 +6,7 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
-from lib.shared.skill_metadata import SelectionProfile
+from lib.skill_metadata import SelectionProfile
 
 SourcePriority: dict[str, int] = {
     "project": 5,
@@ -42,6 +42,7 @@ class Skill:
     compatibility: str = ""
     metadata: dict[str, Any] = field(default_factory=dict)
     permission: str = ""
+
     def to_dict(self) -> dict[str, Any]:
         """Project exactly six required keys plus authored optionals."""
         result: dict[str, Any] = {
@@ -65,6 +66,7 @@ class SkillIndex:
     """A deterministic, precedence-aware collection of skill records."""
 
     def __init__(self) -> None:
+        """Initialize empty skill and warning collections."""
         self._skills: dict[str, Skill] = {}
         self._warnings: list[str] = []
 
@@ -72,12 +74,17 @@ class SkillIndex:
     def _source_priority(source: str, location: str = "") -> tuple[int, int]:
         source_rank = SourcePriority.get(source, 0)
         location_rank = max(
-            (rank for marker, rank in _LOCATION_PRIORITY.items() if marker in location),
+            (
+                rank
+                for marker, rank in _LOCATION_PRIORITY.items()
+                if marker in location
+            ),
             default=0,
         )
         return source_rank, location_rank
 
     def add(self, skill: Skill) -> None:
+        """Add *skill*, retaining the higher-precedence record on conflicts."""
         existing = self._skills.get(skill.name)
         if existing is None:
             self._skills[skill.name] = skill
@@ -97,15 +104,19 @@ class SkillIndex:
             )
 
     def resolve(self) -> list[Skill]:
+        """Return the winning skill records sorted by skill name."""
         return sorted(self._skills.values(), key=lambda skill: skill.name)
 
     def filter_by_classes(self, class_filters: tuple[str, ...]) -> list[Skill]:
+        """Return winning records whose class appears in *class_filters*."""
         allowed = set(class_filters)
         return [skill for skill in self.resolve() if skill.class_ in allowed]
 
     def to_json(self) -> str:
+        """Serialize the resolved skill records as JSON."""
         return json.dumps([skill.to_dict() for skill in self.resolve()])
 
     @property
     def warnings(self) -> list[str]:
+        """Return a copy of precedence warnings collected during insertion."""
         return list(self._warnings)

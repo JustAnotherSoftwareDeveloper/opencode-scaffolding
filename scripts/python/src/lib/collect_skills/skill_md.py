@@ -7,7 +7,7 @@ from typing import Any
 
 import yaml
 
-from lib.shared.skill_metadata import SkillMetadataError, normalize_skill_metadata
+from lib.skill_metadata import SkillMetadataError, normalize_skill_metadata
 
 from .models import Skill
 

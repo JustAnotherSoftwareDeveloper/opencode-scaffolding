@@ -16,7 +16,9 @@ from lib.semantic_selection_evaluation.core import (
 
 
 @click.command(name="evaluate-semantic-selection")
-@click.argument("fixture", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.argument(
+    "fixture", type=click.Path(exists=True, dir_okay=False, path_type=Path)
+)
 @click.option(
     "--root",
     type=click.Path(exists=True, file_okay=False, path_type=Path),

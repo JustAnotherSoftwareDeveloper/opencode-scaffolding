@@ -1,7 +1,7 @@
-"""CLI entry point for validate-skill-meta — validate skill SKILL.md YAML frontmatter.
+"""Validate skill SKILL.md YAML frontmatter with validate-skill-meta.
 
-This script is invoked as:
-  uv run --directory <scripts-python-dir> validate-skill-meta <skill-path> [options]
+Invoke from the project context with ``uv run --directory
+<scripts-python-dir> validate-skill-meta <skill-path> [options]``.
 
 Exit codes:
   0 — Validation passed (valid: true).
@@ -40,7 +40,7 @@ from lib.validate_skill_meta.core import validate_skill_file
     help="Print diagnostic information to stderr.",
 )
 def main(skill_paths: tuple[str, ...], format: str, verbose: bool) -> None:
-    """Validate YAML frontmatter fields (name, description, class) in SKILL_PATHS.
+    """Validate SKILL_PATHS frontmatter name, description, and class fields.
 
     SKILL_PATHS are one or more paths to SKILL.md files.
     """

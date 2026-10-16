@@ -46,9 +46,10 @@ CASES: tuple[EvalCase, ...] = (
         case_id="past_breakdown_skill_creation",
         category="past_tasks",
         prompt=(
-            "Decompose this request into worker packets: create an OpenCode skill "
-            "named release-notes-writer that generates release notes from git "
-            "history, including docs and validation. Return JSON only."
+            "Decompose this request into worker packets: create an "
+            "OpenCode skill named release-notes-writer that generates "
+            "release notes from git history, including docs and validation. "
+            "Return JSON only."
         ),
         required_terms=(
             "release-notes-writer",
@@ -63,9 +64,9 @@ CASES: tuple[EvalCase, ...] = (
         case_id="past_breakdown_node_script",
         category="past_tasks",
         prompt=(
-            "Decompose this request into worker packets: create a TypeScript Node "
-            "CLI script to validate task JSON files and add tests for it. Return "
-            "JSON only."
+            "Decompose this request into worker packets: create a "
+            "TypeScript Node CLI script to validate task JSON files "
+            "and add tests for it. Return JSON only."
         ),
         required_terms=(
             "skill-script-node-writer",
@@ -80,8 +81,9 @@ CASES: tuple[EvalCase, ...] = (
         case_id="write_code_minimal_patch",
         category="writing_code",
         prompt=(
-            "Plan a minimal patch for a Python function that incorrectly returns "
-            "None for empty input. Include implementation steps and verification."
+            "Plan a minimal patch for a Python function that "
+            "incorrectly returns None for empty input. Include implementation "
+            "steps and verification."
         ),
         required_terms=("minimal", "test", "empty", "verification"),
     ),
@@ -89,8 +91,9 @@ CASES: tuple[EvalCase, ...] = (
         case_id="web_research_citations",
         category="web_research",
         prompt=(
-            "Plan web research to compare two open-source LLM evaluation frameworks. "
-            "Require source URLs, version/date checks, and a concise recommendation."
+            "Plan web research to compare two open-source LLM "
+            "evaluation frameworks. Require source URLs, version/date checks, "
+            "and a concise recommendation."
         ),
         required_terms=("source", "URL", "version", "recommendation"),
         forbidden_terms=("unsupported claim",),
@@ -99,8 +102,9 @@ CASES: tuple[EvalCase, ...] = (
         case_id="lint_format_cli",
         category="linting_formatting_cli_tools",
         prompt=(
-            "Plan how to run linting, formatting, typechecking, and tests for a "
-            "mixed TypeScript/Python repository. Include failure handling."
+            "Plan how to run linting, formatting, typechecking, and tests "
+            "for a mixed TypeScript/Python repository. "
+            "Include failure handling."
         ),
         required_terms=("lint", "format", "typecheck", "test", "failure"),
     ),
@@ -108,8 +112,9 @@ CASES: tuple[EvalCase, ...] = (
         case_id="root_cause_analysis",
         category="analysis",
         prompt=(
-            "Analyze a bug report where an API returns HTTP 200 but downstream code "
-            "sees empty content. Produce likely causes and verification steps."
+            "Analyze a bug report where an API returns HTTP 200 but "
+            "downstream code sees empty content. Produce likely causes and "
+            "verification steps."
         ),
         required_terms=("HTTP 200", "empty content", "logs", "reproduce"),
     ),
@@ -117,8 +122,9 @@ CASES: tuple[EvalCase, ...] = (
         case_id="codebase_research",
         category="codebase_research",
         prompt=(
-            "Plan codebase research to identify where CLI entry points are registered, "
-            "how tests are structured, and where shared validation logic lives."
+            "Plan codebase research to identify where CLI entry points "
+            "are registered, how tests are structured, and where shared "
+            "validation logic lives."
         ),
         required_terms=("entry", "tests", "shared", "validation"),
     ),
@@ -126,9 +132,9 @@ CASES: tuple[EvalCase, ...] = (
         case_id="parse_data_schema",
         category="parsing_data",
         prompt=(
-            "Design a parser for JSON evaluation results that groups model outcomes "
-            "by category, distinguishes parse/schema/semantic failures, and emits a "
-            "summary table."
+            "Design a parser for JSON evaluation results that groups "
+            "model outcomes by category, distinguishes "
+            "parse/schema/semantic failures, and emits a summary table."
         ),
         required_terms=("JSON", "parse", "schema", "semantic", "summary"),
     ),
@@ -136,10 +142,11 @@ CASES: tuple[EvalCase, ...] = (
         case_id="model_eval_json_only",
         category="ai_model_evaluation",
         prompt=(
-            "Evaluate an AI model for strict JSON-only behavior. Ask it to return "
-            "an object with keys summary, tasks, and verdict. The evaluation should "
-            "fail outputs wrapped in markdown fences or explanatory prose. Return "
-            "the evaluation plan as JSON only."
+            "Evaluate an AI model for strict JSON-only behavior. Ask "
+            "it to return an object with keys summary, tasks, and verdict. "
+            "The evaluation should fail outputs wrapped in markdown "
+            "fences or explanatory prose. Return the evaluation plan as "
+            "JSON only."
         ),
         required_terms=("summary", "tasks", "verdict", "markdown", "fail"),
         forbidden_terms=("```",),
@@ -149,10 +156,10 @@ CASES: tuple[EvalCase, ...] = (
         case_id="model_eval_breakdown_schema",
         category="ai_model_evaluation",
         prompt=(
-            "Design an AI model evaluation for the OpenCode breakdown-tasks schema. "
-            "The scorer must check required fields purpose, context, filesToRead, "
-            "filesToWrite, skills, executionInstructions, and expectedOutput. Return "
-            "JSON only."
+            "Design an AI model evaluation for the OpenCode "
+            "breakdown-tasks schema. The scorer must check required fields "
+            "purpose, context, filesToRead, filesToWrite, skills, "
+            "executionInstructions, and expectedOutput. Return JSON only."
         ),
         required_terms=(
             "purpose",
@@ -169,11 +176,13 @@ CASES: tuple[EvalCase, ...] = (
         case_id="model_eval_no_invented_skills",
         category="ai_model_evaluation",
         prompt=(
-            "Create a model evaluation that detects invented skill names. The only "
-            "available skills are generic-analysis, skill-script-node-writer, "
-            "skill-script-node-test-writer, skill-factory, and skill-bash-conventions. "
-            "The evaluation should fail outputs using unavailable skills such as "
-            "skill-bash-writer or skill-react-component-development. Return JSON only."
+            "Create a model evaluation that detects invented skill names. "
+            "The only available skills are generic-analysis, "
+            "skill-script-node-writer, skill-script-node-test-writer, "
+            "skill-factory, and skill-bash-conventions. The evaluation "
+            "should fail outputs using unavailable skills such as "
+            "skill-bash-writer or skill-react-component-development. "
+            "Return JSON only."
         ),
         required_terms=(
             "available skills",
@@ -188,10 +197,11 @@ CASES: tuple[EvalCase, ...] = (
         case_id="model_eval_no_invented_paths",
         category="ai_model_evaluation",
         prompt=(
-            "Design a model evaluation for requests where no repository file tree is "
-            "provided. The evaluation must fail any response that invents paths like "
-            "src/components/DarkModeToggle.jsx, README.md, or package.json unless the "
-            "user explicitly supplied those paths. Return JSON only."
+            "Design a model evaluation for requests where no repository "
+            "file tree is provided. The evaluation must fail any response "
+            "that invents paths like src/components/DarkModeToggle.jsx, "
+            "README.md, or package.json unless the user explicitly supplied "
+            "those paths. Return JSON only."
         ),
         required_terms=("filesToRead", "filesToWrite", "invent", "fail"),
         forbidden_terms=("```",),
@@ -201,10 +211,10 @@ CASES: tuple[EvalCase, ...] = (
         case_id="model_eval_context_truncation",
         category="ai_model_evaluation",
         prompt=(
-            "Plan an AI model evaluation for detecting context truncation and length "
-            "finish reasons. The result should distinguish parse failures caused by "
-            "invalid JSON from incomplete outputs caused by token limits. Return JSON "
-            "only."
+            "Plan an AI model evaluation for detecting context truncation "
+            "and length finish reasons. The result should distinguish parse "
+            "failures caused by invalid JSON from incomplete outputs caused "
+            "by token limits. Return JSON only."
         ),
         required_terms=("finish", "length", "token", "parse", "incomplete"),
         forbidden_terms=("```",),
@@ -214,10 +224,11 @@ CASES: tuple[EvalCase, ...] = (
         case_id="model_eval_repair_loop",
         category="ai_model_evaluation",
         prompt=(
-            "Design a two-pass model evaluation with a repair loop. Pass one records "
-            "raw output. Pass two tries safe repairs such as stripping markdown fences "
-            "and revalidating JSON. The report must keep raw and repaired scores "
-            "separate. Return JSON only."
+            "Design a two-pass model evaluation with a repair loop. "
+            "Pass one records raw output. Pass two tries safe repairs "
+            "such as stripping markdown fences and revalidating JSON. "
+            "The report must keep raw and repaired scores separate. "
+            "Return JSON only."
         ),
         required_terms=("raw", "repaired", "markdown", "JSON", "separate"),
         forbidden_terms=("```",),
@@ -227,12 +238,19 @@ CASES: tuple[EvalCase, ...] = (
         case_id="model_eval_terminal_bench_mapping",
         category="ai_model_evaluation",
         prompt=(
-            "Map AI model capabilities to Terminal-Bench-style task categories for "
-            "coding, data parsing, linting, codebase research, and web research. "
-            "Include which categories require Docker sandbox execution versus simple "
-            "Inspect scoring. Return JSON only."
+            "Map AI model capabilities to Terminal-Bench-style task "
+            "categories for coding, data parsing, linting, codebase "
+            "research, and web research. Include which categories require "
+            "Docker sandbox execution versus simple Inspect scoring. "
+            "Return JSON only."
         ),
-        required_terms=("Terminal-Bench", "Docker", "Inspect", "coding", "parsing"),
+        required_terms=(
+            "Terminal-Bench",
+            "Docker",
+            "Inspect",
+            "coding",
+            "parsing",
+        ),
         forbidden_terms=("```",),
         requires_json=True,
     ),
@@ -240,12 +258,19 @@ CASES: tuple[EvalCase, ...] = (
         case_id="model_eval_result_summary",
         category="ai_model_evaluation",
         prompt=(
-            "Design a parser for AI model evaluation result files. It should group "
-            "results by model and test category, count parse/schema/semantic failures, "
-            "identify nondeterministic reruns, and emit a Markdown summary table. "
-            "Return JSON only."
+            "Design a parser for AI model evaluation result files. It "
+            "should group results by model and test category, count "
+            "parse/schema/semantic failures, identify nondeterministic "
+            "reruns, and emit a Markdown summary table. Return JSON only."
         ),
-        required_terms=("model", "category", "parse", "schema", "semantic", "Markdown"),
+        required_terms=(
+            "model",
+            "category",
+            "parse",
+            "schema",
+            "semantic",
+            "Markdown",
+        ),
         forbidden_terms=("```",),
         requires_json=True,
     ),
@@ -253,18 +278,25 @@ CASES: tuple[EvalCase, ...] = (
         case_id="delegator_semantic_review",
         category="worker_contract",
         prompt=(
-            "Review a syntactically valid but semantically wrong decomposition before "
-            "display. Compare it with the original request and correct or re-decompose "
-            "without reading repository files or doing worker work."
+            "Review a syntactically valid but semantically wrong "
+            "decomposition before display. Compare it with the original "
+            "request and correct or re-decompose without reading repository "
+            "files or doing worker work."
         ),
-        required_terms=("semantic", "original request", "display", "re-decompose"),
+        required_terms=(
+            "semantic",
+            "original request",
+            "display",
+            "re-decompose",
+        ),
     ),
     EvalCase(
         case_id="delegator_in_memory_correction",
         category="worker_contract",
         prompt=(
-            "Correct a task plan in memory by merging redundant work, fixing packet "
-            "wording, and preserving the requested outcome. Do not edit the task file."
+            "Correct a task plan in memory by merging redundant work, "
+            "fixing packet wording, and preserving the requested outcome. "
+            "Do not edit the task file."
         ),
         required_terms=("in memory", "merge", "packet", "outcome"),
     ),
@@ -272,9 +304,9 @@ CASES: tuple[EvalCase, ...] = (
         case_id="delegator_feedback_redecomposition",
         category="worker_contract",
         prompt=(
-            "Re-decompose after a focused semantic review diagnosis. Preserve the full "
-            "original request, append concise feedback, and stop if attempts do not "
-            "converge."
+            "Re-decompose after a focused semantic review diagnosis. "
+            "Preserve the full original request, append concise feedback, "
+            "and stop if attempts do not converge."
         ),
         required_terms=("original request", "feedback", "converge"),
     ),
@@ -282,18 +314,25 @@ CASES: tuple[EvalCase, ...] = (
         case_id="delegator_report_review",
         category="worker_contract",
         prompt=(
-            "Review a complete worker report rather than routing on status alone. Use "
-            "accomplishments, actual files, deviations, verification, payload, and "
-            "blockers to choose acceptance, repair, continuation, or clarification."
+            "Review a complete worker report rather than routing on status "
+            "alone. Use accomplishments, actual files, deviations, "
+            "verification, payload, and blockers to choose acceptance, "
+            "repair, continuation, or clarification."
         ),
-        required_terms=("status alone", "deviations", "verification", "continuation"),
+        required_terms=(
+            "status alone",
+            "deviations",
+            "verification",
+            "continuation",
+        ),
     ),
     EvalCase(
         case_id="delegator_non_convergence",
         category="worker_contract",
         prompt=(
-            "Handle repeated corrective attempts that reproduce the same failure or "
-            "have uncertain side effects. Avoid blind replay and stop or ask the user."
+            "Handle repeated corrective attempts that reproduce the same "
+            "failure or have uncertain side effects. Avoid blind replay and "
+            "stop or ask the user."
         ),
         required_terms=("same failure", "side effects", "blind replay", "stop"),
     ),
@@ -305,25 +344,36 @@ CASES: tuple[EvalCase, ...] = (
             "unchanged while accepting minimum skills, greedy reads, suggested "
             "writes, and full list-based reports."
         ),
-        required_terms=("approved plan", "unchanged", "minimum skills", "list-based"),
+        required_terms=(
+            "approved plan",
+            "unchanged",
+            "minimum skills",
+            "list-based",
+        ),
     ),
     EvalCase(
         case_id="worker_minimum_resources",
         category="worker_contract",
         prompt=(
-            "Execute a worker packet that loads every declared skill and begins with "
-            "all declared reads. Declared skills and reads are minimum starting sets."
+            "Execute a worker packet that loads every declared skill and "
+            "begins with all declared reads. Declared skills and reads are "
+            "minimum starting sets."
         ),
-        required_terms=("declared skill", "declared reads", "minimum", "starting"),
+        required_terms=(
+            "declared skill",
+            "declared reads",
+            "minimum",
+            "starting",
+        ),
     ),
     EvalCase(
         case_id="worker_flexible_resources",
         category="worker_contract",
         prompt=(
-            "Evaluate a worker that loads one relevant additional skill, reads "
-            "related context greedily, and makes a minor explained write-path "
-            "adjustment. Accept these changes when purpose and authoritative fields "
-            "remain unchanged."
+            "Evaluate a worker that loads one relevant additional skill, "
+            "reads related context greedily, and makes a minor explained "
+            "write-path adjustment. Accept these changes when purpose and "
+            "authoritative fields remain unchanged."
         ),
         required_terms=(
             "additional skill",
@@ -337,9 +387,9 @@ CASES: tuple[EvalCase, ...] = (
         case_id="worker_authoritative_fields",
         category="worker_contract",
         prompt=(
-            "Reject a worker that changes purpose, details, execution instructions, "
-            "verification, or expected output. These non-resource fields are "
-            "authoritative after dispatch."
+            "Reject a worker that changes purpose, details, execution "
+            "instructions, verification, or expected output. These "
+            "non-resource fields are authoritative after dispatch."
         ),
         required_terms=(
             "authoritative",
@@ -352,19 +402,26 @@ CASES: tuple[EvalCase, ...] = (
         case_id="worker_malformed_evidence",
         category="worker_contract",
         prompt=(
-            "Reject malformed worker output as a deliverable but preserve the original "
-            "response and precise validation diagnostics for supervisory recovery."
+            "Reject malformed worker output as a deliverable but preserve "
+            "the original response and precise validation diagnostics for "
+            "supervisory recovery."
         ),
-        required_terms=("malformed", "original response", "diagnostics", "deliverable"),
+        required_terms=(
+            "malformed",
+            "original response",
+            "diagnostics",
+            "deliverable",
+        ),
     ),
     EvalCase(
         case_id="worker_supervised_redispatch",
         category="worker_contract",
         prompt=(
-            "Preserve the original malformed worker response and diagnostics. The "
-            "supervisor may supply focused correction context and re-dispatch in a "
-            "new invocation without rewriting the report, inferring completion, or "
-            "duplicating uncertain side effects."
+            "Preserve the original malformed worker response and "
+            "diagnostics. The supervisor may supply focused correction "
+            "context and re-dispatch in a new invocation without rewriting "
+            "the report, inferring completion, or duplicating uncertain "
+            "side effects."
         ),
         required_terms=("original", "diagnostics", "correction", "re-dispatch"),
     ),
@@ -372,8 +429,9 @@ CASES: tuple[EvalCase, ...] = (
         case_id="worker_continuation",
         category="worker_contract",
         prompt=(
-            "Continue incomplete work using named known outputs and avoid duplicating "
-            "uncertain side effects. A PARTIAL report has a usable payload."
+            "Continue incomplete work using named known outputs and avoid "
+            "duplicating uncertain side effects. A PARTIAL report has a "
+            "usable payload."
         ),
         required_terms=(
             "known outputs",
@@ -386,9 +444,9 @@ CASES: tuple[EvalCase, ...] = (
         case_id="worker_list_envelope",
         category="worker_contract",
         prompt=(
-            "Accept the sole four-heading list envelope with multiline records and a "
-            "payload that may contain headings. Reject table envelopes and "
-            "status-only routing."
+            "Accept the sole four-heading list envelope with multiline "
+            "records and a payload that may contain headings. Reject table "
+            "envelopes and status-only routing."
         ),
         required_terms=("four-heading", "multiline", "payload", "Reject table"),
     ),
@@ -396,8 +454,9 @@ CASES: tuple[EvalCase, ...] = (
         case_id="worker_no_op",
         category="worker_contract",
         prompt=(
-            "Evaluate an already-compliant packet. Return a non-empty payload and "
-            "report a suggested target unchanged when no modification is needed."
+            "Evaluate an already-compliant packet. Return a non-empty "
+            "payload and report a suggested target unchanged when no "
+            "modification is needed."
         ),
         required_terms=("non-empty", "unchanged", "payload", "suggested"),
     ),
@@ -405,8 +464,9 @@ CASES: tuple[EvalCase, ...] = (
         case_id="worker_unavailable_skill",
         category="worker_contract",
         prompt=(
-            "Evaluate a packet with an unavailable declared skill. It must return "
-            "BLOCKED with blocker and unblock condition, not a success payload."
+            "Evaluate a packet with an unavailable declared skill. It must "
+            "return BLOCKED with blocker and unblock condition, not a "
+            "success payload."
         ),
         required_terms=("BLOCKED", "blocker", "unblock", "skill"),
     ),
@@ -414,8 +474,9 @@ CASES: tuple[EvalCase, ...] = (
         case_id="worker_blocked_input",
         category="worker_contract",
         prompt=(
-            "Evaluate a packet with unknown required input. It must block before side "
-            "effects when the missing input prevents the deliverable."
+            "Evaluate a packet with unknown required input. It must block "
+            "before side effects when the missing input prevents the "
+            "deliverable."
         ),
         required_terms=(
             "BLOCKED",
@@ -428,9 +489,10 @@ CASES: tuple[EvalCase, ...] = (
         case_id="worker_decomposition_false_completion",
         category="worker_contract",
         prompt=(
-            "Evaluate decomposition where breakdown-tasks loads but no task path is "
-            "produced. Reject COMPLETE or PARTIAL: loading a skill alone is not "
-            "completion and Deliverable must be non-empty."
+            "Evaluate decomposition where breakdown-tasks loads but no "
+            "task path is produced. Reject COMPLETE or PARTIAL: loading a "
+            "skill alone is not completion and Deliverable must be "
+            "non-empty."
         ),
         required_terms=(
             "breakdown-tasks",

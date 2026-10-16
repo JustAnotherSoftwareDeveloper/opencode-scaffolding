@@ -6,6 +6,10 @@ import json
 import subprocess
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.integration
+
 ROOT = Path(__file__).resolve().parents[3]
 SKILLS = ROOT / "skills"
 TARGET = SKILLS / "plan-writer"
@@ -16,7 +20,10 @@ def _text(relative: str) -> str:
     return (ROOT / relative).read_text(encoding="utf-8")
 
 
-def test_workspace_move_preserves_the_complete_relative_reference_subtree() -> None:
+def test_workspace_move_preserves_the_complete_relative_reference_subtree() -> (
+    None
+):
+    """Verify the plan-writer move preserves its complete reference subtree."""
     expected = {
         "SKILL.md",
         "reference/README.md",
@@ -37,6 +44,7 @@ def test_workspace_move_preserves_the_complete_relative_reference_subtree() -> N
 
 
 def test_collector_has_one_plan_writer_operation_and_no_plan_identity() -> None:
+    """Verify collection exposes plan-writer, not the retired identity."""
     result = subprocess.run(
         [
             "uv",
@@ -53,7 +61,9 @@ def test_collector_has_one_plan_writer_operation_and_no_plan_identity() -> None:
         text=True,
     )
     records = json.loads(result.stdout)
-    matches = [record for record in records if record.get("name") == "plan-writer"]
+    matches = [
+        record for record in records if record.get("name") == "plan-writer"
+    ]
 
     assert len(matches) == 1
     assert matches[0]["class"] == "operation"
@@ -61,7 +71,10 @@ def test_collector_has_one_plan_writer_operation_and_no_plan_identity() -> None:
     assert all(record.get("name") != "plan" for record in records)
 
 
-def test_frontmatter_and_shared_contract_are_cut_over_before_authoring() -> None:
+def test_frontmatter_and_shared_contract_are_cut_over_before_authoring() -> (
+    None
+):
+    """Verify plan-writer metadata and shared contract completed the cutover."""
     workflow = _text("skills/plan-writer/SKILL.md")
     frontmatter = workflow.split("---", 2)[1]
 
@@ -87,6 +100,7 @@ def test_frontmatter_and_shared_contract_are_cut_over_before_authoring() -> None
 
 
 def test_script_reference_matches_publication_and_validation_contract() -> None:
+    """Verify plan-writer script commands match publication and validation."""
     scripts = _text("skills/plan-writer/reference/scripts.md")
     workflow = _text("skills/plan-writer/SKILL.md")
 
@@ -94,11 +108,12 @@ def test_script_reference_matches_publication_and_validation_contract() -> None:
     assert 'mv "$PUBLISHED_PATH" "$PLAN_DIR/tasks.json"' in scripts
     assert '--state-file "$PLAN_DIR/tasks.json"' in scripts
     assert '--input "$PLAN_DIR/tasks.json"' in scripts
-    assert '$PLAN_DIR/.tasks' not in scripts
+    assert "$PLAN_DIR/.tasks" not in scripts
     assert "render-task-markdown" in workflow
 
 
 def test_documented_state_file_validator_form_executes(tmp_path: Path) -> None:
+    """Verify the documented state-file validator command succeeds."""
     packet = {
         "summary": "validator command fixture",
         "slug": "validator-command-fixture",
@@ -107,8 +122,9 @@ def test_documented_state_file_validator_form_executes(tmp_path: Path) -> None:
                 "taskId": "validator-command",
                 "purpose": "Validate one task packet.",
                 "context": (
-                    "This fixture provides enough concrete context to satisfy the "
-                    "shared task schema while exercising the documented plan-writer "
+                    "This fixture provides enough concrete context to satisfy "
+                    "the shared task schema while exercising the documented "
+                    "plan-writer "
                     "validator command without mutating repository files. "
                 )
                 * 2,
@@ -175,15 +191,24 @@ def test_documented_state_file_validator_form_executes(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
 
 
-def test_active_callers_lifecycle_mappings_and_fixtures_use_new_identity() -> None:
+def test_active_callers_lifecycle_mappings_and_fixtures_use_new_identity() -> (
+    None
+):
+    """Verify callers, lifecycle references, and fixtures use plan-writer."""
     assert "Load the `plan-writer` skill." in _text("commands/plan.md")
     assert "Load the `plan` skill." not in _text("commands/plan.md")
-    assert "Load the `plan-writer` skill." in _text("commands/leeroy-jenkins.md")
-    assert "`plan-writer` - Create copied-source task-plan workspaces." in _text(
-        "agents/planner.md"
+    assert "Load the `plan-writer` skill." in _text(
+        "commands/leeroy-jenkins.md"
+    )
+    assert (
+        "`plan-writer` - Create copied-source task-plan workspaces."
+        in _text("agents/planner.md")
     )
     index = _text("skills/README.md")
-    assert "[`plan-writer`][plan-writing] — create executable plan workspaces." in index
+    assert (
+        "[`plan-writer`][plan-writing] — create executable plan workspaces."
+        in index
+    )
     assert "[plan-writing]: ./plan-writer/SKILL.md" in index
     assert "supports: [breakdown-tasks, plan-writer]" in _text(
         "skills/task-contract/SKILL.md"
@@ -216,6 +241,7 @@ def test_active_callers_lifecycle_mappings_and_fixtures_use_new_identity() -> No
 
 
 def test_migrated_reference_map_resolves_current_contracts() -> None:
+    """Verify the migrated reference map resolves every current contract."""
     reference = TARGET / "reference"
     index = (reference / "README.md").read_text(encoding="utf-8")
     for relative in (

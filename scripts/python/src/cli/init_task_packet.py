@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI entry point for init-task-packet — atomically publish a completed task packet.
+"""CLI entry point for init-task-packet — atomically publish a task packet.
 
 This script is invoked as:
   uv run --directory <scripts-python-dir> init-task-packet [options]
@@ -36,9 +36,9 @@ from lib.validate_task_structure.core import validate_root
 def main(output_dir: Path) -> None:
     """Atomically publish a task packet read from stdin.
 
-    Reads a complete canonical task-packet JSON object from stdin. Preserves its
-    supplied ``slug`` unchanged, prepends an epoch-millisecond timestamp, and writes
-    the object to ``<output-dir>/<timestamp>-<slug>.json``.
+    Read a complete canonical task-packet JSON object from stdin. Preserve its
+    supplied ``slug`` unchanged, prepend an epoch-millisecond timestamp,
+    and write the object to ``<output-dir>/<timestamp>-<slug>.json``.
 
     Existing destination files are never replaced.
     """
@@ -62,7 +62,8 @@ def main(output_dir: Path) -> None:
         schema = load_task_packet_schema()
     except Exception as exc:
         click.echo(
-            f"Error: failed to load canonical task-packet schema: {exc}", err=True
+            f"Error: failed to load canonical task-packet schema: {exc}",
+            err=True,
         )
         raise SystemExit(2) from exc
 

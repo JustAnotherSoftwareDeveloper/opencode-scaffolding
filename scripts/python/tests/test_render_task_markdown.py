@@ -8,7 +8,12 @@ from unittest.mock import patch
 import pytest
 
 from lib.render_task_markdown import core
-from lib.render_task_markdown.core import RenderValidationError, render_task_markdown
+from lib.render_task_markdown.core import (
+    RenderValidationError,
+    render_task_markdown,
+)
+
+pytestmark = pytest.mark.unit
 
 VALID_CONTEXT = "x" * 200
 
@@ -43,9 +48,13 @@ def _packet() -> dict:
                 "filesToRead": ["memo/memo.md"],
                 "filesToWrite": ["tasks.md"],
                 "skills": ["documentation"],
-                "executionInstructions": [{"step": 1, "action": "Render the task."}],
+                "executionInstructions": [
+                    {"step": 1, "action": "Render the task."}
+                ],
                 "expectedOutput": "Markdown task plan.",
-                "verificationCoverage": {"observable": ["Markdown output exists."]},
+                "verificationCoverage": {
+                    "observable": ["Markdown output exists."]
+                },
                 "dependencies": [],
                 "antiPatternSignals": ["none"],
                 "purposeOutputAlignment": {
@@ -58,6 +67,7 @@ def _packet() -> dict:
 
 
 def test_render_task_markdown_writes_packet_content(tmp_path: Path) -> None:
+    """Verify Markdown rendering writes the expected packet content."""
     packet = _packet()
     output = render_task_markdown(
         packet,
@@ -74,10 +84,13 @@ def test_render_task_markdown_writes_packet_content(tmp_path: Path) -> None:
 def test_render_task_markdown_renders_verification_and_normalizes_input(
     tmp_path: Path,
 ) -> None:
+    """Verify rendering includes verification and normalizes task text."""
     packet = _packet()
     packet["tasks"][0]["purpose"] = "Render\nMarkdown"
     packet["tasks"][0]["verification"] = ["Check output."]
-    packet["tasks"][0]["executionInstructions"][0]["verification"] = "Check step."
+    packet["tasks"][0]["executionInstructions"][0]["verification"] = (
+        "Check step."
+    )
     output = render_task_markdown(
         packet,
         tmp_path / "tasks.md",
@@ -89,6 +102,7 @@ def test_render_task_markdown_renders_verification_and_normalizes_input(
 
 
 def test_render_task_markdown_rejects_invalid_packet(tmp_path: Path) -> None:
+    """Verify invalid packets are rejected without creating output."""
     with pytest.raises(RenderValidationError, match="schema"):
         render_task_markdown(
             {"summary": "bad", "tasks": []},
@@ -97,7 +111,10 @@ def test_render_task_markdown_rejects_invalid_packet(tmp_path: Path) -> None:
     assert not (tmp_path / "tasks.md").exists()
 
 
-def test_render_task_markdown_rejects_non_markdown_output(tmp_path: Path) -> None:
+def test_render_task_markdown_rejects_non_markdown_output(
+    tmp_path: Path,
+) -> None:
+    """Verify the renderer rejects output paths without a Markdown suffix."""
     with pytest.raises(RenderValidationError, match=".md suffix"):
         render_task_markdown(
             _packet(),
@@ -105,7 +122,10 @@ def test_render_task_markdown_rejects_non_markdown_output(tmp_path: Path) -> Non
         )
 
 
-def test_render_task_markdown_does_not_replace_existing_output(tmp_path: Path) -> None:
+def test_render_task_markdown_does_not_replace_existing_output(
+    tmp_path: Path,
+) -> None:
+    """Verify rendering preserves an existing output unless overwrite is set."""
     output = tmp_path / "tasks.md"
     output.write_text("preserve\n")
     with pytest.raises(FileExistsError, match="already exists"):
@@ -119,6 +139,7 @@ def test_render_task_markdown_does_not_replace_existing_output(tmp_path: Path) -
 def test_render_task_markdown_replaces_existing_output_only_when_requested(
     tmp_path: Path,
 ) -> None:
+    """Verify existing Markdown is replaced only when overwrite is requested."""
     output = tmp_path / "tasks.md"
     output.write_text("stale\n")
 
@@ -128,9 +149,12 @@ def test_render_task_markdown_replaces_existing_output_only_when_requested(
 
 
 def test_write_text_new_cleans_up_after_link_failure(tmp_path: Path) -> None:
+    """Verify failed atomic publication removes its temporary file."""
     output = tmp_path / "tasks.md"
     with (
-        patch("lib.render_task_markdown.core.os.link", side_effect=OSError("boom")),
+        patch(
+            "lib.render_task_markdown.core.os.link", side_effect=OSError("boom")
+        ),
         pytest.raises(OSError, match="boom"),
     ):
         core._write_text_new(output, "content\n")

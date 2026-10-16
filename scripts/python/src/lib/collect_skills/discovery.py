@@ -10,7 +10,7 @@ import yaml
 
 from lib.collect_skills.models import Skill, SkillIndex
 from lib.collect_skills.parser import extract_frontmatter
-from lib.shared.skill_metadata import SkillMetadataError, normalize_skill_metadata
+from lib.skill_metadata import SkillMetadataError, normalize_skill_metadata
 
 
 def _should_exclude_dir(dir_name: str) -> bool:
@@ -20,6 +20,7 @@ def _should_exclude_dir(dir_name: str) -> bool:
 
 
 def find_git_root(path: Path) -> Path | None:
+    """Return the nearest ancestor containing a Git repository, if any."""
     current = path.resolve()
     for parent in (current, *current.parents):
         if (parent / ".git").is_dir():
@@ -32,6 +33,7 @@ def find_git_root(path: Path) -> Path | None:
 def get_standard_search_roots(
     project_root: Path, config_dir: Path
 ) -> list[tuple[Path, str]]:
+    """Return existing project and global skill roots in search order."""
     roots: list[tuple[Path, str]] = []
     candidates = [
         *(
@@ -124,7 +126,9 @@ def discover_skills_from_root(
                 )
             continue
         if not _within(skill_file, root):
-            _error(index, f"skill file escapes search root: {skill_file}", verbose)
+            _error(
+                index, f"skill file escapes search root: {skill_file}", verbose
+            )
             continue
         try:
             frontmatter = extract_frontmatter(skill_file)
@@ -132,22 +136,24 @@ def discover_skills_from_root(
                 raise ValueError("missing frontmatter")
             metadata = normalize_skill_metadata(frontmatter)
         except (OSError, ValueError, SkillMetadataError, yaml.YAMLError) as exc:
-            _error(index, f"{skill_file}: invalid skill metadata: {exc}", verbose)
+            _error(
+                index, f"{skill_file}: invalid skill metadata: {exc}", verbose
+            )
             continue
         optional = dict(metadata.optional)
         skill = Skill(
-                name=metadata.name,
-                description=metadata.description,
-                selection=metadata.selection,
-                class_=metadata.skill_class,
-                path=str(skill_file.resolve()),
-                source=source,
-                version=str(optional.pop("version", "")),
-                license=str(optional.pop("license", "")),
-                compatibility=str(optional.pop("compatibility", "")),
-                metadata=optional.pop("metadata", {}),
-                permission=str(optional.pop("permission", "")),
-            )
+            name=metadata.name,
+            description=metadata.description,
+            selection=metadata.selection,
+            class_=metadata.skill_class,
+            path=str(skill_file.resolve()),
+            source=source,
+            version=str(optional.pop("version", "")),
+            license=str(optional.pop("license", "")),
+            compatibility=str(optional.pop("compatibility", "")),
+            metadata=optional.pop("metadata", {}),
+            permission=str(optional.pop("permission", "")),
+        )
         index.add(skill)
         candidates = getattr(index, "_discovery_candidates", None)
         if candidates is None:
@@ -159,7 +165,9 @@ def discover_skills_from_root(
 def _finalize(index: SkillIndex) -> None:
     """Finalize discovery-owned candidates without widening the model API."""
     errors: list[str] = getattr(index, "_discovery_errors", [])
-    candidates: dict[str, list[Skill]] = getattr(index, "_discovery_candidates", {})
+    candidates: dict[str, list[Skill]] = getattr(
+        index, "_discovery_candidates", {}
+    )
     for name, values in candidates.items():
         ranked = sorted(
             values,
@@ -179,7 +187,8 @@ def _finalize(index: SkillIndex) -> None:
             for target in skill.selection.supports:
                 if target not in winners:
                     errors.append(
-                        f"skill {skill.name!r} supports unresolved skill {target!r}"
+                        f"skill {skill.name!r} supports unresolved skill "
+                        f"{target!r}"
                     )
     if errors:
         raise ValueError("; ".join(errors))
@@ -213,5 +222,7 @@ def discover_all_skills(
         ]
         for root in archive_roots:
             if root.is_dir():
-                discover_skills_from_root(root, "archive", index, verbose=verbose)
+                discover_skills_from_root(
+                    root, "archive", index, verbose=verbose
+                )
     _finalize(index)

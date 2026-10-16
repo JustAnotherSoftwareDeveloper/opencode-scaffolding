@@ -11,13 +11,15 @@ import shlex
 import tempfile
 from pathlib import Path
 
-from terminal_bench.agents.installed_agents.opencode.opencode_agent import OpenCodeAgent
+from terminal_bench.agents.installed_agents.opencode.opencode_agent import (
+    OpenCodeAgent,
+)
 from terminal_bench.terminal.models import TerminalCommand
 from terminal_bench.utils.template_utils import render_setup_script
 
 
 class OpenCodeOllamaAgent(OpenCodeAgent):
-    """OpenCode agent with Ollama env passthrough for local model smoke tests."""
+    """OpenCode agent that passes local Ollama settings through."""
 
     @property
     def _env(self) -> dict[str, str]:
@@ -40,7 +42,9 @@ class OpenCodeOllamaAgent(OpenCodeAgent):
             self._get_template_variables(),
         )
         if self._provider == "ollama":
-            script_content = f"{script_content}\n{self._opencode_config_script()}"
+            script_content = (
+                f"{script_content}\n{self._opencode_config_script()}"
+            )
         with tempfile.NamedTemporaryFile(
             mode="w",
             suffix=".sh",
@@ -92,8 +96,10 @@ class OpenCodeOllamaAgent(OpenCodeAgent):
         return [
             TerminalCommand(
                 command=(
-                    f"opencode --model {self._model_name} run {escaped_instruction}; "
-                    "cp -r /root/.local/share/opencode/log /logs/opencode-log || true"
+                    f"opencode --model {self._model_name} "
+                    f"run {escaped_instruction}; "
+                    "cp -r /root/.local/share/opencode/log "
+                    "/logs/opencode-log || true"
                 ),
                 min_timeout_sec=0.0,
                 max_timeout_sec=float("inf"),

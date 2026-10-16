@@ -6,7 +6,6 @@ are not used here; coverage for multi-file input path handling is exercised
 through the parser's structured section extraction, source-documents
 resolution, and connection of declared names to indexed sources.
 """
-# ruff: noqa: E501
 
 from __future__ import annotations
 
@@ -19,9 +18,13 @@ from typing import Any
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 ROOT = Path(__file__).resolve().parents[3]
 MODULE_PATH = ROOT / "skills" / "plan-audit" / "scripts" / "plan_audit.py"
-SPEC = importlib.util.spec_from_file_location("plan_audit_under_test", MODULE_PATH)
+SPEC = importlib.util.spec_from_file_location(
+    "plan_audit_under_test", MODULE_PATH
+)
 assert SPEC and SPEC.loader
 plan_audit = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = plan_audit
@@ -60,7 +63,8 @@ source-documents:
 Adopt a read-only plan audit.
 
 ## Technical Rationale
-The current plan needs independent evidence. The decision selects the audit behavior. Use stable, reproducible evidence.
+The current plan needs independent evidence. \
+The decision selects the audit behavior. Use stable, reproducible evidence.
 
 ## Questions
 
@@ -70,7 +74,9 @@ None.
 A read-only report is preferred.
 
 ## Implementation Details
-Implement the audit report and collector provenance. Include the plan audit; exclude repair and approval. Preserve immutable inputs and write only the external report.{drift}
+Implement the audit report and collector provenance. Include the plan audit; \
+exclude repair and approval. Preserve immutable inputs and write only \
+the external report.{drift}
 
 ## Verification Criteria
 The report exposes all three checks and stable findings.
@@ -82,17 +88,29 @@ The report exposes all three checks and stable findings.
 
 def _proposal(root: Path, *, drift: bool = False) -> None:
     """Create a one-document monolithic PROPOSAL.md with one copied source."""
-    _write(root / "PROPOSAL.md", PROPOSAL_BASE.format(drift=" drift" if drift else ""))
-    _write(root / "analysis" / "source.md", "# Source\nThe source supports the selected direction.\n")
+    _write(
+        root / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift=" drift" if drift else ""),
+    )
+    _write(
+        root / "analysis" / "source.md",
+        "# Source\nThe source supports the selected direction.\n",
+    )
 
 
-def _task(*, skills: list[str] | None = None, compound: bool = False) -> dict[str, Any]:
+def _task(
+    *, skills: list[str] | None = None, compound: bool = False
+) -> dict[str, Any]:
     return {
         "taskId": "audit-report",
-        "purpose": "Produce the immutable audit report" if not compound else "Audit the plan and repair the report",
+        "purpose": "Produce the immutable audit report"
+        if not compound
+        else "Audit the plan and repair the report",
         "context": (
-            "Trace the Recommendation, Scope and Exclusions, Design Constraints, "
-            "Implementation Details, and Verification Criteria from PROPOSAL.md. "
+            "Trace the Recommendation, Scope and Exclusions, Design "
+            "Constraints, "
+            "Implementation Details, and Verification Criteria from "
+            "PROPOSAL.md. "
             "Preserve the Open Question: label and copied source identity. "
             "The task is read-only and writes only the external audit report."
         ),
@@ -103,25 +121,44 @@ def _task(*, skills: list[str] | None = None, compound: bool = False) -> dict[st
             {"step": 1, "action": "Read the immutable plan snapshot."},
             {"step": 2, "action": "Write the external report."},
         ],
-        "verification": ["The report contains all three independently statused checks."],
+        "verification": [
+            "The report contains all three independently statused checks."
+        ],
         "expectedOutput": "One UTF-8 Markdown audit report.",
-        "verificationCoverage": {"observable": ["Report sections and disposition are present."], "coverage": "complete"},
+        "verificationCoverage": {
+            "observable": ["Report sections and disposition are present."],
+            "coverage": "complete",
+        },
         "dependencies": [],
         "antiPatternSignals": (
             ["implementation-plus-independent-verification"]
             if compound
             else ["none"]
         ),
-        "purposeOutputAlignment": {"status": "aligned", "evidence": "The purpose names the one Markdown report."},
+        "purposeOutputAlignment": {
+            "status": "aligned",
+            "evidence": "The purpose names the one Markdown report.",
+        },
     }
 
 
-def _plan(root: Path, tasks: list[dict[str, Any]], *, include_brief: bool = True) -> None:
+def _plan(
+    root: Path, tasks: list[dict[str, Any]], *, include_brief: bool = True
+) -> None:
     if include_brief:
-        _write(root / "PLAN.md", "# Plan brief\nThe plan preserves recommendation, scope and exclusions, design constraints, implementation targets, and verification tests.\n")
+        _write(
+            root / "PLAN.md",
+            "# Plan brief\n"
+            "The plan preserves recommendation, scope and exclusions, "
+            "design constraints, implementation targets, and verification "
+            "tests.\n",
+        )
     _write(root / "tasks.md", "# Tasks\n\nProduce the immutable audit report\n")
     (root / "analysis").mkdir(parents=True, exist_ok=True)
-    _write(root / "analysis/source.md", "# Copied source\nThe source supports the selected direction.\n")
+    _write(
+        root / "analysis/source.md",
+        "# Copied source\nThe source supports the selected direction.\n",
+    )
     packet = {
         "summary": "audit fixture",
         "slug": "audit-fixture",
@@ -136,7 +173,9 @@ def _plan(root: Path, tasks: list[dict[str, Any]], *, include_brief: bool = True
             },
             "taskReviews": {
                 str(task.get("taskId") or f"task-{index + 1}"): {
-                    "immediateResult": str(task.get("expectedOutput", "Audit report")),
+                    "immediateResult": str(
+                        task.get("expectedOutput", "Audit report")
+                    ),
                     "predecessorOutputs": [],
                     "preAssignmentDisposition": "single-result",
                     "acceptanceDisposition": "accepted",
@@ -149,12 +188,17 @@ def _plan(root: Path, tasks: list[dict[str, Any]], *, include_brief: bool = True
     _write(root / "tasks.json", json.dumps(packet, indent=2))
 
 
-def _collector(root: Path, *, task_contract: bool = False) -> list[dict[str, Any]]:
+def _collector(
+    root: Path, *, task_contract: bool = False
+) -> list[dict[str, Any]]:
     del root, task_contract
     records = [
         {
             "name": "plan-audit",
-            "description": "Use when auditing one immutable proposal-derived plan snapshot without changing audited inputs.",
+            "description": (
+                "Use when auditing one immutable proposal-derived plan "
+                "snapshot without changing audited inputs."
+            ),
             "selection": {"role": "owner"},
             "class": "operation",
             "path": str(ROOT / "skills" / "plan-audit" / "SKILL.md"),
@@ -162,7 +206,10 @@ def _collector(root: Path, *, task_contract: bool = False) -> list[dict[str, Any
         },
         {
             "name": "plan-writer",
-            "description": "Use when creating a source-document plan workspace that produces executable task JSON.",
+            "description": (
+                "Use when creating a source-document plan workspace that "
+                "produces executable task JSON."
+            ),
             "selection": {"role": "owner"},
             "class": "operation",
             "path": str(ROOT / "skills" / "plan-writer" / "SKILL.md"),
@@ -182,7 +229,9 @@ def _collector(root: Path, *, task_contract: bool = False) -> list[dict[str, Any
     return records
 
 
-def _input(tmp_path: Path, *, copied: bool = False, comparison: Path | None = None) -> tuple[dict[str, Any], Path, Path]:
+def _input(
+    tmp_path: Path, *, copied: bool = False, comparison: Path | None = None
+) -> tuple[dict[str, Any], Path, Path]:
     plan = tmp_path / "plan"
     proposal = tmp_path / "proposal"
     _proposal(proposal)
@@ -195,44 +244,105 @@ def _input(tmp_path: Path, *, copied: bool = False, comparison: Path | None = No
         for path in sorted(proposal.rglob("*")):
             if path.is_file():
                 data = path.read_bytes()
-                manifest.append({"path": path.relative_to(proposal).as_posix(), "bytes": len(data), "sha256": plan_audit.hashlib.sha256(data).hexdigest()})
-        baseline = {"mode": "copied-snapshot", "root": str(proposal), "unavailableReason": "authoritative unavailable", "originIdentity": "fixture-origin", "captureTime": "2026-08-24T00:00:00Z", "manifest": manifest}
+                manifest.append(
+                    {
+                        "path": path.relative_to(proposal).as_posix(),
+                        "bytes": len(data),
+                        "sha256": plan_audit.hashlib.sha256(data).hexdigest(),
+                    }
+                )
+        baseline = {
+            "mode": "copied-snapshot",
+            "root": str(proposal),
+            "unavailableReason": "authoritative unavailable",
+            "originIdentity": "fixture-origin",
+            "captureTime": "2026-08-24T00:00:00Z",
+            "manifest": manifest,
+        }
     if comparison:
         baseline["comparisonSnapshot"] = {"root": str(comparison)}
-    return {"planWorkspace": str(plan), "proposalBaseline": baseline, "assignmentInventory": None, "auditOutput": str(output)}, plan, proposal
+    return (
+        {
+            "planWorkspace": str(plan),
+            "proposalBaseline": baseline,
+            "assignmentInventory": None,
+            "auditOutput": str(output),
+        },
+        plan,
+        proposal,
+    )
 
 
 def test_clean_report_is_composite_and_read_only(tmp_path: Path) -> None:
+    """Verify a clean audit reports all checks without mutating inputs."""
     raw, plan, proposal = _input(tmp_path)
-    before = {path: path.read_bytes() for path in [*plan.rglob("*"), *proposal.rglob("*")] if path.is_file()}
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    before = {
+        path: path.read_bytes()
+        for path in [*plan.rglob("*"), *proposal.rglob("*")]
+        if path.is_file()
+    }
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
     assert result.overall == "PASS"
-    assert [check.name for check in result.checks] == ["Proposal compliance", "Task atomicity", "Skill assignment"]
+    assert [check.name for check in result.checks] == [
+        "Proposal compliance",
+        "Task atomicity",
+        "Skill assignment",
+    ]
     assert "## Proposal compliance" in result.report
     assert "## Task atomicity" in result.report
     assert "## Skill assignment" in result.report
-    assert result.report_path.read_text(encoding="utf-8").startswith("# Plan Audit Report")
-    after = {path: path.read_bytes() for path in [*plan.rglob("*"), *proposal.rglob("*")] if path.is_file()}
+    assert result.report_path.read_text(encoding="utf-8").startswith(
+        "# Plan Audit Report"
+    )
+    after = {
+        path: path.read_bytes()
+        for path in [*plan.rglob("*"), *proposal.rglob("*")]
+        if path.is_file()
+    }
     assert before == after
-    assert json.loads((plan / "tasks.json").read_text(encoding="utf-8"))["slug"] == "audit-fixture"
+    assert (
+        json.loads((plan / "tasks.json").read_text(encoding="utf-8"))["slug"]
+        == "audit-fixture"
+    )
 
 
-def test_missing_packet_slug_fails_closed_as_a_schema_error(tmp_path: Path) -> None:
+def test_missing_packet_slug_fails_closed_as_a_schema_error(
+    tmp_path: Path,
+) -> None:
+    """Verify a packet without a slug fails the schema check."""
     raw, plan, _ = _input(tmp_path)
     packet = json.loads((plan / "tasks.json").read_text(encoding="utf-8"))
     packet.pop("slug")
     _write(plan / "tasks.json", json.dumps(packet))
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
     assert result.checks[1].disposition == "FAIL"
-    assert any(item.criterion == "PACKET-SCHEMA" for item in result.checks[1].diagnostics)
+    assert any(
+        item.criterion == "PACKET-SCHEMA"
+        for item in result.checks[1].diagnostics
+    )
 
 
-def test_compound_task_fails_only_atomicity_and_keeps_sections(tmp_path: Path) -> None:
+def test_compound_task_fails_only_atomicity_and_keeps_sections(
+    tmp_path: Path,
+) -> None:
+    """Verify a compound task fails atomicity without hiding other checks."""
     raw, plan, _ = _input(tmp_path)
     _plan(plan, [_task(compound=True)])
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
     assert result.overall == "FAIL"
     assert result.checks[0].disposition == "PASS"
     assert result.checks[1].disposition == "FAIL"
@@ -240,6 +350,7 @@ def test_compound_task_fails_only_atomicity_and_keeps_sections(tmp_path: Path) -
 
 
 def test_optional_verification_omission_is_conditional(tmp_path: Path) -> None:
+    """Verify omitted optional verification yields a conditional pass."""
     raw, plan, _ = _input(tmp_path)
     task = _task()
     task.pop("verification")
@@ -254,9 +365,14 @@ def test_optional_verification_omission_is_conditional(tmp_path: Path) -> None:
 
 
 def test_blocked_collector_does_not_hide_other_checks(tmp_path: Path) -> None:
+    """Verify a blocked collector leaves independent audit results visible."""
     raw, _, _ = _input(tmp_path)
-    failed = plan_audit.CollectorResult(False, [], stderr="collector unavailable", returncode=1)
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda _cwd: failed)
+    failed = plan_audit.CollectorResult(
+        False, [], stderr="collector unavailable", returncode=1
+    )
+    result = plan_audit.audit(
+        raw, workspace_root=tmp_path, collector_runner=lambda _cwd: failed
+    )
     assert result.overall == "BLOCKED"
     assert result.checks[0].disposition == "PASS"
     assert result.checks[1].disposition == "PASS"
@@ -264,14 +380,20 @@ def test_blocked_collector_does_not_hide_other_checks(tmp_path: Path) -> None:
     assert "## Task atomicity" in result.report
 
 
-def test_input_drift_blocks_the_snapshot_after_checks_start(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_input_drift_blocks_the_snapshot_after_checks_start(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Verify mid-audit input drift blocks the immutable snapshot."""
     raw, plan, _ = _input(tmp_path)
     original = plan_audit._skill_check
 
     def mutate(*args: Any, **kwargs: Any) -> Any:
         result = original(*args, **kwargs)
         tasks_md = plan / "tasks.md"
-        tasks_md.write_text(tasks_md.read_text(encoding="utf-8") + " external drift\n", encoding="utf-8")
+        tasks_md.write_text(
+            tasks_md.read_text(encoding="utf-8") + " external drift\n",
+            encoding="utf-8",
+        )
         return result
 
     monkeypatch.setattr(plan_audit, "_skill_check", mutate)
@@ -282,36 +404,66 @@ def test_input_drift_blocks_the_snapshot_after_checks_start(tmp_path: Path, monk
     )
     assert result.overall == "BLOCKED"
     assert all(check.disposition == "BLOCKED" for check in result.checks)
-    assert any(item.criterion == "INPUT-DRIFT" for item in result.checks[0].diagnostics)
+    assert any(
+        item.criterion == "INPUT-DRIFT" for item in result.checks[0].diagnostics
+    )
 
 
-def test_passive_documentation_is_allowed_with_an_operation_owner(tmp_path: Path) -> None:
+def test_passive_documentation_is_allowed_with_an_operation_owner(
+    tmp_path: Path,
+) -> None:
+    """Verify passive documentation is valid alongside an operation owner."""
     raw, plan, _ = _input(tmp_path)
     _plan(plan, [_task(skills=["plan-audit", "task-contract"])])
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd, task_contract=True))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd, task_contract=True),
+    )
 
     assert result.checks[2].disposition == "PASS"
 
 
-def test_passive_documentation_without_an_operation_owner_fails(tmp_path: Path) -> None:
+def test_passive_documentation_without_an_operation_owner_fails(
+    tmp_path: Path,
+) -> None:
+    """Verify passive documentation without an operation owner fails."""
     raw, plan, _ = _input(tmp_path)
     _plan(plan, [_task(skills=["task-contract"])])
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd, task_contract=True))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd, task_contract=True),
+    )
 
     assert result.checks[2].disposition == "FAIL"
-    assert any(item.criterion == "EXECUTABLE-OWNER" for item in result.checks[2].diagnostics)
+    assert any(
+        item.criterion == "EXECUTABLE-OWNER"
+        for item in result.checks[2].diagnostics
+    )
 
 
 def test_mismatched_operation_contract_fails(tmp_path: Path) -> None:
+    """Verify an operation skill that mismatches the task is rejected."""
     raw, plan, _ = _input(tmp_path)
     _plan(plan, [_task(skills=["plan-writer"])])
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
     assert result.checks[2].disposition == "FAIL"
-    assert any(item.criterion == "CONTRACT-FIT" for item in result.checks[2].diagnostics)
+    assert any(
+        item.criterion == "CONTRACT-FIT"
+        for item in result.checks[2].diagnostics
+    )
 
 
-def test_persisted_stale_winner_is_comparison_failure_not_a_repair(tmp_path: Path) -> None:
+def test_persisted_stale_winner_is_comparison_failure_not_a_repair(
+    tmp_path: Path,
+) -> None:
+    """Verify a stale persisted skill winner fails without being repaired."""
     raw, _, _ = _input(tmp_path)
     inventory = tmp_path / "inventory.json"
     inventory.write_text(
@@ -341,7 +493,10 @@ def test_persisted_stale_winner_is_comparison_failure_not_a_repair(tmp_path: Pat
     assert "no correction" in result.report
 
 
-def test_authoritative_copy_drift_is_stable_source_finding(tmp_path: Path) -> None:
+def test_authoritative_copy_drift_is_stable_source_finding(
+    tmp_path: Path,
+) -> None:
+    """Verify authoritative-copy drift produces stable source findings."""
     raw, _, proposal = _input(tmp_path)
     comparison = tmp_path / "copy"
     _proposal(comparison, drift=True)
@@ -363,56 +518,110 @@ def test_authoritative_copy_drift_is_stable_source_finding(tmp_path: Path) -> No
         "manifest": manifest,
     }
     raw["auditOutput"] = str(tmp_path / "reports" / "drift.md")
-    first = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    first = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
     raw["auditOutput"] = str(tmp_path / "reports" / "drift-again.md")
-    second = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
-    first_ids = [item.id for item in first.checks[0].diagnostics if item.criterion == "SOURCE-DRIFT"]
-    second_ids = [item.id for item in second.checks[0].diagnostics if item.criterion == "SOURCE-DRIFT"]
+    second = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
+    first_ids = [
+        item.id
+        for item in first.checks[0].diagnostics
+        if item.criterion == "SOURCE-DRIFT"
+    ]
+    second_ids = [
+        item.id
+        for item in second.checks[0].diagnostics
+        if item.criterion == "SOURCE-DRIFT"
+    ]
     assert first.overall == "FAIL"
     assert first_ids == second_ids
     assert first_ids[0].startswith("PC-SOURCE-DRIFT-")
 
 
-def test_copied_snapshot_requires_complete_provenance_and_manifest(tmp_path: Path) -> None:
+def test_copied_snapshot_requires_complete_provenance_and_manifest(
+    tmp_path: Path,
+) -> None:
+    """Verify copied snapshots require complete provenance and manifests."""
     raw, _, _ = _input(tmp_path, copied=True)
     raw["proposalBaseline"]["originIdentity"] = ""
     with pytest.raises(plan_audit.AuditInputError):
-        plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+        plan_audit.audit(
+            raw,
+            workspace_root=tmp_path,
+            collector_runner=lambda cwd: _collector(cwd),
+        )
 
 
-def test_output_boundary_refuses_existing_or_audited_target(tmp_path: Path) -> None:
+def test_output_boundary_refuses_existing_or_audited_target(
+    tmp_path: Path,
+) -> None:
+    """Verify audit output cannot overwrite an existing or audited path."""
     raw, plan, _ = _input(tmp_path)
     raw["auditOutput"] = str(plan / "inside.md")
     with pytest.raises(plan_audit.AuditInputError):
-        plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+        plan_audit.audit(
+            raw,
+            workspace_root=tmp_path,
+            collector_runner=lambda cwd: _collector(cwd),
+        )
 
 
-def test_normal_plan_writer_workspace_does_not_require_a_separate_brief(tmp_path: Path) -> None:
+def test_normal_plan_writer_workspace_does_not_require_a_separate_brief(
+    tmp_path: Path,
+) -> None:
+    """Verify a plan-writer workspace does not require a separate brief."""
     raw, plan, _ = _input(tmp_path)
     (plan / "PLAN.md").unlink()
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
     assert result.checks[0].disposition == "PASS"
-    assert not any(item.criterion == "PLAN-BRIEF" for item in result.checks[0].diagnostics)
+    assert not any(
+        item.criterion == "PLAN-BRIEF" for item in result.checks[0].diagnostics
+    )
 
 
-def test_label_guidance_is_not_mistaken_for_an_unresolved_statement(tmp_path: Path) -> None:
+def test_label_guidance_is_not_mistaken_for_an_unresolved_statement(
+    tmp_path: Path,
+) -> None:
+    """Verify label-preservation guidance is not treated as an open question."""
     raw, _, proposal = _input(tmp_path)
     _write(
         proposal / "PROPOSAL.md",
         PROPOSAL_BASE.format(drift="").replace(
-            "## Technical Rationale\nThe current plan needs independent evidence.",
-            "## Technical Rationale\nThe current plan needs independent evidence. Preserve `Assumption:`, `Evidence Gap:`, and `Open Question:` labels when present.",
+            "## Technical Rationale\n"
+            "The current plan needs independent evidence.",
+            "## Technical Rationale\n"
+            "The current plan needs independent evidence. "
+            "Preserve `Assumption:`, `Evidence Gap:`, and "
+            "`Open Question:` labels when present.",
         ),
     )
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
-    assert not any(item.criterion == "LABEL-PRESERVATION" for item in result.checks[0].diagnostics)
+    assert not any(
+        item.criterion == "LABEL-PRESERVATION"
+        for item in result.checks[0].diagnostics
+    )
 
 
 def test_actual_unresolved_statement_must_be_preserved(tmp_path: Path) -> None:
+    """Verify an actual unresolved statement must appear in task context."""
     raw, _, proposal = _input(tmp_path)
     _write(
         proposal / "PROPOSAL.md",
@@ -422,13 +631,23 @@ def test_actual_unresolved_statement_must_be_preserved(tmp_path: Path) -> None:
         ),
     )
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
     assert result.checks[0].disposition == "FAIL"
-    assert any(item.criterion == "LABEL-PRESERVATION" for item in result.checks[0].diagnostics)
+    assert any(
+        item.criterion == "LABEL-PRESERVATION"
+        for item in result.checks[0].diagnostics
+    )
 
 
-def test_coupled_multi_action_task_passes_with_complete_coupling_evidence(tmp_path: Path) -> None:
+def test_coupled_multi_action_task_passes_with_complete_coupling_evidence(
+    tmp_path: Path,
+) -> None:
+    """Verify coupled actions pass with complete coupling evidence."""
     raw, plan, _ = _input(tmp_path)
     task = _task()
     task["purpose"] = "Create and validate one immutable audit report."
@@ -440,12 +659,19 @@ def test_coupled_multi_action_task_passes_with_complete_coupling_evidence(tmp_pa
     }
     _plan(plan, [task])
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
     assert result.checks[1].disposition == "PASS"
 
 
-def test_separable_actions_fail_without_declared_anti_pattern_signal(tmp_path: Path) -> None:
+def test_separable_actions_fail_without_declared_anti_pattern_signal(
+    tmp_path: Path,
+) -> None:
+    """Verify separable actions fail without a matching anti-pattern signal."""
     raw, plan, _ = _input(tmp_path)
     task = _task()
     task["purpose"] = "Analyze migration risk and implement the parser."
@@ -454,13 +680,22 @@ def test_separable_actions_fail_without_declared_anti_pattern_signal(tmp_path: P
     task["antiPatternSignals"] = ["none"]
     _plan(plan, [task])
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
     assert result.checks[1].disposition == "FAIL"
-    assert any(item.criterion == "SPLIT-TEST" for item in result.checks[1].diagnostics)
+    assert any(
+        item.criterion == "SPLIT-TEST" for item in result.checks[1].diagnostics
+    )
 
 
-def test_dependency_glob_matches_concrete_predecessor_read(tmp_path: Path) -> None:
+def test_dependency_glob_matches_concrete_predecessor_read(
+    tmp_path: Path,
+) -> None:
+    """Verify a dependency glob covers a concrete predecessor read."""
     raw, plan, _ = _input(tmp_path)
     first = _task()
     first["taskId"] = "create-contract"
@@ -468,15 +703,27 @@ def test_dependency_glob_matches_concrete_predecessor_read(tmp_path: Path) -> No
     second = _task()
     second["taskId"] = "consume-contract"
     second["filesToRead"].append("skills/task-contract/SKILL.md")
-    second["dependencies"] = [{"taskId": "create-contract", "reason": "Consume the contract."}]
+    second["dependencies"] = [
+        {"taskId": "create-contract", "reason": "Consume the contract."}
+    ]
     _plan(plan, [first, second])
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
-    assert not any(item.criterion == "PREDECESSOR-READ" for item in result.checks[1].diagnostics)
+    assert not any(
+        item.criterion == "PREDECESSOR-READ"
+        for item in result.checks[1].diagnostics
+    )
 
 
-def test_standalone_cli_supplies_structural_validator_dependencies(tmp_path: Path) -> None:
+def test_standalone_cli_supplies_structural_validator_dependencies(
+    tmp_path: Path,
+) -> None:
+    """Verify the standalone audit CLI resolves validator dependencies."""
     raw, _, _ = _input(tmp_path)
     process = subprocess.run(
         [
@@ -498,10 +745,15 @@ def test_standalone_cli_supplies_structural_validator_dependencies(tmp_path: Pat
     assert process.returncode == 0, process.stderr
     payload = json.loads(process.stdout)
     assert payload["overall"] in {"PASS", "CONDITIONAL PASS", "FAIL", "BLOCKED"}
-    assert "No module named 'jsonschema'" not in Path(payload["report"]).read_text(encoding="utf-8")
+    assert "No module named 'jsonschema'" not in Path(
+        payload["report"]
+    ).read_text(encoding="utf-8")
 
 
-def test_blocking_evidence_gap_with_decision_ready_fails(tmp_path: Path) -> None:
+def test_blocking_evidence_gap_with_decision_ready_fails(
+    tmp_path: Path,
+) -> None:
+    """Verify a blocking evidence gap fails a decision-ready proposal."""
     raw, _, proposal = _input(tmp_path)
     _write(
         proposal / "PROPOSAL.md",
@@ -509,22 +761,48 @@ def test_blocking_evidence_gap_with_decision_ready_fails(tmp_path: Path) -> None
         .replace("readiness: review-ready", "readiness: decision-ready")
         .replace(
             "None.",
-            "Evidence Gap: Missing performance data blocks the architecture selection.",
+            "Evidence Gap: Missing performance data blocks "
+            "the architecture selection.",
         ),
     )
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
-    assert any(item.criterion == "BLOCKING-RESEARCH" for item in result.checks[0].diagnostics)
+    assert any(
+        item.criterion == "BLOCKING-RESEARCH"
+        for item in result.checks[0].diagnostics
+    )
     assert result.checks[0].disposition == "FAIL"
 
 
-@pytest.mark.parametrize("gap", [
-    "No direct reader study establishes that the revised prose improves comprehension or task success. This does not block the decision to align the bounded support artifacts, but it forbids such outcome claims.",
-    "No representative sample is available. This gap is non-blocking for the policy decision; it blocks claims of improved operational outcomes.",
-    "No external study is available. This does not block the decision; it blocks a measured improvement claim.",
-])
-def test_non_blocking_evidence_gap_does_not_fail_decision_ready(tmp_path: Path, gap: str) -> None:
+@pytest.mark.parametrize(
+    "gap",
+    [
+        (
+            "No direct reader study establishes that the revised prose "
+            "improves comprehension or task success. This does not block "
+            "the decision to align the bounded support artifacts, but it "
+            "forbids such outcome claims."
+        ),
+        (
+            "No representative sample is available. This gap is "
+            "non-blocking for the policy decision; it blocks claims of "
+            "improved operational outcomes."
+        ),
+        (
+            "No external study is available. This does not block the "
+            "decision; it blocks a measured improvement claim."
+        ),
+    ],
+)
+def test_non_blocking_evidence_gap_does_not_fail_decision_ready(
+    tmp_path: Path, gap: str
+) -> None:
+    """Verify a non-blocking evidence gap does not fail the decision."""
     raw, plan, proposal = _input(tmp_path)
     label = f"Evidence Gap: {gap}"
     _write(
@@ -537,15 +815,28 @@ def test_non_blocking_evidence_gap_does_not_fail_decision_ready(tmp_path: Path, 
     packet["tasks"][0]["context"] += f" Preserve {label}"
     _write(plan / "tasks.json", json.dumps(packet))
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
     assert result.checks[0].disposition == "PASS"
-    assert not any(item.criterion == "BLOCKING-RESEARCH" for item in result.checks[0].diagnostics)
+    assert not any(
+        item.criterion == "BLOCKING-RESEARCH"
+        for item in result.checks[0].diagnostics
+    )
 
 
-def test_explicit_decision_blocker_overrides_non_blocking_claim(tmp_path: Path) -> None:
+def test_explicit_decision_blocker_overrides_non_blocking_claim(
+    tmp_path: Path,
+) -> None:
+    """Verify an explicit decision blocker overrides a non-blocking label."""
     raw, plan, proposal = _input(tmp_path)
-    label = "Evidence Gap: This does not block outcome claims, but it blocks the architecture selection."
+    label = (
+        "Evidence Gap: This does not block outcome claims, but it blocks "
+        "the architecture selection."
+    )
     _write(
         proposal / "PROPOSAL.md",
         PROPOSAL_BASE.format(drift="")
@@ -556,27 +847,45 @@ def test_explicit_decision_blocker_overrides_non_blocking_claim(tmp_path: Path) 
     packet["tasks"][0]["context"] += f" Preserve {label}"
     _write(plan / "tasks.json", json.dumps(packet))
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
     assert result.checks[0].disposition == "FAIL"
-    assert any(item.criterion == "BLOCKING-RESEARCH" for item in result.checks[0].diagnostics)
+    assert any(
+        item.criterion == "BLOCKING-RESEARCH"
+        for item in result.checks[0].diagnostics
+    )
 
 
-def test_source_drift_declared_not_indexed_blocks_incomplete_baseline(tmp_path: Path) -> None:
+def test_source_drift_declared_not_indexed_blocks_incomplete_baseline(
+    tmp_path: Path,
+) -> None:
+    """Verify an unindexed declared source blocks an incomplete baseline."""
     raw, _, proposal = _input(tmp_path)
     _write(proposal / "analysis" / "missing-source.md", "# Missing source\n")
     _write(
         proposal / "PROPOSAL.md",
         PROPOSAL_BASE.format(drift="").replace(
             "source-documents:\n  - analysis/source.md",
-            "source-documents:\n  - analysis/source.md\n  - analysis/missing-source.md",
+            "source-documents:\n  - analysis/source.md\n  "
+            "- analysis/missing-source.md",
         ),
     )
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
     assert result.checks[0].disposition == "BLOCKED"
-    assert any(item.criterion == "BASELINE-COMPLETE" for item in result.checks[0].diagnostics)
+    assert any(
+        item.criterion == "BASELINE-COMPLETE"
+        for item in result.checks[0].diagnostics
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -587,83 +896,131 @@ def test_source_drift_declared_not_indexed_blocks_incomplete_baseline(tmp_path: 
 def test_valid_copied_snapshot_passes(tmp_path: Path) -> None:
     """A copied-snapshot with complete provenance and intact manifest passes."""
     raw, _, _ = _input(tmp_path, copied=True)
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
     assert result.overall == "PASS"
     assert result.checks[0].disposition == "PASS"
 
 
-def test_copied_manifest_missing_file_blocks_without_crashing(tmp_path: Path) -> None:
+def test_copied_manifest_missing_file_blocks_without_crashing(
+    tmp_path: Path,
+) -> None:
+    """Verify a missing copied-manifest file blocks the audit safely."""
     raw, _, _ = _input(tmp_path, copied=True)
     raw["proposalBaseline"]["manifest"].append(
         {"path": "analysis/missing.md", "bytes": 1, "sha256": "0" * 64}
     )
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
     assert result.overall == "BLOCKED"
     assert result.checks[0].disposition == "BLOCKED"
 
 
 def test_missing_recommendation_section_fails(tmp_path: Path) -> None:
-    """A one-document proposal without a Recommendation heading fails proposal compliance."""
-    raw, _, proposal = _input(tmp_path)
-    _write(
-        proposal / "PROPOSAL.md",
-        PROPOSAL_BASE.format(drift="").replace("## Recommendation\nAdopt a read-only plan audit.", ""),
-    )
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
-    assert result.checks[0].disposition == "BLOCKED"
-    assert any(item.criterion == "BASELINE-COMPLETE" for item in result.checks[0].diagnostics)
-
-
-def test_missing_implementation_details_section_blocked(tmp_path: Path) -> None:
-    """A one-document proposal without Implementation Details heading blocks proposal compliance."""
+    """A proposal without Recommendation fails compliance."""
     raw, _, proposal = _input(tmp_path)
     _write(
         proposal / "PROPOSAL.md",
         PROPOSAL_BASE.format(drift="").replace(
-            "## Implementation Details\nImplement the audit report and collector provenance.",
+            "## Recommendation\nAdopt a read-only plan audit.", ""
+        ),
+    )
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
+    assert result.checks[0].disposition == "BLOCKED"
+    assert any(
+        item.criterion == "BASELINE-COMPLETE"
+        for item in result.checks[0].diagnostics
+    )
+
+
+def test_missing_implementation_details_section_blocked(tmp_path: Path) -> None:
+    """A proposal without Implementation Details fails compliance."""
+    raw, _, proposal = _input(tmp_path)
+    _write(
+        proposal / "PROPOSAL.md",
+        PROPOSAL_BASE.format(drift="").replace(
+            "## Implementation Details\n"
+            "Implement the audit report and collector provenance.",
             "",
         ),
     )
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
     assert result.checks[0].disposition == "BLOCKED"
 
 
 def test_missing_verification_criteria_section_blocked(tmp_path: Path) -> None:
-    """A one-document proposal without Verification Criteria heading blocks proposal compliance."""
+    """A proposal without Verification Criteria fails compliance."""
     raw, _, proposal = _input(tmp_path)
     _write(
         proposal / "PROPOSAL.md",
         PROPOSAL_BASE.format(drift="").replace(
-            "## Verification Criteria\nThe report exposes all three checks and stable findings.",
+            "## Verification Criteria\n"
+            "The report exposes all three checks and stable findings.",
             "",
         ),
     )
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
     assert result.checks[0].disposition == "BLOCKED"
 
 
 def test_invalid_readiness_blocked(tmp_path: Path) -> None:
-    """A one-document proposal with an unrecognized readiness value blocks proposal compliance."""
+    """An unknown proposal readiness value fails compliance."""
     raw, _, proposal = _input(tmp_path)
     _write(
         proposal / "PROPOSAL.md",
-        PROPOSAL_BASE.format(drift="").replace("readiness: review-ready", "readiness: invalid-state"),
+        PROPOSAL_BASE.format(drift="").replace(
+            "readiness: review-ready", "readiness: invalid-state"
+        ),
     )
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
     assert result.checks[0].disposition == "BLOCKED"
-    assert any(item.criterion == "BASELINE-COMPLETE" for item in result.checks[0].diagnostics)
+    assert any(
+        item.criterion == "BASELINE-COMPLETE"
+        for item in result.checks[0].diagnostics
+    )
 
 
-def test_malformed_frontmatter_blocks_and_writes_a_report(tmp_path: Path) -> None:
+def test_malformed_frontmatter_blocks_and_writes_a_report(
+    tmp_path: Path,
+) -> None:
+    """Verify malformed proposal frontmatter blocks and writes a report."""
     raw, _, proposal = _input(tmp_path)
     _write(
         proposal / "PROPOSAL.md",
-        PROPOSAL_BASE.format(drift="").replace("title: audit fixture", "title: [broken"),
+        PROPOSAL_BASE.format(drift="").replace(
+            "title: audit fixture", "title: [broken"
+        ),
     )
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
     assert result.overall == "BLOCKED"
     assert result.report_path.is_file()
@@ -671,15 +1028,21 @@ def test_malformed_frontmatter_blocks_and_writes_a_report(tmp_path: Path) -> Non
 
 
 def test_complex_example_accepts_ordered_optional_h3_toc_entries() -> None:
+    """Verify the complex proposal example accepts ordered optional H3 links."""
     parsed = plan_audit._parse_proposal_md(
-        ROOT / "skills" / "proposal" / "examples" / "complex-proposal" / "PROPOSAL.md"
+        ROOT
+        / "skills"
+        / "proposal"
+        / "examples"
+        / "complex-proposal"
+        / "PROPOSAL.md"
     )
 
     assert parsed["valid"]
 
 
 def test_missing_declared_source_file_blocked(tmp_path: Path) -> None:
-    """A source-documents entry pointing to a missing file blocks proposal compliance."""
+    """A missing declared source file blocks proposal audit."""
     raw, _, proposal = _input(tmp_path)
     _write(
         proposal / "PROPOSAL.md",
@@ -688,16 +1051,21 @@ def test_missing_declared_source_file_blocked(tmp_path: Path) -> None:
             "source-documents:\n  - analysis/source.md\n  - analysis/absent.md",
         ),
     )
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
     assert result.checks[0].disposition == "BLOCKED"
     assert any(
-        "declared source is missing or not a regular file" in str(item.observed).lower()
+        "declared source is missing or not a regular file"
+        in str(item.observed).lower()
         for item in result.checks[0].diagnostics
     )
 
 
 def test_unsafe_path_in_source_documents_blocked(tmp_path: Path) -> None:
-    """A source-documents entry resolving outside the proposal root blocks proposal compliance."""
+    """An unsafe source path blocks the proposal audit."""
     raw, _, proposal = _input(tmp_path)
     _write(
         proposal / "PROPOSAL.md",
@@ -706,7 +1074,11 @@ def test_unsafe_path_in_source_documents_blocked(tmp_path: Path) -> None:
             "source-documents:\n  - analysis/source.md\n  - ../../../unsafe.md",
         ),
     )
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
     assert result.checks[0].disposition == "BLOCKED"
     assert any(
         "declared source is unsafe" in str(item.observed).lower()
@@ -714,57 +1086,102 @@ def test_unsafe_path_in_source_documents_blocked(tmp_path: Path) -> None:
     )
 
 
-def test_task_atomicity_passes_with_one_document_baseline(tmp_path: Path) -> None:
-    """Task atomicity check works against a one-document PROPOSAL.md baseline."""
+def test_task_atomicity_passes_with_one_document_baseline(
+    tmp_path: Path,
+) -> None:
+    """Verify task atomicity against a one-document proposal."""
     raw, plan, proposal = _input(tmp_path)
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
     assert result.checks[1].disposition == "PASS"
 
 
-def test_exact_skill_assignment_passes_with_one_document_baseline(tmp_path: Path) -> None:
-    """Skill assignment check works against a one-document PROPOSAL.md baseline."""
+def test_exact_skill_assignment_passes_with_one_document_baseline(
+    tmp_path: Path,
+) -> None:
+    """Verify skill assignment against a one-document proposal."""
     raw, _, _ = _input(tmp_path)
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
     assert result.checks[2].disposition == "PASS"
 
 
-def test_missing_decision_owner_blocks_incomplete_baseline(tmp_path: Path) -> None:
+def test_missing_decision_owner_blocks_incomplete_baseline(
+    tmp_path: Path,
+) -> None:
+    """Verify a proposal without a decision owner blocks baseline review."""
     raw, _, proposal = _input(tmp_path)
     _write(
         proposal / "PROPOSAL.md",
-        PROPOSAL_BASE.format(drift="").replace("decision-owner: test-engineer\n", ""),
+        PROPOSAL_BASE.format(drift="").replace(
+            "decision-owner: test-engineer\n", ""
+        ),
     )
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
     assert result.checks[0].disposition == "BLOCKED"
-    assert any("decision-owner" in str(item.observed) for item in result.checks[0].diagnostics)
+    assert any(
+        "decision-owner" in str(item.observed)
+        for item in result.checks[0].diagnostics
+    )
 
 
-def test_duplicate_sources_identity_blocks_incomplete_baseline(tmp_path: Path) -> None:
+def test_duplicate_sources_identity_blocks_incomplete_baseline(
+    tmp_path: Path,
+) -> None:
+    """Verify duplicate source identities block baseline validation."""
     raw, _, proposal = _input(tmp_path)
     _write(
         proposal / "PROPOSAL.md",
         PROPOSAL_BASE.format(drift="").replace(
             "- [Source](./analysis/source.md)",
-            "- [Source](./analysis/source.md)\n- [Duplicate](./analysis/source.md)",
+            "- [Source](./analysis/source.md)\n"
+            "- [Duplicate](./analysis/source.md)",
         ),
     )
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
     assert result.checks[0].disposition == "BLOCKED"
-    assert any("duplicate internal identities" in str(item.observed) for item in result.checks[0].diagnostics)
+    assert any(
+        "duplicate internal identities" in str(item.observed)
+        for item in result.checks[0].diagnostics
+    )
 
 
-def test_missing_table_of_contents_blocks_incomplete_baseline(tmp_path: Path) -> None:
+def test_missing_table_of_contents_blocks_incomplete_baseline(
+    tmp_path: Path,
+) -> None:
+    """Verify a missing proposal table of contents blocks baseline review."""
     raw, _, proposal = _input(tmp_path)
     text = PROPOSAL_BASE.format(drift="")
     start = text.index("## Table of Contents")
     end = text.index("## Recommendation")
     _write(proposal / "PROPOSAL.md", text[:start] + text[end:])
 
-    result = plan_audit.audit(raw, workspace_root=tmp_path, collector_runner=lambda cwd: _collector(cwd))
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
 
     assert result.checks[0].disposition == "BLOCKED"
-    assert any("table of contents" in str(item.observed).lower() for item in result.checks[0].diagnostics)
+    assert any(
+        "table of contents" in str(item.observed).lower()
+        for item in result.checks[0].diagnostics
+    )

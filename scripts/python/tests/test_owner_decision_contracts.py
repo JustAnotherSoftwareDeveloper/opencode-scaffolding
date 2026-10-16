@@ -1,4 +1,4 @@
-"""Source-level checks for the approved clarification and recovery boundaries."""
+"""Source-level checks for approved clarification and recovery boundaries."""
 
 from __future__ import annotations
 
@@ -6,11 +6,18 @@ import json
 import re
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.integration
+
 ROOT = Path(__file__).resolve().parents[3]
 
 
 def test_no_material_question_blocks_without_empty_tool_call() -> None:
-    content = (ROOT / "skills/ask-question/SKILL.md").read_text(encoding="utf-8")
+    """Verify no material question blocks without an empty tool call."""
+    content = (ROOT / "skills/ask-question/SKILL.md").read_text(
+        encoding="utf-8"
+    )
     schemas = [
         json.loads(block)
         for block in re.findall(r"```json\n(.*?)\n```", content, re.DOTALL)
@@ -29,7 +36,10 @@ def test_no_material_question_blocks_without_empty_tool_call() -> None:
 
 
 def test_malformed_report_requires_supervisory_redispatch_not_repair() -> None:
-    delegation = (ROOT / "skills/task-delegation/SKILL.md").read_text(encoding="utf-8")
+    """Verify malformed reports require redispatch rather than repair."""
+    delegation = (ROOT / "skills/task-delegation/SKILL.md").read_text(
+        encoding="utf-8"
+    )
     delegator = (ROOT / "agents/delegator.md").read_text(encoding="utf-8")
     executor = (ROOT / "agents/executor.md").read_text(encoding="utf-8")
     for content in (delegation, delegator, executor):

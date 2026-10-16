@@ -8,7 +8,10 @@ from typing import Any
 
 import click
 
-from lib.render_task_markdown.core import RenderValidationError, render_task_markdown
+from lib.render_task_markdown.core import (
+    RenderValidationError,
+    render_task_markdown,
+)
 
 
 @click.command(name="render-task-markdown")
@@ -27,7 +30,9 @@ from lib.render_task_markdown.core import RenderValidationError, render_task_mar
 @click.option(
     "--overwrite",
     is_flag=True,
-    help="Atomically replace an existing output after a bounded plan correction.",
+    help=(
+        "Atomically replace an existing output after a bounded plan correction."
+    ),
 )
 def main(
     input_file: Path,
@@ -43,7 +48,12 @@ def main(
             output_file,
             overwrite=overwrite,
         )
-    except (OSError, ValueError, json.JSONDecodeError, RenderValidationError) as exc:
+    except (
+        OSError,
+        ValueError,
+        json.JSONDecodeError,
+        RenderValidationError,
+    ) as exc:
         click.echo(f"Error: {exc}", err=True)
         raise SystemExit(1) from exc
     click.echo(str(result.relative_to(Path.cwd())))
@@ -52,7 +62,9 @@ def main(
 def _require_local_output(path: Path) -> None:
     """Reject an output path outside the current working directory."""
     if not path.is_relative_to(Path.cwd()):
-        raise ValueError("--output must be within the current working directory")
+        raise ValueError(
+            "--output must be within the current working directory"
+        )
 
 
 def _read_json(input_file: Path) -> dict[str, Any]:

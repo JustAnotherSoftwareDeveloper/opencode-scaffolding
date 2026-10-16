@@ -8,6 +8,8 @@ import pytest
 
 from lib.shared.files import read_text, resolve_path, write_text
 
+pytestmark = pytest.mark.unit
+
 
 class TestResolvePath:
     """Tests for ``resolve_path()``."""

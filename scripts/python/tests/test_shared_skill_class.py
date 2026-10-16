@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from lib.shared.skill_class import SkillClass
+from lib.collect_skills.skill_class import SkillClass
+
+pytestmark = pytest.mark.unit
 
 
 def test_all_five_members_present() -> None:

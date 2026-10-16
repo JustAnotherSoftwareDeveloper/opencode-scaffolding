@@ -8,6 +8,8 @@ import pytest
 
 from lib.resolve_script_root.core import resolve_script_root
 
+pytestmark = pytest.mark.unit
+
 
 def test_env_var_override(monkeypatch: pytest.MonkeyPatch) -> None:
     """OPENCODE_SCRIPTS_PYTHON env var returns that path with env-var source."""
@@ -33,7 +35,9 @@ def test_env_var_shell(monkeypatch: pytest.MonkeyPatch) -> None:
     assert str(path) == "/custom/shell"
 
 
-def test_project_local_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_project_local_dir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """When env var is unset and project-local dir exists, returns that path."""
     monkeypatch.delenv("OPENCODE_SCRIPTS_PYTHON", raising=False)
     project_local = tmp_path / "opencode" / "scripts" / "python"
@@ -47,7 +51,9 @@ def test_project_local_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
     assert path == project_local.resolve()
 
 
-def test_global_fallback(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_global_fallback(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """When env var and project-local are absent, falls through to global."""
     monkeypatch.delenv("OPENCODE_SCRIPTS_PYTHON", raising=False)
     home = tmp_path / "home"
@@ -61,10 +67,14 @@ def test_global_fallback(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
         project_root=tmp_path,
     )
     assert source == "global"
-    assert path == (home / ".config" / "opencode" / "scripts" / "python").resolve()
+    assert (
+        path == (home / ".config" / "opencode" / "scripts" / "python").resolve()
+    )
 
 
-def test_runtime_selection(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_runtime_selection(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """--runtime node selects the node subdirectory for project-local."""
     monkeypatch.delenv("OPENCODE_SCRIPTS_NODE", raising=False)
     project_local_node = tmp_path / ".opencode" / "scripts" / "node"

@@ -3,6 +3,10 @@
 import json
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.integration
+
 ROOT = Path(__file__).parents[3]
 CONTRACT = "output-contract-template.md"
 
@@ -45,10 +49,12 @@ REQUIRED_FIELDS = (
 
 
 def read(relative: str) -> str:
+    """Read a repository file as text."""
     return (ROOT / relative).read_text()
 
 
 def test_output_contract_declares_canonical_authority() -> None:
+    """Verify the canonical output contract declares its required fields."""
     content = read(CONTRACT)
     assert "sole canonical source" in content
     for field in REQUIRED_FIELDS:
@@ -56,11 +62,13 @@ def test_output_contract_declares_canonical_authority() -> None:
 
 
 def test_active_producers_and_consumers_reference_canonical_contract() -> None:
+    """Verify active agents and skills reference the canonical contract."""
     for relative in CONSUMERS:
         assert CONTRACT in read(relative), relative
 
 
 def test_restricted_agents_can_read_canonical_contract() -> None:
+    """Verify restricted agents can read the output contract template."""
     config = json.loads(read("opencode.json"))
     for name in ("delegator", "executor"):
         permissions = config["agent"][name]["permission"]
@@ -71,6 +79,7 @@ def test_restricted_agents_can_read_canonical_contract() -> None:
 
 
 def test_structured_fixtures_use_canonical_list_grammar() -> None:
+    """Verify structured worker fixtures use the canonical list grammar."""
     fixture_root = "skills/task-delegation/reference/fixtures"
     for name in STRUCTURED_FIXTURES:
         content = read(f"{fixture_root}/{name}")
@@ -81,6 +90,7 @@ def test_structured_fixtures_use_canonical_list_grammar() -> None:
 
 
 def test_legacy_table_is_only_an_invalid_fixture() -> None:
+    """Verify only the invalid fixture uses the legacy table envelope."""
     fixture_root = ROOT / "skills/task-delegation/reference/fixtures"
     table_fixtures = {
         path.name

@@ -12,6 +12,8 @@ from lib.boundary_review_acceptance.core import accept_boundary_review
 from lib.schema import load_schema
 from lib.validate_task_structure.core import validate_root
 
+pytestmark = pytest.mark.integration
+
 ROOT = Path(__file__).resolve().parents[3]
 BREAKDOWN = ROOT / "skills" / "breakdown-tasks"
 WORKFLOW = BREAKDOWN / "SKILL.md"
@@ -42,18 +44,25 @@ def _collector_records() -> list[dict[str, object]]:
     return records
 
 
-def test_task_contract_is_collector_winning_passive_context_before_drafting() -> None:
+def test_task_contract_is_collector_winning_passive_context_before_drafting():
+    """Verify passive task-contract context comes from the winning record."""
     text = WORKFLOW.read_text(encoding="utf-8")
     records = _collector_records()
-    matches = [record for record in records if record.get("name") == "task-contract"]
+    matches = [
+        record for record in records if record.get("name") == "task-contract"
+    ]
 
     assert len(matches) == 1
     record = matches[0]
     assert record["class"] == "documentation"
-    assert Path(str(record["path"])).resolve() == TASK_CONTRACT.resolve()
-    assert record["path"].endswith("skills/task-contract/SKILL.md")
+    path = record["path"]
+    assert isinstance(path, str)
+    assert Path(path).resolve() == TASK_CONTRACT.resolve()
+    assert path.endswith("skills/task-contract/SKILL.md")
 
-    load = text.index("Load the shared task contract before authoring boundaries")
+    load = text.index(
+        "Load the shared task contract before authoring boundaries"
+    )
     draft = text.index("Draft tasks without `skills`")
     assert load < draft
     assert "exact collector winner" in text
@@ -62,6 +71,7 @@ def test_task_contract_is_collector_winning_passive_context_before_drafting() ->
 
 
 def test_operation_owned_pipeline_remains_and_cli_paths_are_stable() -> None:
+    """Keep the operation-owned workflow and established CLI paths stable."""
     text = WORKFLOW.read_text(encoding="utf-8")
     normalized_text = " ".join(text.split()).lower()
 
@@ -71,11 +81,17 @@ def test_operation_owned_pipeline_remains_and_cli_paths_are_stable() -> None:
         "then split it again if it still",
         "Draft tasks without `skills`",
         "Assign skills only after boundary acceptance",
-        "Inspect contracts",
+        "Verify selected contracts",
         "Publish the candidate packet",
         "Validate structure and close final request-aware acceptance",
     ):
         assert phrase.lower() in normalized_text
+
+    assert (
+        "for operation assignments, inspect the collector-winning "
+        "`skill.md` without executing that future task's operation."
+        in normalized_text
+    )
 
     for command in (
         "collect-skills --class planning",
@@ -89,7 +105,7 @@ def test_operation_owned_pipeline_remains_and_cli_paths_are_stable() -> None:
     assert (BREAKDOWN / "schema" / "task-input.schema.json").is_file()
     assert (BREAKDOWN / "schema" / "task-packet.schema.json").is_file()
     assert "--output-dir .tasks" in text
-    assert 'schema=~/.config/opencode/skills/breakdown-tasks/schema' in text
+    assert "schema=~/.config/opencode/skills/breakdown-tasks/schema" in text
     assert 'mktemp "${TMPDIR:-/tmp}/opencode-breakdown.XXXXXX.json"' in text
     assert '< "$DRAFT_PATH"' in text
     assert 'rm -f -- "$DRAFT_PATH"' in text
@@ -100,6 +116,7 @@ def test_operation_owned_pipeline_remains_and_cli_paths_are_stable() -> None:
 
 
 def test_local_authoring_docs_point_to_shared_invariant_owners() -> None:
+    """Defer authoring invariants to shared contract owners."""
     core = (BREAKDOWN / "reference" / "authoring" / "core-rules.md").read_text(
         encoding="utf-8"
     )
@@ -120,8 +137,8 @@ def test_local_authoring_docs_point_to_shared_invariant_owners() -> None:
     assert "atomicity-and-alignment.md" in core
     assert "dependencies-and-coupling.md" in core
     assert "traceability-and-metadata.md" in core
-    assert "atomicity-and-alignment.md" in granularity
-    assert "dependencies-and-coupling.md" in granularity
+    assert "Atomicity and alignment" in granularity
+    assert "Dependencies and coupling" in granularity
     assert "task-contract" in fields
     assert "traceability-and-metadata.md" in context
     assert "task-contract" in validation
@@ -133,12 +150,16 @@ def test_local_authoring_docs_point_to_shared_invariant_owners() -> None:
 
 
 def test_passive_documentation_is_not_an_executable_assignment() -> None:
-    assignment = (
-        BREAKDOWN / "reference" / "skill-assignment.md"
-    ).read_text(encoding="utf-8")
+    """Keep documentation-only context outside executable skill assignments."""
+    assignment = (BREAKDOWN / "reference" / "skill-assignment.md").read_text(
+        encoding="utf-8"
+    )
     contract = TASK_CONTRACT.read_text(encoding="utf-8")
 
-    assert "context only, not an executable assignment" in assignment
+    assert (
+        "Exclude the passive pre-authoring `task-contract` record from "
+        "executable task assignments." in " ".join(assignment.split())
+    )
     assert "passive, documentation-only, non-transitive" in assignment
     assert "class: documentation" in contract
     assert "non-transitive" in contract
@@ -146,7 +167,8 @@ def test_passive_documentation_is_not_an_executable_assignment() -> None:
     assert "does not auto-read" in contract
 
 
-def test_decomposition_method_aggressively_splits_then_connects_results() -> None:
+def test_decomposition_method_splits_then_connects_results() -> None:
+    """Keep the decomposition method's split-then-connect process explicit."""
     method = (
         BREAKDOWN / "reference" / "authoring" / "decomposition-method.md"
     ).read_text(encoding="utf-8")
@@ -179,8 +201,13 @@ def test_decomposition_method_aggressively_splits_then_connects_results() -> Non
 
 
 def test_atomicity_contract_prefers_splitting_over_compound_work() -> None:
+    """Prefer independently acceptable task boundaries over compound work."""
     atomicity = (
-        ROOT / "skills" / "task-contract" / "reference" / "atomicity-and-alignment.md"
+        ROOT
+        / "skills"
+        / "task-contract"
+        / "reference"
+        / "atomicity-and-alignment.md"
     ).read_text(encoding="utf-8")
     normalized_atomicity = " ".join(atomicity.split()).lower()
 
@@ -234,14 +261,22 @@ def _reviewed_packet(
         }
     if indivisible_task_id:
         task_reviews[indivisible_task_id] = {
-            "immediateResult": task_reviews[indivisible_task_id]["immediateResult"],
+            "immediateResult": task_reviews[indivisible_task_id][
+                "immediateResult"
+            ],
             "predecessorOutputs": [],
             "preAssignmentDisposition": "retained-indivisible",
             "acceptanceDisposition": "accepted-indivisible",
             "indivisibilityEvidence": {
-                "sharedResult": "One valid source-schema/generated-client state.",
-                "verificationBoundary": "Generated client matches the source schema.",
-                "separationHarm": "Separating them leaves the repository inconsistent.",
+                "sharedResult": (
+                    "One valid source-schema/generated-client state."
+                ),
+                "verificationBoundary": (
+                    "Generated client matches the source schema."
+                ),
+                "separationHarm": (
+                    "Separating them leaves the repository inconsistent."
+                ),
             },
         }
     return {
@@ -336,13 +371,13 @@ def _reviewed_packet(
         ),
     ],
 )
-def test_request_packet_regressions_keep_structural_and_semantic_evidence_separate(
+def test_request_packet_regressions_separate_structural_and_semantic_evidence(
     user_request: str,
     task_results: list[tuple[str, str]],
     warnings: dict[str, dict[str, str]],
     indivisible_task_id: str | None,
 ) -> None:
-    """Schema conformance records evidence; delegator review decides semantics."""
+    """Separate schema evidence from semantic task-boundary review."""
     packet = _reviewed_packet(
         user_request,
         task_results,
@@ -358,7 +393,10 @@ def test_request_packet_regressions_keep_structural_and_semantic_evidence_separa
 
 
 def _review_evidence(
-    request: str, packet: dict[str, object], *, deficiencies: list[str] | None = None
+    request: str,
+    packet: dict[str, object],
+    *,
+    deficiencies: list[str] | None = None,
 ) -> dict[str, object]:
     tasks = packet["tasks"]
     assert isinstance(tasks, list)
@@ -367,7 +405,9 @@ def _review_evidence(
         "packetSlug": packet["slug"],
         "reviewedTaskIds": [task["taskId"] for task in tasks],
         "disposition": "accepted",
-        "rationale": "The supervisory review substantiates the recorded boundary.",
+        "rationale": (
+            "The supervisory review substantiates the recorded boundary."
+        ),
         "deficiencies": deficiencies or [],
     }
 
@@ -437,7 +477,9 @@ def _review_evidence(
                     "Analyze the lifecycle and implement the resulting change.",
                     [("implementation", "Implementation change.")],
                 ),
-                deficiencies=["The lifecycle analysis is missing from the inventory."],
+                deficiencies=[
+                    "The lifecycle analysis is missing from the inventory."
+                ],
             ),
             "review evidence identifies unresolved deficiencies",
             id="missing-inventory-coverage",
@@ -456,7 +498,9 @@ def _review_evidence(
                     [("schema-client", "Source schema and generated client.")],
                     indivisible_task_id="schema-client",
                 ),
-                deficiencies=["The claimed coupling has no request-aware support."],
+                deficiencies=[
+                    "The claimed coupling has no request-aware support."
+                ],
             ),
             "review evidence identifies unresolved deficiencies",
             id="unsupported-coupling",
@@ -474,7 +518,8 @@ def _review_evidence(
                     [("lifecycle", "Lifecycle analysis and implementation.")],
                 ),
                 deficiencies=[
-                    "Analysis and implementation are independently acceptable results."
+                    "Analysis and implementation are independently "
+                    "acceptable results."
                 ],
             ),
             "review evidence identifies unresolved deficiencies",
@@ -488,7 +533,7 @@ def test_downstream_eligibility_rejects_unaccepted_request_packet_reviews(
     evidence: object,
     expected_diagnostic: str,
 ) -> None:
-    """Structural validity is necessary, never a request-aware acceptance oracle."""
+    """Require review evidence beyond structural validity."""
     schema = load_schema(SCHEMA)
     structural_valid, structural_diagnostics = validate_root(packet, schema)
 
@@ -502,8 +547,8 @@ def test_downstream_eligibility_rejects_unaccepted_request_packet_reviews(
     assert expected_diagnostic in diagnostics
 
 
-def test_downstream_eligibility_accepts_only_documented_indivisible_fixture() -> None:
-    """A concrete shared repository state remains the narrow retained exception."""
+def test_downstream_eligibility_accepts_only_documented_indivisible_fixture():
+    """Retain only the documented shared-state exception."""
     request = (
         "Change the source schema and regenerate its client as one required "
         "repository state."
@@ -524,7 +569,9 @@ def test_downstream_eligibility_accepts_only_documented_indivisible_fixture() ->
     evidence = _review_evidence(request, packet)
 
     structural_valid, structural_diagnostics = validate_root(packet, schema)
-    accepted, diagnostics = accept_boundary_review(request, packet, evidence, schema)
+    accepted, diagnostics = accept_boundary_review(
+        request, packet, evidence, schema
+    )
 
     assert structural_valid is True
     assert structural_diagnostics == []
@@ -532,8 +579,8 @@ def test_downstream_eligibility_accepts_only_documented_indivisible_fixture() ->
     assert diagnostics == []
 
 
-def test_downstream_eligibility_rejects_invalid_request_binding_and_structure() -> None:
-    """Eligibility binds the original request and requires the canonical root."""
+def test_downstream_eligibility_rejects_invalid_request_binding_and_structure():
+    """Bind eligibility to the original request and canonical packet root."""
     request = "Implement checkout."
     packet = _reviewed_packet(request, [("implementation", "Checkout.")])
     schema = load_schema(SCHEMA)
@@ -543,10 +590,14 @@ def test_downstream_eligibility_rejects_invalid_request_binding_and_structure() 
 
     assert accepted is False
     assert "original request must be a non-empty string" in diagnostics
-    assert "review evidence must bind the unchanged original request" in diagnostics
+    assert "review evidence must bind the unchanged original request" in (
+        diagnostics
+    )
 
     packet.pop("boundaryReview")
-    accepted, diagnostics = accept_boundary_review(request, packet, evidence, schema)
+    accepted, diagnostics = accept_boundary_review(
+        request, packet, evidence, schema
+    )
 
     assert accepted is False
     assert diagnostics[0] == "canonical packet failed structural validation"

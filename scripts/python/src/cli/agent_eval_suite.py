@@ -48,7 +48,9 @@ from lib.agent_eval_suite import (
     type=click.Path(file_okay=False, path_type=Path),
     help="Optional Inspect log directory.",
 )
-@click.option("--inspect-limit", type=int, help="Optional Inspect sample limit.")
+@click.option(
+    "--inspect-limit", type=int, help="Optional Inspect sample limit."
+)
 @click.option(
     "--run-terminal-bench",
     is_flag=True,
@@ -90,8 +92,12 @@ from lib.agent_eval_suite import (
 )
 @click.option("--tb-n-tasks", type=int, help="Limit Terminal-Bench task count.")
 @click.option("--tb-n-concurrent", type=int, default=1, show_default=True)
-@click.option("--tb-no-rebuild", is_flag=True, help="Pass --no-rebuild to tb run.")
-@click.option("--tb-no-cleanup", is_flag=True, help="Pass --no-cleanup to tb run.")
+@click.option(
+    "--tb-no-rebuild", is_flag=True, help="Pass --no-rebuild to tb run."
+)
+@click.option(
+    "--tb-no-cleanup", is_flag=True, help="Pass --no-cleanup to tb run."
+)
 def main(
     list_cases: bool,
     write_inspect_task: Path,
@@ -135,7 +141,9 @@ def main(
 
     if run_inspect:
         if inspect_model is None:
-            click.echo("Error: --run-inspect requires --inspect-model.", err=True)
+            click.echo(
+                "Error: --run-inspect requires --inspect-model.", err=True
+            )
             raise SystemExit(2)
         result = run_inspect_eval(
             inspect_task_path,
@@ -154,7 +162,9 @@ def main(
 
     if run_terminal_bench:
         if tb_model is None:
-            click.echo("Error: --run-terminal-bench requires --tb-model.", err=True)
+            click.echo(
+                "Error: --run-terminal-bench requires --tb-model.", err=True
+            )
             raise SystemExit(2)
         result = run_terminal_bench_eval(
             agent=tb_agent,

@@ -32,7 +32,10 @@ def format_json(
     Returns:
         A formatted JSON string with trailing newline.
     """
-    return json.dumps(data, indent=indent, sort_keys=sort_keys, default=default) + "\n"
+    return (
+        json.dumps(data, indent=indent, sort_keys=sort_keys, default=default)
+        + "\n"
+    )
 
 
 def format_text_result(

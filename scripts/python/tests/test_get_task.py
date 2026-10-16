@@ -1,4 +1,4 @@
-"""Selecting one complete task must not abbreviate or mutate the source packet."""
+"""Selecting one task must not abbreviate or mutate the source packet."""
 
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ from cli.get_task import main, select_task
 
 @pytest.fixture
 def packet() -> dict:
+    """Build a canonical packet with short and large task objects."""
     return {
         "summary": "Select one task.",
         "slug": "read-only-selection",
@@ -46,6 +47,7 @@ def packet() -> dict:
 
 @pytest.fixture
 def task_file(tmp_path: Path, packet: dict) -> Path:
+    """Write the task packet to a temporary JSON file."""
     path = tmp_path / "tasks.json"
     path.write_text(json.dumps(packet), encoding="utf-8")
     return path
@@ -55,9 +57,11 @@ def task_file(tmp_path: Path, packet: dict) -> Path:
     ("args", "expected_index"),
     [(["--id", "first"], 0), (["--index", "0"], 0), (["--index", "1"], 1)],
 )
+@pytest.mark.integration
 def test_returns_exact_complete_object(
     task_file: Path, packet: dict, args: list[str], expected_index: int
 ) -> None:
+    """Verify task selection returns the complete unchanged object."""
     before = task_file.read_bytes()
     result = CliRunner().invoke(main, [str(task_file), *args])
     assert result.exit_code == 0, result.output
@@ -67,17 +71,26 @@ def test_returns_exact_complete_object(
 
 @pytest.mark.parametrize(
     "args",
-    [[], ["--id", "first", "--index", "0"], ["--id", "missing"], ["--index", "2"]],
+    [
+        [],
+        ["--id", "first", "--index", "0"],
+        ["--id", "missing"],
+        ["--index", "2"],
+    ],
 )
+@pytest.mark.integration
 def test_rejects_ambiguous_or_missing_selection(
     task_file: Path, args: list[str]
 ) -> None:
+    """Verify ambiguous and missing task selections are rejected."""
     result = CliRunner().invoke(main, [str(task_file), *args])
     assert result.exit_code == 2
     assert "Error:" in result.output
 
 
+@pytest.mark.integration
 def test_rejects_malformed_and_rootless_json(task_file: Path) -> None:
+    """Verify malformed and rootless task packets are rejected."""
     task_file.write_text("[{}]", encoding="utf-8")
     rootless = CliRunner().invoke(main, [str(task_file), "--index", "0"])
     assert rootless.exit_code == 2
@@ -88,7 +101,9 @@ def test_rejects_malformed_and_rootless_json(task_file: Path) -> None:
     assert "Error:" in malformed.output
 
 
+@pytest.mark.unit
 def test_rejects_duplicate_task_id_and_non_object_task(packet: dict) -> None:
+    """Verify duplicate IDs and non-object tasks are rejected."""
     packet["tasks"].append({"taskId": "first"})
     with pytest.raises(ValueError, match="exactly one task"):
         select_task(packet, "first", None)
@@ -97,9 +112,11 @@ def test_rejects_duplicate_task_id_and_non_object_task(packet: dict) -> None:
         select_task(packet, None, 0)
 
 
+@pytest.mark.integration
 def test_selects_late_task_from_a_plan_larger_than_read_tool_limit(
     task_file: Path, packet: dict
 ) -> None:
+    """Verify a late task can be selected from a large plan."""
     packet["tasks"] = [deepcopy(packet["tasks"][0]) for _ in range(25)]
     for index, task in enumerate(packet["tasks"]):
         task["taskId"] = f"long-task-{index}"

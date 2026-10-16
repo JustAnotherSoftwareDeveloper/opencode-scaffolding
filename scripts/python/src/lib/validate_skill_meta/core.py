@@ -11,7 +11,7 @@ from typing import TypedDict
 
 import yaml
 
-from lib.shared.skill_metadata import SkillMetadataError, normalize_skill_metadata
+from lib.skill_metadata import SkillMetadataError, normalize_skill_metadata
 
 
 class ValidationResult(TypedDict):
@@ -104,7 +104,10 @@ def validate_skill_file(path: Path) -> ValidationResult:
     try:
         parsed = yaml.safe_load(frontmatter)
     except yaml.YAMLError as exc:
-        return {"valid": False, "errors": [f"Frontmatter YAML parse error: {exc}"]}
+        return {
+            "valid": False,
+            "errors": [f"Frontmatter YAML parse error: {exc}"],
+        }
 
     try:
         errors = validate_frontmatter(parsed)

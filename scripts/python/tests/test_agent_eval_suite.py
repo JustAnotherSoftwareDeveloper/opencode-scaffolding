@@ -4,11 +4,15 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from lib.agent_eval_suite.core import (
     CASES,
     list_cases,
     write_inspect_task,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_eval_case_structure() -> None:

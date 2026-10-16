@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Example command-line adapter for the scripts-python package."""
+
 from __future__ import annotations
 
 from lib.shared._path_helper import setup_package_path
@@ -7,6 +9,7 @@ setup_package_path()
 
 
 def main() -> int:
+    """Print the example runtime message and return success."""
     from lib.example import example_message
 
     print(example_message("python"))

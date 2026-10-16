@@ -1,5 +1,4 @@
-"""
-test_example.py — Tests for lib/example.py and cli/example.py.
+"""test_example.py — Tests for lib/example.py and cli/example.py.
 
 This file covers:
 - lib.example.example_message() — unit tests for the library function
@@ -15,6 +14,8 @@ from __future__ import annotations
 import pytest
 
 from lib.example import example_message
+
+pytestmark = pytest.mark.unit
 
 # ============================================================================
 # Tests for lib.example.example_message()
@@ -61,7 +62,9 @@ class TestCliExample:
         exit_code = main()
         assert exit_code == 0
 
-    def test_main_prints_message(self, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_main_prints_message(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """main() prints the expected message to stdout."""
         from cli.example import main
 

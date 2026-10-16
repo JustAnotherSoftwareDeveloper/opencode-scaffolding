@@ -2,14 +2,20 @@
 
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.integration
+
 ROOT = Path(__file__).parents[3]
 
 
 def read(relative: str) -> str:
+    """Read a repository file as text."""
     return (ROOT / relative).read_text()
 
 
 def test_worker_reports_planning_context_separately() -> None:
+    """Verify worker separates planning context from executable skills."""
     worker = read("agents/worker.md")
     contract = read("output-contract-template.md")
     assert "load every materially relevant planning" in worker
@@ -18,7 +24,10 @@ def test_worker_reports_planning_context_separately() -> None:
     assert "successfully loaded executable skill" in contract
 
 
-def test_worker_requires_bounded_assignments_and_two_pass_reconciliation() -> None:
+def test_worker_requires_bounded_assignments_and_two_pass_reconciliation() -> (
+    None
+):
+    """Verify workers enforce bounded assignments and reconciliation passes."""
     content = read("agents/worker.md")
     assert "one to three executable assignments" in content
     assert "collector-winning existing `SKILL.md` path" in content
@@ -26,7 +35,10 @@ def test_worker_requires_bounded_assignments_and_two_pass_reconciliation() -> No
     assert "Any stale path" in content
 
 
-def test_delegation_uses_flexible_resource_semantics_and_list_envelope() -> None:
+def test_delegation_uses_flexible_resource_semantics_and_list_envelope() -> (
+    None
+):
+    """Verify delegation uses flexible resources and the list-based envelope."""
     content = read("skills/task-delegation/SKILL.md")
     assert "Stale paths" in content
     assert "minimums" in content
@@ -38,8 +50,11 @@ def test_delegation_uses_flexible_resource_semantics_and_list_envelope() -> None
 
 
 def test_executor_preserves_approved_plan_without_status_only_routing() -> None:
+    """Verify the executor preserves the plan rather than routing by status."""
     content = read("agents/executor.md")
-    assert "approved canonical packet root, including its packet slug" in content
+    assert (
+        "approved canonical packet root, including its packet slug" in content
+    )
     assert "complete report" in content
     assert "Status is a routing signal" in content
     assert "sole acceptance criterion" in content
@@ -47,6 +62,7 @@ def test_executor_preserves_approved_plan_without_status_only_routing() -> None:
 
 
 def test_executor_contract_requires_and_preserves_the_supplied_slug() -> None:
+    """Verify executor contracts require and preserve the supplied slug."""
     for relative in (
         "agents/executor.md",
         "agents/executor-simple.md",
@@ -58,6 +74,7 @@ def test_executor_contract_requires_and_preserves_the_supplied_slug() -> None:
 
 
 def test_inline_execution_does_not_turn_planning_into_authority() -> None:
+    """Verify inline execution leaves planning context non-authoritative."""
     content = read("skills/task-executor/SKILL.md")
     assert "no passive planning-load exception" in content
     assert "Load exactly those declared skills" in content

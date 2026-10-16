@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from lib.shared.output import format_error, format_json, format_text_result
+
+pytestmark = pytest.mark.unit
 
 
 class TestFormatJson:

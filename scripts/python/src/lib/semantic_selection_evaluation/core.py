@@ -14,8 +14,12 @@ class EvaluationError(ValueError):
 def load_fixture(path: Path) -> dict[str, Any]:
     """Load and minimally validate the canonical fixture."""
     value = _load_json(path, "fixture")
-    if not isinstance(value, dict) or not isinstance(value.get("inventory"), list):
-        raise EvaluationError("fixture must be an object with an inventory array")
+    if not isinstance(value, dict) or not isinstance(
+        value.get("inventory"), list
+    ):
+        raise EvaluationError(
+            "fixture must be an object with an inventory array"
+        )
     if not isinstance(value.get("cases"), list):
         raise EvaluationError("fixture must contain a cases array")
     return value
@@ -39,7 +43,7 @@ def evaluate_fixture(
     model: str | None = None,
     host: str | None = None,
 ) -> dict[str, Any]:
-    """Return machine-readable release-gate results without scores or fallback."""
+    """Return machine-readable results without scores or fallback behavior."""
     if mode not in {"deterministic", "configured-llm"}:
         raise EvaluationError("mode must be deterministic or configured-llm")
     inventory = fixture.get("inventory")
@@ -50,7 +54,9 @@ def evaluate_fixture(
     inventory_by_name: dict[str, dict[str, Any]] = {}
     for item in inventory:
         if not isinstance(item, dict) or not isinstance(item.get("name"), str):
-            raise EvaluationError("inventory entries must contain a string name")
+            raise EvaluationError(
+                "inventory entries must contain a string name"
+            )
         name = item["name"]
         if name in inventory_by_name:
             raise EvaluationError(f"duplicate inventory name: {name}")
@@ -85,11 +91,15 @@ def evaluate_fixture(
         if mode == "configured-llm":
             if responses is None or case_id not in responses:
                 actual = None
-                contract_error = contract_error or "missing configured-LLM response"
+                contract_error = (
+                    contract_error or "missing configured-LLM response"
+                )
             else:
                 actual = responses[case_id]
         selected, output_error = _parse_selection(actual)
-        response_error = _validate_response_selection(selected, case, inventory_by_name)
+        response_error = _validate_response_selection(
+            selected, case, inventory_by_name
+        )
         error = contract_error or output_error or response_error
         passed = error is None and selected == expected_names
         records[case_id] = {
@@ -124,7 +134,9 @@ def _load_json(path: Path, label: str) -> Any:
 
 
 def _valid_string_array(value: object) -> bool:
-    return isinstance(value, list) and all(isinstance(item, str) for item in value)
+    return isinstance(value, list) and all(
+        isinstance(item, str) for item in value
+    )
 
 
 def _resolve_inventory_path(item: dict[str, Any], root: Path) -> Path:
@@ -133,7 +145,9 @@ def _resolve_inventory_path(item: dict[str, Any], root: Path) -> Path:
         raise EvaluationError("inventory path must be a non-empty string")
     resolved = (root / path).resolve()
     if not resolved.is_file():
-        raise EvaluationError(f"inventory path does not resolve to a file: {path}")
+        raise EvaluationError(
+            f"inventory path does not resolve to a file: {path}"
+        )
     return resolved
 
 

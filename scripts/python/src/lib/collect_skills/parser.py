@@ -8,8 +8,8 @@ from typing import Any
 
 import yaml
 
-from lib.shared.skill_class import SkillClass
-from lib.shared.skill_metadata import SkillMetadataError, normalize_skill_metadata
+from lib.collect_skills.skill_class import SkillClass
+from lib.skill_metadata import SkillMetadataError, normalize_skill_metadata
 
 # Matches kebab-case: lowercase letters and digits, hyphen-separated.
 SKILL_NAME_RE = re.compile(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$")
@@ -23,13 +23,13 @@ def extract_frontmatter(file_path: Path) -> dict[str, Any] | None:
     ``---`` (with optional trailing whitespace), extracts the content between
     them, and parses it as YAML.
 
-    Returns
+    Returns:
     -------
     dict[str, Any] | None
         The parsed frontmatter dictionary, or *None* if no ``---`` delimiters
         are found.
 
-    Raises
+    Raises:
     ------
     FileNotFoundError
         *file_path* does not exist.
@@ -97,7 +97,7 @@ def validate_skill_frontmatter(
     file_path:
         Path to the SKILL.md file (included in error messages for traceability).
 
-    Returns
+    Returns:
     -------
     list[str]
         A list of human-readable error messages.  An empty list means the
@@ -140,14 +140,17 @@ def validate_skill_frontmatter(
         or "\n" in description
         or "\r" in description
     ):
-        errors.append(f"{file_path}: 'description' must be trimmed and single-line")
+        errors.append(
+            f"{file_path}: 'description' must be trimmed and single-line"
+        )
 
     class_value = frontmatter.get("class")
     if class_value is None:
         errors.append(f"{file_path}: missing 'class' field")
     elif not isinstance(class_value, str) or class_value not in _VALID_CLASSES:
         errors.append(
-            f"{file_path}: 'class' must be one of: {', '.join(sorted(_VALID_CLASSES))}"
+            f"{file_path}: 'class' must be one of: "
+            f"{', '.join(sorted(_VALID_CLASSES))}"
         )
     elif isinstance(description, str):
         expected_prefix = (

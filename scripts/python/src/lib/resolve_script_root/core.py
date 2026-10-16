@@ -1,4 +1,4 @@
-"""Core logic for resolve-script-root — global vs project-local script root resolution.
+"""Core logic for resolving global and project-local script roots.
 
 Resolution order:
 1. $OPENCODE_SCRIPTS_PYTHON (or OPENCODE_SCRIPTS_NODE / OPENCODE_SCRIPTS_SHELL)
@@ -31,7 +31,7 @@ def resolve_script_root(
         Optional explicit project root.
         Defaults to ``Path.cwd()`` when *None*.
 
-    Returns
+    Returns:
     -------
     tuple[Path, str]
         The resolved path and its source label.
