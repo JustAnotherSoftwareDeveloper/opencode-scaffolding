@@ -13,8 +13,10 @@ that contract.
 
 1. **Name the requested outcome.** Record what the user wants to be true or delivered,
    along with explicit scope, constraints, source inputs, exclusions, and completion
-   evidence. Ask for clarification only when missing information changes the outcome
-   or prevents a usable breakdown.
+   evidence. Give each intentional exclusion a specific, reviewable scope basis
+   supported by a source. Do not use an exclusion to hide unresolved candidate work.
+   Ask for clarification only when missing information changes the outcome or prevents
+   a usable breakdown.
 
 2. **Create the request-result inventory.** For every applicable packet, retain
    a boundary-review record alongside the draft and canonical packet. Its request-result

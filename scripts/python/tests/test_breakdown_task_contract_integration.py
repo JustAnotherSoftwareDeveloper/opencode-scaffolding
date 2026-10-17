@@ -21,7 +21,7 @@ TASK_CONTRACT = ROOT / "skills" / "task-contract" / "SKILL.md"
 SCHEMA = BREAKDOWN / "schema" / "task-packet.schema.json"
 
 
-def _collector_records() -> list[dict[str, object]]:
+def _documentation_records() -> list[dict[str, object]]:
     result = subprocess.run(
         [
             "uv",
@@ -29,8 +29,6 @@ def _collector_records() -> list[dict[str, object]]:
             "--project",
             str(ROOT / "scripts" / "python"),
             "collect-skills",
-            "--class",
-            "operation",
             "--class",
             "documentation",
         ],
@@ -41,13 +39,14 @@ def _collector_records() -> list[dict[str, object]]:
     )
     records = json.loads(result.stdout)
     assert isinstance(records, list)
+    assert all(record.get("class") == "documentation" for record in records)
     return records
 
 
 def test_task_contract_is_collector_winning_passive_context_before_drafting():
     """Verify passive task-contract context comes from the winning record."""
     text = WORKFLOW.read_text(encoding="utf-8")
-    records = _collector_records()
+    records = _documentation_records()
     matches = [
         record for record in records if record.get("name") == "task-contract"
     ]
@@ -60,11 +59,13 @@ def test_task_contract_is_collector_winning_passive_context_before_drafting():
     assert Path(path).resolve() == TASK_CONTRACT.resolve()
     assert path.endswith("skills/task-contract/SKILL.md")
 
+    collection = text.index("Collect documentation skills")
     load = text.index(
         "Load the shared task contract before authoring boundaries"
     )
     draft = text.index("Draft tasks without `skills`")
-    assert load < draft
+    assert collection < load < draft
+    assert "documentation result" in text[load:draft].lower()
     assert "exact collector winner" in text
     assert "passive, non-transitive" in text
     assert "adds no authority" in text
@@ -155,12 +156,21 @@ def test_passive_documentation_is_not_an_executable_assignment() -> None:
         encoding="utf-8"
     )
     contract = TASK_CONTRACT.read_text(encoding="utf-8")
+    normalized_assignment = " ".join(assignment.split()).lower()
 
     assert (
-        "Exclude the passive pre-authoring `task-contract` record from "
-        "executable task assignments." in " ".join(assignment.split())
+        "the pre-authoring `task-contract` load is passive, "
+        "documentation-only, "
+        "and non-transitive; that load itself is excluded from executable task "
+        "assignments." in normalized_assignment
     )
-    assert "passive, documentation-only, non-transitive" in assignment
+    assert (
+        "this is not a blanket ban on assigning the `task-contract` profile"
+        in normalized_assignment
+    )
+    assert "it may be selected as a task's documentation assignment" in (
+        normalized_assignment
+    )
     assert "class: documentation" in contract
     assert "non-transitive" in contract
     assert "does not own decomposition" in contract

@@ -60,9 +60,11 @@ def _render(data: dict[str, Any]) -> str:
         lines.extend(
             [
                 "",
-                f"## Task {index}: {_inline_text(task['purpose'])}",
+                f"## Task {index}",
                 "",
-                "### Context",
+                f"Purpose: {task['purpose']}",
+                "",
+                f"### Task {index} Context",
                 "",
                 task["context"],
             ]
@@ -72,9 +74,9 @@ def _render(data: dict[str, Any]) -> str:
             ("Files To Write", "filesToWrite"),
             ("Skills", "skills"),
         ):
-            lines.extend(["", f"### {heading}", ""])
+            lines.extend(["", f"### Task {index} {heading}", ""])
             lines.extend([f"- `{item}`" for item in task[key]] or ["- None."])
-        lines.extend(["", "### Execution Instructions", ""])
+        lines.extend(["", f"### Task {index} Execution Instructions", ""])
         for step in task["executionInstructions"]:
             lines.append(f"{step['step']}. {_inline_text(step['action'])}")
             if "verification" in step:
@@ -82,9 +84,16 @@ def _render(data: dict[str, Any]) -> str:
                     f"   Verification: {_inline_text(step['verification'])}"
                 )
         if "verification" in task:
-            lines.extend(["", "### Verification", ""])
+            lines.extend(["", f"### Task {index} Verification", ""])
             lines.extend(f"- {item}" for item in task["verification"])
-        lines.extend(["", "### Expected Output", "", task["expectedOutput"]])
+        lines.extend(
+            [
+                "",
+                f"### Task {index} Expected Output",
+                "",
+                task["expectedOutput"],
+            ]
+        )
     return "\n".join(lines) + "\n"
 
 

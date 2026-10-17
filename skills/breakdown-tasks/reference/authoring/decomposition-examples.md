@@ -56,6 +56,13 @@ the supplied item, explain how the proposal uses it, and begin only when the
 assessment is complete enough to support a decision. Sequence does not merge the
 results.
 
+## Opaque Dependency And Rework
+
+Task B's statement “depends on Task A” is opaque: it names no supplied result,
+consumer use, or readiness condition. If B consumes no result from A, remove the
+edge. For a real handoff, name the supplied result, explain B's use and the readiness
+condition, and identify the consumer read path; put file handoffs in B's `filesToRead`.
+
 ## Independent Findings In One Report
 
 **Request:** Assess authentication design and dependency risk in one report.

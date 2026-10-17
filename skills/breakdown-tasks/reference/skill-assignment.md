@@ -1,40 +1,32 @@
 # Direct Skill Selection
 
-Both planning and task assignment use filtered collector output. The operation and
-documentation array is collected before task-boundary authoring so the shared
-task-contract documentation can be loaded before the draft is written; the same
-array remains the sole authority for later task assignment.
+Assign skills only after the task boundaries are accepted. This reference covers
+per-task assignment from the distinct operation and documentation results; the
+[producer workflow](../SKILL.md) owns collection and pre-authoring sequence. The
+documentation result also supplies the earlier passive `task-contract` load, but
+that load is not a task assignment and does not authorize assignment before
+boundary acceptance.
 
-## Two Collector Calls
+## Documentation Relevance
 
-Run `collect-skills --class planning` before planning selection. Run
-`collect-skills --class operation --class documentation` before task-boundary
-authoring and assignment. The resulting array is the sole authority for both
-operation/documentation phases.
+After selecting one operation owner, actively consider whether a documentation
+profile adds distinct, material execution value beyond the task context and its
+listed materials. Include a profile when it clarifies a relevant contract,
+resolves a task-specific semantic, or helps prevent a likely execution error.
+Availability or name similarity alone is not evidence of fit, and duplicating
+guidance already supplied does not add distinct value.
 
-## Planning Selection
-
-Show the request and the planning array to the LLM. Load every materially relevant
-profile, with no numeric cap. Load only selected names through the skill tool. A
-planning load is passive context and does not grant execution or write authority. An
-empty selection is valid when no planning concern exists.
-
-Block on a name absent from the planning array.
-
-## Shared Documentation Load
-
-Before authoring task boundaries, reconcile and load the collector-winning
-`task-contract` record with its exact `name`, `class: documentation`, and `path`.
-This is a passive, documentation-only, non-transitive load. It cannot add workflow
-steps, authority, tools, writes, delegation, assignment decisions, or completion
-evidence. Any further task-contract reference is an explicit read, not an automatic
-recursive load. Block on a missing name, stale or mismatched path, class mismatch,
-or load failure.
+For example, a worker-packet task may benefit from `customize-opencode` when
+packet or result-envelope rules affect the outcome and are not already provided
+in the task materials. Omit it for unrelated work, or when the relevant guidance
+is already supplied. Do not impose a documentation quota or target, score or
+rank candidates, or require a candidate-by-candidate rejection log. Zero
+documentation assignments is valid when none adds distinct material value; the
+existing maximum remains two.
 
 ## Task Assignment
 
-Show the complete accepted draft and the operation/documentation array to the LLM.
-For each task:
+For each accepted task:
 
 1. Select exactly one `class: operation` execution owner without changing the
    accepted task boundary.
@@ -42,37 +34,46 @@ For each task:
    artifact contract, orchestration flow, destructive authority, or other special
    execution semantics, select that operation.
 3. When no specialized operation semantically fits, select the collector-winning
-   `generic-executor` operation as the task's execution owner. A missing specialized
-   match is not a blocker.
-4. Select zero to two `class: documentation` skills when they materially improve
-   execution context. Documentation is passive and never replaces or competes with
-   the operation owner.
-5. Keep the canonical `skills` field as one flat array containing the one operation
-   owner followed by any selected documentation skills. Exclude the passive
-   pre-authoring `task-contract` record from executable task assignments.
-6. Inspect selected contracts and reconcile every selected name against the collector
-   array's winning `name`, `class`, and `path`. Confirm the reconciled class
-   composition is exactly one operation and zero to two documentation skills before
-   publication.
+   `generic-executor` operation. A missing specialized match is not a blocker.
+4. Select zero to two `class: documentation` skills from the documentation
+   result when they add material value under the criteria above. Documentation
+   is passive and cannot replace or compete with the operation owner.
+5. Store the assignment in the existing flat `skills` array: one operation
+   owner followed by any selected documentation skills.
 
-If more than one specialized operation initially appears relevant, determine which
-one owns the bounded result. Do not publish two operation owners. Overlapping skill
-coverage is an assignment question, not evidence by itself that the accepted task
-boundary should change.
+The pre-authoring `task-contract` load is passive, documentation-only, and
+non-transitive; that load itself is excluded from executable task assignments.
+This is not a blanket ban on assigning the `task-contract` profile: after a
+boundary is accepted, it may be selected as a task's documentation assignment
+when it independently adds material value under the same criteria. Such an
+assignment must be reconciled like any other and counts toward the two-skill
+documentation limit.
 
-`generic-executor` is a semantic fallback only. It must itself exist in the collector
-array as the exact winning `class: operation` record. Block if that record is absent,
-stale, substituted, mismatched, or cannot be loaded. Do not use it to conceal a
-collector failure, a failed required skill load, or an unresolved assignment to a
-known specialized owner.
+If more than one specialized operation initially appears relevant, determine
+which one owns the bounded result. Do not publish two operation owners or change
+an accepted boundary merely because skill coverage overlaps.
 
-Block on any selected name absent from the operation/documentation array, stale or
-substituted path, class mismatch, failed required load, more than one operation owner,
-no operation owner, or more than two documentation assignments.
+Reconcile every selected assignment against the collector-winning `name`,
+`class`, and `path`. Confirm exactly one operation owner and zero to two
+documentation skills before publication. Load selected documentation with the
+skill tool before relying on it; reading `SKILL.md` is not a load. Inspect the
+collector-winning operation contract without executing its future task. Block
+on an absent name, stale or substituted path, class mismatch, failed required
+load, unresolved assignment, no operation owner, more than one operation owner,
+or more than two documentation skills.
+
+Any later `task-contract` reference is an explicit read, not an automatic
+recursive load.
+
+`generic-executor` is a semantic fallback only. It must itself be the exact
+collector-winning `class: operation` record. Do not use it to conceal a
+collector failure, broken specialized record, failed required load, or an
+unresolved assignment to a known specialized owner.
 
 ## Prohibited Semantics
 
-Do not score, rank, threshold, rerank, clip, use lexical or path fallback, or manually
-repair assignments. Do not recollect or rebuild metadata from names. Do not choose
-`generic-executor` merely because a specialized collector record is broken; fallback
-applies only when no specialized operation semantically owns the accepted task.
+Do not score, rank, threshold, rerank, clip, use lexical or path fallback, or
+manually repair assignments. Do not recollect or rebuild metadata from names.
+Do not select documentation merely to fill the available limit. Documentation
+remains passive and non-transitive; it adds no execution authority, workflow,
+tools, writes, delegation, or completion evidence.

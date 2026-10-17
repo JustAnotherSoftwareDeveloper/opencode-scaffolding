@@ -81,6 +81,9 @@ def test_cli_renders_markdown(tmp_path: Path) -> None:
         )
     assert result.exit_code == 0, result.output
     assert output_file.is_file()
+    content = output_file.read_text()
+    assert "## Task 1\n\nPurpose: Render Markdown." in content
+    assert "### Task 1 Context" in content
 
 
 def test_cli_overwrites_only_with_explicit_flag(tmp_path: Path) -> None:

@@ -48,7 +48,7 @@ recorded decision authority explicitly authorized planning. Validation success,
 
 ### Planning and Task Authoring
 
-4. **Collect planning skills.** Run:
+4. **Collect planning skills once per request.** Run:
 
    ```bash
    uv run --project ~/.config/opencode/scripts/python collect-skills --class planning
@@ -63,25 +63,35 @@ recorded decision authority explicitly authorized planning. Validation success,
    does not substitute for loading it. Block on an absent name, stale path, or load
    failure. Treat successful planning loads as passive context, not execution assignments.
 
-6. **Collect operation and documentation skills.** Run:
+6. **Collect operation skills once per request.** Run:
 
    ```bash
-   uv run --project ~/.config/opencode/scripts/python collect-skills --class operation --class documentation
+   uv run --project ~/.config/opencode/scripts/python collect-skills --class operation
    ```
 
    Capture stdout.
    Block on non-zero exit.
-   Retain this array as the sole authority for later executable assignment.
+   Keep this operation result distinct for later executable assignment.
 
-7. **Load the shared task contract before authoring.** Reconcile the collector array to the exact winning record whose `name` is `task-contract`, whose `class` is `documentation`, and whose `path` is the discovered `SKILL.md` path.
+7. **Collect documentation skills once per request.** Run:
+
+   ```bash
+   uv run --project ~/.config/opencode/scripts/python collect-skills --class documentation
+   ```
+
+   Capture stdout.
+   Block on non-zero exit.
+   Keep this documentation result distinct and available for the pre-authoring load and later task assignment. This class-targeted call does not filter candidates by individual task; do not recollect for each task.
+
+8. **Load the shared task contract before authoring.** Reconcile the documentation result to the exact winning record whose `name` is `task-contract`, whose `class` is `documentation`, and whose `path` is the discovered `SKILL.md` path.
    Load that record with the skill tool before drafting task boundaries.
    Treat the load as passive, documentation-only, and non-transitive: it can add no authority, workflow steps, tools, writes, delegation, assignment decisions, or completion evidence.
    Read any task-contract reference files needed for authoring explicitly.
    Block on an absent name, stale path, class mismatch, or load failure.
 
-8. **Author tasks.** Require the author to select one packet slug and write a
+9. **Author tasks.** Require the author to select one packet slug and write a
     schema-valid canonical packet root. Preserve the selected packet slug unchanged.
-    The canonical task-packet schema used in validation step 13 owns the
+    The canonical task-packet schema used in validation step 14 owns the
     packet-root fields and constraints, not this workflow.
     Follow [task-authoring rules](reference/task-authoring.md). For shared task
     semantics, use the already-loaded `task-contract` documentation skill. Consult
@@ -97,35 +107,44 @@ recorded decision authority explicitly authorized planning. Validation success,
 
 ### Skill Assignment and Publication
 
-9. **Assign skills to each task.** Present the complete draft and the operation/documentation array to the LLM.
+10. **Assign skills after boundary acceptance.** Present the complete draft and the distinct operation and documentation results to the LLM only after task boundaries are accepted.
    Select exactly one `class: operation` execution owner for each task. Prefer the
    specialized operation that clearly owns distinct lifecycle, artifact-contract,
    orchestration, destructive-authority, or other special execution semantics. When
    no specialized operation semantically fits, select the exact collector-winning
    `generic-executor`; lack of a specialized semantic match is not a blocker.
-   Add zero to two materially relevant `class: documentation` skills as passive
-   execution guidance. Keep the canonical `skills` field flat: one operation owner
-   followed by any selected documentation skills. Do not include the pre-authoring
-   passive `task-contract` record in an executable `skills` array.
-   Reconcile every selected name, class, and path against the collector array and
-   confirm exactly one operation plus zero to two documentation skills before
-   publication. If multiple specialized operations appear relevant, resolve which one
-   owns the bounded result; do not publish multiple operation owners. Block on missing,
-   stale, substituted, mismatched, or failed required records, but do not use
-   `generic-executor` to hide those failures. Do not score, rank, rerank, clip, or use
-   lexical fallback.
+   After choosing the operation owner, actively consider whether a documentation
+   profile adds distinct, material execution value for that task beyond its context
+   and listed materials. Include profiles that clarify a relevant contract, resolve
+   a task-specific semantic, or help prevent a likely execution error. Consider
+   `customize-opencode` for packet tasks when unsupplied packet/envelope rules affect
+   the result; omit it when unrelated or already covered. Zero documentation assignments is valid
+   when none adds distinct material value; assign no more than two. Do not impose a
+   quota, target, or rejection log. Documentation is passive and cannot replace or
+   compete with the operation owner. Keep the canonical `skills` field flat: one
+   operation owner followed by any selected documentation skills. Exclude the
+   pre-authoring `task-contract` load itself from executable assignments; this is not
+   a blanket ban on `task-contract`, which may be assigned after boundary acceptance
+   when it independently adds material value under these same criteria.
+   Reconcile every selected name, class, and path against its corresponding operation
+   or documentation result. Confirm exactly one operation owner and zero to two materially relevant `class: documentation`
+   skills before publication. If multiple specialized operations appear
+   relevant, resolve which one owns the bounded result; do not publish multiple operation owners.
+   Block on missing, stale, substituted, mismatched, or failed
+   required records, but do not use `generic-executor` to hide those failures. Do not
+   score, rank, rerank, clip, or use lexical fallback.
 
-10. **Verify selected contracts.** Load each selected documentation skill with the
+11. **Verify selected contracts.** Load each selected documentation skill with the
     skill tool before relying on its guidance; reading its `SKILL.md` is not a load.
     For operation assignments, inspect the collector-winning `SKILL.md` without
     executing that future task's operation. Verify every contract matches its task.
     Block on a stale or substituted path, class mismatch, or required load failure.
 
-11. **Write the completed draft.** Write the completed canonical packet root with
+12. **Write the completed draft.** Write the completed canonical packet root with
     every task's `skills` populated to the workspace as `draft.json`, retaining the
     author-selected packet slug unchanged.
 
-12. **Publish.** Run from the workspace directory:
+13. **Publish.** Run from the workspace directory:
 
     ```bash
     uv run --project ~/.config/opencode/scripts/python init-task-packet \
@@ -137,7 +156,7 @@ recorded decision authority explicitly authorized planning. Validation success,
     Move the published file to `tasks.json` in the workspace root.
     Block on non-zero exit.
 
-13. **Validate and fix.** Run in a loop until valid:
+14. **Validate and fix.** Run in a loop until valid:
 
     ```bash
     uv run --project ~/.config/opencode/scripts/python validate-task-structure \
@@ -153,7 +172,7 @@ recorded decision authority explicitly authorized planning. Validation success,
 
 ### Render and Validate Workspace
 
-14. **Render tasks.md.** Run:
+15. **Render tasks.md.** Run:
 
     ```bash
     uv run --project ~/.config/opencode/scripts/python render-task-markdown \
@@ -165,13 +184,16 @@ recorded decision authority explicitly authorized planning. Validation success,
     After a bounded plan correction, rerun this command with `--overwrite` to replace
     the stale rendered task document before mandatory re-audit.
 
-15. **Validate the workspace.** Confirm every task purpose appears in `tasks.md` in order.
+16. **Validate the workspace.** Confirm every task purpose appears in `tasks.md` in order.
     Confirm all copied sources exist.
     Confirm `tasks.json` is present and readable.
 
 ## Guardrails
 
-- Collect skills twice exactly as shown. Do not swap the arrays between phases.
+- Collect planning, operation, and documentation separately exactly once per request;
+  keep results distinct, without per-task recollection or task-semantic filtering.
+- Use the planning result for planning-skill selection. Use the distinct operation and
+  documentation results for post-boundary task assignment; do not swap or combine them.
 - Load the collector-winning `task-contract` documentation record before task authoring. Keep that load passive, documentation-only, and non-transitive; it is not an executable task assignment.
 - Every executable task has exactly one operation owner and zero to two documentation
   skills; preserve that class composition while storing names in the flat `skills`
@@ -194,6 +216,6 @@ recorded decision authority explicitly authorized planning. Validation success,
 - [Workspace contract](reference/workspace-contract.md)
 - [Task-authoring rules](reference/task-authoring.md)
 - [Script contracts](reference/scripts.md)
-- Consult the four exact task-contract references named in step 8 through the loaded
+- Consult the four exact task-contract references named in step 9 through the loaded
   documentation skill; do not link into another skill's directory. They remain
   passive and non-transitive and add no workflow or authority.

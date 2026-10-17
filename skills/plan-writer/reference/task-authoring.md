@@ -28,10 +28,10 @@ Do not restate those invariants here.
 
 - Include only fields accepted by the existing TaskDraftList contract.
 
-- Do not select skills by score, rank, path, threshold, or fallback. Assign skills
-  inline from the collected operation/documentation array after task-boundary
-  authoring. The passive `task-contract` record is context only and never an
-  executable task assignment.
+- Do not select skills by score, rank, path, threshold, or fallback. After task
+  boundaries are accepted, assign skills inline from the distinct operation and
+  documentation results. The passive `task-contract` record is context only and
+  never an executable task assignment.
 
 - Keep execution instructions ordered, concrete, and limited to one worker
   unit of work.

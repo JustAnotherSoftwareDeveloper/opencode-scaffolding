@@ -84,13 +84,22 @@ def test_planning_and_documentation_require_actual_skill_tool_loads(
 ) -> None:
     """Verify planning workflows load selected skills through the skill tool."""
     text = (SKILLS / workflow / "SKILL.md").read_text(encoding="utf-8")
-    planning = text.split("**Select and load planning skills.**", 1)[1].split(
-        "**Collect operation and documentation skills.**", 1
-    )[0]
+    planning_start = text.split("**Select and load planning skills.**", 1)[1]
+    planning_sections = re.split(
+        r"\*\*Collect operation skills(?: once per request)?\.\*\*",
+        planning_start,
+        maxsplit=1,
+    )
+    assert len(planning_sections) == 2
+    planning = planning_sections[0]
     planning = " ".join(planning.split())
     assert "skill tool" in planning
     assert "load failure" in planning
     assert "substitute for loading" in planning
+
+    assert text.index("**Collect documentation skills") < text.index(
+        "**Load the shared task contract before authoring"
+    )
 
     verification = " ".join(
         text.split("**Verify selected contracts.**", 1)[1].split()

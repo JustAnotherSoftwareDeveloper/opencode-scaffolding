@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 from unittest.mock import patch
 
@@ -75,16 +76,75 @@ def test_render_task_markdown_writes_packet_content(tmp_path: Path) -> None:
     )
     content = output.read_text()
     assert output == tmp_path / "tasks.md"
-    assert "## Task 1: Render Markdown." in content
+    assert "## Task 1\n\nPurpose: Render Markdown." in content
     assert content.startswith("# Task Plan\n")
     assert packet["slug"] == "render-a-plan"
     assert "render-a-plan" not in content
 
 
-def test_render_task_markdown_renders_verification_and_normalizes_input(
+def test_render_task_markdown_uses_unique_headings_and_preserves_task_content(
     tmp_path: Path,
 ) -> None:
-    """Verify rendering includes verification and normalizes task text."""
+    """Verify headings are unique and rendered task content stays intact."""
+    packet = _packet()
+    second_task = deepcopy(packet["tasks"][0])
+    second_task.update(
+        {
+            "taskId": "review",
+            "purpose": "Review the rendered plan.",
+            "context": "y" * 200,
+            "filesToRead": ["review/source.md"],
+            "filesToWrite": ["review/result.md"],
+            "skills": ["reviewer"],
+            "executionInstructions": [
+                {"step": 1, "action": "Review the output."}
+            ],
+            "verification": ["Confirm the review."],
+            "expectedOutput": "A reviewed plan.",
+        }
+    )
+    packet["summary"] = "Render and review a plan."
+    packet["tasks"].append(second_task)
+
+    output = render_task_markdown(packet, tmp_path / "tasks.md")
+
+    content = output.read_text()
+    headings = [line for line in content.splitlines() if line.startswith("#")]
+    assert len(headings) == len(set(headings))
+    assert all(
+        not heading.endswith((".", "!", "?", ":", ";")) for heading in headings
+    )
+    assert "Purpose: Render Markdown." in content
+    assert "Purpose: Review the rendered plan." in content
+    assert content.index("Purpose: Render Markdown.") < content.index(
+        "Purpose: Review the rendered plan."
+    )
+    for expected in (
+        "Render and review a plan.",
+        VALID_CONTEXT,
+        "`memo/memo.md`",
+        "`tasks.md`",
+        "`documentation`",
+        "1. Render the task.",
+        "Markdown task plan.",
+        "y" * 200,
+        "`review/source.md`",
+        "`review/result.md`",
+        "`reviewer`",
+        "1. Review the output.",
+        "Confirm the review.",
+        "A reviewed plan.",
+    ):
+        assert expected in content
+    assert content.index("### Task 1 Expected Output") < content.index(
+        "## Task 2"
+    )
+
+
+def test_render_task_markdown_preserves_purpose_and_renders_verification(
+    tmp_path: Path,
+) -> None:
+    """Verify purpose text and verification content are rendered as provided."""
     packet = _packet()
     packet["tasks"][0]["purpose"] = "Render\nMarkdown"
     packet["tasks"][0]["verification"] = ["Check output."]
@@ -96,9 +156,9 @@ def test_render_task_markdown_renders_verification_and_normalizes_input(
         tmp_path / "tasks.md",
     )
     content = output.read_text()
-    assert "## Task 1: Render Markdown" in content
+    assert "Purpose: Render\nMarkdown" in content
     assert "Verification: Check step." in content
-    assert "### Verification" in content
+    assert "### Task 1 Verification" in content
 
 
 def test_render_task_markdown_rejects_invalid_packet(tmp_path: Path) -> None:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 from pathlib import Path
 
@@ -18,6 +19,85 @@ SOURCE = SKILLS / "plan"
 
 def _text(relative: str) -> str:
     return (ROOT / relative).read_text(encoding="utf-8")
+
+
+def _assert_three_stage_collection_contract(workflow: str) -> None:
+    """Check distinct ordered class calls and task-specific assignment rules."""
+    execution_match = re.search(
+        r"(?ms)^## Execution\s*\n(?P<section>.*?)(?=^## [^\n]+|\Z)",
+        workflow,
+    )
+    assert execution_match is not None
+    execution = execution_match.group("section")
+
+    calls: list[tuple[tuple[str, ...], int]] = []
+    for block in re.finditer(
+        r"```(?:bash|sh)\s*\n(.*?)```", execution, re.DOTALL
+    ):
+        command_block = re.sub(r"\\\s*\n\s*", " ", block.group(1))
+        for invocation in re.finditer(
+            r"\bcollect-skills\b([^\n]*)", command_block
+        ):
+            classes = tuple(
+                re.findall(
+                    r"--class(?:=|\s+)([a-z][\w-]*)", invocation.group(1)
+                )
+            )
+            calls.append((classes, block.start(1) + invocation.start()))
+
+    assert [classes for classes, _ in calls] == [
+        ("planning",),
+        ("operation",),
+        ("documentation",),
+    ]
+
+    execution_lowered = " ".join(execution.lower().split())
+    for stage in ("planning", "operation", "documentation"):
+        assert f"collect {stage} skills once per request" in execution_lowered
+
+    task_contract_load = re.search(
+        r"\*\*Load the shared task contract before authoring\.", execution
+    )
+    author_tasks = re.search(r"\*\*Author tasks\.", execution)
+    assignment = re.search(
+        r"\*\*Assign skills after boundary acceptance\.", execution
+    )
+    assert task_contract_load is not None
+    assert author_tasks is not None
+    assert assignment is not None
+    assert calls[-1][1] < task_contract_load.start() < author_tasks.start()
+    assert author_tasks.start() < assignment.start()
+
+    assert (
+        "keep this operation result distinct for later executable assignment"
+        in execution_lowered
+    )
+    assert (
+        "keep this documentation result distinct and available for the "
+        "pre-authoring "
+        "load and later task assignment" in execution_lowered
+    )
+    assert (
+        "the distinct operation and documentation results to the llm only "
+        "after "
+        "task boundaries are accepted" in execution_lowered
+    )
+    assert (
+        "actively consider whether a documentation profile adds distinct"
+        in execution_lowered
+    )
+    assert "material execution value for that task beyond its context" in (
+        execution_lowered
+    )
+    assert "listed materials" in execution_lowered
+    assert "zero documentation assignments is valid" in execution_lowered
+    assert "assign no more than two" in execution_lowered
+    assert "this is not a blanket ban on `task-contract`" in execution_lowered
+    assert "do not recollect for each task" in execution_lowered
+    workflow_lowered = " ".join(workflow.lower().split())
+    assert "without per-task recollection or task-semantic filtering" in (
+        workflow_lowered
+    )
 
 
 def test_workspace_move_preserves_the_complete_relative_reference_subtree() -> (
@@ -97,6 +177,24 @@ def test_frontmatter_and_shared_contract_are_cut_over_before_authoring() -> (
     assert "Require the author to select one packet slug" in workflow
     assert "Never derive," in workflow
     assert "normalize, or locally validate it" in workflow
+
+
+def test_plan_writer_collection_and_assignment_contract() -> None:
+    """Verify the updated producer and task-authoring handoff contract."""
+    workflow = _text("skills/plan-writer/SKILL.md")
+    authoring = _text("skills/plan-writer/reference/task-authoring.md")
+
+    _assert_three_stage_collection_contract(workflow)
+
+    normalized_authoring = " ".join(authoring.split()).lower()
+    assert (
+        "after task boundaries are accepted, assign skills inline from the "
+        "distinct "
+        "operation and documentation results" in normalized_authoring
+    )
+    assert "the passive `task-contract` record is context only" in (
+        normalized_authoring
+    )
 
 
 def test_script_reference_matches_publication_and_validation_contract() -> None:
