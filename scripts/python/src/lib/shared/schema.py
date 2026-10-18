@@ -1,6 +1,6 @@
 """Lightweight JSON-object validation helpers.
 
-Consumers: shared by generated script CLIs.
+Consumers: shared by generated script CLIs and ``lib.render_task_markdown``.
 
 Uses the existing ``jsonschema`` dependency when available for full JSON Schema
 validation, and provides simple required-key checks that work without it.
@@ -20,7 +20,7 @@ try:
     import jsonschema as _jsonschema
 
     _HAS_JSONSCHEMA = True
-except ImportError:  # pragma: no cover
+except ImportError:
     _HAS_JSONSCHEMA = False
 
 

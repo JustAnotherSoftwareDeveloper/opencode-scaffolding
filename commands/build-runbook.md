@@ -13,7 +13,7 @@ Generate a v3 XML/XSD-first runbook workspace from a plan slug. If no slug is pr
 2. Verify the plan has `status: approved` in its frontmatter, or ask the user for authorization.
 3. Load the `build-runbook` skill.
 4. Create `.runbooks/<unix-timestamp>-slug/main.xml`, `state.xml`, one `steps/<step-id>.xml` file per executable step, and default manifest indexes at `evidence/index.xml`, `snippets/index.xml`, and `reference/index.xml`.
-5. Validate the v3 runbook workspace with script-backed checks: `uv run --project scripts/python validate-runbook .runbooks/<runbook_id>/main.xml`.
+5. Stop at the validation gate: `validate-runbook` is not registered or implemented in the current toolbox, so this runbook remains **unvalidated**. No supported replacement invocation is available. Report this blocker and halt the workflow here; do not claim script-backed validation passed or continue to the following steps. Resume only after a validator is restored, registered, and its invocation is verified.
 6. Run embedded quality check via `worker` with review-mode instructions.
 7. Report the artifact path, status, and next step (state init + execution).
 

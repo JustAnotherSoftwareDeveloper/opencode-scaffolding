@@ -17,6 +17,11 @@ from lib.agent_eval_suite import core
 pytestmark = pytest.mark.unit
 
 
+def _set_module_attribute(module: ModuleType, name: str, value: object) -> None:
+    """Attach a typed dynamic attribute to a synthetic import module."""
+    setattr(module, name, value)
+
+
 def test_evaluation_core_preflight_cases_and_generated_task(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -70,15 +75,26 @@ def test_evaluation_core_builds_inspect_and_terminal_bench_commands(
     result = core.run_inspect_eval(task_file, "local/model", logs, 3)
     assert result.stdout == "out"
     assert calls[0][0] == [
-        "inspect", "eval", "generated.py", "--model", "local/model",
-        "--log-dir", str(logs), "--limit", "3",
+        "inspect",
+        "eval",
+        "generated.py",
+        "--model",
+        "local/model",
+        "--log-dir",
+        str(logs),
+        "--limit",
+        "3",
     ]
     assert calls[0][1]["cwd"] == tmp_path
     assert calls[0][1]["capture_output"] is True
 
     core.run_inspect_eval(task_file, "local/model")
     assert calls[1][0] == [
-        "inspect", "eval", "generated.py", "--model", "local/model"
+        "inspect",
+        "eval",
+        "generated.py",
+        "--model",
+        "local/model",
     ]
 
     core.run_terminal_bench(
@@ -94,11 +110,31 @@ def test_evaluation_core_builds_inspect_and_terminal_bench_commands(
         no_cleanup=True,
     )
     assert calls[2][0] == [
-        "tb", "run", "--model", "ollama/model", "--dataset", "bench==1",
-        "--output-path", str(tmp_path / "runs"), "--n-concurrent", "4",
-        "--no-upload-results", "--agent", "opencode", "--agent-kwarg",
-        "temperature=0", "--agent-kwarg", "region=west", "--task-id", "one",
-        "--task-id", "two", "--n-tasks", "2", "--no-rebuild", "--no-cleanup",
+        "tb",
+        "run",
+        "--model",
+        "ollama/model",
+        "--dataset",
+        "bench==1",
+        "--output-path",
+        str(tmp_path / "runs"),
+        "--n-concurrent",
+        "4",
+        "--no-upload-results",
+        "--agent",
+        "opencode",
+        "--agent-kwarg",
+        "temperature=0",
+        "--agent-kwarg",
+        "region=west",
+        "--task-id",
+        "one",
+        "--task-id",
+        "two",
+        "--n-tasks",
+        "2",
+        "--no-rebuild",
+        "--no-cleanup",
     ]
 
     core.run_terminal_bench(
@@ -155,14 +191,24 @@ def _fake_terminal_bench_modules() -> dict[str, ModuleType]:
         "terminal_bench.utils",
     ):
         modules[package].__path__ = []  # type: ignore[attr-defined]
-    modules[
-        "terminal_bench.agents.installed_agents.opencode.opencode_agent"
-    ].OpenCodeAgent = OpenCodeAgent
-    modules["terminal_bench.terminal.models"].TerminalCommand = TerminalCommand
-    modules["terminal_bench.utils.template_utils"].render_setup_script = (
+    _set_module_attribute(
+        modules[
+            "terminal_bench.agents.installed_agents.opencode.opencode_agent"
+        ],
+        "OpenCodeAgent",
+        OpenCodeAgent,
+    )
+    _set_module_attribute(
+        modules["terminal_bench.terminal.models"],
+        "TerminalCommand",
+        TerminalCommand,
+    )
+    _set_module_attribute(
+        modules["terminal_bench.utils.template_utils"],
+        "render_setup_script",
         lambda template_path, variables: (
             f"setup {template_path.name} {variables['model']}"
-        )
+        ),
     )
     return modules
 

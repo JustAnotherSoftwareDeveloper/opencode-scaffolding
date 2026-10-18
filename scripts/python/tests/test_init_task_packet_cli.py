@@ -9,6 +9,7 @@ import pytest
 from click.testing import CliRunner
 
 from cli.init_task_packet import main
+from lib.task_packet import initialization as task_packet_initialization
 
 pytestmark = pytest.mark.integration
 
@@ -80,7 +81,11 @@ def test_rejects_invalid_json(tmp_path: Path) -> None:
         ["--output-dir", str(tmp_path)],
         input="{not json",
     )
-    assert result.exit_code == 1
+    assert result.exit_code == 2
+    assert "Error:" in result.stderr
+    assert result.stdout == ""
+    assert "Traceback" not in result.output
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_rejects_non_object(tmp_path: Path) -> None:
@@ -90,7 +95,11 @@ def test_rejects_non_object(tmp_path: Path) -> None:
         ["--output-dir", str(tmp_path)],
         input="[]",
     )
-    assert result.exit_code == 1
+    assert result.exit_code == 2
+    assert "Error:" in result.stderr
+    assert result.stdout == ""
+    assert "Traceback" not in result.output
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_rejects_missing_summary(tmp_path: Path) -> None:
@@ -100,8 +109,11 @@ def test_rejects_missing_summary(tmp_path: Path) -> None:
         ["--output-dir", str(tmp_path)],
         input=json.dumps({"tasks": []}),
     )
-    assert result.exit_code == 1
-    assert "summary" in result.output
+    assert result.exit_code == 2
+    assert "summary" in result.stderr
+    assert result.stdout == ""
+    assert "Traceback" not in result.output
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_rejects_empty_summary(tmp_path: Path) -> None:
@@ -111,13 +123,17 @@ def test_rejects_empty_summary(tmp_path: Path) -> None:
         ["--output-dir", str(tmp_path)],
         input=json.dumps({"summary": "   ", "tasks": []}),
     )
-    assert result.exit_code == 1
+    assert result.exit_code == 2
+    assert "Error:" in result.stderr
+    assert result.stdout == ""
+    assert "Traceback" not in result.output
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_rejects_existing_destination(tmp_path: Path, monkeypatch) -> None:
     """Verify publication rejects an existing destination file."""
     monkeypatch.setattr(
-        "cli.init_task_packet.time.time_ns", lambda: 1_000_000_000
+        task_packet_initialization.time, "time_ns", lambda: 1_000_000_000
     )
     result = CliRunner().invoke(
         main,
@@ -130,8 +146,12 @@ def test_rejects_existing_destination(tmp_path: Path, monkeypatch) -> None:
         ["--output-dir", str(tmp_path)],
         input=json.dumps(_packet()),
     )
-    assert result.exit_code == 2
-    assert "already exists" in result.output
+    assert result.exit_code == 3
+    assert "already exists" in result.stderr
+    assert result.stdout == ""
+    assert "Traceback" not in result.output
+    assert len(list(tmp_path.glob("*.json"))) == 1
+    assert list(tmp_path.glob(".*.tmp")) == []
 
 
 def test_preserves_supplied_slug(tmp_path: Path) -> None:
@@ -191,9 +211,91 @@ def test_rejects_missing_or_malformed_supplied_slug(
         input=json.dumps(packet),
     )
 
-    assert result.exit_code == 1
-    assert "slug" in result.output
+    assert result.exit_code == 2
+    assert "slug" in result.stderr
+    assert result.stdout == ""
+    assert "Traceback" not in result.output
     assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.parametrize(
+    "failure", ["stdin", "schema", "mkdir", "collision", "write"]
+)
+def test_environment_failures_return_code_three_without_publication(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    failure: str,
+) -> None:
+    """Report environment failures without leaking output or partial files."""
+    output_dir = tmp_path / "output"
+    expected_message = {
+        "stdin": "reading stdin",
+        "schema": "failed to load canonical",
+        "mkdir": "Not a directory",
+        "collision": "already exists",
+        "write": "disk full",
+    }[failure]
+    blocked_parent: Path | None = None
+
+    if failure == "stdin":
+        monkeypatch.setattr(
+            "cli.init_task_packet.click.get_text_stream",
+            lambda _: (_ for _ in ()).throw(OSError("closed stdin")),
+        )
+    else:
+        if failure == "schema":
+            monkeypatch.setattr(
+                task_packet_initialization,
+                "load_task_packet_schema",
+                lambda: (_ for _ in ()).throw(OSError("schema unavailable")),
+            )
+        elif failure == "mkdir":
+            blocked_parent = tmp_path / "not-a-directory"
+            blocked_parent.write_text("not a directory", encoding="utf-8")
+            output_dir = blocked_parent / "output"
+        elif failure == "collision":
+            output_dir.mkdir()
+            monkeypatch.setattr(
+                task_packet_initialization.time,
+                "time_ns",
+                lambda: 1_000_000_000,
+            )
+            (output_dir / "1000-test-packet-for-init.json").write_text(
+                "keep existing content", encoding="utf-8"
+            )
+        elif failure == "write":
+            monkeypatch.setattr(
+                task_packet_initialization.os,
+                "fsync",
+                lambda *_: (_ for _ in ()).throw(OSError("disk full")),
+            )
+
+    result = CliRunner().invoke(
+        main,
+        ["--output-dir", str(output_dir)],
+        input=json.dumps(_packet()),
+    )
+
+    assert result.exit_code == 3
+    assert expected_message in result.stderr
+    assert result.stdout == ""
+    assert "Traceback" not in result.output
+    assert list(tmp_path.rglob(".*.tmp")) == []
+    if failure in {"stdin", "schema"}:
+        assert not output_dir.exists()
+    elif failure == "mkdir":
+        assert blocked_parent is not None
+        assert not output_dir.exists()
+        assert blocked_parent.is_file()
+        assert blocked_parent.read_text(encoding="utf-8") == "not a directory"
+    elif failure == "collision":
+        assert (output_dir / "1000-test-packet-for-init.json").read_text(
+            encoding="utf-8"
+        ) == "keep existing content"
+        assert len(list(output_dir.iterdir())) == 1
+    else:
+        assert output_dir.is_dir()
+        assert list(output_dir.iterdir()) == []
 
 
 def test_help_works() -> None:

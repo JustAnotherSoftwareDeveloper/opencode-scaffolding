@@ -1,4 +1,4 @@
-"""Metadata validation for skill SKILL.md frontmatter fields (name, description, class)."""  # noqa: E501
+"""Validate skill metadata in SKILL.md frontmatter."""
 
 from __future__ import annotations
 

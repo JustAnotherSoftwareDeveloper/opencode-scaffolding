@@ -36,8 +36,10 @@ def _write_skill(
     directory.mkdir(parents=True, exist_ok=True)
     path = directory / "SKILL.md"
     path.write_text(
-        "---\n" + yaml.safe_dump(_profile(name, skill_class), sort_keys=False)
-        + "---\n" + body,
+        "---\n"
+        + yaml.safe_dump(_profile(name, skill_class), sort_keys=False)
+        + "---\n"
+        + body,
         encoding="utf-8",
     )
     return path
@@ -110,9 +112,10 @@ def test_frontmatter_name_description_and_class_checks_report_contracts(
         encoding="utf-8",
     )
     monkeypatch.setattr(checks, "normalize_skill_metadata", lambda _: None)
-    assert "missing or empty" in checks.check_frontmatter_valid(
-        missing_scalar
-    ).detail
+    assert (
+        "missing or empty"
+        in checks.check_frontmatter_valid(missing_scalar).detail
+    )
 
     bad_syntax = tmp_path / "bad-syntax"
     bad_syntax.mkdir()
@@ -293,10 +296,11 @@ def test_validate_skill_meta_extracts_and_validates_frontmatter(
     """Validate frontmatter boundaries and report normalization failures."""
     valid = _write_skill(tmp_path, name="meta-profile")
     text = valid.read_text(encoding="utf-8")
-    assert meta_core._extract_frontmatter(text) is not None
+    frontmatter = meta_core._extract_frontmatter(text)
+    assert frontmatter is not None
     assert meta_core._extract_frontmatter("body") is None
     assert meta_core._extract_frontmatter("---\nname: x\n") is None
-    parsed = yaml.safe_load(meta_core._extract_frontmatter(text))
+    parsed = yaml.safe_load(frontmatter)
     assert meta_core.validate_frontmatter(parsed) == []
     assert meta_core.validate_frontmatter(None)
     assert meta_core.validate_skill_file(valid) == {"valid": True, "errors": []}

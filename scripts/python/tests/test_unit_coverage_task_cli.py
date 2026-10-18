@@ -10,131 +10,224 @@ from typing import Any
 import pytest
 
 from cli import init_task_packet, render_task_markdown, validate_task_structure
+from lib.task_packet import (
+    InvalidTaskPacketError,
+    TaskPacketSchemaError,
+    initialize_task_packet,
+)
+from lib.task_packet import initialization as packet_initialization
 
 pytestmark = pytest.mark.unit
 
 
-def test_init_task_packet_publishes_valid_packet_without_replacing_files(
+def test_initialize_task_packet_publishes_valid_packet_and_rejects_collision(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
-    capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """Publish the supplied slug atomically and retain collision protection."""
+    """Publish a valid packet atomically and preserve collision protection."""
     data = {"slug": "preserved-slug", "tasks": []}
     monkeypatch.setattr(
-        init_task_packet.click,
-        "get_text_stream",
-        lambda _: io.StringIO(json.dumps(data)),
-    )
-    monkeypatch.setattr(init_task_packet, "load_task_packet_schema", lambda: {})
-    monkeypatch.setattr(
-        init_task_packet, "validate_root", lambda *_: (True, [])
+        packet_initialization, "load_task_packet_schema", lambda: {}
     )
     monkeypatch.setattr(
-        init_task_packet.time,
-        "time_ns",
-        lambda: 1_700_000_000_000_000_000,
+        packet_initialization, "validate_root", lambda *_: (True, [])
+    )
+    monkeypatch.setattr(
+        packet_initialization.time, "time_ns", lambda: 1_700_000_000_000_000_000
     )
     output_dir = tmp_path / "published"
 
-    init_task_packet.main.callback(output_dir)
+    destination = initialize_task_packet(data, output_dir)
 
-    destination = output_dir / "1700000000000-preserved-slug.json"
-    assert capsys.readouterr().out.strip() == str(destination)
+    assert destination == output_dir / "1700000000000-preserved-slug.json"
     assert json.loads(destination.read_text(encoding="utf-8")) == data
     assert list(output_dir.glob(".*.tmp")) == []
 
-    monkeypatch.setattr(
-        init_task_packet.click,
-        "get_text_stream",
-        lambda _: io.StringIO(json.dumps(data)),
-    )
-    with pytest.raises(SystemExit) as collision:
-        init_task_packet.main.callback(output_dir)
-    assert collision.value.code == 2
-    assert "already exists" in capsys.readouterr().err
+    with pytest.raises(FileExistsError, match="already exists"):
+        initialize_task_packet(data, output_dir)
     assert json.loads(destination.read_text(encoding="utf-8")) == data
+    assert list(output_dir.glob(".*.tmp")) == []
 
 
-@pytest.mark.parametrize(
-    ("stream", "schema_failure", "valid", "code", "message"),
-    [
-        ("{", False, True, 1, "not valid JSON"),
-        ("[]", False, True, 1, "must be an object"),
-        ('{"slug":"x"}', True, True, 2, "failed to load canonical"),
-        ('{"slug":"x"}', False, False, 1, "canonical task-packet schema"),
-    ],
-)
-def test_init_task_packet_rejects_input_and_schema_failures(
+def test_initialize_task_packet_rejects_invalid_packet_without_publication(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
-    capsys: pytest.CaptureFixture[str],
-    stream: str,
-    schema_failure: bool,
-    valid: bool,
-    code: int,
-    message: str,
 ) -> None:
-    """Return the prescribed error for malformed or invalid packet input."""
+    """Reject invalid canonical data before creating publication files."""
     monkeypatch.setattr(
-        init_task_packet.click,
-        "get_text_stream",
-        lambda _: io.StringIO(stream),
+        packet_initialization, "load_task_packet_schema", lambda: {}
     )
     monkeypatch.setattr(
-        init_task_packet,
-        "load_task_packet_schema",
-        lambda: (_ for _ in ()).throw(OSError("schema unavailable"))
-        if schema_failure
-        else {},
-    )
-    monkeypatch.setattr(
-        init_task_packet,
+        packet_initialization,
         "validate_root",
-        lambda *_: (valid, ["bad root"]),
+        lambda *_: (False, ["bad root"]),
     )
+    output_dir = tmp_path / "not-published"
 
-    with pytest.raises(SystemExit) as exc_info:
-        init_task_packet.main.callback(tmp_path / "unused")
+    with pytest.raises(InvalidTaskPacketError, match="bad root"):
+        initialize_task_packet({"slug": "safe", "tasks": []}, output_dir)
 
-    assert exc_info.value.code == code
-    assert message in capsys.readouterr().err
+    assert not output_dir.exists()
+    assert list(tmp_path.iterdir()) == []
 
 
-def test_init_task_packet_handles_stdin_and_temporary_write_errors(
+def test_initialize_task_packet_wraps_schema_load_failure(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
-    capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """Map input-stream and temporary-file failures to stable exit statuses."""
+    """Expose schema loading failures through the domain error contract."""
     monkeypatch.setattr(
-        init_task_packet.click,
-        "get_text_stream",
-        lambda _: (_ for _ in ()).throw(OSError("closed stdin")),
+        packet_initialization,
+        "load_task_packet_schema",
+        lambda: (_ for _ in ()).throw(OSError("schema unavailable")),
     )
-    with pytest.raises(SystemExit) as read_error:
-        init_task_packet.main.callback(tmp_path)
-    assert read_error.value.code == 1
-    assert "reading stdin" in capsys.readouterr().err
 
+    with pytest.raises(TaskPacketSchemaError, match="schema unavailable"):
+        initialize_task_packet({"slug": "safe", "tasks": []}, tmp_path / "out")
+
+    assert not (tmp_path / "out").exists()
+
+
+def test_initialize_task_packet_cleans_temporary_file_after_write_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """Remove partial output after an atomic-write filesystem failure."""
+    data = {"slug": "safe", "tasks": []}
     monkeypatch.setattr(
-        init_task_packet.click,
-        "get_text_stream",
-        lambda _: io.StringIO('{"slug":"safe"}'),
+        packet_initialization, "load_task_packet_schema", lambda: {}
     )
-    monkeypatch.setattr(init_task_packet, "load_task_packet_schema", lambda: {})
     monkeypatch.setattr(
-        init_task_packet, "validate_root", lambda *_: (True, [])
+        packet_initialization, "validate_root", lambda *_: (True, [])
     )
     monkeypatch.setattr(
-        init_task_packet.os,
+        packet_initialization.time,
+        "time_ns",
+        lambda: 1_700_000_000_000_000_000,
+    )
+    monkeypatch.setattr(
+        packet_initialization.os,
         "fsync",
         lambda *_: (_ for _ in ()).throw(OSError("disk full")),
     )
-    with pytest.raises(SystemExit) as write_error:
-        init_task_packet.main.callback(tmp_path / "write-error")
-    assert write_error.value.code == 2
-    assert "writing output: disk full" in capsys.readouterr().err
+    output_dir = tmp_path / "write-error"
+
+    with pytest.raises(OSError, match="disk full"):
+        initialize_task_packet(data, output_dir)
+
+    assert output_dir.is_dir()
+    assert list(output_dir.iterdir()) == []
+
+
+def test_init_task_packet_adapter_publishes_domain_result(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Pass parsed input to the domain operation and print its returned path."""
+    packet = {"slug": "safe"}
+    destination = Path("output") / "result.json"
+    received: list[tuple[object, Path]] = []
+
+    monkeypatch.setattr(
+        init_task_packet.click,
+        "get_text_stream",
+        lambda _: io.StringIO(json.dumps(packet)),
+    )
+
+    def initialize(data: object, output_dir: Path) -> Path:
+        received.append((data, output_dir))
+        return destination
+
+    monkeypatch.setattr(init_task_packet, "initialize_task_packet", initialize)
+    callback = init_task_packet.main.callback
+    assert callback is not None
+    callback(Path("output"))
+
+    assert received == [(packet, Path("output"))]
+    assert capsys.readouterr().out.strip() == str(destination)
+
+
+def test_init_task_packet_adapter_maps_stdin_read_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Map an input stream read failure to the environment exit status."""
+
+    class FailingStream:
+        """A stdin fake that fails when the adapter reads it."""
+
+        def read(self) -> str:
+            raise OSError("closed stdin")
+
+    monkeypatch.setattr(
+        init_task_packet.click, "get_text_stream", lambda _: FailingStream()
+    )
+
+    callback = init_task_packet.main.callback
+    assert callback is not None
+    with pytest.raises(SystemExit) as error:
+        callback(Path("output"))
+
+    captured = capsys.readouterr()
+    assert error.value.code == 3
+    assert "Error: reading stdin: closed stdin" in captured.err
+    assert captured.out == ""
+
+
+@pytest.mark.parametrize(
+    ("raw", "failure", "code", "message"),
+    [
+        ("{", None, 2, "not valid JSON"),
+        ("[]", None, 2, "must be an object"),
+        (
+            '{"slug":"x"}',
+            InvalidTaskPacketError("bad packet"),
+            2,
+            "bad packet",
+        ),
+        (
+            '{"slug":"x"}',
+            TaskPacketSchemaError("schema unavailable"),
+            3,
+            "schema unavailable",
+        ),
+        ('{"slug":"x"}', OSError("write denied"), 3, "write denied"),
+    ],
+)
+def test_init_task_packet_adapter_maps_input_and_domain_errors(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    raw: str,
+    failure: Exception | None,
+    code: int,
+    message: str,
+) -> None:
+    """Keep the CLI adapter's bad-input and environment statuses distinct."""
+    monkeypatch.setattr(
+        init_task_packet.click, "get_text_stream", lambda _: io.StringIO(raw)
+    )
+    monkeypatch.setattr(
+        init_task_packet,
+        "initialize_task_packet",
+        lambda *_: (
+            (_ for _ in ()).throw(failure) if failure else Path("result.json")
+        ),
+    )
+    callback = init_task_packet.main.callback
+    assert callback is not None
+
+    if code == 0:
+        callback(Path("output"))
+        assert capsys.readouterr().out.strip() == "result.json"
+        return
+
+    with pytest.raises(SystemExit) as error:
+        callback(Path("output"))
+
+    captured = capsys.readouterr()
+    assert error.value.code == code
+    assert message in captured.err
+    assert captured.out == ""
 
 
 def test_render_task_markdown_callback_reads_and_publishes_local_output(
@@ -155,7 +248,9 @@ def test_render_task_markdown_callback_reads_and_publishes_local_output(
         return path
 
     monkeypatch.setattr(render_task_markdown, "render_task_markdown", render)
-    render_task_markdown.main.callback(source, output, True)
+    callback = render_task_markdown.main.callback
+    assert callback is not None
+    callback(source, output, True)
     assert received == [({"summary": "kept"}, output, True)]
     assert capsys.readouterr().out.strip() == "result.md"
     assert output.read_text(encoding="utf-8") == "# rendered\n"
@@ -191,11 +286,39 @@ def test_render_task_markdown_callback_reports_supported_errors(
             lambda *_a, **_k: (_ for _ in ()).throw(ValueError("bad packet")),
         )
 
+    callback = render_task_markdown.main.callback
+    assert callback is not None
     with pytest.raises(SystemExit) as exc_info:
-        render_task_markdown.main.callback(source, output, False)
+        callback(source, output, False)
 
-    assert exc_info.value.code == 1
+    assert exc_info.value.code == 2
     assert "Error:" in capsys.readouterr().err
+
+
+def test_render_task_markdown_callback_maps_filesystem_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Report renderer filesystem failures with the environment status."""
+    monkeypatch.chdir(tmp_path)
+    source = tmp_path / "packet.json"
+    source.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(
+        render_task_markdown,
+        "render_task_markdown",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("disk full")),
+    )
+
+    callback = render_task_markdown.main.callback
+    assert callback is not None
+    with pytest.raises(SystemExit) as error:
+        callback(source, tmp_path / "result.md", False)
+
+    captured = capsys.readouterr()
+    assert error.value.code == 3
+    assert "Error: disk full" in captured.err
+    assert captured.out == ""
 
 
 def test_validate_task_structure_callback_routes_all_input_modes(
@@ -214,9 +337,9 @@ def test_validate_task_structure_callback_routes_all_input_modes(
     )
     source = tmp_path / "packet.json"
     source.write_text('{"advisory":true}', encoding="utf-8")
-    validate_task_structure.main.callback(
-        str(source), False, None, False, "schema.json"
-    )
+    callback = validate_task_structure.main.callback
+    assert callback is not None
+    callback(str(source), False, None, False, "schema.json")
     assert json.loads(capsys.readouterr().out) == {
         "valid": True,
         "diagnostics": ["advisory"],
@@ -227,15 +350,11 @@ def test_validate_task_structure_callback_routes_all_input_modes(
         "get_text_stream",
         lambda _: io.StringIO('{"ok":true}'),
     )
-    validate_task_structure.main.callback(
-        None, True, None, False, "schema.json"
-    )
+    callback(None, True, None, False, "schema.json")
     assert json.loads(capsys.readouterr().out) == {"valid": True}
 
     source.write_text('{"ok":true}', encoding="utf-8")
-    validate_task_structure.main.callback(
-        None, False, str(source), False, "schema.json"
-    )
+    callback(None, False, str(source), False, "schema.json")
     assert json.loads(capsys.readouterr().out) == {"valid": True}
 
 
@@ -257,10 +376,10 @@ def test_validate_task_structure_callback_rejects_incompatible_modes(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Reject mutually exclusive or incomplete command modes before loading."""
+    callback = validate_task_structure.main.callback
+    assert callback is not None
     with pytest.raises(SystemExit) as exc_info:
-        validate_task_structure.main.callback(
-            file_path, stdin, state_file, auto_fix, "schema.json"
-        )
+        callback(file_path, stdin, state_file, auto_fix, "schema.json")
     assert exc_info.value.code == 2
     assert message in capsys.readouterr().err
 
@@ -278,19 +397,17 @@ def test_validate_task_structure_callback_reports_failures_and_autofixes(
         "load_schema",
         lambda _: (_ for _ in ()).throw(ValueError("invalid schema")),
     )
+    callback = validate_task_structure.main.callback
+    assert callback is not None
     with pytest.raises(SystemExit) as schema_error:
-        validate_task_structure.main.callback(
-            str(source), False, None, False, "bad"
-        )
-    assert schema_error.value.code == 2
+        callback(str(source), False, None, False, "bad")
+    assert schema_error.value.code == 3
     assert "failed to load schema" in capsys.readouterr().err
 
     monkeypatch.setattr(validate_task_structure, "load_schema", lambda _: {})
     source.write_text("{", encoding="utf-8")
     with pytest.raises(SystemExit) as parse_error:
-        validate_task_structure.main.callback(
-            str(source), False, None, False, "schema"
-        )
+        callback(str(source), False, None, False, "schema")
     assert parse_error.value.code == 2
     assert "invalid JSON input" in capsys.readouterr().err
 
@@ -301,9 +418,7 @@ def test_validate_task_structure_callback_reports_failures_and_autofixes(
         lambda *_: (_ for _ in ()).throw(RuntimeError("validator failed")),
     )
     with pytest.raises(SystemExit) as validation_error:
-        validate_task_structure.main.callback(
-            str(source), False, None, False, "schema"
-        )
+        callback(str(source), False, None, False, "schema")
     assert validation_error.value.code == 2
     assert "validation error" in capsys.readouterr().err
 
@@ -314,9 +429,7 @@ def test_validate_task_structure_callback_reports_failures_and_autofixes(
         validate_task_structure, "auto_fix_task_structure", fail_fix
     )
     with pytest.raises(SystemExit) as fix_error:
-        validate_task_structure.main.callback(
-            None, False, str(source), True, "schema"
-        )
+        callback(None, False, str(source), True, "schema")
     assert fix_error.value.code == 2
     assert "auto-fix failed" in capsys.readouterr().err
 
@@ -326,9 +439,7 @@ def test_validate_task_structure_callback_reports_failures_and_autofixes(
         lambda *_: {"valid": False, "errors": ["cannot repair"]},
     )
     with pytest.raises(SystemExit) as invalid_fix:
-        validate_task_structure.main.callback(
-            None, False, str(source), True, "schema"
-        )
+        callback(None, False, str(source), True, "schema")
     assert invalid_fix.value.code == 1
     assert json.loads(capsys.readouterr().out) == {
         "valid": False,
@@ -340,9 +451,7 @@ def test_validate_task_structure_callback_reports_failures_and_autofixes(
         "auto_fix_task_structure",
         lambda *_: {"valid": True, "fixed": True},
     )
-    validate_task_structure.main.callback(
-        None, False, str(source), True, "schema"
-    )
+    callback(None, False, str(source), True, "schema")
     assert json.loads(capsys.readouterr().out) == {"valid": True, "fixed": True}
 
     monkeypatch.setattr(
@@ -351,9 +460,7 @@ def test_validate_task_structure_callback_reports_failures_and_autofixes(
         lambda *_: (False, ["invalid packet"]),
     )
     with pytest.raises(SystemExit) as invalid_packet:
-        validate_task_structure.main.callback(
-            str(source), False, None, False, "schema"
-        )
+        callback(str(source), False, None, False, "schema")
     assert invalid_packet.value.code == 1
     assert json.loads(capsys.readouterr().out) == {
         "valid": False,
@@ -372,15 +479,20 @@ def test_validate_task_structure_callback_reports_input_read_errors(
     monkeypatch.setattr(validate_task_structure, "load_schema", lambda _: {})
     original_read_text = Path.read_text
 
-    def fail_selected(path: Path, *args: object, **kwargs: object) -> str:
+    def fail_selected(
+        path: Path,
+        encoding: str | None = None,
+        *,
+        errors: str | None = None,
+    ) -> str:
         if path == source:
             raise OSError("read denied")
-        return original_read_text(path, *args, **kwargs)
+        return original_read_text(path, encoding=encoding, errors=errors)
 
     monkeypatch.setattr(Path, "read_text", fail_selected)
+    callback = validate_task_structure.main.callback
+    assert callback is not None
     with pytest.raises(SystemExit) as error:
-        validate_task_structure.main.callback(
-            str(source), False, None, False, "schema"
-        )
-    assert error.value.code == 2
+        callback(str(source), False, None, False, "schema")
+    assert error.value.code == 3
     assert "failed to read input" in capsys.readouterr().err

@@ -27,6 +27,7 @@ from .helpers import (
     # target through the package public API instead of reaching into .helpers.
 )
 from .registry import ALL_CHECKS, run_all
+from .skill_md import validate_skill_file
 
 __all__ = [
     "ALL_CHECKS",
@@ -46,4 +47,5 @@ __all__ = [
     "check_one_sentence_per_line",
     "check_reference_readme_exists",
     "run_all",
+    "validate_skill_file",
 ]

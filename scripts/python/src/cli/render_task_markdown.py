@@ -48,14 +48,12 @@ def main(
             output_file,
             overwrite=overwrite,
         )
-    except (
-        OSError,
-        ValueError,
-        json.JSONDecodeError,
-        RenderValidationError,
-    ) as exc:
+    except OSError as exc:
         click.echo(f"Error: {exc}", err=True)
-        raise SystemExit(1) from exc
+        raise SystemExit(3) from exc
+    except (ValueError, json.JSONDecodeError, RenderValidationError) as exc:
+        click.echo(f"Error: {exc}", err=True)
+        raise SystemExit(2) from exc
     click.echo(str(result.relative_to(Path.cwd())))
 
 

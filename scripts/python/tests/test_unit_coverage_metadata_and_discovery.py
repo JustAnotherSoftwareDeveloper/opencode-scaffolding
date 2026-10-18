@@ -20,6 +20,7 @@ from lib.collect_skills.parser import (
     validate_skill_frontmatter,
 )
 from lib.collect_skills.skill_md import parse_skill_md
+from lib.shared.git import find_git_root as find_shared_git_root
 from lib.skill_metadata import (
     SelectionProfile,
     SelectionTags,
@@ -130,10 +131,13 @@ def test_metadata_normalizer_rejects_invalid_root_and_selection(
     if value is None:
         invalid = value
     else:
-        data.update(value)
-        invalid = data
+        if isinstance(value, dict):
+            data.update(value)
+            invalid = data
+        else:
+            invalid = value
     with pytest.raises(SkillMetadataError, match=message):
-        normalize_skill_metadata(invalid)  # type: ignore[arg-type]
+        normalize_skill_metadata(invalid)
 
 
 @pytest.mark.parametrize(
@@ -265,8 +269,7 @@ def test_frontmatter_parsers_and_metadata_validation_cover_supported_shapes(
         valid,
     )
     assert any(
-        "name' must be a non-empty string" in error
-        for error in invalid_scalars
+        "name' must be a non-empty string" in error for error in invalid_scalars
     )
     assert any(
         "description' must be a non-empty string" in error
@@ -292,7 +295,65 @@ def test_frontmatter_parsers_and_metadata_validation_cover_supported_shapes(
     assert skill_md.parse_skill_md(bad_metadata, "extra") is None
 
 
-def test_discovery_search_roots_and_git_ancestor_rules(tmp_path: Path) -> None:
+def test_collector_frontmatter_wrapper_matches_parser_boundaries(
+    tmp_path: Path,
+) -> None:
+    """Preserve parser equivalence and fail-closed wrapper diagnostics."""
+    valid = "---\n" + yaml.safe_dump(_profile(), sort_keys=False) + "---\n"
+    cases = {
+        "valid": (valid, "mapping"),
+        "absent": ("Body without frontmatter.\n", "none"),
+        "unclosed": ("---\nname: sample-skill\n", "none"),
+        "empty": ("---\n---\n", "empty"),
+        "malformed": ("---\nname: [broken\n---\n", "yaml-error"),
+        "scalar": ("---\nplain-scalar\n---\n", "non-mapping"),
+        "list": ("---\n- item\n---\n", "non-mapping"),
+    }
+
+    for name, (content, category) in cases.items():
+        path = tmp_path / f"{name}.md"
+        path.write_text(content, encoding="utf-8")
+        if category in {"mapping", "none", "empty"}:
+            canonical = extract_frontmatter(path)
+            wrapped = skill_md.extract_frontmatter(path)
+            assert wrapped == canonical
+            if category == "none":
+                assert canonical is None
+                assert parse_skill_md(path, "extra") is None
+            elif category == "empty":
+                assert canonical == {}
+                assert parse_skill_md(path, "extra") is None
+            else:
+                assert canonical == _profile()
+                assert parse_skill_md(path, "extra") is not None
+        elif category == "yaml-error":
+            with pytest.raises(yaml.YAMLError) as canonical_error:
+                extract_frontmatter(path)
+            with pytest.raises(yaml.YAMLError) as wrapper_error:
+                skill_md.extract_frontmatter(path)
+            assert type(wrapper_error.value) is type(canonical_error.value)
+            assert parse_skill_md(path, "extra") is None
+        else:
+            with pytest.raises(ValueError, match="must be a mapping"):
+                extract_frontmatter(path)
+            with pytest.raises(
+                ValueError, match="SKILL.md frontmatter must be a mapping"
+            ):
+                skill_md.extract_frontmatter(path)
+            assert parse_skill_md(path, "extra") is None
+
+    undecodable = tmp_path / "undecodable.md"
+    undecodable.write_bytes(b"\xff")
+    with pytest.raises(UnicodeDecodeError) as canonical_error:
+        extract_frontmatter(undecodable)
+    with pytest.raises(UnicodeDecodeError) as wrapper_error:
+        skill_md.extract_frontmatter(undecodable)
+    assert type(wrapper_error.value) is type(canonical_error.value)
+
+
+def test_discovery_search_roots_and_git_ancestor_rules(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Find only existing standard roots and return the nearest Git parent."""
     project = tmp_path / "project"
     config = tmp_path / "home" / ".config" / "opencode"
@@ -314,7 +375,14 @@ def test_discovery_search_roots_and_git_ancestor_rules(tmp_path: Path) -> None:
     (repository / ".git").mkdir(parents=True)
     nested.mkdir()
     assert find_git_root(nested) == repository
+    assert find_shared_git_root(nested) == repository
     assert find_git_root(tmp_path / "outside") is None
+    assert find_shared_git_root(tmp_path / "outside") is None
+
+    monkeypatch.chdir(project)
+    relative_nested = Path("repo") / "nested"
+    assert find_git_root(relative_nested) == repository.resolve()
+    assert find_shared_git_root(relative_nested) == repository.resolve()
 
 
 def test_discovery_resolves_precedence_archive_and_unresolved_supports(

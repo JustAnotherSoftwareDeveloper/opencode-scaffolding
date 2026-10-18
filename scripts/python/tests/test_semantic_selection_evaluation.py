@@ -20,10 +20,13 @@ FIXTURE = Path(__file__).parents[1] / "test-data/semantic-selection-cases.json"
 
 def test_deterministic_covers_every_canonical_case() -> None:
     """Verify deterministic evaluation covers every canonical case."""
-    result = evaluate_fixture(load_fixture(FIXTURE), root=ROOT)
+    fixture = load_fixture(FIXTURE)
+    fixture_case_ids = [case["id"] for case in fixture["cases"]]
+    result = evaluate_fixture(fixture, root=ROOT)
     assert result["passed"] is True
-    assert result["fixture_cases"] == 10
-    assert len(result["cases"]) == 10
+    assert result["fixture_cases"] == len(fixture_case_ids)
+    assert len(result["cases"]) == len(fixture_case_ids)
+    assert list(result["cases"]) == fixture_case_ids
     assert all("score" not in case for case in result["cases"].values())
 
 

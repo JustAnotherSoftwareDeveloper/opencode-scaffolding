@@ -120,6 +120,20 @@ class SkillMetadata:
 
 
 def _text(value: Any, field: str, max_length: int = 128) -> str:
+    """Validate non-empty trimmed text within a character limit.
+
+    Args:
+        value: Value to validate.
+        field: Field label used in validation errors.
+        max_length: Maximum allowed character count.
+
+    Returns:
+        The validated text.
+
+    Raises:
+        SkillMetadataError: If value is not a non-empty trimmed string without
+            CR or LF, or if it exceeds max_length.
+    """
     if (
         not isinstance(value, str)
         or not value
@@ -136,6 +150,24 @@ def _text(value: Any, field: str, max_length: int = 128) -> str:
 
 
 def _items(value: Any, field: str, *, names: bool = False) -> tuple[str, ...]:
+    """Validate a non-empty list of unique text items.
+
+    The list is limited to 32 items, and each item is validated by ``_text``.
+    When names is true, each item must also be a canonical skill name.
+
+    Args:
+        value: List of values to validate.
+        field: Field label used in validation errors.
+        names: Whether to require canonical skill names.
+
+    Returns:
+        Validated items as a tuple, preserving their order.
+
+    Raises:
+        SkillMetadataError: If the list is empty, too large, contains invalid
+            or duplicate text, or contains a non-canonical name when names is
+            true.
+    """
     if not isinstance(value, list) or not value:
         raise SkillMetadataError(f"{field} must be a non-empty string array")
     if len(value) > 32:
@@ -148,7 +180,7 @@ def _items(value: Any, field: str, *, names: bool = False) -> tuple[str, ...]:
     return result
 
 
-def normalize_skill_metadata(data: Mapping[str, Any]) -> SkillMetadata:
+def normalize_skill_metadata(data: object) -> SkillMetadata:
     """Validate and normalize a profile, preserving authored array order."""
     if not isinstance(data, Mapping):
         raise SkillMetadataError("skill metadata must be an object")

@@ -11,7 +11,6 @@ dependencies = [
     "PyYAML>=6.0",
     "click>=8.4.2",
     "jsonschema>=4.0",
-    "lxml>=6.1.0",
 ]
 
 [project.scripts]
@@ -37,6 +36,9 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cli", "src/lib"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/.coverage*", "/.tasks/*.json"]
 
 [tool.uv]
 package = true

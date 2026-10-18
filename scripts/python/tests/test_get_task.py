@@ -9,7 +9,8 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from cli.get_task import main, select_task
+from cli.get_task import main
+from lib.get_task.core import select_task
 
 
 @pytest.fixture
@@ -99,6 +100,28 @@ def test_rejects_malformed_and_rootless_json(task_file: Path) -> None:
     malformed = CliRunner().invoke(main, [str(task_file), "--index", "0"])
     assert malformed.exit_code == 2
     assert "Error:" in malformed.output
+
+
+@pytest.mark.unit
+def test_domain_selects_by_id_and_index(packet: dict) -> None:
+    """Select complete task objects directly through the domain API."""
+    assert select_task(packet, "first", None) is packet["tasks"][0]
+    assert select_task(packet, None, 1) is packet["tasks"][1]
+
+
+@pytest.mark.parametrize("packet", [[], {"tasks": None}, {"items": []}])
+@pytest.mark.unit
+def test_domain_rejects_invalid_roots(packet: object) -> None:
+    """Reject non-object roots and roots without a task array."""
+    with pytest.raises(ValueError, match="canonical task-packet object"):
+        select_task(packet, "first", None)
+
+
+@pytest.mark.unit
+def test_domain_rejects_out_of_range_index(packet: dict) -> None:
+    """Reject an index outside the canonical task array."""
+    with pytest.raises(ValueError, match="out of range"):
+        select_task(packet, None, len(packet["tasks"]))
 
 
 @pytest.mark.unit

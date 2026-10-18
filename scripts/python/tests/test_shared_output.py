@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -38,7 +39,7 @@ class TestFormatJson:
 
     def test_default_serializer(self) -> None:
         """Non-serializable types use the default callable."""
-        result = format_json({"path": "/tmp/test"})
+        result = format_json({"path": Path("/tmp/test")})
         assert json.loads(result) == {"path": "/tmp/test"}
 
     def test_empty_dict(self) -> None:

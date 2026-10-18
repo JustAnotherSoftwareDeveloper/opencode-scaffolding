@@ -59,7 +59,9 @@ def _extract_frontmatter(text: str) -> str | None:
     return rest[:end_idx]
 
 
-def validate_frontmatter(data: object, registry=None) -> list[str]:
+def validate_frontmatter(
+    data: object, registry: object | None = None
+) -> list[str]:
     """Validate parsed frontmatter fields and return a list of error messages.
 
     Returns an empty list if all fields are valid.
@@ -67,7 +69,7 @@ def validate_frontmatter(data: object, registry=None) -> list[str]:
     del registry
     errors: list[str] = []
     try:
-        normalize_skill_metadata(data)  # type: ignore[arg-type]
+        normalize_skill_metadata(data)
     except SkillMetadataError as exc:
         errors.append(str(exc))
 

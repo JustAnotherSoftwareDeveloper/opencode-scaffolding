@@ -8,7 +8,7 @@ from typing import Any
 
 from lib.skill_metadata import SelectionProfile
 
-SourcePriority: dict[str, int] = {
+SOURCE_PRIORITY: dict[str, int] = {
     "project": 5,
     "extra": 4,
     "global": 3,
@@ -72,7 +72,7 @@ class SkillIndex:
 
     @staticmethod
     def _source_priority(source: str, location: str = "") -> tuple[int, int]:
-        source_rank = SourcePriority.get(source, 0)
+        source_rank = SOURCE_PRIORITY.get(source, 0)
         location_rank = max(
             (
                 rank

@@ -10,8 +10,9 @@ Exit codes:
   0 — The packet's structural interface is valid. This is not semantic
       atomicity approval.
   1 — Validation violations found.
-  2 — Parse/file/schema error (bad input, unreadable file, invalid JSON,
-      bad schema).
+  2 — Invalid invocation or input JSON, and validation/auto-fix operation
+      errors.
+  3 — Schema-load or input-read errors.
 """
 
 from __future__ import annotations
@@ -115,7 +116,7 @@ def main(
         schema_dict: dict = load_schema(Path(schema))
     except Exception as exc:
         click.echo(f"Error: failed to load schema: {exc}", err=True)
-        raise SystemExit(2) from exc
+        raise SystemExit(3) from exc
 
     # --- Auto-fix mode ---
     if auto_fix:
@@ -142,7 +143,7 @@ def main(
             raw = Path(file_path).read_text(encoding="utf-8")  # type: ignore[arg-type]
     except Exception as exc:
         click.echo(f"Error: failed to read input: {exc}", err=True)
-        raise SystemExit(2) from exc
+        raise SystemExit(3) from exc
 
     # --- Parse JSON ---
     try:

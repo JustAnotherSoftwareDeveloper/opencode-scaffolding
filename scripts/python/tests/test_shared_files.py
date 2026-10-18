@@ -47,10 +47,10 @@ class TestReadText:
         f.write_text("hello world")
         assert read_text(f) == "hello world"
 
-    def test_not_found(self) -> None:
+    def test_not_found(self, tmp_path: Path) -> None:
         """Non-existent file raises FileNotFoundError."""
         with pytest.raises(FileNotFoundError):
-            read_text(Path("/nonexistent/file.txt"))
+            read_text(tmp_path / "missing" / "file.txt")
 
     def test_with_encoding(self, tmp_path: Path) -> None:
         """Read a file with a specific encoding."""

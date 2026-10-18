@@ -20,52 +20,72 @@ WORKER = ROOT / "agents" / "worker.md"
 TASK_DELEGATION = ROOT / "skills" / "task-delegation" / "SKILL.md"
 
 
+def normalized(path: Path) -> str:
+    """Normalize policy prose across case and layout changes."""
+    return " ".join(path.read_text(encoding="utf-8").split()).casefold()
+
+
 def test_breakdown_assignment_requires_one_operation_plus_optional_docs() -> (
     None
 ):
     """Verify breakdown assignments require one operation and optional docs."""
-    assignment = ASSIGNMENT.read_text(encoding="utf-8")
-    workflow = WORKFLOW.read_text(encoding="utf-8")
+    assignment = normalized(ASSIGNMENT)
+    workflow = normalized(WORKFLOW)
 
-    assert "exactly one `class: operation`" in assignment
-    assert "zero to two `class: documentation`" in assignment
+    assert "select exactly one `class: operation` execution owner" in assignment
+    assert "select zero to two `class: documentation` skills" in assignment
     assert "do not publish two operation owners" in assignment
     assert "no operation owner" in assignment
-    assert "more than two documentation assignments" in assignment
+    assert "more than two documentation skills" in assignment
+    assert "stale or substituted path" in assignment
 
-    assert "exactly one `class: operation` execution owner" in workflow
-    assert "zero to two materially relevant `class: documentation`" in workflow
+    assert "select exactly one `class: operation` execution owner" in workflow
+    assert (
+        "add zero to two materially relevant `class: documentation` skills"
+        in workflow
+    )
     assert "do not publish multiple operation owners" in workflow
-    assert "exactly one operation owner and zero to two" in workflow
+    assert (
+        "exactly one operation and zero to two documentation skills" in workflow
+    )
 
 
 def test_plan_writer_uses_same_assignment_composition() -> None:
     """Verify plan-writer uses the same operation and documentation limits."""
-    text = PLAN_WRITER.read_text(encoding="utf-8")
+    text = normalized(PLAN_WRITER)
 
-    assert "exactly one `class: operation` execution owner" in text
-    assert "zero to two materially relevant `class: documentation`" in text
+    assert "select exactly one `class: operation` execution owner" in text
+    assert "zero documentation assignments is valid" in text
+    assert "assign no more than two" in text
     assert "do not publish multiple operation owners" in text
-    assert "exactly one operation owner and zero to two documentation" in text
+    assert (
+        "confirm exactly one operation owner and zero to two materially "
+        "relevant" in text
+    )
 
 
 def test_worker_cannot_silently_acquire_second_operation_owner() -> None:
     """Verify workers cannot silently acquire a second operation owner."""
-    worker = WORKER.read_text(encoding="utf-8")
-    delegation = TASK_DELEGATION.read_text(encoding="utf-8")
+    worker = normalized(WORKER)
+    delegation = normalized(TASK_DELEGATION)
 
-    assert "do not add or substitute another operation skill inline" in worker
     assert "do not add a second operation owner during execution" in worker
     assert "supervisory adaptation may re-dispatch" in worker
+    assert "one operation owner and zero to two documentation skills" in worker
 
+    assert "block on stale or substituted paths" in delegation
     assert (
-        "may not silently add or substitute a\nsecond operation owner"
+        "changing the operation owner requires supervisory adaptation"
         in delegation
     )
     assert (
-        "changing the operation owner is a supervisory adaptation" in delegation
+        "may explicitly load a materially relevant `documentation` skill"
+        in delegation
     )
-    assert "may gain passive documentation context" in delegation
+    assert (
+        "ordinary execution may not load an additional operation owner"
+        in delegation
+    )
 
 
 def test_schema_keeps_compatible_flat_one_to_three_skill_representation() -> (

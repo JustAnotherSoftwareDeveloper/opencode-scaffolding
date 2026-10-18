@@ -67,15 +67,34 @@ def test_active_producers_and_consumers_reference_canonical_contract() -> None:
         assert CONTRACT in read(relative), relative
 
 
-def test_restricted_agents_can_read_canonical_contract() -> None:
-    """Verify restricted agents can read the output contract template."""
+def test_agents_keep_distinct_contract_read_policies() -> None:
+    """Verify each agent can read the contract within its safety boundaries."""
     config = json.loads(read("opencode.json"))
-    for name in ("delegator", "executor"):
-        permissions = config["agent"][name]["permission"]
-        contract_path = f"~/.config/opencode/{CONTRACT}"
-        assert permissions["read"]["*"] == "deny"
-        assert permissions["read"][contract_path] == "allow"
-        assert permissions["external_directory"][contract_path] == "allow"
+    contract_path = f"~/.config/opencode/{CONTRACT}"
+
+    delegator = config["agent"]["delegator"]["permission"]
+    assert delegator["read"]["*"] == "allow"
+    assert delegator["read"][contract_path] == "allow"
+    assert delegator["external_directory"][contract_path] == "allow"
+    for pattern in (
+        "skills/**",
+        ".opencode/skills/**",
+        ".claude/skills/**",
+        ".agents/skills/**",
+        "~/.config/opencode/skills/**",
+        ".env",
+        ".env.*",
+        "**/.env",
+        "**/.env.*",
+    ):
+        assert delegator["read"][pattern] == "deny"
+
+    executor = config["agent"]["executor"]["permission"]
+    assert executor["read"]["*"] == "deny"
+    assert executor["read"][CONTRACT] == "allow"
+    assert executor["read"][f"*/{CONTRACT}"] == "allow"
+    assert executor["external_directory"]["*"] == "deny"
+    assert executor["external_directory"][contract_path] == "allow"
 
 
 def test_structured_fixtures_use_canonical_list_grammar() -> None:

@@ -10,6 +10,7 @@ import yaml
 
 from lib.collect_skills.models import Skill, SkillIndex
 from lib.collect_skills.parser import extract_frontmatter
+from lib.shared.git import find_git_root as find_shared_git_root
 from lib.skill_metadata import SkillMetadataError, normalize_skill_metadata
 
 
@@ -21,13 +22,7 @@ def _should_exclude_dir(dir_name: str) -> bool:
 
 def find_git_root(path: Path) -> Path | None:
     """Return the nearest ancestor containing a Git repository, if any."""
-    current = path.resolve()
-    for parent in (current, *current.parents):
-        if (parent / ".git").is_dir():
-            return parent
-        if parent == parent.parent:
-            break
-    return None
+    return find_shared_git_root(path)
 
 
 def get_standard_search_roots(

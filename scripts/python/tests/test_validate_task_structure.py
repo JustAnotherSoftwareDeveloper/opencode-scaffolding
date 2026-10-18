@@ -454,5 +454,7 @@ def test_cli_parse_and_schema_load_errors_are_reported(tmp_path: Path) -> None:
     result = CliRunner().invoke(
         main, [str(invalid_json), "--schema", str(invalid_schema)]
     )
-    assert result.exit_code == 2
-    assert "failed to load schema" in result.output
+    assert result.exit_code == 3
+    assert "failed to load schema" in result.stderr
+    assert "Error:" in result.stderr
+    assert "Traceback" not in result.output

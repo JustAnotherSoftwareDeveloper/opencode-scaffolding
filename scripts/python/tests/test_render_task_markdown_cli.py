@@ -123,8 +123,9 @@ def test_cli_rejects_invalid_json(tmp_path: Path) -> None:
             str(tmp_path / "tasks.md"),
         ],
     )
-    assert result.exit_code == 1
-    assert "Error:" in result.output
+    assert result.exit_code == 2
+    assert "Error:" in result.stderr
+    assert "Traceback" not in result.output
 
 
 def test_cli_rejects_output_outside_cwd(tmp_path: Path) -> None:
@@ -140,5 +141,30 @@ def test_cli_rejects_output_outside_cwd(tmp_path: Path) -> None:
             str(tmp_path / "tasks.md"),
         ],
     )
-    assert result.exit_code == 1
-    assert "within the current working directory" in result.output
+    assert result.exit_code == 2
+    assert "within the current working directory" in result.stderr
+    assert "Traceback" not in result.output
+
+
+def test_cli_reports_output_filesystem_failure_with_environment_status(
+    tmp_path: Path,
+) -> None:
+    """Distinguish output I/O errors from invalid packet or path input."""
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        input_file = Path.cwd() / "tasks.json"
+        input_file.write_text(json.dumps(_packet()), encoding="utf-8")
+        blocked_parent = Path.cwd() / "blocked-parent"
+        blocked_parent.write_text("not a directory", encoding="utf-8")
+        output_file = blocked_parent / "tasks.md"
+
+        result = runner.invoke(
+            main,
+            ["--input", str(input_file), "--output", str(output_file)],
+        )
+
+        assert result.exit_code == 3
+        assert "Error:" in result.stderr
+        assert "Traceback" not in result.output
+        assert not output_file.exists()
+        assert blocked_parent.read_text(encoding="utf-8") == "not a directory"

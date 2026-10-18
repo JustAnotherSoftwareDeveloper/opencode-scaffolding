@@ -10,27 +10,17 @@ import yaml
 from lib.skill_metadata import SkillMetadataError, normalize_skill_metadata
 
 from .models import Skill
+from .parser import extract_frontmatter as _extract_frontmatter
 
 
 def extract_frontmatter(path: Path) -> dict[str, Any] | None:
     """Extract YAML frontmatter, returning ``None`` for an absent block."""
-    lines = path.read_text(encoding="utf-8").splitlines()
-    if not lines or lines[0].rstrip() != "---":
-        return None
     try:
-        end = next(
-            index
-            for index in range(1, len(lines))
-            if lines[index].rstrip() == "---"
-        )
-    except StopIteration:
-        return None
-    value = yaml.safe_load("\n".join(lines[1:end]))
-    if value is None:
-        return {}
-    if not isinstance(value, dict):
-        raise ValueError("SKILL.md frontmatter must be a mapping")
-    return dict(value)
+        return _extract_frontmatter(path)
+    except UnicodeDecodeError:
+        raise
+    except ValueError as exc:
+        raise ValueError("SKILL.md frontmatter must be a mapping") from exc
 
 
 def parse_skill_md(path: Path, source: str) -> Skill | None:

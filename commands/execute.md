@@ -12,7 +12,7 @@ Initialize state and execute a runbook. If no runbook slug is provided, use the 
 1. Locate `.runbooks/<slug>/main.xml` first. If absent, fall back to legacy `.runbooks/<slug>/runbook.json` (or use the full path if given).
 2. Verify the runbook has `status: approved`, or ask the user for authorization.
 3. Read the runbook as the authoritative execution contract.
-4. Initialize state with the selected source: `uv run --project scripts/python init-runbook-state .runbooks/<runbook_id>/main.xml` for v3/v2 XML, or `.runbooks/<runbook_id>/runbook.json` only for legacy v1. For v3, this creates or updates runbook-local `state.xml` and default manifest indexes.
+4. Stop at the state-initialization gate: `init-runbook-state` is not registered or implemented in the current toolbox; state initialization and the documented XML/legacy JSON argument contracts are unavailable. Do not start execution or assume state is initialized. Report this blocker and stop here. Resume only after a supported initializer is restored and registered and its accepted inputs and effects are verified.
 5. Execute each step according to the runbook dependency graph, dispatching worker delegations serially—one delegated worker at most in flight—then reconcile state after each delegation completes.
     - Load `decompose` when step scope is unclear; for each atomic unit, load `delegation` to construct bounded handoffs.
     - Route work via `task` to configured harness subagents.

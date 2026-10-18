@@ -49,7 +49,10 @@ def _root(*tasks: dict[str, object]) -> dict[str, object]:
 def test_root_validation_reports_task_review_and_warning_references() -> None:
     """Check exact review coverage and consistency for each final task ID."""
     packet = _root(_task())
-    review = packet["boundaryReview"]["taskReviews"]
+    boundary_review = packet["boundaryReview"]
+    assert isinstance(boundary_review, dict)
+    review = boundary_review["taskReviews"]
+    assert isinstance(review, dict)
     del review["one"]
     review["unknown"] = {
         "preAssignmentDisposition": "single-result",
@@ -60,7 +63,7 @@ def test_root_validation_reports_task_review_and_warning_references() -> None:
         "acceptanceDisposition": "accepted",
         "indivisibilityEvidence": {},
     }
-    packet["boundaryReview"]["warningDispositions"] = {
+    boundary_review["warningDispositions"] = {
         "unknown-reference": {
             "taskId": "absent",
             "disposition": "split",
@@ -74,12 +77,8 @@ def test_root_validation_reports_task_review_and_warning_references() -> None:
     valid, diagnostics = core.validate_root(packet, {})
 
     assert valid is False
-    assert any(
-        "boundary-review-task-coverage" in item for item in diagnostics
-    )
-    assert any(
-        "boundary-review-task-reference" in item for item in diagnostics
-    )
+    assert any("boundary-review-task-coverage" in item for item in diagnostics)
+    assert any("boundary-review-task-reference" in item for item in diagnostics)
     assert any(
         "boundary-review-indivisibility-evidence" in item
         for item in diagnostics
@@ -88,8 +87,7 @@ def test_root_validation_reports_task_review_and_warning_references() -> None:
         "boundary-review-warning-reference" in item for item in diagnostics
     )
     assert any(
-        "boundary-review-warning-consistency" in item
-        for item in diagnostics
+        "boundary-review-warning-consistency" in item for item in diagnostics
     )
 
 
@@ -124,11 +122,15 @@ def test_metadata_cycles_and_write_sharing_distinguish_safe_edges() -> None:
         couplingRationale={"group": "one publication"},
     )
     packet = _root(first, second)
-    packet["tasks"][0]["couplingRationale"] = {"group": "one publication"}
+    tasks = packet["tasks"]
+    assert isinstance(tasks, list)
+    first_task = tasks[0]
+    assert isinstance(first_task, dict)
+    first_task["couplingRationale"] = {"group": "one publication"}
     assert core.validate(packet, {}) == (True, [])
 
     second["dependencies"] = [{"taskId": "first"}]
-    packet["tasks"][0]["dependencies"] = [{"taskId": "second"}]
+    first_task["dependencies"] = [{"taskId": "second"}]
     valid, diagnostics = core.validate(packet, {})
     assert valid is False
     assert any(
@@ -202,9 +204,11 @@ def test_auto_fix_task_structure_handles_bad_roots_and_repairable_schema_errors(
 
     packet = _root(_task(skills=["one", "one", "", "two", "three", "four"]))
     path.write_text(json.dumps(packet), encoding="utf-8")
-    error = jsonschema.ValidationError("duplicate skills")
-    error.absolute_path.extend(["tasks", 0, "skills"])
-    error.validator = "uniqueItems"
+    error = jsonschema.ValidationError(
+        "duplicate skills",
+        validator="uniqueItems",
+        path=["tasks", 0, "skills"],
+    )
     calls = 0
 
     def schema_errors(_parsed: object, _schema: dict[str, object]):
@@ -274,18 +278,22 @@ def test_auto_fix_revalidates_schema_and_boundary_after_skill_repair(
     """Do not write repairs when revalidation exposes additional errors."""
     path = tmp_path / "packet.json"
     packet = _root(_task(skills=["a", "a"]))
-    packet["boundaryReview"]["warningDispositions"] = {
+    boundary_review = packet["boundaryReview"]
+    assert isinstance(boundary_review, dict)
+    boundary_review["warningDispositions"] = {
         "unknown-task": {"taskId": "absent", "disposition": "split"}
     }
     original = json.dumps(packet)
     path.write_text(original, encoding="utf-8")
 
-    repairable = jsonschema.ValidationError("duplicate skills")
-    repairable.absolute_path.extend(["tasks", 0, "skills"])
-    repairable.validator = "uniqueItems"
-    changed_root = jsonschema.ValidationError("new root constraint")
-    changed_root.absolute_path.append("slug")
-    changed_root.validator = "minLength"
+    repairable = jsonschema.ValidationError(
+        "duplicate skills",
+        validator="uniqueItems",
+        path=["tasks", 0, "skills"],
+    )
+    changed_root = jsonschema.ValidationError(
+        "new root constraint", validator="minLength", path=["slug"]
+    )
     calls = 0
 
     def root_errors(_packet: object, _schema: dict[str, object]):
@@ -305,9 +313,7 @@ def test_auto_fix_revalidates_schema_and_boundary_after_skill_repair(
 
     calls = 0
 
-    def root_valid_after_repair(
-        _packet: object, _schema: dict[str, object]
-    ):
+    def root_valid_after_repair(_packet: object, _schema: dict[str, object]):
         nonlocal calls
         calls += 1
         return [repairable] if calls == 1 else []

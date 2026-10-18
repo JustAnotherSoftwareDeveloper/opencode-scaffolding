@@ -126,7 +126,7 @@ def main(
             status = preflight_frameworks()
         except Exception as exc:
             click.echo(f"Error: framework preflight failed: {exc}", err=True)
-            raise SystemExit(2) from exc
+            raise SystemExit(3) from exc
         output["frameworks"] = status.__dict__
 
     if list_cases:
@@ -136,7 +136,7 @@ def main(
         inspect_task_path = write_inspect_task_file(write_inspect_task)
     except Exception as exc:
         click.echo(f"Error: failed to write Inspect task: {exc}", err=True)
-        raise SystemExit(2) from exc
+        raise SystemExit(3) from exc
     output["inspect_task"] = str(inspect_task_path)
 
     if run_inspect:

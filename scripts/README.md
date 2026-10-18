@@ -44,10 +44,7 @@ Python with uv:
 ```bash
 uv run --directory scripts/python python --version
 uv sync --project scripts/python
-uv run --directory scripts/python src/example.py
-uv run --project scripts/python validate-json opencode.json
-uv run --project scripts/python validate-runbook .runbooks/<id>/main.xml
-uv run --project scripts/python init-runbook-state .runbooks/<id>/main.xml  # v3 creates runbook-local state.xml and manifest indexes
+uv run --project scripts/python example
 ```
 
 Runbook validation is XML/XSD-first for the v3 target workflow. XSDs under `skills/build-runbook/schemas/` are the schema contract; validation must run through Python/bash helpers, not LLM judgment. Legacy JSON runbook schemas/templates are retired for new target workflows.
@@ -67,6 +64,6 @@ Scripts intended for skills should:
 
 ## Dependency Policy
 
-Only add dependencies when a helper needs them and the dependency choice has been reviewed. The Python validators intentionally use `PyYAML`, `jsonschema`, `lxml`, and a dev `pyright` dependency; keep `scripts/python/uv.lock` updated when these dependencies change.
+Only add dependencies when a helper needs them and the dependency choice has been reviewed. The Python validators use `PyYAML` and `jsonschema`, with `pyright` as a dev dependency; keep `scripts/python/uv.lock` updated when these dependencies change.
 
 **Bash/shell dependencies** must be system packages installed via the platform package manager (`apt` on Debian/Ubuntu, `brew` on macOS). Do not commit project-local vendored binaries. The `scripts/shell/Makefile` should expose a `deps-check` target that verifies required system packages are present and reports missing ones with install instructions.

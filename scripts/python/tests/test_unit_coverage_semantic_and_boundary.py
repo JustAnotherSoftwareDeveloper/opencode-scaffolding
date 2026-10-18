@@ -302,6 +302,8 @@ def test_semantic_evaluator_rejects_unknown_modes_and_duplicate_inventory(
     fixture = _selection_fixture(tmp_path)
     with pytest.raises(EvaluationError, match="mode must be"):
         evaluate_fixture(fixture, root=tmp_path, mode="unknown")
-    fixture["inventory"].append({"name": "alpha", "path": "skills/alpha.md"})
+    inventory = fixture["inventory"]
+    assert isinstance(inventory, list)
+    inventory.append({"name": "alpha", "path": "skills/alpha.md"})
     with pytest.raises(EvaluationError, match="duplicate inventory name"):
         evaluate_fixture(fixture, root=tmp_path)

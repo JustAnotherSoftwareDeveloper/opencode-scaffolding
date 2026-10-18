@@ -101,7 +101,9 @@ def test_agent_eval_callback_lists_cases_and_serializes_process_results(
         tb_no_cleanup=True,
     )
 
-    agent_eval_suite.main.callback(**options)
+    callback = agent_eval_suite.main.callback
+    assert callback is not None
+    callback(**options)
 
     result = json.loads(capsys.readouterr().out)
     assert result["cases"] == [{"case_id": "a"}]
@@ -143,11 +145,13 @@ def test_agent_eval_callback_reports_preflight_and_write_errors(
         )
     options = _agent_options(tmp_path / "task.py")
     options["run_inspect"] = stage == "preflight"
+    callback = agent_eval_suite.main.callback
+    assert callback is not None
 
     with pytest.raises(SystemExit) as exc_info:
-        agent_eval_suite.main.callback(**options)
+        callback(**options)
 
-    assert exc_info.value.code == 2
+    assert exc_info.value.code == 3
     assert expected in capsys.readouterr().err
 
 
@@ -172,14 +176,16 @@ def test_agent_eval_callback_validates_requested_models_and_process_status(
     )
     options = _agent_options(task_path)
     options["run_inspect"] = True
+    callback = agent_eval_suite.main.callback
+    assert callback is not None
     with pytest.raises(SystemExit) as missing_inspect:
-        agent_eval_suite.main.callback(**options)
+        callback(**options)
     assert missing_inspect.value.code == 2
     assert "requires --inspect-model" in capsys.readouterr().err
 
     options.update(run_inspect=False, run_terminal_bench=True)
     with pytest.raises(SystemExit) as missing_bench:
-        agent_eval_suite.main.callback(**options)
+        callback(**options)
     assert missing_bench.value.code == 2
     assert "requires --tb-model" in capsys.readouterr().err
 
@@ -190,7 +196,7 @@ def test_agent_eval_callback_validates_requested_models_and_process_status(
         lambda **_: SimpleNamespace(returncode=7, stdout="", stderr="failed"),
     )
     with pytest.raises(SystemExit) as failed_bench:
-        agent_eval_suite.main.callback(**options)
+        callback(**options)
     output = json.loads(capsys.readouterr().out)
     assert failed_bench.value.code == 7
     assert output["terminal_bench"]["stderr"] == "failed"
@@ -210,7 +216,7 @@ def test_agent_eval_callback_validates_requested_models_and_process_status(
         ),
     )
     with pytest.raises(SystemExit) as failed_inspect:
-        agent_eval_suite.main.callback(**options)
+        callback(**options)
     inspect_output = json.loads(capsys.readouterr().out)
     assert failed_inspect.value.code == 5
     assert inspect_output["inspect"]["stderr"] == "inspect failure"
@@ -222,6 +228,7 @@ def test_collect_skills_callback_filters_and_publishes_json(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Publish only winning classes and retain the serialized skill contract."""
+
     def populate(index: SkillIndex, **_: object) -> None:
         index.add(
             Skill("writer", "Writer", class_="operation", source="project")
@@ -233,7 +240,9 @@ def test_collect_skills_callback_filters_and_publishes_json(
 
     monkeypatch.setattr(collect_skills, "discover_all_skills", populate)
     destination = tmp_path / "inventory.json"
-    collect_skills.main.callback(
+    callback = collect_skills.main.callback
+    assert callback is not None
+    callback(
         str(tmp_path),
         str(tmp_path),
         (),
@@ -258,12 +267,12 @@ def test_collect_skills_callback_stdout_and_fail_closed_errors(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Keep stdout JSON-only and refuse failed or deferred discovery results."""
+    callback = collect_skills.main.callback
+    assert callback is not None
     monkeypatch.setattr(
         collect_skills, "discover_all_skills", lambda *_a, **_k: None
     )
-    collect_skills.main.callback(
-        str(tmp_path), str(tmp_path), (), False, (), False, None
-    )
+    callback(str(tmp_path), str(tmp_path), (), False, (), False, None)
     assert json.loads(capsys.readouterr().out) == []
 
     def fail(*_: object, **__: object) -> None:
@@ -271,20 +280,16 @@ def test_collect_skills_callback_stdout_and_fail_closed_errors(
 
     monkeypatch.setattr(collect_skills, "discover_all_skills", fail)
     with pytest.raises(SystemExit) as error:
-        collect_skills.main.callback(
-            str(tmp_path), str(tmp_path), (), False, (), False, None
-        )
+        callback(str(tmp_path), str(tmp_path), (), False, (), False, None)
     assert error.value.code == 1
     assert "unreadable root" in capsys.readouterr().err
 
     def deferred(index: SkillIndex, **_: object) -> None:
-        index._discovery_errors = ["unresolved inventory"]
+        object.__setattr__(index, "_discovery_errors", ["unresolved inventory"])
 
     monkeypatch.setattr(collect_skills, "discover_all_skills", deferred)
     with pytest.raises(SystemExit) as invalid_inventory:
-        collect_skills.main.callback(
-            str(tmp_path), str(tmp_path), (), False, (), False, None
-        )
+        callback(str(tmp_path), str(tmp_path), (), False, (), False, None)
     assert invalid_inventory.value.code == 1
     assert "invalid inventory" in capsys.readouterr().err
 
@@ -304,8 +309,10 @@ def test_collect_skills_callback_cleans_temporary_output_after_write_failure(
         lambda *_args: (_ for _ in ()).throw(OSError("replace denied")),
     )
     destination = tmp_path / "inventory.json"
+    callback = collect_skills.main.callback
+    assert callback is not None
     with pytest.raises(SystemExit) as error:
-        collect_skills.main.callback(
+        callback(
             str(tmp_path), str(tmp_path), (), False, (), False, str(destination)
         )
     assert error.value.code == 1
@@ -334,7 +341,9 @@ def test_semantic_selection_callback_emits_result_and_maps_errors(
         "evaluate_fixture",
         lambda *_args, **kwargs: {"passed": True, "mode": kwargs["mode"]},
     )
-    evaluate_semantic_selection.main.callback(
+    callback = evaluate_semantic_selection.main.callback
+    assert callback is not None
+    callback(
         tmp_path / "fixture.json",
         tmp_path,
         "configured-llm",
@@ -351,12 +360,10 @@ def test_semantic_selection_callback_emits_result_and_maps_errors(
     monkeypatch.setattr(
         evaluate_semantic_selection,
         "evaluate_fixture",
-        lambda *_a, **_k: (_ for _ in ()).throw(
-            EvaluationError("bad fixture")
-        ),
+        lambda *_a, **_k: (_ for _ in ()).throw(EvaluationError("bad fixture")),
     )
     with pytest.raises(SystemExit) as exc_info:
-        evaluate_semantic_selection.main.callback(
+        callback(
             tmp_path / "fixture.json",
             tmp_path,
             "deterministic",
@@ -375,7 +382,9 @@ def test_get_task_callback_reads_and_reports_invalid_input(
     """Return the selected task unchanged and map malformed input to exit 2."""
     task_file = tmp_path / "tasks.json"
     task_file.write_text('{"tasks":[{"taskId":"kept","context":"full"}]}')
-    get_task.main.callback(task_file, "kept", None)
+    callback = get_task.main.callback
+    assert callback is not None
+    callback(task_file, "kept", None)
     assert json.loads(capsys.readouterr().out) == {
         "taskId": "kept",
         "context": "full",
@@ -383,19 +392,19 @@ def test_get_task_callback_reads_and_reports_invalid_input(
 
     task_file.write_text("{")
     with pytest.raises(SystemExit) as invalid_json:
-        get_task.main.callback(task_file, "kept", None)
+        callback(task_file, "kept", None)
     assert invalid_json.value.code == 2
     assert "Error:" in capsys.readouterr().err
 
     with pytest.raises(SystemExit) as unreadable:
-        get_task.main.callback(tmp_path / "absent.json", "kept", None)
+        callback(tmp_path / "absent.json", "kept", None)
     assert unreadable.value.code == 2
     assert "Error:" in capsys.readouterr().err
 
 
 def test_select_task_rejects_ambiguous_roots_and_out_of_range_indices() -> None:
     """Require one selection mode and a canonical task-list object."""
-    from cli.get_task import select_task
+    from lib.get_task.core import select_task
 
     with pytest.raises(ValueError, match="exactly one"):
         select_task({"tasks": []}, None, None)
@@ -406,6 +415,16 @@ def test_select_task_rejects_ambiguous_roots_and_out_of_range_indices() -> None:
     with pytest.raises(ValueError, match="out of range"):
         select_task({"tasks": []}, None, 0)
 
+
+def test_cli_modules_keep_domain_compatibility_exports() -> None:
+    """Retain the established CLI import paths for extracted domain APIs."""
+    from lib.get_task.core import select_task as select_task_api
+    from lib.skill_validator import validate_skill_file
+
+    assert get_task.select_task is select_task_api
+    assert validate_skill_md.validate_skill_file is validate_skill_file
+
+
 def test_resolve_script_root_callback_supports_text_and_json(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -415,9 +434,11 @@ def test_resolve_script_root_callback_supports_text_and_json(
         "resolve_script_root",
         lambda **_: (Path("/resolved/python"), "project-local"),
     )
-    resolve_script_root.main.callback("python", None, "text")
+    callback = resolve_script_root.main.callback
+    assert callback is not None
+    callback("python", None, "text")
     assert capsys.readouterr().out.strip() == "/resolved/python"
-    resolve_script_root.main.callback("python", "/repo", "json")
+    callback("python", "/repo", "json")
     assert json.loads(capsys.readouterr().out) == {
         "path": "/resolved/python",
         "runtime": "python",
@@ -433,14 +454,16 @@ def test_skill_validator_callback_exits_on_aggregate_check_results(
     """Serialize check results and set the documented aggregate status."""
     result = {"checks": [{"name": "frontmatter-valid", "passed": True}]}
     monkeypatch.setattr(skill_validator, "run_all", lambda _: result)
+    callback = skill_validator.cli.callback
+    assert callback is not None
     with pytest.raises(SystemExit) as passed:
-        skill_validator.cli.callback(str(tmp_path))
+        callback(str(tmp_path))
     assert passed.value.code == 0
     assert json.loads(capsys.readouterr().out) == result
 
     result["checks"][0]["passed"] = False
     with pytest.raises(SystemExit) as failed:
-        skill_validator.cli.callback(str(tmp_path))
+        callback(str(tmp_path))
     assert failed.value.code == 1
     assert json.loads(capsys.readouterr().out)["checks"][0]["passed"] is False
 
@@ -458,7 +481,9 @@ def _write_skill(path: Path, skill_class: str = "operation") -> Path:
         },
     }
     skill_file.write_text(
-        "---\n" + yaml.safe_dump(profile, sort_keys=False) + "---\n"
+        "---\n"
+        + yaml.safe_dump(profile, sort_keys=False)
+        + "---\n"
         + (
             "Reference notes.\n"
             if skill_class == "documentation"
@@ -479,8 +504,10 @@ def test_skill_markdown_callbacks_validate_one_or_many_profiles(
 
     invalid = _write_skill(tmp_path / "invalid-profile")
     invalid.write_text("body without frontmatter", encoding="utf-8")
+    callback = validate_skill_md.main.callback
+    assert callback is not None
     with pytest.raises(SystemExit) as failed:
-        validate_skill_md.main.callback((str(valid), str(invalid)))
+        callback((str(valid), str(invalid)))
     assert failed.value.code == 1
     records = json.loads(capsys.readouterr().out)
     assert [record["valid"] for record in records] == [True, False]
@@ -518,9 +545,10 @@ def test_skill_markdown_file_validation_reports_frontmatter_and_body_errors(
     closed = tmp_path / "closed" / "SKILL.md"
     closed.parent.mkdir()
     closed.write_text("---\nname: no-close\n", encoding="utf-8")
-    assert "closing delimiter" in validate_skill_md.validate_skill_file(
-        closed
-    )["errors"][0]
+    assert (
+        "closing delimiter"
+        in validate_skill_md.validate_skill_file(closed)["errors"][0]
+    )
 
     wrong_directory = _write_skill(
         tmp_path / "mismatch", skill_class="operation"
@@ -557,10 +585,15 @@ def test_skill_markdown_file_validation_reports_frontmatter_and_body_errors(
     unreadable.write_text("---\nname: readable\n---\n1. read\n")
     original_read_text = Path.read_text
 
-    def fail_selected(path: Path, *args: object, **kwargs: object) -> str:
+    def fail_selected(
+        path: Path,
+        encoding: str | None = None,
+        *,
+        errors: str | None = None,
+    ) -> str:
         if path == unreadable:
             raise OSError("read denied")
-        return original_read_text(path, *args, **kwargs)
+        return original_read_text(path, encoding=encoding, errors=errors)
 
     monkeypatch.setattr(Path, "read_text", fail_selected)
     read_error = validate_skill_md.validate_skill_file(unreadable)
@@ -575,20 +608,20 @@ def test_skill_markdown_meta_callback_formats_each_validation_result(
     valid = _write_skill(tmp_path / "valid-meta")
     invalid = _write_skill(tmp_path / "invalid-meta")
     invalid.write_text("---\nname: invalid\n---\n", encoding="utf-8")
-    validate_skill_meta.main.callback((str(valid),), "text", True)
+    callback = validate_skill_meta.main.callback
+    assert callback is not None
+    callback((str(valid),), "text", True)
     output = capsys.readouterr()
     assert "VALID" in output.out
     assert "Validating:" in output.err
 
     with pytest.raises(SystemExit) as text_error:
-        validate_skill_meta.main.callback((str(invalid),), "text", False)
+        callback((str(invalid),), "text", False)
     assert text_error.value.code == 1
     assert "INVALID" in capsys.readouterr().out
 
     with pytest.raises(SystemExit) as failed:
-        validate_skill_meta.main.callback(
-            (str(valid), str(invalid)), "json", False
-        )
+        callback((str(valid), str(invalid)), "json", False)
     assert failed.value.code == 1
     result = json.loads(capsys.readouterr().out)
     assert [item["valid"] for item in result] == [True, False]

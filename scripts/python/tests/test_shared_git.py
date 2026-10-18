@@ -44,12 +44,15 @@ class TestFindGitRoot:
         nested.mkdir(parents=True)
         assert find_git_root(nested) is None
 
-    def test_current_dir_default(self) -> None:
-        """When called with no argument, uses CWD and detects real repo."""
+    def test_current_dir_default(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """When called with no argument, use an isolated temporary CWD."""
+        (tmp_path / ".git").mkdir()
+        monkeypatch.chdir(tmp_path)
+
         result = find_git_root()
-        # This opencode config directory is itself a git repo.
-        assert result is not None
-        assert (result / ".git").is_dir()
+        assert result == tmp_path.resolve()
 
     @pytest.mark.usefixtures("isolated_git_ancestors")
     def test_dot_git_is_file_not_dir(self, tmp_path: Path) -> None:
