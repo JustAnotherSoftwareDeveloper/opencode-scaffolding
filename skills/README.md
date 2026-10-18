@@ -31,7 +31,6 @@ contract details.
 - [`display-tasks`][display] — render canonical task summaries.
 - [`plan-writer`][plan-writing] — create executable plan workspaces.
 - [`proposal`][proposals] — create evidence-based decision proposals.
-- [`todo-writer`][todos] — write todo entries from task output.
 
 ## Analysis and Inline Work
 
@@ -65,7 +64,6 @@ contract details.
 [display]: ./display-tasks/SKILL.md
 [plan-writing]: ./plan-writer/SKILL.md
 [proposals]: ./proposal/SKILL.md
-[todos]: ./todo-writer/SKILL.md
 [questions]: ./ask-question/SKILL.md
 [analysis]: ./generic-analysis/SKILL.md
 [inline-execution]: ./task-executor/SKILL.md

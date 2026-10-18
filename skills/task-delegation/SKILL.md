@@ -1,6 +1,6 @@
 ---
 name: task-delegation
-description: "Use when adapting loose task information into one worker packet and forwarding it via the task tool."
+description: "Use when adapting loose task information into one worker packet and forwarding it via the current supervisor's functions.subagent tool."
 selection:
   role: owner
   tags:
@@ -8,7 +8,7 @@ selection:
     inputs: [loose task information, worker report]
     outputs: [one worker packet, validated result]
     topics: [task delegation, resource reconciliation]
-    environments: [task tool]
+    environments: [functions.subagent]
   use_when: [one selected task must be dispatched and its report assessed]
   not_for: [decomposing a request into multiple tasks]
 class: inline
@@ -122,8 +122,9 @@ caller's authority. For a malformed result, return the original response and
 diagnostics for supervisory review. A supervisor may correct only the transient
 execution context and re-dispatch the complete task in a subsequent invocation;
 preserve the approved task's authoritative fields and do not infer completion or
-silently repair the malformed response. Keep the task tool, one worker per
-invocation, and no silent authority creep as hard boundaries.
+silently repair the malformed response. For the current supervisor environment,
+keep the `functions.subagent` tool, one worker per invocation, and no silent
+authority creep as hard boundaries.
 
 ## Execution Steps
 

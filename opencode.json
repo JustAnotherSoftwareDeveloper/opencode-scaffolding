@@ -133,7 +133,6 @@
       "permission": {
         "*": "allow",
         "task": "deny",
-        "todowrite": "deny",
         "question": "deny"
       }
     },
@@ -164,7 +163,6 @@
           "*": "deny",
           "~/.config/opencode/output-contract-template.md": "allow"
         },
-        "todowrite": "allow",
         "question": "allow",
         "task": {
           "*": "deny",
@@ -188,7 +186,6 @@
       "permission": {
         "*": "allow",
         "task": "deny",
-        "todowrite": "deny",
         "question": "deny"
       }
     }

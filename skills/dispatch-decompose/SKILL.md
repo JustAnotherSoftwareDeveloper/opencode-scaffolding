@@ -95,10 +95,16 @@ Return `BLOCKED:` for every non-complete or invalid result.
    Confirm `## DETAILS` contains the complete input verbatim.
    Confirm `## SKILLS` is exactly `breakdown-tasks`.
 5. **Invoke the worker.**
-   Call the `task` tool with `subagent_type: "worker"`.
-   Set `description` to `Decompose request into atomic tasks`.
-   Set `command` to `Decompose request into atomic tasks`.
-   Set `prompt` to the complete decomposition packet.
+   For the current supervisor environment only, call:
+
+   ```text
+   functions.subagent({
+     agent: "worker",
+     description: "Decompose request into atomic tasks",
+     prompt: <complete decomposition packet>
+   })
+   ```
+
 6. **Validate the worker result envelope.**
    Read `~/.config/opencode/output-contract-template.md` and validate the report
    against its complete envelope grammar, status rules, reconciliation rules, and

@@ -24,8 +24,7 @@
     {"name": "skill-script-python-writer", "class": "operation", "path": "skills/skill-script-python-writer/SKILL.md", "source": "project"},
     {"name": "skill-template-library", "class": "documentation", "path": "skills/skill-template-library/SKILL.md", "source": "project"},
     {"name": "task-delegation", "class": "inline", "path": "skills/task-delegation/SKILL.md", "source": "project"},
-    {"name": "task-executor", "class": "inline", "path": "skills/task-executor/SKILL.md", "source": "project"},
-    {"name": "todo-writer", "class": "inline", "path": "skills/todo-writer/SKILL.md", "source": "project"}
+    {"name": "task-executor", "class": "inline", "path": "skills/task-executor/SKILL.md", "source": "project"}
   ],
   "cases": [
     {"id": "python-script-task", "kind": "supported-task", "mode": "task", "request": "Create a deterministic Python CLI and library from these requirements.", "expected": {"names": ["skill-script-python-writer"], "paths": ["skills/skill-script-python-writer/SKILL.md"]}},
