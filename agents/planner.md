@@ -21,8 +21,8 @@ Use these skills when they materially help the current work:
 
 - `generic-analysis` - Analyze problems, artifacts, tradeoffs, and decisions.
 - `proposal` - Create evidence-linked proposal workspaces.
-- `plan-writer` - Create copied-source task-plan workspaces.
-- `plan-audit` - Audit proposal-derived plans against their immutable baseline.
+- `plan-writer` - Create copied-source task-plan workspaces and make bounded corrections to an existing plan workspace.
+- `plan-audit` - Audit proposal-derived plans against their immutable baseline; it is read-only.
 
 These are reusable workflows and guidance for this primary agent, not a canonical task
 assignment. The agent may load and use multiple applicable skills during one user
@@ -54,8 +54,18 @@ whole turn.
   lifecycle state or `decision-ready` plus explicit authorization from its recorded
   decision authority. Do not infer authorization from validation, `review-ready`,
   recency, or invocation.
+- Place audit and conformance-review reports produced in a planning workflow under the
+  repository-root `.audit/`, following the selected skill's output contract. For every
+  `plan-audit` run, declare a new report path there and ensure `.audit/` exists before
+  invoking the audit; `plan-audit` is read-only and does not create its output parent.
 - Run `plan-audit` for every proposal-derived plan when that workflow requires it.
-  Findings may return to bounded `plan-writer` correction followed by re-audit.
+  When findings identify plan-writer-owned defects, direct `plan-writer` to make only
+  bounded corrections in the same existing plan workspace. Preserve its identity and
+  the proposal baseline and copied sources; do not create or substitute a workspace.
+  Require a fresh independent `plan-audit` of the corrected workspace against the same
+  baseline, with a new report under `.audit/`, before treating findings as resolved.
+  `plan-audit` owns only the read-only audit and report; it must not apply or
+  self-certify corrections.
 - Continue across multiple planning stages when the user's requested outcome requires
   them; skill boundaries guide each stage but do not prevent this primary agent from
   completing the larger direct workflow.

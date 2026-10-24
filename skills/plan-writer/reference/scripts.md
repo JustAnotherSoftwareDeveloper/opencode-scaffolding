@@ -21,7 +21,16 @@ uv run --project ~/.config/opencode/scripts/python render-task-markdown \
 state-file form only; do not combine a positional input path with `--state-file`.
 
 For a bounded plan-owned correction after an audit finding, validate the revised
-`tasks.json` and rerender the existing `tasks.md` explicitly:
+`tasks.json` in the existing `$PLAN_DIR` without automatic edits. Inspect any diff and
+apply only fixes authorized by the exact finding before retrying validation:
+
+```bash
+uv run --project ~/.config/opencode/scripts/python validate-task-structure \
+  --state-file "$PLAN_DIR/tasks.json" \
+  --schema ~/.config/opencode/skills/breakdown-tasks/schema/task-packet.schema.json
+```
+
+After validation succeeds, rerender only that workspace's existing `tasks.md`:
 
 ```bash
 uv run --project ~/.config/opencode/scripts/python render-task-markdown \
@@ -32,3 +41,4 @@ uv run --project ~/.config/opencode/scripts/python render-task-markdown \
 
 `--overwrite` is limited to the existing rendered task document in the same plan
 workspace. It is not used for initial publication or to replace any other artifact.
+Correction does not invoke `init-task-packet` or create a new plan workspace.

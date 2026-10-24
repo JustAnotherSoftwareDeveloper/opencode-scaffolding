@@ -1,50 +1,45 @@
 ---
 name: plan-writer
-description: "Use when creating a source-document plan workspace that produces executable task JSON."
+description: "Use when creating a source-based plan workspace or correcting bounded audit findings in an existing plan."
 selection:
   role: owner
   tags:
-    actions: [create executable plan]
-    inputs: [source documents]
-    outputs: [plan workspace, executable task JSON]
-    topics: [implementation planning]
-    constraints: [source grounded]
-  use_when: [source documents must become an executable plan workspace]
+    actions: [create executable plan, correct plan-owned audit findings]
+    inputs: [source documents, existing plan workspace, audit report, finding IDs, proposal baseline, input manifest]
+    outputs: [plan workspace, executable task JSON, corrected task packet]
+    topics: [implementation planning, audit finding correction]
+    constraints: [source grounded, same-workspace correction]
+  use_when:
+    - source documents must become an executable plan workspace
+    - a caller requests bounded correction of plan-writer-owned findings in an existing plan
   not_for: [general analysis or decision proposal authoring]
 class: operation
 ---
 
 # Plan Writer
 
-Create an evidence-preserving plan workspace, author tasks from source documents, and publish.
+Steps 1–16 perform source-based initial creation and always create a new plan workspace. Use the separate bounded correction mode below for audit findings against an existing plan; never run workspace setup or publish a replacement workspace for a correction.
 
-## Input Contract
+## Initial Creation Input Contract
 
 Require a topic or summary and one or more source-document paths. Block when absent.
 
-When the source set contains `PROPOSAL.md`, read its `status`, `readiness`, and
-`decision-owner` before creating a workspace. Continue only when the proposal
-records an accepted lifecycle state, or when it is `decision-ready` and the
-recorded decision authority explicitly authorized planning. Validation success,
-`review-ready`, recency, and invocation alone do not authorize planning.
+When the source set contains `PROPOSAL.md`, read its `status`, `readiness`, and `decision-owner` before creating a workspace.
+Continue only when the proposal records an accepted lifecycle state, or when it is `decision-ready` and the recorded decision authority explicitly authorized planning. Validation success, `review-ready`, recency, and invocation alone do not authorize planning.
 
 ## Execution
 
 ### Workspace Setup
 
-1. **Validate sources.** Follow [the workspace contract](reference/workspace-contract.md).
-   Resolve every source path.
+1. **Validate sources.** Follow [the workspace contract](reference/workspace-contract.md). Resolve every source path.
    Block on a missing path, a non-file path, a target outside `$CWD`, or a target inside an existing plan workspace.
 
-2. **Create the workspace.** Derive a workspace-directory summary slug and
-    epoch-millisecond timestamp. Create `.plans/<epoch-ms>-<workspace-slug>/`
-    without replacing an existing directory. This directory identity is distinct
-    from the packet slug.
+2. **Create the workspace.** Derive a workspace-directory summary slug and epoch-millisecond timestamp. Create `.plans/<epoch-ms>-<workspace-slug>/` without replacing an existing directory.
+    This directory identity is distinct from the packet slug.
    Create category subdirectories only when sources belong to them.
 
-3. **Copy sources.** Copy each source into its category directory.
-   Preserve the source filename or add a deterministic collision suffix.
-   Never modify source documents.
+3. **Copy sources.** Copy each source into its category directory. Preserve the source filename or add a deterministic collision suffix.
+    Never modify source documents.
 
 ### Planning and Task Authoring
 
@@ -57,8 +52,7 @@ recorded decision authority explicitly authorized planning. Validation success,
    Capture stdout.
    Block on non-zero exit.
 
-5. **Select and load planning skills.** Present the source-backed request and planning array to the LLM.
-   Select every materially relevant planning skill and load each with the skill tool.
+5. **Select and load planning skills.** Present the source-backed request and planning array to the LLM. Select every materially relevant planning skill and load each with the skill tool.
    Reconcile its name and path against the collector winner. Reading its `SKILL.md`
    does not substitute for loading it. Block on an absent name, stale path, or load
    failure. Treat successful planning loads as passive context, not execution assignments.
@@ -89,10 +83,8 @@ recorded decision authority explicitly authorized planning. Validation success,
    Read any task-contract reference files needed for authoring explicitly.
    Block on an absent name, stale path, class mismatch, or load failure.
 
-9. **Author tasks.** Require the author to select one packet slug and write a
-    schema-valid canonical packet root. Preserve the selected packet slug unchanged.
-    The canonical task-packet schema used in validation step 14 owns the
-    packet-root fields and constraints, not this workflow.
+9. **Author tasks.** Require the author to select one packet slug and write a schema-valid canonical packet root. Preserve the selected packet slug unchanged.
+    The canonical task-packet schema used in validation step 14 owns packet-root fields and constraints, not this workflow.
     Follow [task-authoring rules](reference/task-authoring.md). For shared task
     semantics, use the already-loaded `task-contract` documentation skill. Consult
     `task-contract -> reference/task-identity.md`,
@@ -172,7 +164,7 @@ recorded decision authority explicitly authorized planning. Validation success,
 
 ### Render and Validate Workspace
 
-15. **Render tasks.md.** Run:
+15. **Render tasks.md for initial creation.** Run:
 
     ```bash
     uv run --project ~/.config/opencode/scripts/python render-task-markdown \
@@ -181,12 +173,25 @@ recorded decision authority explicitly authorized planning. Validation success,
     ```
 
     Block on non-zero exit.
-    After a bounded plan correction, rerun this command with `--overwrite` to replace
-    the stale rendered task document before mandatory re-audit.
+    Do not use `--overwrite` for initial publication; use correction-mode step 4 for an existing plan.
 
 16. **Validate the workspace.** Confirm every task purpose appears in `tasks.md` in order.
     Confirm all copied sources exist.
     Confirm `tasks.json` is present and readable.
+
+### Bounded Audit-Finding Correction
+
+1. Require the existing plan-directory path, exact audit report (or a finding extract retaining its run identity and complete input manifest), finding IDs, and proposal baseline. Verify the manifest identifies this target's pre-correction `tasks.json` and `tasks.md` and all supplied baseline files by path and recorded SHA-256; block missing, ambiguous, or mismatched identity, or absent `tasks.json`.
+2. Correct only the reported, plan-writer-owned findings in that workspace's `tasks.json`, preserving unrelated task content and packet identity. The only writable files are that `tasks.json` and its `tasks.md`; never modify copied sources or the proposal baseline, and block findings that require those edits. Inspect diffs and reject changes not authorized by the exact finding IDs.
+3. Validate the revised `tasks.json` with step 14's state-file command but omit `--auto-fix`; inspect each diff and fix only finding-authorized violations, including `skills` entries only when that finding authorizes them, then retry. Block if validation requires an out-of-scope fix. Do not create `draft.json`, invoke `init-task-packet`, or create, rename, or replace a plan workspace.
+4. After validation succeeds, rerender from the existing `tasks.json` with `--overwrite`; the output path must be exactly `$PLAN_DIR/tasks.md`:
+
+   ```bash
+   uv run --project ~/.config/opencode/scripts/python render-task-markdown \
+     --input "$PLAN_DIR/tasks.json" --output "$PLAN_DIR/tasks.md" --overwrite
+   ```
+
+5. Confirm task purposes remain in order and copied sources and the proposal baseline remain unchanged. Require a fresh independent `plan-audit` of the corrected plan and the same baseline before treating findings as resolved. `plan-audit` remains read-only and must not apply or self-certify corrections.
 
 ## Guardrails
 

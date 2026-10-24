@@ -27,17 +27,19 @@ republishes a packet, changes readiness, approves work, or delegates.
 ## Normalize Input
 
 Require one object with `planWorkspace`, `proposalBaseline`, `assignmentInventory`,
-and `auditOutput`. `planWorkspace` and `auditOutput` resolve under the caller's
-workspace root. The baseline is `authoritative` by default; `copied-snapshot` is
+and `auditOutput`. `planWorkspace` resolves under the caller's workspace root;
+`auditOutput` resolves beneath the repository-root `.audit/` directory. The baseline
+is `authoritative` by default; `copied-snapshot` is
 accepted only when the caller supplies an explicit unavailable/unreadable reason,
 origin identity, capture time, PROPOSAL.md plus its declared copied sources, and
 per-file manifest. The operation populates `assignmentInventory` from its one fresh
 collector run; any caller-supplied inventory is historical comparison evidence only
 and never replaces that fresh result.
 
-Keep audit reports in a dedicated evidence directory such as `.evidence/`, not as
-loose files in the workspace root. The caller must create the report parent before
-invoking the audit; do not silently redirect a declared output path.
+Keep the report external to all audited trees and beneath the repository-root
+`.audit/` directory. The caller must declare a new report path there and create its
+parent before invoking the audit. Do not create the parent, overwrite an existing
+report, or silently redirect a declared output path.
 
 An authoritative baseline must contain `PROPOSAL.md` with valid frontmatter
 (`title`, `slug`, `status`, `readiness`, `decision-owner`, `source-documents`),

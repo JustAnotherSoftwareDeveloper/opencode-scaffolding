@@ -10,6 +10,15 @@ This workflow preserves decision evidence through plan publication and the audit
 handoff. The proposal workspace provides decision context, scope boundaries,
 requirements, and open engineering decisions for `plan-writer`.
 
+## Passive Boundary
+
+This reference describes workflow states, artifacts, owners, and handoffs only. It is
+passive and non-transitive: it grants no executable steps, tools, writes, delegation,
+skill loading, approval, or completion authority. `plan-audit` is an independent,
+read-only report owner; `plan-writer` alone owns bounded plan correction. The full
+proposal-derived audit lifecycle is described in the
+[proposal-derived audit lifecycle](./proposal-derived-audit-lifecycle.md).
+
 ## Sequence
 
 1. `Proposal recorded` is owned by `proposal` and is represented by the proposal
@@ -22,13 +31,16 @@ requirements, and open engineering decisions for `plan-writer`.
    with `tasks.json`, `tasks.md`, and preserved source context.
 4. A published proposal-derived plan transitions to `Audit pending`, owned by
    `plan-audit`, with the exact plan snapshot and proposal baseline identified.
-5. `plan-audit` produces either `Audit passed` or `Audit findings` in its external
-   Markdown report:
-   - **`Audit passed`:** the external report records the pass disposition.
-   - **`Audit findings`:** the report identifies bounded remediation by finding ID;
-     the audit owner does not repair the plan.
-6. Findings transition to a `plan-writer`-owned bounded fix, then to a revised plan
-   and mandatory re-audit. The full state description is in the
+5. `plan-audit` produces either `Audit passed` or `Audit findings` in a new external
+   Markdown report under repository-root `.audit/`:
+   - **`Audit passed`:** the report records the pass disposition.
+   - **`Audit findings`:** the read-only report identifies bounded remediation by
+     stable finding ID and impact; it does not change the audited plan.
+6. For findings, `plan-writer` makes a bounded correction to `tasks.json` and
+   `tasks.md` in the same existing plan workspace, preserving its proposal and source
+   context. The resulting revised snapshot requires a new `plan-audit` report under
+   `.audit/`; this mandatory re-audit is read-only and applies to that revised
+   snapshot. The full state description is in the
    [proposal-derived audit lifecycle](./proposal-derived-audit-lifecycle.md).
 
 ## Artifacts
@@ -36,8 +48,10 @@ requirements, and open engineering decisions for `plan-writer`.
 - Proposal workspace.
 - Proposal source documents and any additional planning evidence.
 - Plan workspace containing `tasks.json` and `tasks.md`.
-- External audit report containing the pass or finding disposition.
-- Revised plan snapshot when a bounded finding fix exists.
+- External audit report under repository-root `.audit/`, containing the pass or
+  finding disposition.
+- Revised plan snapshot in the same existing plan workspace when a bounded finding
+  correction exists.
 
 ## Notes
 

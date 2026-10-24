@@ -160,6 +160,11 @@ def test_frontmatter_and_shared_contract_are_cut_over_before_authoring() -> (
 
     assert "name: plan-writer" in frontmatter
     assert "class: operation" in frontmatter
+    assert (
+        "correcting bounded audit findings in an existing plan" in frontmatter
+    )
+    assert "correct plan-owned audit findings" in frontmatter
+    assert "same-workspace correction" in frontmatter
     assert "name: plan\n" not in frontmatter
     assert "# Plan Writer" in workflow
     assert "Load the shared task contract before authoring" in workflow
@@ -208,6 +213,79 @@ def test_script_reference_matches_publication_and_validation_contract() -> None:
     assert '--input "$PLAN_DIR/tasks.json"' in scripts
     assert "$PLAN_DIR/.tasks" not in scripts
     assert "render-task-markdown" in workflow
+
+
+def test_bounded_correction_stays_in_place_and_requires_fresh_reaudit() -> None:
+    """Keep initial creation distinct from correction of an audited plan."""
+    workflow = _text("skills/plan-writer/SKILL.md")
+    scripts = _text("skills/plan-writer/reference/scripts.md")
+    initial, correction = workflow.split(
+        "### Bounded Audit-Finding Correction", maxsplit=1
+    )
+    correction_scripts = scripts.split(
+        "For a bounded plan-owned correction", maxsplit=1
+    )[1]
+
+    assert "always create a new plan workspace" in initial
+    assert "Create `.plans/<epoch-ms>-<workspace-slug>/`" in initial
+    assert "init-task-packet" in initial
+    assert "Do not use `--overwrite` for initial publication" in initial
+
+    assert (
+        "Require the existing plan-directory path, exact audit report (or a "
+        "finding extract retaining its run identity and complete input "
+        "manifest), finding IDs, and proposal baseline."
+    ) in correction
+    assert (
+        "manifest identifies this target's pre-correction `tasks.json` and "
+        "`tasks.md` and all supplied baseline files by path and recorded "
+        "SHA-256"
+    ) in correction
+    assert "block missing, ambiguous, or mismatched identity" in correction
+    assert "Correct only the reported, plan-writer-owned findings" in correction
+    assert "preserving unrelated task content and packet identity" in correction
+    assert (
+        "The only writable files are that `tasks.json` and its `tasks.md`; "
+        "never modify copied sources or the proposal baseline"
+    ) in correction
+    assert (
+        "Validate the revised `tasks.json` with step 14's state-file command "
+        "but omit `--auto-fix`"
+    ) in correction
+    assert (
+        "inspect each diff and fix only finding-authorized violations, "
+        "including `skills` entries only when that finding authorizes them"
+        in correction
+    )
+    assert (
+        "Do not create `draft.json`, invoke `init-task-packet`, or create, "
+        "rename, or replace a plan workspace."
+    ) in correction
+    assert (
+        "rerender from the existing `tasks.json` with `--overwrite`"
+        in correction
+    )
+    assert "output path must be exactly `$PLAN_DIR/tasks.md`" in correction
+    assert (
+        "copied sources and the proposal baseline remain unchanged"
+        in correction
+    )
+    assert (
+        "Require a fresh independent `plan-audit` of the corrected plan "
+        "and the "
+        "same baseline"
+    ) in correction
+
+    assert '--state-file "$PLAN_DIR/tasks.json"' in correction_scripts
+    assert "--auto-fix" not in correction_scripts
+    assert "--schema" in correction_scripts
+    assert '--input "$PLAN_DIR/tasks.json"' in correction_scripts
+    assert '--output "$PLAN_DIR/tasks.md"' in correction_scripts
+    assert "--overwrite" in correction_scripts
+    assert (
+        "Correction does not invoke `init-task-packet` or create a new plan "
+        "workspace."
+    ) in correction_scripts
 
 
 def test_documented_state_file_validator_form_executes(tmp_path: Path) -> None:
@@ -293,15 +371,51 @@ def test_active_callers_lifecycle_mappings_and_fixtures_use_new_identity() -> (
     None
 ):
     """Verify callers, lifecycle references, and fixtures use plan-writer."""
-    assert "Load the `plan-writer` skill." in _text("commands/plan.md")
-    assert "Load the `plan` skill." not in _text("commands/plan.md")
-    assert "Load the `plan-writer` skill." in _text(
-        "commands/leeroy-jenkins.md"
+    plan_command = _text("commands/plan.md")
+    assert "Load the `plan-writer` skill." in plan_command
+    assert "Load the `plan` skill." not in plan_command
+    assert (
+        "Authorize planning only when either the proposal records an "
+        "accepted lifecycle state"
+    ) in plan_command
+    assert "decision-ready" in plan_command
+    assert "recorded decision authority" in plan_command
+    assert "Do not infer acceptance" in plan_command
+    assert "For findings with plan-writer-owned remediation" in plan_command
+    assert "the existing plan workspace" in plan_command
+    assert (
+        "After each correction, perform a mandatory fresh read-only "
+        "`plan-audit`"
+        in plan_command
+    )
+
+    automation_command = _text("commands/leeroy-jenkins.md")
+    assert "Load the `plan-writer` skill and create a new plan workspace" in (
+        automation_command
+    )
+    assert "Stop after proposal creation unless" in automation_command
+    assert "Initial automation consent is not proposal acceptance" in (
+        automation_command
+    )
+    assert "recorded decision authority" in automation_command
+    assert "For findings with plan-writer-owned remediation" in (
+        automation_command
     )
     assert (
-        "`plan-writer` - Create copied-source task-plan workspaces."
-        in _text("agents/planner.md")
+        "After each correction, perform a mandatory fresh read-only "
+        "`plan-audit`"
+        in automation_command
     )
+    planner = " ".join(_text("agents/planner.md").split())
+    assert (
+        "`plan-writer` - Create copied-source task-plan workspaces and make "
+        "bounded corrections to an existing plan workspace."
+    ) in planner
+    assert (
+        "to make only bounded corrections in the same existing plan workspace"
+        in planner
+    )
+    assert "Require a fresh independent `plan-audit`" in planner
     index = _text("skills/README.md")
     assert (
         "[`plan-writer`][plan-writing] — create executable plan workspaces."

@@ -13,8 +13,9 @@ and non-transitive: it grants no executable steps, tools, writes, delegation, sk
 loading, approval, or completion authority.
 
 `plan-audit` remains an independent, read-only report owner. `plan-writer` remains
-the only owner of a bounded plan correction and revised plan. A finding does not
-authorize a repair, and an audit pass does not authorize approval.
+the only owner of a bounded plan correction and revised plan. Every audit report is
+external to the audited inputs and located under the repository-root `.audit/`.
+A finding does not authorize a repair, and an audit pass does not authorize approval.
 
 ## Forward States And Transitions
 
@@ -33,26 +34,31 @@ authorize a repair, and an audit pass does not authorize approval.
   pending**.
 - **Audit pending** — `plan-audit` owns the pending audit handoff. The artifact is
   an exact plan workspace, proposal baseline, task packet, and assignment context
-  identified for independent review. The state has two permitted report outcomes:
+  identified for independent review. Its report is external to the audited inputs
+  and under repository-root `.audit/`. The state has two permitted report outcomes:
   **Audit passed** or **Audit findings**.
 - **Audit passed** — `plan-audit` owns the external UTF-8 Markdown audit report with
   an overall `PASS` disposition and no finding handoff. This state has no fix
   transition unless a later explicit audit request or material change creates a new
   audit context.
-- **Audit findings** — `plan-audit` owns the external report with stable finding
-  IDs, check dispositions, evidence gaps, and remediation impact. The handoff names
-  finding IDs only; the report does not change the audited plan.
-- **Bounded plan-owned fix** — `plan-writer` owns a revision bounded by the exact
-  finding IDs, proposal decision, source evidence, and stated impact. The audit
-  report remains immutable, and the fix does not expand the proposal scope or
-  replace the proposal decision.
-- **Revised plan** — `plan-writer` owns the new plan snapshot and its preserved
-  proposal and source traceability. The revised plan transitions to **Mandatory
-  re-audit** rather than directly to a passed state.
+- **Audit findings** — `plan-audit` owns the external report under repository-root
+  `.audit/`, with stable finding IDs, check dispositions, evidence gaps, and
+  remediation impact. The handoff names finding IDs only; the report does not change
+  the audited plan.
+- **Bounded plan-owned correction** — `plan-writer` owns correction of the existing
+  plan workspace's `tasks.json` and `tasks.md`, bounded by the exact finding IDs,
+  proposal decision, source evidence, and stated impact. The audit report remains
+  immutable; copied sources and proposal context are preserved, and the correction
+  does not expand the proposal scope or replace its decision.
+- **Revised plan** — `plan-writer` owns the revised snapshot in that same existing
+  plan workspace, with its proposal and source traceability preserved. The revised
+  snapshot transitions to **Mandatory re-audit** rather than directly to a passed
+  state.
 - **Mandatory re-audit** — `plan-audit` owns a new external report against the
-  revised immutable snapshot. The report returns the lifecycle to **Audit passed**
-  or **Audit findings**; every further finding/fix loop repeats the same bounded
-  transition.
+  revised immutable snapshot, stored under repository-root `.audit/`. The report
+  returns the lifecycle to **Audit passed** or **Audit findings**; every further
+  finding/correction loop repeats the same bounded transition. `plan-audit` remains
+  read-only and does not apply or self-certify the correction.
 
 ## Evidence Labels And Handoff Shape
 

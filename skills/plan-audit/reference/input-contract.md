@@ -10,10 +10,11 @@ The operation accepts one object with these fields:
   `authoritative` or `copied-snapshot`.
 - `assignmentInventory` — an optional path or object containing a persisted skill
   inventory. It is historical comparison evidence only.
-- `auditOutput` — a new caller-declared Markdown path.
+- `auditOutput` — a new caller-declared Markdown path that resolves beneath the
+  repository-root `.audit/` directory.
 
-Declare the report inside a dedicated evidence directory such as `.evidence/`.
-Do not place loose audit reports in the workspace root. Prepare the parent before
+Declare the report beneath the repository-root `.audit/` directory. Do not place it
+in `.evidence/`, the plan workspace, or another directory. Prepare the parent before
 invocation; the audit does not create it or silently choose another destination.
 
 An authoritative baseline must contain `PROPOSAL.md` with valid YAML frontmatter
@@ -34,8 +35,10 @@ source-drift finding.
 ## Boundary
 
 The report parent must already exist and the target must not exist. The resolved
-report is under the workspace root and outside every plan, proposal, copied snapshot,
-persisted inventory, and selected skill tree. No alternate destination is chosen.
+report must be beneath the repository-root `.audit/` directory and outside every plan,
+proposal, copied snapshot, persisted inventory, and selected skill tree. Block if the
+caller-declared path does not satisfy these constraints; do not choose an alternate
+destination.
 
 The operation snapshots all readable regular files before checks and verifies their
 SHA-256 digest and byte length again before writing. A changed file blocks the check

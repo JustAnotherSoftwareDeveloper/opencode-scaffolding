@@ -25,17 +25,20 @@ Analyze ambiguous or cross-domain work with a deliberate, evidence-calibrated re
 
 ## Output
 
-Create one analysis document at `$CWD/.analysis/<unix-epoch-milliseconds>-<summary-slug>.md`.
+Choose the output route from the requested deliverable, not its subject or filename:
 
-Derive `<summary-slug>` as a lowercase kebab-case slug from the analysis question.
+- **Ordinary analysis (default):** Create one document at `$CWD/.analysis/<unix-epoch-milliseconds>-<summary-slug>.md`. Use the Ordinary Analysis Format below.
+- **Audit/review report:** Use this route only when the user explicitly requests a final audit or review report. Asking to analyze an audit or review, mentioning those words in a title or path, or citing an existing report does not qualify. A report states its review scope, evidence-linked findings, overall disposition, and verification limits; do not recast ordinary analysis as a report.
+  - When a specialized audit/review skill owns the requested scope, use that skill instead; generic-analysis does not replace it.
+  - When generic-analysis owns the request, create one report directly under repository-root `.audit/<unix-epoch-milliseconds>-<summary-slug>.md`. Create repository-root `.audit/` when absent.
 
-Create `$CWD/.analysis/` when absent.
+Derive `<summary-slug>` as a lowercase kebab-case slug from the analysis question or report subject.
 
-Never replace an existing analysis document.
+Create `$CWD/.analysis/` when ordinary analysis output is selected. Never replace an existing document or report; choose an unused output path.
 
-Return only the relative path to the created analysis document.
+Return only the relative path to the created document or report.
 
-### Output Format
+### Ordinary Analysis Format
 
 - **Question:** State the decision, claim, or problem under analysis.
 - **Scope:** Define the objective, boundaries, constraints, and success criteria.
@@ -77,9 +80,10 @@ Return only the relative path to the created analysis document.
 7. Test the leading conclusion against credible alternatives, boundary conditions, risks, and counterevidence.
 8. State a direct conclusion with a calibrated confidence level and the assumptions that limit it.
 9. Ask a focused question when a missing fact materially changes the conclusion.
-10. Derive an epoch-millisecond timestamp and lowercase kebab-case summary slug from the analysis question.
-11. Write the result in the specified output format to `$CWD/.analysis/<timestamp>-<summary-slug>.md`.
-12. Return the created document's relative path.
+10. Derive an epoch-millisecond timestamp and lowercase kebab-case summary slug from the analysis question or requested report subject.
+11. Select the output route using [Output](#output); an explicitly requested audit/review report must also pass its report criteria, while ordinary analysis remains the default.
+12. Write to the selected route using its specified content requirements.
+13. Return the created file's relative path.
 
 Execute one reasoning pass.
 Avoid delegation and multi-phase orchestration.
@@ -93,8 +97,8 @@ Avoid delegation and multi-phase orchestration.
 - Present alternatives fairly before rejecting them.
 - Keep recommendations within the stated scope and authority.
 - Do not execute changes unless the request explicitly includes implementation.
-- Write analysis documents only under `$CWD/.analysis/`.
-- Do not replace an existing analysis document.
+- Write ordinary analysis documents only under `$CWD/.analysis/`; write an explicitly requested audit/review report under repository-root `.audit/` only as specified in [Output](#output).
+- Do not route by topic words, filenames, or references to existing audits/reviews, and do not replace an existing output.
 
 ## Self-Validation
 
@@ -104,7 +108,8 @@ Avoid delegation and multi-phase orchestration.
 - State confidence and material uncertainty.
 - Deliver a conclusion that answers the request directly.
 - List actionable next steps when uncertainty or risk remains.
-- Confirm the analysis document exists at `$CWD/.analysis/<timestamp>-<summary-slug>.md`.
+- Confirm the created file exists under the selected route: ordinary analysis at `$CWD/.analysis/`, or an explicitly requested audit/review report at repository-root `.audit/`.
+- For an audit/review report, confirm it identifies the review scope, evidence-linked findings, overall disposition, and verification limits.
 
 ## Docs
 

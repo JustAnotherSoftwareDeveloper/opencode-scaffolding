@@ -190,5 +190,45 @@
       }
     }
   },
-  "plugin": []
+  "plugin": [],
+  "mcp": {
+    "servers": {
+      "context7": {
+        "type": "remote",
+        "url": "https://mcp.context7.com/mcp/oauth"
+      },
+      "deepwiki": {
+        "type": "remote",
+        "url": "https://mcp.deepwiki.com/mcp"
+      },
+      "exa": {
+        "type": "remote",
+        "url": "https://mcp.exa.ai/mcp"
+      },
+      "playwright": {
+        "type": "local",
+        "command": [
+          "/home/michael/.config/opencode/node_modules/.bin/playwright-mcp",
+          "--headless",
+          "--browser=chromium"
+        ],
+        "cwd": "/home/michael/.config/opencode",
+        "environment": {
+          "PLAYWRIGHT_BROWSERS_PATH": "/home/michael/.config/opencode/.cache/ms-playwright"
+        }
+      },
+      "serena": {
+        "type": "local",
+        "command": [
+          "/home/michael/.config/opencode/.tools/bin/serena",
+          "start-mcp-server",
+          "--project-from-cwd"
+        ],
+        "cwd": "/home/michael/.config/opencode"
+      }
+    }
+  },
+  "plugins": [
+    "@upstash/context7-opencode"
+  ]
 }

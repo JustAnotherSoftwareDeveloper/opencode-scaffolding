@@ -165,13 +165,38 @@ def _inside(path: Path, root: Path) -> bool:
         return False
 
 
+def _default_workspace_root() -> Path:
+    """Use the current working repository root, or the standalone CWD."""
+    cwd = Path.cwd().resolve()
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=cwd,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+    except OSError:
+        return cwd
+    if result.returncode != 0 or not result.stdout.strip():
+        return cwd
+    return Path(result.stdout.strip()).resolve()
+
+
 def normalize_input(raw: Mapping[str, Any], *, workspace_root: Path | None = None) -> NormalizedInput:
     """Normalize the exact public input object without reading audited files."""
     required = {"planWorkspace", "proposalBaseline", "assignmentInventory", "auditOutput"}
     missing = required.difference(raw)
     if missing:
         raise AuditInputError(f"missing normalized input fields: {', '.join(sorted(missing))}")
-    root = (workspace_root or Path.cwd()).resolve()
+    # The output boundary belongs to the audited workspace, not this installed
+    # skill's project. Keep an explicit root override for API callers and tests.
+    root = (
+        workspace_root.resolve()
+        if workspace_root is not None
+        else _default_workspace_root()
+    )
     plan = _resolve(str(raw["planWorkspace"]), root)
     baseline = raw["proposalBaseline"]
     if not isinstance(baseline, Mapping):
@@ -198,6 +223,11 @@ def normalize_input(raw: Mapping[str, Any], *, workspace_root: Path | None = Non
         comparison_root = _resolve(str(comparison["root"]), root)
     if not _inside(output, root):
         raise AuditInputError("auditOutput must be under the workspace root")
+    audit_directory = root / ".audit"
+    if output == audit_directory or not _inside(output, audit_directory):
+        raise AuditInputError(
+            "auditOutput must be under the repository-root .audit directory"
+        )
     if output.exists():
         raise AuditInputError("auditOutput already exists; refusing overwrite")
     if not output.parent.is_dir():

@@ -6,20 +6,21 @@ selection:
   tags:
     actions: [assess, review]
     inputs: [existing skill workspace, class contract, selection profile]
-    outputs: [conformance analysis]
+    outputs: [conformance report]
     topics: [skill conformance, validation evidence]
     constraints: [read-only review, one workspace]
   use_when:
     - a maintainer needs findings and a pass/fail recommendation for one existing skill
   not_for:
     - creating or editing a skill, migrating a family, choosing taxonomy, or replacing validators
+    - ordinary analysis unrelated to a skill-conformance review
 class: operation
 ---
 
 # Skill Reviewer
 
 Assess one existing skill workspace against its applicable contracts and publish one
-evidence-linked conformance analysis without changing the workspace.
+evidence-linked conformance report without changing the workspace.
 
 ## Normalize Input
 
@@ -39,12 +40,21 @@ prose-policy owner when semantic form selection and `TABLE-001` apply.
 5. Separate deterministic conformance evidence from human clarity judgment. Do not
    treat lint as proof of readability, comprehension, navigation quality, or task
    success.
-6. Publish one analysis with findings, evidence links, disposition, and unavailable or
-   inapplicable checks.
+6. Publish one conformance report with findings, evidence links, disposition, and
+   unavailable or inapplicable checks to repository-root
+   `.audit/<epoch-ms>-<slug>.md`. Set `<epoch-ms>` to the report creation time in
+   milliseconds since the Unix epoch. Set `<slug>` to a lowercase, hyphen-separated
+   summary of the reviewed skill and report. Create repository-root `.audit/` if it is
+   absent. Choose an unused destination rather than overwriting an existing report.
+   Do not use this destination for ordinary analyses; this operation produces only its
+   conformance review report.
 
 ## Self-Validation
 
-- The review covers one existing workspace and does not modify it.
+- The review covers one existing workspace and does not modify it; only its report is
+  written outside that workspace.
+- The conformance report is under repository-root `.audit/` and includes the review
+  findings and disposition.
 - Every finding has a source path, evidence, severity, and bounded recommendation.
 - Applicable findings distinguish deterministic prose-policy conformance from human
   clarity judgment.
@@ -54,5 +64,5 @@ prose-policy owner when semantic form selection and `TABLE-001` apply.
 
 ## Expected Output
 
-One evidence-linked conformance analysis grouped by contract, metadata, structure,
+One evidence-linked conformance report grouped by contract, metadata, structure,
 style, and workflow behavior, with a complete disposition and explicit evidence gaps.

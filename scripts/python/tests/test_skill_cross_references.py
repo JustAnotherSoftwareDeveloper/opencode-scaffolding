@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -133,19 +134,88 @@ def test_cross_reference_policy_is_indexed_and_loads_before_resolution() -> (
     )
 
 
-def test_audit_loads_documentation_and_uses_a_dedicated_evidence_directory(  # noqa: E501
-) -> None:
-    """Verify audits load task-contract guidance and use dedicated evidence."""
+def test_plan_audit_routes_to_audit_directory() -> None:
+    """Verify audits load task-contract guidance and use the audit directory."""
     text = (SKILLS / "plan-audit/SKILL.md").read_text(encoding="utf-8")
     text = " ".join(text.split())
     assert "load the exact fresh `task-contract` documentation winner" in text
     assert "skill tool before semantic checks" in text
     assert "reading `SKILL.md` is not a substitute for a load" in text
-    assert "dedicated evidence directory such as `.evidence/`" in text
-    assert "not as loose files in the workspace root" in text
+    assert (
+        "`auditOutput` resolves beneath the repository-root `.audit/` directory"
+        in text
+    )
+    assert (
+        "Keep the report external to all audited trees and beneath the "
+        "repository-root "
+        "`.audit/` directory"
+    ) in text
+    assert "Do not create the parent, overwrite an existing report" in text
+    assert ".analysis/" not in text
 
 
-def test_offloading_audit_reports_live_in_evidence_not_the_repository_root(  # noqa: E501
-) -> None:
-    """Verify offloading audit reports stay under the evidence directory."""
+def test_skill_review_reports_use_the_audit_directory() -> None:
+    """Verify skill reviews publish reports under repository-root .audit/."""
+    text = " ".join(
+        (SKILLS / "skill-reviewer/SKILL.md").read_text(encoding="utf-8").split()
+    )
+    report_route = text.split("Publish one conformance report", 1)[1].split(
+        "## Self-Validation", 1
+    )[0]
+    assert "repository-root `.audit/<epoch-ms>-<slug>.md`" in text
+    assert "The conformance report is under repository-root `.audit/`" in text
+    assert "Do not use this destination for ordinary analyses" in text
+    assert ".analysis/" not in report_route
+
+
+def test_generic_analysis_audit_and_analysis_routes() -> None:
+    """Verify only explicit generic audits use .audit, not ordinary analysis."""
+    text = (SKILLS / "generic-analysis/SKILL.md").read_text(encoding="utf-8")
+    output = text.split("## Output", 1)[1].split("## Analysis Types", 1)[0]
+    ordinary_route, audit_route = output.split(
+        "- **Audit/review report:**", 1
+    )
+    audit_route = audit_route.split("\nDerive `<summary-slug>`", 1)[0]
+
+    assert "Ordinary analysis (default)" in ordinary_route
+    assert (
+        "$CWD/.analysis/<unix-epoch-milliseconds>-<summary-slug>.md"
+        in ordinary_route
+    )
+    assert (
+        "only when the user explicitly requests a final audit or review report"
+        in audit_route
+    )
+    assert (
+        "directly under repository-root "
+        "`.audit/<unix-epoch-milliseconds>-<summary-slug>.md`"
+    ) in audit_route
+    assert ".analysis/" not in audit_route
+
+
+def test_audit_directory_is_ignored() -> None:
+    """Verify the repository ignore rule excludes audit reports."""
+    ignore_text = (ROOT / ".gitignore").read_text(encoding="utf-8")
+    ignore_rules = ignore_text.splitlines()
+    assert "/.audit/" in ignore_rules
+    result = subprocess.run(
+        [
+            "git",
+            "check-ignore",
+            "--verbose",
+            "--no-index",
+            ".audit/audit-routing-regression.md",
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert ".gitignore" in result.stdout
+    assert "/.audit/" in result.stdout
+
+
+def test_offloading_audit_reports_do_not_live_in_the_repository_root() -> None:
+    """Verify offloading audit reports are not loose root files."""
     assert not list(ROOT.glob("static-operation-skill-offloading-*audit*.md"))

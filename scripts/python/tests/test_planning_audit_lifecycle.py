@@ -80,7 +80,7 @@ def test_proposal_derived_lifecycle_has_the_mandatory_reaudit_loop() -> None:
         "Audit pending",
         "Audit passed",
         "Audit findings",
-        "Bounded plan-owned fix",
+        "Bounded plan-owned correction",
         "Revised plan",
         "Mandatory re-audit",
     ]
@@ -90,11 +90,99 @@ def test_proposal_derived_lifecycle_has_the_mandatory_reaudit_loop() -> None:
     assert "plan-writer" in text
     assert "plan-audit" in text
     assert "mandatory re-audit" in text.lower()
-    assert "revised plan transitions to **Mandatory\n  re-audit**" in text
     assert "review-ready" in text
     assert "do not cause this transition" in text
     assert "decision-ready" in text
     assert "recorded\n  `decision-owner`" in text
+    collapsed = " ".join(text.split())
+    assert (
+        "The revised snapshot transitions to **Mandatory re-audit** rather than"
+        " directly to a passed state."
+    ) in collapsed
+    assert "recorded accepted lifecycle state" in collapsed
+    assert (
+        "`decision-ready` plus explicit planning authorization"
+        " from the recorded `decision-owner`."
+    ) in collapsed
+    assert (
+        "Publication, validation, `review-ready`, baseline stability, recency,"
+        " and invocation do not cause this transition."
+    ) in collapsed
+
+
+def test_audit_reports_are_external_read_only_and_root_routed() -> None:
+    """Verify reports stay outside audited plans and under .audit/."""
+    text = _text(
+        "skills/planning-pipeline-architecture/reference/proposal-derived-audit-lifecycle.md"
+    )
+    collapsed = " ".join(text.split())
+
+    assert (
+        "`plan-audit` remains an independent, read-only report owner."
+        in collapsed
+    )
+    assert (
+        "Every audit report is external to the audited inputs and located under"
+        " the repository-root `.audit/`."
+    ) in collapsed
+    assert "external UTF-8 Markdown audit report" in collapsed
+    assert "external report under repository-root `.audit/`" in collapsed
+    assert (
+        "new external report against the revised immutable snapshot,"
+        " stored under repository-root `.audit/`."
+    ) in collapsed
+    assert "the report does not change the audited plan." in collapsed
+    assert (
+        "`plan-audit` remains read-only and does not apply or self-certify the"
+        " correction."
+    ) in collapsed
+
+
+def test_correction_is_bounded_in_the_same_workspace_before_reaudit() -> None:
+    """Verify findings lead to an in-place fix and mandatory re-audit."""
+    text = _text(
+        "skills/planning-pipeline-architecture/reference/proposal-derived-audit-lifecycle.md"
+    )
+    collapsed = " ".join(text.split())
+
+    assert (
+        "`plan-writer` owns correction of the existing plan workspace's"
+        " `tasks.json` and `tasks.md`"
+    ) in collapsed
+    assert (
+        "bounded by the exact finding IDs, proposal decision, source evidence,"
+        " and stated impact."
+    ) in collapsed
+    assert "copied sources and proposal context are preserved" in collapsed
+    assert (
+        "does not expand the proposal scope or "
+        "replace its decision." in collapsed
+    )
+    assert (
+        "`plan-writer` owns the revised snapshot in that same existing"
+        " plan workspace"
+        in collapsed
+    )
+    assert (
+        "The revised snapshot transitions to **Mandatory re-audit** rather than"
+        " directly to a passed state."
+    ) in collapsed
+
+
+def test_proposal_derived_workflows_keep_audits_and_fixes_in_scope() -> None:
+    """Verify workflow summaries retain external audits and in-place fixes."""
+    references = (
+        "skills/planning-pipeline-architecture/reference/proposal-to-plan.md",
+        "skills/planning-pipeline-architecture/reference/analysis-to-proposal-to-plan.md",
+    )
+    for relative in references:
+        collapsed = " ".join(_text(relative).split())
+        lowered = collapsed.lower()
+        assert ".audit/" in collapsed
+        assert "same existing plan workspace" in collapsed
+        assert "mandatory" in lowered
+        assert "re-audit" in lowered
+        assert "read-only" in lowered
 
 
 def test_blocked_handoffs_preserve_exact_needed_input_and_impact() -> None:

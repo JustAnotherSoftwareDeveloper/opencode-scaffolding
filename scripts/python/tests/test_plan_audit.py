@@ -236,8 +236,9 @@ def _input(
     proposal = tmp_path / "proposal"
     _proposal(proposal)
     _plan(plan, [_task()])
-    output = tmp_path / "reports" / "audit.md"
-    output.parent.mkdir()
+    audit_directory = tmp_path / ".audit"
+    audit_directory.mkdir()
+    output = audit_directory / "audit.md"
     baseline: dict[str, Any] = {"mode": "authoritative", "root": str(proposal)}
     if copied:
         manifest = []
@@ -295,6 +296,7 @@ def test_clean_report_is_composite_and_read_only(tmp_path: Path) -> None:
     assert "## Proposal compliance" in result.report
     assert "## Task atomicity" in result.report
     assert "## Skill assignment" in result.report
+    assert result.report_path == Path(raw["auditOutput"])
     assert result.report_path.read_text(encoding="utf-8").startswith(
         "# Plan Audit Report"
     )
@@ -444,9 +446,25 @@ def test_passive_documentation_without_an_operation_owner_fails(
 
 
 def test_mismatched_operation_contract_fails(tmp_path: Path) -> None:
-    """Verify an operation skill that mismatches the task is rejected."""
+    """Reject an operation whose profile has no request-facing match."""
     raw, plan, _ = _input(tmp_path)
-    _plan(plan, [_task(skills=["plan-writer"])])
+    task = _task(skills=["plan-writer"])
+    task.update(
+        {
+            "purpose": "Create a customer onboarding email",
+            "context": (
+                "Write a concise welcome note using the supplied profile."
+            ),
+            "filesToRead": ["customer-profile.json"],
+            "filesToWrite": ["welcome-email.md"],
+            "executionInstructions": [
+                {"step": 1, "action": "Read the customer profile."},
+                {"step": 2, "action": "Write the welcome email."},
+            ],
+            "expectedOutput": "One customer welcome email.",
+        }
+    )
+    _plan(plan, [task])
     result = plan_audit.audit(
         raw,
         workspace_root=tmp_path,
@@ -479,7 +497,7 @@ def test_persisted_stale_winner_is_comparison_failure_not_a_repair(
         encoding="utf-8",
     )
     raw["assignmentInventory"] = str(inventory)
-    raw["auditOutput"] = str(tmp_path / "reports" / "stale.md")
+    raw["auditOutput"] = str(tmp_path / ".audit" / "stale.md")
     result = plan_audit.audit(
         raw,
         workspace_root=tmp_path,
@@ -517,13 +535,13 @@ def test_authoritative_copy_drift_is_stable_source_finding(
         "captureTime": "2026-08-24T00:00:00Z",
         "manifest": manifest,
     }
-    raw["auditOutput"] = str(tmp_path / "reports" / "drift.md")
+    raw["auditOutput"] = str(tmp_path / ".audit" / "drift.md")
     first = plan_audit.audit(
         raw,
         workspace_root=tmp_path,
         collector_runner=lambda cwd: _collector(cwd),
     )
-    raw["auditOutput"] = str(tmp_path / "reports" / "drift-again.md")
+    raw["auditOutput"] = str(tmp_path / ".audit" / "drift-again.md")
     second = plan_audit.audit(
         raw,
         workspace_root=tmp_path,
@@ -558,13 +576,134 @@ def test_copied_snapshot_requires_complete_provenance_and_manifest(
         )
 
 
-def test_output_boundary_refuses_existing_or_audited_target(
+def test_output_boundary_refuses_target_outside_audit_directory(
     tmp_path: Path,
 ) -> None:
-    """Verify audit output cannot overwrite an existing or audited path."""
-    raw, plan, _ = _input(tmp_path)
+    """Verify output must be beneath the repository-root .audit directory."""
+    raw, _, _ = _input(tmp_path)
+    raw["auditOutput"] = str(tmp_path / "outside.md")
+
+    with pytest.raises(
+        plan_audit.AuditInputError,
+        match="under the repository-root .audit directory",
+    ):
+        plan_audit.audit(
+            raw,
+            workspace_root=tmp_path,
+            collector_runner=lambda cwd: _collector(cwd),
+        )
+
+
+def test_default_git_root_accepts_root_audit_output_from_nested_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Accept the repository-root .audit report when invoked below the root."""
+    subprocess.run(
+        ["git", "init", "--quiet", str(tmp_path)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    nested = tmp_path / "nested" / "working-directory"
+    nested.mkdir(parents=True)
+    monkeypatch.chdir(nested)
+    raw, _, _ = _input(tmp_path)
+
+    result = plan_audit.audit(
+        raw,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
+
+    assert result.report_path == tmp_path / ".audit" / "audit.md"
+    assert result.report_path.is_file()
+
+
+def test_default_git_root_rejects_nested_audit_directory_from_nested_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Reject a nested .audit when the repository root is an ancestor CWD."""
+    subprocess.run(
+        ["git", "init", "--quiet", str(tmp_path)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    nested = tmp_path / "nested" / "working-directory"
+    nested_audit = nested / ".audit"
+    nested_audit.mkdir(parents=True)
+    monkeypatch.chdir(nested)
+    raw, _, _ = _input(tmp_path)
+    raw["auditOutput"] = str(nested_audit / "audit.md")
+
+    with pytest.raises(
+        plan_audit.AuditInputError,
+        match="under the repository-root .audit directory",
+    ):
+        plan_audit.audit(raw, collector_runner=lambda cwd: _collector(cwd))
+
+
+def test_explicit_workspace_root_accepts_root_audit_output_from_nested_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Keep explicit root selection independent of the nested invocation CWD."""
+    nested = tmp_path / "nested" / "working-directory"
+    nested.mkdir(parents=True)
+    monkeypatch.chdir(nested)
+    raw, _, _ = _input(tmp_path)
+
+    result = plan_audit.audit(
+        raw,
+        workspace_root=tmp_path,
+        collector_runner=lambda cwd: _collector(cwd),
+    )
+
+    assert result.report_path == tmp_path / ".audit" / "audit.md"
+    assert result.report_path.is_file()
+
+
+def test_output_boundary_refuses_existing_target(tmp_path: Path) -> None:
+    """Verify audit output cannot overwrite an existing report."""
+    raw, _, _ = _input(tmp_path)
+    output = tmp_path / ".audit" / "existing.md"
+    output.write_text("existing report\n", encoding="utf-8")
+    raw["auditOutput"] = str(output)
+
+    with pytest.raises(plan_audit.AuditInputError, match="refusing overwrite"):
+        plan_audit.audit(
+            raw,
+            workspace_root=tmp_path,
+            collector_runner=lambda cwd: _collector(cwd),
+        )
+
+
+def test_output_boundary_requires_existing_parent(tmp_path: Path) -> None:
+    """Verify audit output does not create its parent directory."""
+    raw, _, _ = _input(tmp_path)
+    missing_parent = tmp_path / ".audit" / "missing"
+    raw["auditOutput"] = str(missing_parent / "audit.md")
+
+    with pytest.raises(
+        plan_audit.AuditInputError, match="parent must already exist"
+    ):
+        plan_audit.audit(
+            raw,
+            workspace_root=tmp_path,
+            collector_runner=lambda cwd: _collector(cwd),
+        )
+
+
+def test_output_boundary_refuses_audited_target(tmp_path: Path) -> None:
+    """Verify audit output cannot be placed inside an audited plan tree."""
+    raw, _, _ = _input(tmp_path)
+    plan = tmp_path / ".audit" / "plan"
+    _plan(plan, [_task()])
+    raw["planWorkspace"] = str(plan)
     raw["auditOutput"] = str(plan / "inside.md")
-    with pytest.raises(plan_audit.AuditInputError):
+
+    with pytest.raises(
+        plan_audit.AuditInputError,
+        match="outside every declared audited tree",
+    ):
         plan_audit.audit(
             raw,
             workspace_root=tmp_path,
@@ -744,6 +883,7 @@ def test_standalone_cli_supplies_structural_validator_dependencies(
 
     assert process.returncode == 0, process.stderr
     payload = json.loads(process.stdout)
+    assert payload["report"] == raw["auditOutput"]
     assert payload["overall"] in {"PASS", "CONDITIONAL PASS", "FAIL", "BLOCKED"}
     assert "No module named 'jsonschema'" not in Path(
         payload["report"]

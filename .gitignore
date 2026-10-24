@@ -63,4 +63,7 @@ coverage
 .opencode/
 # Evidence artifacts (operational, not code)
 .evidence/
+.audit/
 .audits/
+.tools/
+.cache
