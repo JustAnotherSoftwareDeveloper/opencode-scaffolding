@@ -29,6 +29,8 @@ contract details.
 - [`breakdown-tasks`][decomposition] — decompose requests into bounded task
   packets.
 - [`display-tasks`][display] — render canonical task summaries.
+- [`generic-research`][research] — answer bounded questions requiring
+  external evidence discovery.
 - [`plan-writer`][plan-writing] — create executable plan workspaces.
 - [`proposal`][proposals] — create evidence-based decision proposals.
 
@@ -62,6 +64,7 @@ contract details.
 [decomposition]: ./breakdown-tasks/SKILL.md
 [packet-engine]: ./customize-opencode/SKILL.md
 [display]: ./display-tasks/SKILL.md
+[research]: ./generic-research/SKILL.md
 [plan-writing]: ./plan-writer/SKILL.md
 [proposals]: ./proposal/SKILL.md
 [questions]: ./ask-question/SKILL.md

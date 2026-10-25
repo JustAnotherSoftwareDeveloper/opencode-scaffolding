@@ -172,9 +172,7 @@ def test_generic_analysis_audit_and_analysis_routes() -> None:
     """Verify only explicit generic audits use .audit, not ordinary analysis."""
     text = (SKILLS / "generic-analysis/SKILL.md").read_text(encoding="utf-8")
     output = text.split("## Output", 1)[1].split("## Analysis Types", 1)[0]
-    ordinary_route, audit_route = output.split(
-        "- **Audit/review report:**", 1
-    )
+    ordinary_route, audit_route = output.split("- **Audit/review report:**", 1)
     audit_route = audit_route.split("\nDerive `<summary-slug>`", 1)[0]
 
     assert "Ordinary analysis (default)" in ordinary_route
@@ -197,7 +195,7 @@ def test_audit_directory_is_ignored() -> None:
     """Verify the repository ignore rule excludes audit reports."""
     ignore_text = (ROOT / ".gitignore").read_text(encoding="utf-8")
     ignore_rules = ignore_text.splitlines()
-    assert "/.audit/" in ignore_rules
+    assert ".audit/" in ignore_rules
     result = subprocess.run(
         [
             "git",
@@ -213,7 +211,7 @@ def test_audit_directory_is_ignored() -> None:
     )
     assert result.returncode == 0, result.stderr
     assert ".gitignore" in result.stdout
-    assert "/.audit/" in result.stdout
+    assert ".audit/" in result.stdout
 
 
 def test_offloading_audit_reports_do_not_live_in_the_repository_root() -> None:

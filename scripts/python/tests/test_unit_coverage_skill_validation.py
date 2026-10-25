@@ -198,7 +198,7 @@ def test_docs_examples_and_reference_index_checks_cover_empty_and_present_cases(
     assert "No H2" in checks.check_docs_last_section(no_headings).detail
 
 
-def test_sentence_voice_and_placeholder_checks_honor_prose_and_skip_rules(
+def test_voice_and_placeholder_checks_honor_prose_and_skip_rules(
     tmp_path: Path,
 ) -> None:
     """Report prose defects while ignoring supported skip regions."""
@@ -206,19 +206,17 @@ def test_sentence_voice_and_placeholder_checks_honor_prose_and_skip_rules(
     assert checks.check_description_prefix(skill.parent).passed
     (skill.parent / "reference").mkdir()
     (skill.parent / "reference" / "reference.md").write_text(
-        "One. Two.\nThis is used.\n<<kept>>\n", encoding="utf-8"
+        "Reference prose.\nThis is used.\n<<kept>>\n", encoding="utf-8"
     )
     (skill.parent / "templates").mkdir()
     (skill.parent / "templates" / "template.md").write_text(
         "<<intentional>>\n", encoding="utf-8"
     )
-    assert checks.check_one_sentence_per_line(skill.parent).passed
     assert checks.check_no_declarative_voice(skill.parent).passed
     assert checks.check_no_placeholders(skill.parent).passed
 
     (skill.parent / "guide.md").write_text(
-        "First. Second. Third.\n" * 7
-        + "This is used.\n" * 7
+        "This is used.\n" * 7
         + "<<missing>>\n" * 7
         + "1. One sentence.\n2. Another sentence.\n"
         + "* A bullet.\n> A quotation.\n"
@@ -226,18 +224,40 @@ def test_sentence_voice_and_placeholder_checks_honor_prose_and_skip_rules(
         + "3. It is used.\n",
         encoding="utf-8",
     )
-    sentence = checks.check_one_sentence_per_line(skill.parent)
     voice = checks.check_no_declarative_voice(skill.parent)
     placeholders = checks.check_no_placeholders(skill.parent)
-    assert not sentence.passed and "and 2 more" in sentence.detail
     assert not voice.passed and "and 2 more" in voice.detail
     assert not placeholders.passed and "and 2 more" in placeholders.detail
 
     no_markdown = tmp_path / "no-markdown"
     no_markdown.mkdir()
-    assert not checks.check_one_sentence_per_line(no_markdown).passed
     assert not checks.check_no_declarative_voice(no_markdown).passed
     assert not checks.check_no_placeholders(no_markdown).passed
+
+
+def test_registry_omits_physical_line_rule_and_keeps_other_checks(
+    tmp_path: Path,
+) -> None:
+    """Omit physical-line policy and retain all other aggregate checks."""
+    skill = _write_skill(tmp_path)
+
+    checks_result = registry.run_all(skill.parent)["checks"]
+    check_names = [result["name"] for result in checks_result]
+
+    assert "one-sentence-per-line" not in check_names
+    assert check_names == [
+        "frontmatter-valid",
+        "name-matches-dir",
+        "description-prefix",
+        "class-valid",
+        "docs-last-section",
+        "reference-readme-exists",
+        "no-examples-section",
+        "no-declarative-voice",
+        "no-placeholders",
+        "cross-references-exist",
+    ]
+    assert all(result["passed"] for result in checks_result)
 
 
 def test_cross_reference_check_resolves_root_and_file_relative_links(

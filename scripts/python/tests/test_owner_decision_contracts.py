@@ -47,6 +47,6 @@ def test_malformed_report_requires_supervisory_redispatch_not_repair() -> None:
         assert "diagnostics" in content
         assert "re-dispatch" in content
     assert "Never translate malformed output into a valid report" in delegation
-    assert "one worker per\ninvocation" in delegation
+    assert re.search(r"one worker per\s+invocation", delegation)
     assert "transient" in delegator
     assert re.search(r"does not repair\s+the approved packet", executor)

@@ -41,8 +41,6 @@ PLACEHOLDER_PATTERN = re.compile(r"<<[^>]+>>")
 
 RELATIVE_LINK_PATTERN = re.compile(r"\]\(\./.*?\.md(?:\#.*?)?\)")
 
-SENTENCE_END_PATTERN = re.compile(r"[.!?][\s'\u2019\u201d]")
-
 
 def _is_in_skip_directory(
     file_path: Path, skill_dir: Path, dirs: frozenset[str]

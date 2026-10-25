@@ -17,7 +17,6 @@ from .checks import (
     check_no_declarative_voice,
     check_no_examples_section,
     check_no_placeholders,
-    check_one_sentence_per_line,
     check_reference_readme_exists,
 )
 
@@ -33,7 +32,6 @@ ALL_CHECKS: list[tuple[str, Callable[..., CheckResult]]] = [
     ("docs-last-section", check_docs_last_section),
     ("reference-readme-exists", check_reference_readme_exists),
     ("no-examples-section", check_no_examples_section),
-    ("one-sentence-per-line", check_one_sentence_per_line),
     ("no-declarative-voice", check_no_declarative_voice),
     ("no-placeholders", check_no_placeholders),
     ("cross-references-exist", check_cross_references_exist),

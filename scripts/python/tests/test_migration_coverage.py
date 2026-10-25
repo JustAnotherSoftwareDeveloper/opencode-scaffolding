@@ -39,7 +39,6 @@ from lib.skill_validator.checks import (
     check_no_declarative_voice,
     check_no_examples_section,
     check_no_placeholders,
-    check_one_sentence_per_line,
     check_reference_readme_exists,
 )
 from lib.skill_validator.registry import run_all
@@ -344,7 +343,9 @@ def test_skill_validator_checks_and_cli(tmp_path: Path) -> None:
     assert check_docs_last_section(skill.parent).passed
     assert check_reference_readme_exists(skill.parent).passed
     assert check_no_examples_section(skill.parent).passed
-    assert check_one_sentence_per_line(skill.parent).passed
+    assert "one-sentence-per-line" not in {
+        check["name"] for check in run_all(skill.parent)["checks"]
+    }
     assert check_no_declarative_voice(skill.parent).passed
     assert check_no_placeholders(skill.parent).passed
     assert check_cross_references_exist(skill.parent).passed

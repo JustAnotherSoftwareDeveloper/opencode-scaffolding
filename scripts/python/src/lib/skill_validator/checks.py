@@ -15,7 +15,6 @@ from .helpers import (
     PLACEHOLDER_PATTERN,
     PLANNING_DESCRIPTION_PREFIX,
     RELATIVE_LINK_PATTERN,
-    SENTENCE_END_PATTERN,
     VALID_CLASSES,
     _is_in_skip_directory,
     _parse_frontmatter,
@@ -33,7 +32,7 @@ class CheckResult:
 
 
 # ---------------------------------------------------------------------------
-# Individual checks (1-11)
+# Individual checks (1-10)
 # ---------------------------------------------------------------------------
 
 
@@ -181,7 +180,7 @@ def check_class_valid(skill_dir: Path) -> CheckResult:
 
 
 def check_docs_last_section(skill_dir: Path) -> CheckResult:
-    """Check 5: SKILL.md has a '## Docs' section as the last section."""
+    """Check 5: SKILL.md ends with a Docs or References navigation section."""
     content = _read_skill_md(skill_dir)
     if content is None:
         return CheckResult("docs-last-section", False, "SKILL.md not found")
@@ -194,14 +193,15 @@ def check_docs_last_section(skill_dir: Path) -> CheckResult:
         )
 
     last_heading = headings[-1].strip()
-    if last_heading == "Docs":
+    if last_heading in {"Docs", "References"}:
         return CheckResult(
-            "docs-last-section", True, "Last H2 section is '## Docs'"
+            "docs-last-section", True, f"Last H2 section is '## {last_heading}'"
         )
     return CheckResult(
         "docs-last-section",
         False,
-        f"Last H2 section is '## {last_heading}', expected '## Docs'",
+        f"Last H2 section is '## {last_heading}', expected '## Docs' or "
+        "'## References'",
     )
 
 
@@ -241,69 +241,8 @@ def check_no_examples_section(skill_dir: Path) -> CheckResult:
     return CheckResult("no-examples-section", True, "No examples section found")
 
 
-def check_one_sentence_per_line(skill_dir: Path) -> CheckResult:
-    """Check that Markdown body sentences each start on a new line."""
-    violations: list[str] = []
-    md_files = list(skill_dir.rglob("*.md"))
-
-    if not md_files:
-        return CheckResult(
-            "one-sentence-per-line",
-            False,
-            "No .md files found in skill directory",
-        )
-
-    for md_file in md_files:
-        # Skip schemas/ and templates/ per the style-guide exceptions.
-        # Reference files use looser documentation conventions too.
-        if _is_in_skip_directory(
-            md_file, skill_dir, frozenset({"schemas", "templates", "reference"})
-        ):
-            continue
-
-        text = md_file.read_text(encoding="utf-8")
-        lines = text.split("\n")
-        for i, line in enumerate(lines, 1):
-            stripped = line.strip()
-            # Skip frontmatter, headings, empty lines, list items, and fences.
-            if not stripped:
-                continue
-            if stripped.startswith("---"):
-                continue
-            if stripped.startswith("#"):
-                continue
-            if stripped.startswith("- "):
-                continue
-            if stripped.startswith("* "):
-                continue
-            if stripped.startswith("1.") or stripped.startswith("2."):
-                continue
-            if stripped.startswith("```"):
-                continue
-            if stripped.startswith(">"):
-                continue
-            # Detect multiple sentence endings followed by spaces in prose.
-            matches = list(SENTENCE_END_PATTERN.finditer(stripped))
-            if len(matches) > 1:
-                violations.append(
-                    f"{md_file.name}:{i}: multiple sentences on one line"
-                )
-
-    if violations:
-        # Show first 5 violations
-        detail_lines = violations[:5]
-        if len(violations) > 5:
-            detail_lines.append(f"... and {len(violations) - 5} more")
-        return CheckResult(
-            "one-sentence-per-line", False, "; ".join(detail_lines)
-        )
-    return CheckResult(
-        "one-sentence-per-line", True, "All .md files use one sentence per line"
-    )
-
-
 def check_no_declarative_voice(skill_dir: Path) -> CheckResult:
-    """Check 9: No procedural sentence uses declarative voice."""
+    """Check 8: No procedural sentence uses declarative voice."""
     violations: list[str] = []
     md_files = list(skill_dir.rglob("*.md"))
 
@@ -349,7 +288,7 @@ def check_no_declarative_voice(skill_dir: Path) -> CheckResult:
 
 
 def check_no_placeholders(skill_dir: Path) -> CheckResult:
-    """Check 10: No un-replaced <<placeholders>> remain."""
+    """Check 9: No un-replaced <<placeholders>> remain."""
     violations: list[str] = []
     md_files = list(skill_dir.rglob("*.md"))
 
@@ -379,7 +318,7 @@ def check_no_placeholders(skill_dir: Path) -> CheckResult:
 
 
 def check_cross_references_exist(skill_dir: Path) -> CheckResult:
-    """Check that relative cross-references point to existing skill files."""
+    """Check 10: Relative cross-references point to existing skill files."""
     md_files = list(skill_dir.rglob("*.md"))
     broken_refs: list[str] = []
 

@@ -15,7 +15,6 @@ from .checks import (
     check_no_declarative_voice,
     check_no_examples_section,
     check_no_placeholders,
-    check_one_sentence_per_line,
     check_reference_readme_exists,
 )
 from .helpers import (
@@ -44,7 +43,6 @@ __all__ = [
     "check_no_declarative_voice",
     "check_no_examples_section",
     "check_no_placeholders",
-    "check_one_sentence_per_line",
     "check_reference_readme_exists",
     "run_all",
     "validate_skill_file",
