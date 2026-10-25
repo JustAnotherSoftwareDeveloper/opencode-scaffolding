@@ -15,6 +15,7 @@ contract details.
 - [`skill-authoring-guide`][authoring] —
   authoring rules and selection-profile guidance.
 - [`skill-bash-conventions`][bash-conventions] — shared Bash conventions.
+- [`linux-cli-conventions`][linux-cli] — passive reference for shell, utility, and Linux OS semantics.
 - [`customize-opencode`][packet-engine] — reference for OpenCode worker-packet
   execution behavior, not configuration edits.
 - [`skill-maintenance-reference`][maintenance] — maintenance and migration
@@ -58,6 +59,7 @@ contract details.
 [architect]: ./skill-architect/SKILL.md
 [authoring]: ./skill-authoring-guide/SKILL.md
 [bash-conventions]: ./skill-bash-conventions/SKILL.md
+[linux-cli]: ./linux-cli-conventions/SKILL.md
 [maintenance]: ./skill-maintenance-reference/SKILL.md
 [node-conventions]: ./skill-node-script-conventions/SKILL.md
 [templates]: ./skill-template-library/SKILL.md
