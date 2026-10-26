@@ -82,8 +82,9 @@ Return only the relative path to the created document or report.
 9. Ask a focused question when a missing fact materially changes the conclusion.
 10. Derive an epoch-millisecond timestamp and lowercase kebab-case summary slug from the analysis question or requested report subject.
 11. Select the output route using [Output](#output); an explicitly requested audit/review report must also pass its report criteria, while ordinary analysis remains the default.
-12. Write to the selected route using its specified content requirements.
-13. Return the created file's relative path.
+12. **Apply shared writing guidance to authored prose.** In a direct workflow, before drafting substantive prose in either output route—including compatible prose in an explicitly requested audit/review report—load `markdown-writing-guide` with the skill tool and read `markdown-writing-guide -> reference/writing-quality.md`. Apply it only to prose being authored or substantively revised, and only where compatible. In canonical packet execution, read and apply it only when the guide is declared in the packet and already loaded; never self-load an undeclared skill. Preserve ordinary analysis's six-section order, the explicit report-routing rule, evidence distinctions, and report criteria.
+13. Write to the selected route using its specified content requirements.
+14. Return the created file's relative path.
 
 Execute one reasoning pass.
 Avoid delegation and multi-phase orchestration.
@@ -91,6 +92,7 @@ Avoid delegation and multi-phase orchestration.
 ## Guardrails
 
 - Preserve the distinction between evidence and inference.
+- Keep the selected analysis/report structure and output route authoritative; the shared writing guide does not authorize changing them.
 - Prefer primary sources, direct inspection, and reproducible observations over unsupported claims.
 - Quantify material impact when available.
 - Name uncertainty instead of masking it with confident language.
@@ -107,6 +109,7 @@ Avoid delegation and multi-phase orchestration.
 - Address the strongest plausible alternative or counterexample.
 - State confidence and material uncertainty.
 - Deliver a conclusion that answers the request directly.
+- When the guide was explicitly loaded for the applicable workflow, review for reader/task fit, supported substance, useful specificity, concise completeness, proportionate tone, and purposeful structure.
 - List actionable next steps when uncertainty or risk remains.
 - Confirm the created file exists under the selected route: ordinary analysis at `$CWD/.analysis/`, or an explicitly requested audit/review report at repository-root `.audit/`.
 - For an audit/review report, confirm it identifies the review scope, evidence-linked findings, overall disposition, and verification limits.

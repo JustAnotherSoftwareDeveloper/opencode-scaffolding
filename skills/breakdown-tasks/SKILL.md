@@ -64,13 +64,26 @@ constraints, files, and expected outcome. Block when either is absent.
    filter candidates by individual task; do not recollect for each task. Block
    on non-zero exit.
 
-5. **Load the shared task contract before authoring boundaries.**
+5. **Load shared task and writing references before authoring.**
    Reconcile the exact collector winner named `task-contract` in the
    documentation result with class `documentation` and its discovered `SKILL.md`
    path, then load it before drafting boundaries. The passive, non-transitive
    load adds no authority, workflow, tools, writes, delegation, assignment, or
    completion evidence. Read needed references explicitly. Block on an absent
    name, stale path, class mismatch, or load failure.
+
+   Before drafting substantive task-field prose, reconcile the exact
+   `markdown-writing-guide` collector winner in that same documentation result
+   with class `documentation` and its discovered `SKILL.md` path, load it with
+   the skill tool, and read
+   `markdown-writing-guide -> reference/writing-quality.md`. Apply it only to
+   prose authored or substantively revised in fields such as purpose, context,
+   execution instructions, verification, and expected output. Preserve each
+   field's purpose, task-contract semantics, source-derived evidence and
+   constraints, accepted boundaries, and packet schema. The guide is passive
+   and non-transitive; it adds no workflow, assignment, authority, or other
+   execution permission. Block on an absent name, stale path, class mismatch,
+   or required load failure.
 
 6. **Draft boundaries and close the pre-assignment review.** Before selecting executable
    skills, follow the operation-owned
@@ -124,6 +137,14 @@ constraints, files, and expected outcome. Block when either is absent.
     compete with the operation owner. Store the result in the existing flat
     `skills` array: one operation owner followed by zero to two documentation
     skills. Exclude passive `task-contract` from executable `skills`.
+
+   When a task requires substantive prose authoring or revision in a Markdown
+   deliverable or structured task fields, include the exact collector-winning
+   `markdown-writing-guide` documentation record when it adds material value
+   and fits within the two-documentation limit. Do not assign it for a path or
+   Markdown output alone, mechanical edits, or deterministic rendering. This
+   assignment is independent of the pre-authoring passive load and does not
+   transfer its guidance transitively to a worker.
 
    Reconcile every selected skill, including `generic-executor`, against the winning
    `name`, `class`, and `path`. Before publication, confirm the reconciled assignment

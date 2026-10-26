@@ -77,11 +77,13 @@ Continue only when the proposal records an accepted lifecycle state, or when it 
    Block on non-zero exit.
    Keep this documentation result distinct and available for the pre-authoring load and later task assignment. This class-targeted call does not filter candidates by individual task; do not recollect for each task.
 
-8. **Load the shared task contract before authoring.** Reconcile the documentation result to the exact winning record whose `name` is `task-contract`, whose `class` is `documentation`, and whose `path` is the discovered `SKILL.md` path.
+8. **Load shared documentation before authoring.** Reconcile the documentation result to the exact winning record whose `name` is `task-contract`, whose `class` is `documentation`, and whose `path` is the discovered `SKILL.md` path.
    Load that record with the skill tool before drafting task boundaries.
    Treat the load as passive, documentation-only, and non-transitive: it can add no authority, workflow steps, tools, writes, delegation, assignment decisions, or completion evidence.
    Read any task-contract reference files needed for authoring explicitly.
    Block on an absent name, stale path, class mismatch, or load failure.
+
+   Before initial task authoring, reconcile and load the exact documentation record named `markdown-writing-guide` with the skill tool, then explicitly read `markdown-writing-guide -> reference/writing-quality.md`; follow [Writing integration](reference/writing-integration.md). Apply it to compatible substantive prose in packet `summary` and task `purpose`, `context`, `executionInstructions`, `verification`, and `expectedOutput` fields, without changing their format or meaning. Treat it as passive, documentation-only, and non-transitive; it adds no workflow, authority, or permission to change task boundaries. In canonical packet execution, do not recollect or self-load it; apply it only when declared and already loaded.
 
 9. **Author tasks.** Require the author to select one packet slug and write a schema-valid canonical packet root. Preserve the selected packet slug unchanged.
     The canonical task-packet schema used in validation step 14 owns packet-root fields and constraints, not this workflow.
@@ -105,6 +107,7 @@ Continue only when the proposal records an accepted lifecycle state, or when it 
    orchestration, destructive-authority, or other special execution semantics. When
    no specialized operation semantically fits, select the exact collector-winning
    `generic-executor`; lack of a specialized semantic match is not a blocker.
+   Assign the exact `markdown-writing-guide` documentation record when a task requires substantive Markdown or Markdown-like prose authoring or revision and the guide adds compatible value, including prose within a specialized format. A specialized format or skill class alone is not an exclusion; the guide supplements rather than replaces local writing guidance and artifact contracts. See [Writing integration](reference/writing-integration.md).
    After choosing the operation owner, actively consider whether a documentation
    profile adds distinct, material execution value for that task beyond its context
    and listed materials. Include profiles that clarify a relevant contract, resolve
@@ -114,10 +117,8 @@ Continue only when the proposal records an accepted lifecycle state, or when it 
    when none adds distinct material value; assign no more than two. Do not impose a
    quota, target, or rejection log. Documentation is passive and cannot replace or
    compete with the operation owner. Keep the canonical `skills` field flat: one
-   operation owner followed by any selected documentation skills. Exclude the
-   pre-authoring `task-contract` load itself from executable assignments; this is not
-   a blanket ban on `task-contract`, which may be assigned after boundary acceptance
-   when it independently adds material value under these same criteria.
+   operation owner followed by any selected documentation skills.
+   Do not assign pre-authoring documentation loads automatically; follow task-specific assignment criteria, including the guide condition above.
    Reconcile every selected name, class, and path against its corresponding operation
    or documentation result. Confirm exactly one operation owner and zero to two materially relevant `class: documentation`
    skills before publication. If multiple specialized operations appear
@@ -181,7 +182,7 @@ Continue only when the proposal records an accepted lifecycle state, or when it 
 
 ### Bounded Audit-Finding Correction
 
-1. Require the existing plan-directory path, exact audit report (or a finding extract retaining its run identity and complete input manifest), finding IDs, and proposal baseline. Verify the manifest identifies this target's pre-correction `tasks.json` and `tasks.md` and all supplied baseline files by path and recorded SHA-256; block missing, ambiguous, or mismatched identity, or absent `tasks.json`.
+1. Require the existing plan-directory path, exact audit report (or a finding extract retaining its run identity and complete input manifest), finding IDs, and proposal baseline. Verify the manifest identifies this target's pre-correction `tasks.json` and `tasks.md` and all supplied baseline files by path and recorded SHA-256; block missing, ambiguous, or mismatched identity, or absent `tasks.json`. Before substantive prose corrections, follow [Writing integration](reference/writing-integration.md) and keep edits within finding-authorized fields.
 2. Correct only the reported, plan-writer-owned findings in that workspace's `tasks.json`, preserving unrelated task content and packet identity. The only writable files are that `tasks.json` and its `tasks.md`; never modify copied sources or the proposal baseline, and block findings that require those edits. Inspect diffs and reject changes not authorized by the exact finding IDs.
 3. Validate the revised `tasks.json` with step 14's state-file command but omit `--auto-fix`; inspect each diff and fix only finding-authorized violations, including `skills` entries only when that finding authorizes them, then retry. Block if validation requires an out-of-scope fix. Do not create `draft.json`, invoke `init-task-packet`, or create, rename, or replace a plan workspace.
 4. After validation succeeds, rerender from the existing `tasks.json` with `--overwrite`; the output path must be exactly `$PLAN_DIR/tasks.md`:
@@ -218,6 +219,7 @@ Continue only when the proposal records an accepted lifecycle state, or when it 
 
 ## Docs
 
+- [Writing integration](reference/writing-integration.md)
 - [Workspace contract](reference/workspace-contract.md)
 - [Task-authoring rules](reference/task-authoring.md)
 - [Script contracts](reference/scripts.md)

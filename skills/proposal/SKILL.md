@@ -70,10 +70,18 @@ is unknown.
    `Evidence Gap: <missing evidence>` and a residual engineering decision as
    `Open Question: <question>`, including the decision-maker, choices, and consequence
    of deferral. Never convert missing research into an owner decision.
-6. Create one metadata-bearing `PROPOSAL.md` from
-     [the active template](./templates/PROPOSAL.md), as the sole authored decision,
-     implementation, verification, and source-traceability artifact. No companion
-     implementation/source files or active legacy aliases. See [proposal format, core
+6. For direct execution, before drafting, load `markdown-writing-guide` as passive
+   documentation context and read `markdown-writing-guide -> reference/writing-quality.md`.
+   Apply it only to authored `PROPOSAL.md` prose as a supplement to the [proposal
+   format](./reference/proposal-format.md) and [writing
+   style](./reference/writing-style.md); preserve the required section order,
+   readiness semantics, source traceability, and human engineering review. During
+   canonical packet execution, use the guide only when declared in the packet's
+   documentation assignments and already loaded; never self-load it. Then create one
+   metadata-bearing `PROPOSAL.md` from
+      [the active template](./templates/PROPOSAL.md), as the sole authored decision,
+      implementation, verification, and source-traceability artifact. No companion
+      implementation/source files or active legacy aliases. See [proposal format, core
      document order](./reference/proposal-format.md#core-document-order).
 7. Write the required core sections in the order defined by [proposal
      format](./reference/proposal-format.md#core-document-order); add an optional

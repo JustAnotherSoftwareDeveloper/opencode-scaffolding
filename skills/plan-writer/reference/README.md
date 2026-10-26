@@ -2,6 +2,7 @@
 
 - [workspace-contract.md](./workspace-contract.md) defines plan inputs, copied-source categories, workspace layout, and validation requirements.
 - [task-authoring.md](./task-authoring.md) defines TaskDraftList creation rules before inline skill assignment.
+- [writing-integration.md](./writing-integration.md) defines Markdown-writing guide loading, task assignment, and bounded correction rules.
 - [scripts.md](./scripts.md) defines init-task-packet and render-task-markdown invocations.
 - Load the `task-contract` documentation skill through the skill tool and consult
   its reference index for task identity, atomicity, result and verification

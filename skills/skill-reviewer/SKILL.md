@@ -26,7 +26,14 @@ evidence-linked conformance report without changing the workspace.
 
 Identify the existing skill path, intended class, applicable profile rules, templates,
 style guidance, and maintenance checks. Load `skill-authoring-guide` as the canonical
-prose-policy owner when semantic form selection and `TABLE-001` apply.
+prose-policy owner when semantic form selection and `TABLE-001` apply. When reviewing
+authored prose or drafting the conformance report, load `markdown-writing-guide` as
+passive context and read `markdown-writing-guide -> reference/writing-quality.md`
+before relying on it.
+Apply the guide to prose under review and report prose being authored, only where
+compatible with the skill-specific semantic-form and `TABLE-001` policy, evidence
+links, severity, report route, and read-only scope. In a canonical packet, use the guide
+only if it is declared and already loaded; do not self-load it.
 
 ## Procedure
 

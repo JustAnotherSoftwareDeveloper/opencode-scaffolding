@@ -27,31 +27,38 @@ Create or update one bounded OpenCode agent file under `agents/`.
 
 1. Identify the target path as `agents/<name>.md`. Confirm the path is under `agents/` and does not overlap an existing file unless the operation is an update.
 2. Read every existing agent file with a related mode or overlapping skill/tool declaration for discovery bounded to `agents/`. Inventory shared naming, permission, and guardrail conventions.
-3. Write or update the agent file frontmatter with exactly these supported fields:
+3. Before drafting agent prose, load `markdown-writing-guide` through the skill tool for direct work.
+   In packet work, use it only when the packet declares and loads it; do not self-load it.
+   Read `markdown-writing-guide -> reference/writing-quality.md` before relying on the guide.
+   Apply it only where compatible to newly authored or substantively revised agent
+   description, purpose, workflow or operating rules, and guardrails prose. Keep supported
+   frontmatter, required body sections, capability boundaries, and validation requirements
+   authoritative.
+4. Write or update the agent file frontmatter with exactly these supported fields:
    - `name` — quoted string matching the filename stem.
    - `description` — one-line role summary.
    - `mode` — `primary` or `subagent`.
    - `permission` — tool permission map; required only when the agent needs non-default permissions.
    - `version` — semantic version string.
    Do not add routing, scoring, registry, or delegation metadata to the frontmatter.
-4. Write the body with these required sections:
+5. Write the body with these required sections:
    - A heading matching the agent name.
    - A role-purpose paragraph.
    - A `## Workflow` section with numbered execution steps when the agent follows a procedural sequence, or a `## Operating Rules` section when it follows constraint-based guidance.
    - A `## Guardrails` section listing explicit prohibitions and capability boundaries.
-5. Validate the agent file:
+6. Validate the agent file:
    - Frontmatter contains `name`, `description`, and `mode`.
    - `mode` is `primary` or `subagent`.
    - Referenced skills resolve to existing `skills/<name>/SKILL.md` paths.
    - Tool declarations are explicit and bounded.
    - No stale, substituted, or non-winning references.
    - Prompt and instruction sentences are coherent and non-contradictory.
-6. Run the repository Markdown lint command on every modified file:
+7. Run the repository Markdown lint command on every modified file:
    ```sh
    cd scripts/node && bun run src/cli/lint-md.ts "../../agents/<name>.md"
    ```
    Fix every lint diagnostic before reporting completion.
-7. Report the exact files read, the exact files written, and a bounded summary of related agents discovered.
+8. Report the exact files read, the exact files written, and a bounded summary of related agents discovered.
 
 ## Self-Validation
 

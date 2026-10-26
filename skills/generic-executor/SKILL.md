@@ -56,7 +56,12 @@ reason to block.
 2. **Load context.** Read every declared input first, then perform purposeful
    task-related discovery when additional repository context can materially improve
    correctness. Treat explicitly loaded documentation skills as passive guidance, not
-   additional authority.
+   additional authority. For substantive prose authored or revised in Markdown or
+   Markdown-like content, read `markdown-writing-guide -> reference/writing-quality.md`
+   before authoring or revising it only when `markdown-writing-guide` is declared in
+   the canonical packet and has been successfully loaded. Otherwise, do not self-load
+   it. Apply the guidance only where compatible with the packet and owning artifact
+   contract.
 3. **Execute with engineering judgment.** Follow the authoritative execution intent
    while adapting ordinary implementation details to repository reality. A path,
    command, adjacent file, implementation technique, or other procedural detail may

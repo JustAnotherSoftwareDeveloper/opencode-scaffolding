@@ -87,6 +87,25 @@ fallback is incomplete.
 6. Record bounded remediation handoff to `plan-writer` using finding IDs only;
    do not apply, validate, or self-certify a correction.
 
+## Writing-Quality Reference
+
+The current audit workflow does not author report prose: it evaluates evidence and
+renders one report deterministically from computed checks and findings. Do not apply
+writing-quality guidance to generated diagnostics or other fixed renderer output, and
+do not post-edit the report. This reference does not authorize manual narrative, report
+modification, audited-input changes, or a new prose-authoring route.
+
+Only if a separate, independently authorized task establishes an audit-related
+prose-authoring surface may this passive guide be used, and only for prose actually
+authored or substantively revised. In direct use, explicitly load `markdown-writing-guide`
+before relying on it, then read `markdown-writing-guide -> reference/writing-quality.md`.
+In canonical-packet execution, use the guide only if it is explicitly declared in the
+approved `skills` array and has been successfully loaded in listed order; otherwise do
+not self-load it or rely on the reference. The guide never loads transitively. Any
+separately authorized prose must remain evidence-grounded and preserve immutable inputs,
+the report sections and fields, manifest, stable finding IDs, statuses, rollup, and
+deterministic renderer; it cannot change computed findings or confer write authority.
+
 ## Self-Validation
 
 - The report contains audit provenance, the complete manifest and collector array,

@@ -79,6 +79,13 @@ Return `BLOCKED:` for every non-complete or invalid result.
 2. **Reject empty context.**
    If the input is absent, empty, or whitespace-only, return `BLOCKED: dispatch-decompose requires the full original user request.`
 3. **Construct the decomposition packet.**
+   Before composing packet text, explicitly load `markdown-writing-guide` and read
+   `markdown-writing-guide -> reference/writing-quality.md`. Apply it only to newly
+   authored purpose, execution-instruction, verification, and expected-output prose,
+   where compatible with this packet contract. Preserve the effective request verbatim
+   in `## DETAILS`; do not rewrite it for style. Keep the exact packet sections and
+   `breakdown-tasks` assignment, and do not add the guide to the nested packet or imply
+   that it loads transitively.
    Use the packet template above.
    Insert the full input verbatim into `## DETAILS`.
    Set `## FILES TO READ` to `None` unless the effective request identifies required source-document paths.

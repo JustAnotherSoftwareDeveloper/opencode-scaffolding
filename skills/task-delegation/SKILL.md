@@ -23,6 +23,16 @@ work. An executor must preserve an already approved task plan unchanged.
 
 ## Packet Construction
 
+Before composing or substantively revising packet prose in `PURPOSE`, `DETAILS`,
+`EXECUTION INSTRUCTIONS`, `VERIFICATION`, or `EXPECTED OUTPUT`, explicitly load
+`markdown-writing-guide` and read `markdown-writing-guide -> reference/writing-quality.md`.
+Apply it only to that authored prose and where compatible with the supplied intent,
+source evidence, resource rules and reconciliation, packet grammar, assigned operation
+or delegated owner, and dispatch boundary. Preserve verbatim source context when
+required; do not rewrite it solely for style. This passive load does not transfer to the
+dispatched worker, alter its `SKILLS` assignment, or change any field made authoritative
+after dispatch.
+
 Accept plaintext, JSON, YAML, key-value lists, or mixed notes. Map aliases to exactly
 these eight sections and mark genuinely uninferable values `UNKNOWN — not provided in
 input`. Use `None` for known-empty resource arrays:

@@ -58,6 +58,15 @@ order. The operation skill owns execution. Documentation skills are passive cont
 they may inform implementation but do not add authority, workflow steps, writes,
 delegation, or completion evidence.
 
+When `markdown-writing-guide` appears in the approved `skills` array and has been
+loaded successfully in listed order, read
+`markdown-writing-guide -> reference/writing-quality.md` before authoring or
+substantively revising Markdown or Markdown-like prose. Apply it only to that prose,
+where compatible with this immutable packet, the assigned operation, and the output's
+required format, fields, schema, evidence rules, and meaning. The guide remains passive
+and non-transitive: it adds no workflow, authority, writes, delegation, or completion
+evidence. Never add, infer, or transitively load it; when it is absent, do not use it.
+
 If a declared name cannot load, a loaded skill's class violates the required
 composition, or more than one operation owner is declared, return `BLOCKED` before
 executing the task. Do not use `generic-executor` or any other skill as an undeclared

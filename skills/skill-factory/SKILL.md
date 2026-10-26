@@ -36,7 +36,16 @@ Create or update one skill workspace and validate its direct-selection profile.
    reading a skill's `SKILL.md` never replaces its skill-tool load.
    Load relevant class and maintenance references; use template guidance separately
    when needed. The guide owns authoring policy; these references do not replace this
-   factory workflow.
+   factory workflow. For newly authored or substantively revised filled Markdown prose
+   in the one selected workspace, apply the shared guide only where compatible with
+   `skill-authoring-guide`, applicable class templates, profile policy, semantic-form
+   and `TABLE-001` rules, disclosure limits, and the local artifact contract. For
+   direct use outside canonical-packet execution, load `markdown-writing-guide` and
+   read `markdown-writing-guide -> reference/writing-quality.md` before drafting. For
+   canonical packets, read that reference before drafting only when
+   `markdown-writing-guide` is explicitly assigned and successfully loaded; do not
+   self-load an undeclared guide, and have the task author resolve its fit within the
+   packet's two-documentation-skill maximum.
 3. Derive the profile from the owned request, inputs, outputs, and nearest competitors,
    applying `skill-authoring-guide -> reference/tagging-guide.md` and
    `skill-authoring-guide -> reference/trigger-evaluation.md`.

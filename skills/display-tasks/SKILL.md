@@ -73,3 +73,11 @@ One row per item in `tasks`.
 - Preserve the packet slug unchanged in memory. Do not render it until the repository
   maintainer decides its display policy.
 - Do not normalize arrays, single task objects, or plaintext packets.
+
+## Writing Guidance
+
+When authoring or substantively revising explanatory prose in this skill, load
+`markdown-writing-guide` as passive context and read
+`markdown-writing-guide -> reference/writing-quality.md`. Apply the guidance only to
+that prose; do not style extracted packet values or alter the required single-table
+output.
