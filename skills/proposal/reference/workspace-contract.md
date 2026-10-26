@@ -63,6 +63,13 @@ entry. Internal source sets therefore reconcile exactly in both directions. Exte
 bibliography entries may appear under `Sources` but are not manifest entries. Missing,
 extra, duplicate, unsafe, or mismatched entries are workspace violations.
 
+Caller-supplied persisted research packet files are predecessor source artifacts, not
+proposal-authored documents. Copy each supplied packet file unchanged under its
+caller-declared, allowed top-level source category (normally `research/`) and reconcile
+it like any other copied source: one safe `source-documents` entry and one matching
+internal `Sources` link. External URLs and bibliographic records in the packet's
+`sources.md` are references, not copied files or manifest entries.
+
 ## Document structure
 
 Require unique H2 headings in this order: `Table of Contents`, `Recommendation`,

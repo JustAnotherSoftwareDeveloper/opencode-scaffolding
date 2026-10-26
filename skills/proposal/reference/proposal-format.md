@@ -29,14 +29,25 @@ the table of contents itself.
 ### Recommendation
 
 State the selected architecture or behavior in the first two sentences. Name the
-affected system boundary, decisive constraint, material compatibility consequence,
-and principal trade-off without repeating the option history.
+motivating problem or need, decision scope, affected system boundary, decisive
+constraint, material compatibility consequence, and principal trade-off without
+repeating the option history. Make material goals or non-goals legible when they clarify
+why the decision is needed or what it excludes. Use the existing Recommendation or
+Technical Rationale narrative; do not add a mandatory standalone problem/goals section
+or boilerplate.
 
 ### Technical Rationale
 
 Explain why the recommendation follows from evidence. Keep evaluation criteria here
 or with option comparison: they judge a direction and are not completion evidence.
 Identify assumptions, dependencies, invariants, and material objections.
+
+When external, comparative, or prior-art research materially informs the recommendation,
+summarize the research question and boundary, decision-driving findings, material
+limitations or contrary evidence, and which statements are external conventions versus
+local choices. Link to the copied research records rather than duplicating packet
+contents; use [bounded research evidence](./research-evidence.md) for the local method.
+Do not add an empty research summary when no material research informs the decision.
 
 ### Questions
 

@@ -58,9 +58,13 @@ defines the implementation boundary for planning; it is not a companion file or 
 
 ## Optional detail
 
-Add security, performance, reliability, rollout, rollback, observability, operational,
-or stakeholder detail only when evidence shows that it affects the decision. State
-failure modes and compatibility consequences where material. Omit empty headings.
+Add security, performance, reliability, or stakeholder detail only when evidence shows
+that it affects the decision. Include rollout, rollback, monitoring/observability,
+troubleshooting, and operational-readiness detail only when the proposal materially
+affects deployment or ongoing operations; identify the relevant risk and verification
+dependency. Keep applicable operational details within the affected area rather than
+adding a generic operational section. State failure modes and compatibility
+consequences where material. Omit empty headings.
 
 Exclude assignments, estimates, generic lifecycle phases, unsupported dependencies,
 and command-by-command execution instructions. A proposal may identify a CLI as an

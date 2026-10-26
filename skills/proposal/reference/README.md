@@ -12,6 +12,8 @@
   and when optional technical subsections are justified.
 - [Examples](../examples/README.md) demonstrate short, standard, and complex
   one-document proposals and separate deterministic checks from human review.
+- [Bounded research evidence](./research-evidence.md) defines the conditional research
+  trigger, persisted packet, and stop/resume rules.
 
 These references govern newly authored or deliberately revised proposals. Historical
 `.proposals/` workspaces remain immutable evidence and are not active format aliases.

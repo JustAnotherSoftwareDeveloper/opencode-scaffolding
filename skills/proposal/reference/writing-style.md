@@ -61,10 +61,16 @@ uniformity. These are review rules, not lexical bans, readability scores, or quo
 
 ## Preserve evidence meaning
 
-Keep `Assumption:`, `Evidence Gap:`, and `Open Question:` stable and distinct. A link
-shows provenance, not evidence strength. State when evidence is indirect, unavailable,
-or non-blocking. Never turn unavailable research into an owner decision or make weak
-evidence look stronger through emphasis.
+Keep `Assumption:`, `Evidence Gap:`, and `Open Question:` stable and distinct. Distinguish
+direct source facts, cross-source synthesis, interpretation, and the proposal's local
+recommendation; do not present an inference or local choice as a source fact or external
+requirement. Put attribution and qualifications beside the claim. A citation shows
+provenance, not evidence strength. State material limitations and contrary or qualifying
+evidence, and distinguish unavailable, silent, and contradictory evidence when relevant.
+Bound claims to their sources' scope and time; distinguish formal standards from
+project-specific templates and recurring conventions. Do not infer general prevalence or
+a universal standard from local or repeated practice. Never turn unavailable research
+into an owner decision or make weak evidence look stronger through emphasis.
 
 ## Engineering review passes
 

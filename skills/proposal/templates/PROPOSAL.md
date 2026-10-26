@@ -31,15 +31,23 @@ before output. -->
 
 {{selected_architecture_or_behavior_and_affected_boundary}}
 
-<!-- State the decision first. Include its decisive constraint, material trade-off,
-and compatibility consequence when applicable. Remove this comment before output. -->
+<!-- State the decision first. When useful to explain why it is needed or what it
+ excludes, make the problem or motivation, decision scope, and material goals or
+ non-goals legible in this narrative. Include its decisive constraint, material
+ trade-off, and compatibility consequence when applicable. Do not add a standalone
+ problem/goals section or boilerplate. Remove this comment before output. -->
 
 ## Technical Rationale
 
 {{evidence_constraints_and_tradeoffs_supporting_the_recommendation}}
 
-<!-- Name affected invariants and dependencies. Keep option-evaluation criteria
-distinct from completion evidence. Remove this comment before output. -->
+<!-- Name affected invariants and dependencies. When external, comparative, or prior-art
+ research materially informs the recommendation, summarize its question and boundary,
+ decision-driving findings, material limitations or contrary evidence, and which
+ statements reflect external conventions versus local choices. Link copied research
+ records rather than duplicating them; do not add an empty research summary otherwise.
+ Keep option-evaluation criteria distinct from completion evidence. Remove this comment
+ before output. -->
 
 ## Questions
 
