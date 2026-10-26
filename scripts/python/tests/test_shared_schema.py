@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import importlib.util
+import sys
+from pathlib import Path
+
 import pytest
 
 from lib.shared.schema import (
@@ -107,32 +111,59 @@ class TestValidateJsonSchema:
             },
         }
         errors = validate_json_schema(instance, schema)
-        assert len(errors) > 0
+        assert errors == ["42 is not of type 'string'"]
 
-    def test_not_a_dict_no_jsonschema(
+    def test_jsonschema_import_error_fails_closed(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """Instance must be a dict when jsonschema is absent."""
-        monkeypatch.setattr("lib.shared.schema._HAS_JSONSCHEMA", False)
-        errors = validate_json_schema("not a dict", {"required": ["name"]})
-        assert "must be a dict" in errors[0].lower()
-
-    def test_missing_required_no_jsonschema(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        """Required key check works without jsonschema."""
-        monkeypatch.setattr("lib.shared.schema._HAS_JSONSCHEMA", False)
-        errors = validate_json_schema(
-            {"name": "test"}, {"required": ["name", "version"]}
+        """An actual import failure disables full validation with an error."""
+        monkeypatch.setitem(sys.modules, "jsonschema", None)
+        schema_path = (
+            Path(__file__).resolve().parents[1]
+            / "src"
+            / "lib"
+            / "shared"
+            / "schema.py"
         )
-        assert errors == ["version"]
+        spec = importlib.util.spec_from_file_location(
+            "schema_without_jsonschema", schema_path
+        )
+        assert spec is not None and spec.loader is not None
+        unavailable_schema = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(unavailable_schema)
 
-    def test_non_list_required_no_jsonschema(
+        errors = unavailable_schema.validate_json_schema(
+            {"name": "test"}, {"type": "object"}
+        )
+
+        assert errors == [
+            "jsonschema is unavailable; full JSON Schema validation "
+            "cannot be performed"
+        ]
+
+    def test_unavailable_jsonschema_rejects_invalid_nested_schema_data(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """Non-list ``required`` in schema returns empty list."""
+        """Missing jsonschema cannot accept data after checking root keys."""
         monkeypatch.setattr("lib.shared.schema._HAS_JSONSCHEMA", False)
-        errors = validate_json_schema(
-            {"name": "test"}, {"required": "not-a-list"}
-        )
-        assert errors == []
+        instance = {"boundaryReview": {"taskReviews": {}}}
+        schema = {
+            "type": "object",
+            "required": ["boundaryReview"],
+            "properties": {
+                "boundaryReview": {
+                    "type": "object",
+                    "required": ["taskReviews"],
+                    "properties": {
+                        "taskReviews": {
+                            "type": "object",
+                            "required": ["render"],
+                        }
+                    },
+                }
+            },
+        }
+
+        errors = validate_json_schema(instance, schema)
+
+        assert errors

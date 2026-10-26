@@ -1,9 +1,9 @@
-"""Lightweight JSON-object validation helpers.
+"""JSON-object validation helpers.
 
 Consumers: shared by generated script CLIs and ``lib.render_task_markdown``.
 
-Uses the existing ``jsonschema`` dependency when available for full JSON Schema
-validation, and provides simple required-key checks that work without it.
+Uses the existing ``jsonschema`` dependency for full JSON Schema validation.
+When it is unavailable, JSON Schema validation fails closed.
 """
 
 from __future__ import annotations
@@ -74,12 +74,12 @@ def validate_json_schema(
 ) -> list[str]:
     """Validate *instance* against a JSON Schema using ``jsonschema``.
 
-    If ``jsonschema`` is not installed, falls back to a simple required-key
-    check that expects *schema* to have a ``"required"`` list.
+    If ``jsonschema`` is not installed, return an error rather than treating
+    partial validation as successful.
 
     Args:
         instance: The data to validate (typically a ``dict``).
-        schema: A JSON Schema dict (or a dict with at least ``"required"``).
+        schema: A JSON Schema dict.
 
     Returns:
         A list of error messages (empty if valid).
@@ -91,12 +91,7 @@ def validate_json_schema(
         except _jsonschema.ValidationError as exc:
             return [exc.message]
 
-    # Fallback: simple required-key check.
-    if not isinstance(instance, dict):
-        return ["Instance must be a dict"]
-
-    required: list[str] = schema.get("required", [])
-    if not isinstance(required, list):
-        return []
-
-    return validate_required_keys(instance, required)
+    return [
+        "jsonschema is unavailable; full JSON Schema validation "
+        "cannot be performed"
+    ]

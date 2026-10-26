@@ -13,6 +13,7 @@ from lib.render_task_markdown.core import (
     RenderValidationError,
     render_task_markdown,
 )
+from lib.shared import schema as shared_schema
 
 pytestmark = pytest.mark.unit
 
@@ -67,8 +68,11 @@ def _packet() -> dict:
     }
 
 
-def test_render_task_markdown_writes_packet_content(tmp_path: Path) -> None:
-    """Verify Markdown rendering writes the expected packet content."""
+def test_render_task_markdown_renders_valid_full_schema_packet(
+    tmp_path: Path,
+) -> None:
+    """Verify a valid packet passes full validation and renders."""
+    assert shared_schema._HAS_JSONSCHEMA
     packet = _packet()
     output = render_task_markdown(
         packet,
@@ -169,6 +173,39 @@ def test_render_task_markdown_rejects_invalid_packet(tmp_path: Path) -> None:
             tmp_path / "tasks.md",
         )
     assert not (tmp_path / "tasks.md").exists()
+
+
+def test_render_task_markdown_fails_closed_without_jsonschema(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Reject a packet before writing when full validation is unavailable."""
+    monkeypatch.setattr("lib.shared.schema._HAS_JSONSCHEMA", False)
+    packet = _packet()
+    output = tmp_path / "tasks.md"
+
+    with pytest.raises(
+        RenderValidationError, match="jsonschema is unavailable"
+    ):
+        render_task_markdown(packet, output)
+
+    assert not output.exists()
+
+
+def test_render_task_markdown_rejects_malformed_nested_packet_with_jsonschema(
+    tmp_path: Path,
+) -> None:
+    """Reject invalid nested schema data when full validation is available."""
+    assert shared_schema._HAS_JSONSCHEMA
+    packet = _packet()
+    packet["boundaryReview"]["taskReviews"]["render"][
+        "acceptanceDisposition"
+    ] = "not-accepted"
+    output = tmp_path / "tasks.md"
+
+    with pytest.raises(RenderValidationError, match="schema"):
+        render_task_markdown(packet, output)
+
+    assert not output.exists()
 
 
 def test_render_task_markdown_rejects_non_markdown_output(
