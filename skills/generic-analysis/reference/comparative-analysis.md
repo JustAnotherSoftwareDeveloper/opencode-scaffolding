@@ -3,7 +3,7 @@
 ## Define The Comparison
 
 - State the alternatives or artifacts under comparison and the decision they inform.
-- Define consistent scope, baseline conditions, and evaluation criteria.
+- Define a common scope, baseline conditions, and evaluation criteria for all alternatives.
 - Exclude alternatives that violate non-negotiable constraints.
 - Gather equivalent evidence for each remaining alternative.
 

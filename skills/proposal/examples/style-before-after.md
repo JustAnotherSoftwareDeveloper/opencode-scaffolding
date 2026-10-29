@@ -1,9 +1,9 @@
 # Engineering writing before and after
 
 These paired examples demonstrate precision, density, and technical scanability.
-Each rewrite keeps the technical meaning while removing robotic phrasing, adding
-concrete detail, clarifying uncertainty ownership, exposing compatibility impact,
-and making verification observable.
+Together, the rewrites preserve technical meaning while demonstrating how to remove
+robotic phrasing, add concrete detail, distinguish research gaps from owner decisions,
+expose compatibility effects, and make verification observable.
 
 ## Robotic Prose
 

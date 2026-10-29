@@ -1,8 +1,6 @@
 # Class Decision Flow
 
-Use these questions when uncertain.
-Start with `operation` as the default.
-Only choose another class when a specific condition clearly applies.
+When the class is unclear, start with `operation`; choose another class only when its specific conditions clearly apply.
 
 ## Default — Single Bounded, Independent, Self-Validating, No Sub-Delegation
 

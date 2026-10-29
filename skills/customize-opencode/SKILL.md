@@ -30,56 +30,55 @@ class: documentation
 
 ### Purpose
 
-- The `## PURPOSE` section defines the primary task objective.
-- Controls all execution and interpretation decisions.
+- The `## PURPOSE` section defines the primary task objective and governs all execution and interpretation decisions.
 
 ### Details
 
 - The `## DETAILS` section supplies authoritative context and facts.
-- Excludes invented facts and unsupported outcomes.
-- Permits repository evidence and reversible interpretations to resolve non-material omissions.
+- Do not invent facts or claim unsupported outcomes.
+- You may use repository evidence and reversible interpretations to resolve non-material omissions.
 
 ### Files to Read
 
 - The `## FILES TO READ` section lists required initial read targets.
-- Permits purposeful discovery of additional task-related read context.
-- Makes a missing listed file blocking only when the absence materially prevents the deliverable or required verification.
+- You may discover additional task-related read context when useful.
+- A missing listed file blocks only when its absence materially prevents the deliverable or required verification.
 
 ### Files to Write
 
 - The `## FILES TO WRITE` section defines the complete write boundary through literal paths or explicit bounded path patterns.
-- Requires every dynamic output to match an authorized pattern.
-- Requires bounded patterns to identify a directory, filename structure, and extension.
-- Excludes recursive wildcards and repository-wide write patterns.
-- Reports each listed path according to the canonical
+- Every dynamic output must match an authorized pattern.
+- A bounded pattern must identify a directory, filename structure, and extension.
+- Do not use recursive wildcards or repository-wide write patterns.
+- Report each listed path according to the canonical
   `~/.config/opencode/output-contract-template.md` reconciliation contract.
-- Permits an unchanged result when verification establishes that the path already satisfies the requested state.
+- You may leave a path unchanged when verification establishes that it already satisfies the requested state.
 
 ### Skills
 
 - The `## SKILLS` section lists every authorized skill-tool invocation.
-- Requires successful loading of every named skill.
-- Excludes skill-tool invocations for unlisted names.
-- Applies skill-level output instructions to the `Deliverable` payload while preserving the worker result envelope.
-- Translates skill-level `PARTIAL:` and `BLOCKED:` guidance into envelope status and report fields.
+- Load every named skill successfully.
+- Do not invoke the skill tool for unlisted names.
+- Apply skill-level output instructions to the `Deliverable` payload while preserving the worker result envelope.
+- Translate skill-level `PARTIAL:` and `BLOCKED:` guidance into the envelope status and report fields.
 
 ### Execution Instructions
 
 - The `## EXECUTION INSTRUCTIONS` section defines required outcomes and the default execution order.
-- Permits supporting actions and safe reordering when correctness requires them.
-- Excludes omission of required outcomes.
+- Supporting actions and safe reordering are allowed when correctness requires them.
+- Do not omit required outcomes.
 
 ### Verification
 
 - The `## VERIFICATION` section defines applicable quality checks.
-- Reports every check according to
+- Report every check according to
   `~/.config/opencode/output-contract-template.md`.
-- Permits remediation within the hard boundaries.
+- You may remediate failures within the hard boundaries.
 
 ### Expected Output
 
-- The `## EXPECTED OUTPUT` section defines the exact payload shape under `Deliverable`.
-- Does not suppress or replace the worker result envelope.
+- The `## EXPECTED OUTPUT` section defines the exact shape of the payload under `Deliverable`.
+- It does not suppress or replace the worker result envelope.
 
 ## Sentinel Values
 

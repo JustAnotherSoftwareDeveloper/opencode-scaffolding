@@ -1,6 +1,8 @@
 # Error Handling
 
-Use unified `die()` and `err()` helpers from `lib/shared/common.sh`:
+## Diagnostic helpers
+
+Use the shared helpers in `lib/shared/common.sh` for three cases: `die()` writes an error to stderr and exits, `err()` writes an error to stderr without exiting, and `info()` writes an informational message to stderr only in verbose mode.
 
 ```bash
 # Die with error message and exit code
@@ -23,7 +25,9 @@ info() {
 }
 ```
 
-Trap pattern for cleanup:
+## Cleanup trap
+
+When cleanup succeeds or is skipped, this `EXIT` trap exits with the status captured when it starts; under `errexit`, a cleanup failure can stop it before that explicit exit:
 
 ```bash
 cleanup() {
@@ -34,7 +38,9 @@ cleanup() {
 trap cleanup EXIT
 ```
 
-Named exit code constants:
+## Exit code constants
+
+Define named constants for success, runtime, usage, and environment exit codes:
 
 ```bash
 readonly EXIT_SUCCESS=0

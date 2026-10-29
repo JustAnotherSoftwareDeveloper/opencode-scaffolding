@@ -18,11 +18,11 @@ class: operation
 
 # Plan Writer
 
-Steps 1–16 perform source-based initial creation and always create a new plan workspace. Use the separate bounded correction mode below for audit findings against an existing plan; never run workspace setup or publish a replacement workspace for a correction.
+Steps 1–16 cover source-based initial creation and always create a new plan workspace. For audit findings against an existing plan, use the separate bounded correction mode below; never set up or publish a replacement workspace for a correction.
 
 ## Initial Creation Input Contract
 
-Require a topic or summary and one or more source-document paths. Block when absent.
+Require a topic or summary and at least one source-document path. Block if neither a topic nor a summary is provided, or if no source-document path is provided.
 
 When the source set contains `PROPOSAL.md`, read its `status`, `readiness`, and `decision-owner` before creating a workspace.
 Continue only when the proposal records an accepted lifecycle state, or when it is `decision-ready` and the recorded decision authority explicitly authorized planning. Validation success, `review-ready`, recency, and invocation alone do not authorize planning.
@@ -34,8 +34,8 @@ Continue only when the proposal records an accepted lifecycle state, or when it 
 1. **Validate sources.** Follow [the workspace contract](reference/workspace-contract.md). Resolve every source path.
    Block on a missing path, a non-file path, a target outside `$CWD`, or a target inside an existing plan workspace.
 
-2. **Create the workspace.** Derive a workspace-directory summary slug and epoch-millisecond timestamp. Create `.plans/<epoch-ms>-<workspace-slug>/` without replacing an existing directory.
-    This directory identity is distinct from the packet slug.
+2. **Create the workspace.** Derive a summary slug for the workspace directory and an epoch-millisecond timestamp. Create `.plans/<epoch-ms>-<workspace-slug>/` without replacing an existing directory.
+    This workspace directory name is distinct from the packet slug.
    Create category subdirectories only when sources belong to them.
 
 3. **Copy sources.** Copy each source into its category directory. Preserve the source filename or add a deterministic collision suffix.
@@ -83,7 +83,9 @@ Continue only when the proposal records an accepted lifecycle state, or when it 
    Read any task-contract reference files needed for authoring explicitly.
    Block on an absent name, stale path, class mismatch, or load failure.
 
-   Before initial task authoring, reconcile and load the exact documentation record named `markdown-writing-guide` with the skill tool, then explicitly read `markdown-writing-guide -> reference/writing-quality.md`; follow [Writing integration](reference/writing-integration.md). Apply it to compatible substantive prose in packet `summary` and task `purpose`, `context`, `executionInstructions`, `verification`, and `expectedOutput` fields, without changing their format or meaning. Treat it as passive, documentation-only, and non-transitive; it adds no workflow, authority, or permission to change task boundaries. In canonical packet execution, do not recollect or self-load it; apply it only when declared and already loaded.
+   Before initial task authoring, reconcile and load the exact documentation record named `markdown-writing-guide` with the skill tool. Then explicitly read `markdown-writing-guide -> reference/writing-quality.md` and follow [Writing integration](reference/writing-integration.md).
+   Apply the guide to compatible substantive prose in packet `summary` and task `purpose`, `context`, `executionInstructions`, `verification`, and `expectedOutput` fields without changing their format or meaning. Treat it as passive, documentation-only, and non-transitive; it adds no workflow, authority, or permission to change task boundaries.
+   In canonical packet execution, do not recollect or self-load the guide; apply it only when declared and already loaded.
 
 9. **Author tasks.** Require the author to select one packet slug and write a schema-valid canonical packet root. Preserve the selected packet slug unchanged.
     The canonical task-packet schema used in validation step 14 owns packet-root fields and constraints, not this workflow.
@@ -107,7 +109,7 @@ Continue only when the proposal records an accepted lifecycle state, or when it 
    orchestration, destructive-authority, or other special execution semantics. When
    no specialized operation semantically fits, select the exact collector-winning
    `generic-executor`; lack of a specialized semantic match is not a blocker.
-   Assign the exact `markdown-writing-guide` documentation record when a task requires substantive Markdown or Markdown-like prose authoring or revision and the guide adds compatible value, including prose within a specialized format. A specialized format or skill class alone is not an exclusion; the guide supplements rather than replaces local writing guidance and artifact contracts. See [Writing integration](reference/writing-integration.md).
+   Assign the exact `markdown-writing-guide` documentation record when a task requires substantive Markdown or Markdown-like prose authoring or revision and the guide adds compatible value. This includes prose within a specialized format: the guide supplements rather than replaces local writing guidance and artifact contracts. A specialized format or skill class alone is not an exclusion. See [Writing integration](reference/writing-integration.md).
    After choosing the operation owner, actively consider whether a documentation
    profile adds distinct, material execution value for that task beyond its context
    and listed materials. Include profiles that clarify a relevant contract, resolve
@@ -182,9 +184,9 @@ Continue only when the proposal records an accepted lifecycle state, or when it 
 
 ### Bounded Audit-Finding Correction
 
-1. Require the existing plan-directory path, exact audit report (or a finding extract retaining its run identity and complete input manifest), finding IDs, and proposal baseline. Verify the manifest identifies this target's pre-correction `tasks.json` and `tasks.md` and all supplied baseline files by path and recorded SHA-256; block missing, ambiguous, or mismatched identity, or absent `tasks.json`. Before substantive prose corrections, follow [Writing integration](reference/writing-integration.md) and keep edits within finding-authorized fields.
-2. Correct only the reported, plan-writer-owned findings in that workspace's `tasks.json`, preserving unrelated task content and packet identity. The only writable files are that `tasks.json` and its `tasks.md`; never modify copied sources or the proposal baseline, and block findings that require those edits. Inspect diffs and reject changes not authorized by the exact finding IDs.
-3. Validate the revised `tasks.json` with step 14's state-file command but omit `--auto-fix`; inspect each diff and fix only finding-authorized violations, including `skills` entries only when that finding authorizes them, then retry. Block if validation requires an out-of-scope fix. Do not create `draft.json`, invoke `init-task-packet`, or create, rename, or replace a plan workspace.
+1. Require the existing plan-directory path, exact audit report (or a finding extract that retains its run identity and complete input manifest), finding IDs, and proposal baseline. Verify the manifest identifies this target's pre-correction `tasks.json` and `tasks.md` and all supplied baseline files by path and recorded SHA-256; block missing, ambiguous, or mismatched identity, or absent `tasks.json`. Before substantive prose corrections, follow [Writing integration](reference/writing-integration.md) and limit edits to finding-authorized fields.
+2. Correct only reported findings owned by plan-writer in that workspace's `tasks.json`; preserve unrelated task content and packet identity. The only writable files are that `tasks.json` and its `tasks.md`. Never modify copied sources or the proposal baseline; block findings that require those edits. Inspect the resulting diffs and reject any change the exact finding IDs do not authorize.
+3. Validate the revised `tasks.json` with the state-file command from step 14, omitting `--auto-fix`. Inspect each diff and fix only finding-authorized violations. Change `skills` entries only when the finding authorizes those changes, then retry. Block if validation requires an out-of-scope fix. Do not create `draft.json`, invoke `init-task-packet`, or create, rename, or replace a plan workspace.
 4. After validation succeeds, rerender from the existing `tasks.json` with `--overwrite`; the output path must be exactly `$PLAN_DIR/tasks.md`:
 
    ```bash

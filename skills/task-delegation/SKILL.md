@@ -26,9 +26,10 @@ work. An executor must preserve an already approved task plan unchanged.
 Before composing or substantively revising packet prose in `PURPOSE`, `DETAILS`,
 `EXECUTION INSTRUCTIONS`, `VERIFICATION`, or `EXPECTED OUTPUT`, explicitly load
 `markdown-writing-guide` and read `markdown-writing-guide -> reference/writing-quality.md`.
-Apply it only to that authored prose and where compatible with the supplied intent,
-source evidence, resource rules and reconciliation, packet grammar, assigned operation
-or delegated owner, and dispatch boundary. Preserve verbatim source context when
+Apply the guidance only to prose in those five fields that is being authored or
+substantively revised, and only when compatible with the supplied intent, source
+evidence, resource rules and reconciliation, packet grammar, assigned operation or
+delegated owner, and dispatch boundary. Preserve verbatim source context when
 required; do not rewrite it solely for style. This passive load does not transfer to the
 dispatched worker, alter its `SKILLS` assignment, or change any field made authoritative
 after dispatch.

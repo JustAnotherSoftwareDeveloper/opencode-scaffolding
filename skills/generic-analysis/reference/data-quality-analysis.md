@@ -2,8 +2,8 @@
 
 ## Define Fitness For Use
 
-- Identify the decision, model, report, or workflow that consumes the data.
-- Define required dimensions of quality, scope, timeliness, and acceptable error.
+- Identify the decision, model, report, or workflow that will use the data.
+- For that use, define required quality dimensions, data scope, timeliness, and acceptable error.
 - Identify data sources, owners, transformations, and storage locations.
 - Establish the population and time period represented by the data.
 

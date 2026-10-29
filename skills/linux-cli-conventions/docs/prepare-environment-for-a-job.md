@@ -1,6 +1,6 @@
 # Prepare The Environment A Job Needs
 
-Use this page to distinguish prerequisite and context reports before a job starts: package availability versus installation, unit-file versus runtime state, access and identity views, resource context, or storage reports. These are documented distinctions, not installation, configuration, permission-repair, or cleanup procedures.
+Before a job starts, use this page to interpret reports about its prerequisites and execution context. It distinguishes package availability from installation, unit-file state from runtime state, and identity information from effective access; it also describes resource and storage reports. The page explains what these reports can show; it does not prescribe installation, configuration, permission repair, or cleanup.
 
 ## Check Package And Unit States
 

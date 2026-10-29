@@ -13,8 +13,8 @@ The persisted analysis document supplies planning context alongside any other re
 
 1. A question, problem, or artifact enters analysis.
 2. Analysis produces a conclusion, material uncertainty, and next actions.
-3. The analysis result becomes a persisted source document with other relevant evidence.
-4. The documented analysis and evidence form the source set for a plan workspace.
+3. The analysis result is persisted as a source document alongside other relevant evidence.
+4. Together, the persisted analysis and evidence form the source set for a plan workspace.
 5. The plan workspace records executable task JSON and rendered task documentation.
 
 ## Artifacts

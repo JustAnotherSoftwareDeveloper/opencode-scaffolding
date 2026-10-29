@@ -1,7 +1,7 @@
 # Grouped Selection Tags
 
-Write tags as answers to six selection questions. Use only groups that improve a
-decision; do not fill every group.
+Use the six tag groups to answer selection questions, but include a group only when it
+helps distinguish the skill. Do not fill every group.
 
 - `actions`: What does the skill do?
 - `inputs`: What does it receive or inspect?
@@ -10,11 +10,12 @@ decision; do not fill every group.
 - `environments`: Where does the request apply?
 - `constraints`: What condition materially changes ownership?
 
-Start with the owned request and its input/output contract. Then list the nearest
-neighboring skills and the requests they own. Keep a tag only when changing or
-removing it could change selection. Prefer request vocabulary over implementation
-details. Keep each value atomic: express one concept per value. Check discoverability
-using request language and, where useful, concise aliases for the same owned request.
+Start with the request the skill owns and its input/output contract. Identify the
+nearest neighboring skills and the requests they own. Keep a tag only if changing or
+removing it could change skill selection. Prefer request wording to implementation
+details. Keep each value atomic: one concept per value. Test discoverability with
+likely request wording; where useful, add concise aliases for alternate wording of the
+same owned request.
 
 ## Conditions And Aliases
 

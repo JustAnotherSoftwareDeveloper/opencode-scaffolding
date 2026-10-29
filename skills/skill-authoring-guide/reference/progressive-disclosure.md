@@ -50,13 +50,12 @@ as `[insert ...]`. When declaring a new reusable value slot, use `<<name>>` (rep
 `name` with a descriptive slot name) unless the consuming format requires another
 spelling. Preserve existing required path, command, output, and template syntax
 verbatim: do not replace required tokens with literal values or convert their
-delimiters. This notation choice does not approve a marker by itself. For each retained
-reusable slot, the same template or required-format definition must explicitly declare
-the slot, define the value it represents (or how that value is supplied or generated),
-and require its substitution when the template or format is instantiated. Delimiters
-alone do not establish that a marker is an approved slot. A marker that leaves
-instructional content unfinished, or lacks any part of this declaration, remains
-unresolved and violates this rule.
+delimiters. The delimiters do not approve a slot: the same template or required-format
+definition must explicitly declare each retained reusable slot, define the value it
+represents (or how that value is supplied or generated), and require its substitution
+when the template or format is instantiated. A marker that leaves instructional content
+unfinished or lacks any part of this declaration remains unresolved and violates this
+rule.
 
 **Diagnostic evidence.** Report the exact unresolved token and line. For each retained
 reusable slot, record the token's use line and the declaration location in the same

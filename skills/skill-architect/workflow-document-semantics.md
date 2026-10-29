@@ -2,13 +2,13 @@
 
 ## Purpose
 
-Define what a workflow document means as a passive planning artifact and where its
-authority ends.
+Define the meaning of a workflow document supplied as passive planning context and
+where its authority ends.
 
 ## Applicability
 
-Applies to family planning, skill creation or review context, migration context, and
-validation or release descriptions supplied as passive references.
+Applies to skill-family planning, skill creation or review context, migration context,
+and validation or release descriptions when supplied as passive references.
 
 ## Non-Goals
 
@@ -30,8 +30,9 @@ authority, cause a transitive load, or count as completion evidence.
 
 ## Evidence Status
 
-The passive artifact contract is approved. Its existence as context does not claim
-that a consuming operation or workflow has been completed.
+The passive artifact contract is approved. A workflow document's presence as context
+does not establish that its consuming operation or the workflow it describes has been
+completed.
 
 ## Shared Passive-Contract Verification
 

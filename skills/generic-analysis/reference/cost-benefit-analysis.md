@@ -16,7 +16,7 @@
 
 ## Compare Alternatives
 
-- Compare net value, payback period, downside exposure, and distribution of effects.
+- Compare net value, payback period, downside exposure, and how costs, benefits, and other effects are distributed among affected stakeholders.
 - Test the conclusion against high-impact uncertainty and alternative assumptions.
 - State benefits or harms that resist monetary valuation.
 - Select the option that satisfies the objective within accepted cost and risk limits.

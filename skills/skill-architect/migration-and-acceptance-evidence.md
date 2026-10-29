@@ -39,9 +39,9 @@ unverified completion claims.
 
 ## Evidence Status
 
-The architecture is approved and the ledger is preserved as rollback evidence. The
-listed gates remain acceptance criteria; validator and lint results are reported by
-the consuming operation, not established by this passive document.
+The architecture is approved, and the ledger is preserved as rollback evidence. The
+listed gates remain acceptance criteria. The consuming operation reports validator
+and lint results; this passive document does not establish those results.
 
 ## Shared Passive-Contract Verification
 

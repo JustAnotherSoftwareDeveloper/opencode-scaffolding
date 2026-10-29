@@ -36,8 +36,8 @@ Define these required fields:
 
 ## Procedure
 
-Each numbered step is one phase; its accompanying requirements specify the work to
-complete within that phase.
+Each numbered step defines a phase; its accompanying requirements describe the
+work within that phase.
 Do not delegate sub-tasks.
 
 1. **Parse requirements** — Extract script name, purpose, input/output contracts, dependencies, and skill consumers from the normalized input.

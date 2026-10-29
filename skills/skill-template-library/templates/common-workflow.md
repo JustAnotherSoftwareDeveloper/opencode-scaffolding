@@ -4,8 +4,9 @@ the value from its source below; no slot may remain. Use one Workflow Name value
 both occurrences. Remove this comment from the instantiated workflow; it is not part
 of the workflow output.
 
-- Workflow Name (title and metadata line): replace both occurrences with the author-
-  supplied name of the practice described by Purpose and Descriptive Sequence.
+- Workflow Name (title and metadata line): replace both occurrences with the workflow
+  name supplied by the author; it must name the practice described in Purpose and
+  Descriptive Sequence.
 - optional skill (metadata line): replace with the author-supplied name of a skill
   actually associated with this workflow, or with empty text when none is associated.
 - Description (metadata line): replace with an author-supplied brief description of
@@ -48,8 +49,8 @@ of the workflow output.
 
 ## Descriptive Sequence
 
-Describe the practice in sequence. These entries are descriptive context, not
-imperative steps, commands, or instructions for the reader to execute.
+Describe the practice in sequence. These entries provide context; they are not steps,
+commands, or instructions for the reader to execute.
 
 1. **<<Phase 1 Name>>** — <<description of the practice, its inputs, outputs, and key decisions>>
 2. **<<Phase 2 Name>>** — <<description of the practice, its inputs, outputs, and key decisions>>
@@ -57,15 +58,15 @@ imperative steps, commands, or instructions for the reader to execute.
 
 ## Artifacts
 
-<<List of artifacts associated with the practice, including files, configuration,
-evidence, or state described as inputs or outputs. This list does not authorize
-creating, modifying, or deleting anything. Use bullet points.>>
+<<List actual files, configuration, evidence, or state used as inputs or produced as
+outputs by the practice. This is descriptive only; it does not authorize creating,
+modifying, or deleting anything. Use bullet points.>>
 
 ## Validation Context
 
-<<Describe the evidence or criteria by which a consuming operation may assess the
-workflow outcome. This is validation context, not a completion check performed by
-this document. Use bullet points.>>
+<<List the evidence or criteria a consuming operation may use to assess the workflow
+outcome. This document provides context; it does not perform a completion check. Use
+bullet points.>>
 
 ## Prerequisites
 
@@ -74,7 +75,7 @@ practice. Do not prescribe tool use or execution. Use bullet points.>>
 
 ## Notes
 
-<<Assumptions, boundaries, failure modes, or gotchas specific to this workflow.
+<<List assumptions, boundaries, failure modes, or gotchas specific to this workflow.
 Use bullet points.>>
 
 ## Operation Handoff

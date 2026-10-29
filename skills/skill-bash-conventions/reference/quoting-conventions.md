@@ -1,6 +1,6 @@
 # Quoting Conventions
 
-Follow Google Shell Style Guide quoting rules.
+Follow Google Shell Style Guide quoting rules to prevent unintended word splitting and pathname expansion.
 
 - Always quote variables: `"$var"`, `"${array[@]}"`.
 - Always quote command substitutions: `"$(command)"`.

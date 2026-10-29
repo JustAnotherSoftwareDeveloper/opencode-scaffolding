@@ -1,6 +1,6 @@
 # Reference Files
 
-Index of reference files for `skill-script-node-writer`.
+Choose a reference by topic: CLI behavior, script layout and platform choice, or tooling configuration.
 
 - [./cli-conventions.md](./cli-conventions.md) — Cleye CLI patterns, exit code conventions, error message formatting, and the complete `lint-md` example.
 - [./path-layout.md](./path-layout.md) — Directory layout, import conventions, shared lib pattern, and Node vs Python platform selection guidance.

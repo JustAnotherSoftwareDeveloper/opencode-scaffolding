@@ -16,7 +16,7 @@ class: documentation
 
 # Node Script Conventions
 
-This skill stores shared reference documentation that operation-class skills use when authoring, reviewing, or maintaining Node/TypeScript scripts for the OpenCode platform. It is a passive data store with no execution steps, no side effects, and no tool invocations. Downstream operation-class skills load this skill with the skill tool and reference its files by relative path.
+This documentation skill provides shared guidance for operation-class skills that author, review, or maintain Node/TypeScript scripts for OpenCode. It contains reference material only: it has no execution steps, side effects, or tool invocations. Downstream operation-class skills load it with the skill tool and refer to its files by relative path.
 
 ## Files
 

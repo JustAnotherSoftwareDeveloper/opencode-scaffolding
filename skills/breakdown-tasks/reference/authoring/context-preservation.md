@@ -1,31 +1,27 @@
 # Context Preservation
 
-Operation guidance for populating the `context` field in each task packet. The loaded
-`task-contract` documentation skill's named **Task identity** and named
-**Traceability and metadata** reference (`traceability-and-metadata.md`) define
-requirements for context and source/proposal links; this file only describes the
-decomposition workflow's context-preservation procedure.
+Use this procedure to populate the `context` field in each task packet. The loaded
+`task-contract` documentation skill's **Task identity** (`task-identity.md`) and
+**Traceability and metadata** (`traceability-and-metadata.md`) references define the
+shared requirements for task context and source/proposal links. This page covers only
+the decomposition workflow's context-preservation procedure.
 
-*Why this field exists: Workers are stateless. They cannot re-read the original
-user prompt or access shared state between packets. The `context` field makes each
-packet self-contained, so every worker has the information it needs without external
-lookup. This design prevents stale-context bugs and enables parallel dispatch.*
-
-Copy relevant user context into each task's `context` field, preserving the shared
-contract's source and proposal references.
-Workers must not re-read the original prompt.
+Workers cannot reread the original user prompt or access shared state between packets.
+Copy the relevant user context into each task's `context` field so each worker has the
+request facts needed for its task without relying on that prompt or shared state.
+Workers must not reread the original prompt. This self-contained handoff reduces
+stale-context risk and supports parallel dispatch.
 
 The `context` field contains:
 
 - The relevant subset of the user request for this specific task
 - Background information and constraints
-- References to prior decisions or artifacts, as required by the shared traceability
-  contract
+- References to prior decisions or artifacts, and source/proposal references required
+  by the shared traceability contract
 
-Context fields are 200–8000 characters.
-Use concise, task-specific information to meet the minimum.
-Do not pad context with repeated or irrelevant text.
+Context fields must contain 200–8,000 characters. Keep context concise and
+task-specific; meet the minimum with relevant information rather than padding it with
+repeated or irrelevant text.
 Do not truncate context.
-*Why: Truncation introduces ambiguity. If the context is too long, prioritize by
-relevance rather than truncating. The worker needs complete information for its
-specific task.*
+If context is too long, prioritize information by relevance and revise it to fit.
+Truncation can introduce ambiguity or remove information the worker needs for its task.

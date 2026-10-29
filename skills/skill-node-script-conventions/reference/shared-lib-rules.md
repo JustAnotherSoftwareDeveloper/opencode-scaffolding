@@ -1,7 +1,7 @@
 # Shared Library Rules
 
 Shared utility modules live in `src/lib/shared/` and are imported by multiple scripts.
-This follows the "Scripts plus lib" pattern where cross-script utilities are organized by domain rather than by consumer script.
+The "Scripts plus lib" pattern organizes cross-script utilities by domain rather than by consuming script.
 
 ## Five Shared Module Rules
 
@@ -10,8 +10,7 @@ Every shared module must follow these conventions:
 ### 1. No CLI Entry Points
 
 Shared modules are library code only.
-They are imported, never invoked via `bun run` or registered in `package.json` scripts.
-No `src/cli/` entry point exists for a shared module.
+Import them into scripts; do not invoke them via `bun run`, register them in `package.json` scripts, or add a `src/cli/` entry point for them.
 
 ### 2. 100% Test Coverage Required
 
@@ -30,7 +29,7 @@ Each shared module must declare its consumer scripts in a module-level JSDoc com
  */
 ```
 
-This prevents accidental deletion — a maintainer can see which scripts depend on the module without searching imports.
+This prevents accidental deletion: maintainers can see which scripts depend on a module without searching imports.
 
 ### 4. Domain-Based Naming
 
@@ -42,9 +41,8 @@ This prevents rename churn when new scripts import the same module.
 
 ### 5. Extraction Rule
 
-Keep utility code in a per-script lib package until a second script needs it.
-Extract to `src/lib/shared/` only when the function or class is imported by two or more scripts.
-Premature extraction is discouraged — a single consumer does not justify shared placement.
+Keep utility code in a per-script lib package until a second script needs it; a single consumer does not justify shared placement.
+Extract a function or class to `src/lib/shared/` only when two or more scripts import it.
 
 ## File Layout
 
@@ -71,7 +69,7 @@ This prevents duplication when multiple scripts need the same utility.
 
 ## Import Convention
 
-Shared modules are imported using relative paths with `.ts` extensions (Bun requirement):
+Import shared modules with relative paths and `.ts` extensions, as Bun requires:
 
 ```typescript
 import { resolveTarget, isExempted } from '../lib/shared/path.ts'
@@ -79,7 +77,7 @@ import { formatViolation, die } from '../lib/shared/format.ts'
 import { ExitCode } from '../lib/shared/exit-codes.ts'
 ```
 
-This convention works identically in CLI entry points, per-script lib modules, and tests because all use the same relative path resolution from `src/`.
+CLI entry points, per-script `lib` modules, and tests all import shared modules through relative paths under `src/`.
 
 **Import from a CLI entry point** (`src/cli/<script-name>.ts`):
 

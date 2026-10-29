@@ -86,4 +86,5 @@ uv run --project ~/.config/opencode/scripts/python validate-task-structure \
 ## Integration Point
 
 Run structural validation after the generator publishes the packet. Then perform
-the separate request-aware boundary review before accepting the packet for
+the separate request-aware boundary review before accepting the packet for display
+or dispatch.

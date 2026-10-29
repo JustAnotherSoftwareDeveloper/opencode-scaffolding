@@ -11,10 +11,10 @@ The analysis result distinguishes observations, inferences, assumptions, uncerta
 
 ## Sequence
 
-1. A question, problem, artifact, or decision enters analysis.
+1. Analysis begins with a question, problem, artifact, or decision.
 2. Relevant evidence and material uncertainty shape the assessment.
 3. The assessment supplies a conclusion and prioritized next actions.
-4. The planning lifecycle ends unless a later request requires a decision record or plan.
+4. The planning lifecycle ends here unless a later request requires a decision record or plan.
 
 ## Artifacts
 

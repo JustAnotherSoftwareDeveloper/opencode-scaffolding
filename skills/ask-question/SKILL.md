@@ -24,7 +24,7 @@ The caller provides a free-form prompt containing a user request that may requir
 
 - **Request text**: What the user wants to accomplish.
 - **Provided context**: Files, directories, constraints, or background already mentioned.
-- **All provided context**: Preserve meaning; do not omit details.
+- **All provided context**: Preserve its meaning; do not omit details.
 
 ## Output
 

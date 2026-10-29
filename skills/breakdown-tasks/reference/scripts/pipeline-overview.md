@@ -1,10 +1,10 @@
 # Pipeline Overview
 
-This is an in-file map of one request's path from normalization to an accepted
-task packet. The [producer workflow](../../SKILL.md) owns the full procedure;
-the [skill assignment reference](../skill-assignment.md) explains assignment
-decisions. The stages below show what each phase consumes, produces, and must
-prove before the next phase starts.
+Use this overview to trace a request from normalization through final acceptance
+of its task packet. The [producer workflow](../../SKILL.md) owns the full
+procedure; the [skill assignment reference](../skill-assignment.md) explains
+assignment decisions. Each stage identifies its inputs, outputs, and the
+evidence needed to proceed.
 
 ## Ordered Stages
 

@@ -3,7 +3,8 @@
 
 ## Purpose
 
-Provide historical layout context for the canonical platform-layout concern.
+Give readers consulting the canonical platform-layout concern its historical layout
+context.
 
 ## Applicability
 
@@ -101,11 +102,11 @@ host skill discovery, selection, indexing, or loading behavior.
 
 ## Directory Layout Convention
 
-**Status: historical convention.** The earlier text stated that every
-documentation-class and planning-class skill must structure its entry-point `SKILL.md`
-with an index that lists every file within the skill's directory, each with a
-one-sentence description. It said this enabled callers to determine which internal
-files to read without scanning the directory or parsing unfamiliar filenames.
+**Status: historical convention.** The earlier text required documentation-class and
+planning-class skills to include in their entry-point `SKILL.md` an index of every file
+in the skill directory, with a one-sentence description for each. Its stated rationale
+was to help callers determine which internal files to read without scanning the directory
+or parsing unfamiliar filenames.
 
 The earlier text also said operation-class skills may omit the file index and that
 their entry point defines a procedural workflow instead. These are recorded as former

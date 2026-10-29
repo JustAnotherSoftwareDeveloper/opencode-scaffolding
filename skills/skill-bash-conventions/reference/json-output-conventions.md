@@ -1,9 +1,6 @@
 # JSON Output Conventions
 
-Follow the same output contract as Python and Node scripts.
+Keep JSON results on stdout and human-readable diagnostics on stderr, matching the output contract used by Python and Node scripts.
 
-- **stdout** — Machine-readable JSON output.
-  Use `printf` for JSON emission: `printf '{"status":"ok","count":%d}\n' "${count}"`.
-- **stderr** — Human-readable diagnostic messages.
-  Prefix errors with `Error:`, warnings with `Warning:`, verbose info with `Info:`.
-  All stderr output uses `printf '...' >&2`.
+- **stdout** — Emit machine-readable JSON with `printf`, for example: `printf '{"status":"ok","count":%d}\n' "${count}"`.
+- **stderr** — All stderr output uses `printf '...' >&2` for human-readable diagnostic messages. Prefix errors with `Error:`, warnings with `Warning:`, and verbose info with `Info:`.

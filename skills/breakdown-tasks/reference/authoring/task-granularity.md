@@ -10,8 +10,8 @@ references remain owned by `task-contract`.
 
 1. Name the requested outcome.
 2. List the smaller results needed to reach it.
-3. Create separate candidates for discovery, research, analysis, decisions,
-   authoring, changes, verification, and reporting.
+3. Create a separate candidate for each needed discovery, research, analysis,
+   decision, authoring, change, verification, or reporting result.
 4. Split candidates that still contain more than one immediate result.
 5. Repeat until each piece is the smallest useful assignment.
 6. Add dependencies and handoffs after the pieces are clear.

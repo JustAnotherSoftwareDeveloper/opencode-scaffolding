@@ -9,9 +9,11 @@ authoring metadata. These notes cover structure, not those shared semantics.
 
 ## Boundary Guidance
 
-Review task boundaries using the loaded documentation skill's named **Atomicity
-and alignment**, **Dependencies and coupling**, and **Traceability and metadata**
-references. The fields below describe the JSON interface only.
+Use `task-contract`'s shared semantics when reviewing task boundaries; see
+[Atomicity and alignment](../../../task-contract/reference/atomicity-and-alignment.md),
+[Dependencies and coupling](../../../task-contract/reference/dependencies-and-coupling.md),
+and [Traceability and metadata](../../../task-contract/reference/traceability-and-metadata.md).
+The fields below describe the JSON interface only.
 
 ## Root-Level Fields
 

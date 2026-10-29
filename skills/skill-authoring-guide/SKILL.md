@@ -18,8 +18,8 @@ class: documentation
 
 # Skill Authoring Guide
 
-Use this guide to author one valid, readable profile for direct semantic selection.
-Factory and template maintenance are separate operations.
+Use this guide to create or review one valid, readable profile for direct semantic
+selection. Factory and template maintenance are separate operations.
 
 ## Reference Files
 

@@ -82,7 +82,10 @@ Return only the relative path to the created document or report.
 9. Ask a focused question when a missing fact materially changes the conclusion.
 10. Derive an epoch-millisecond timestamp and lowercase kebab-case summary slug from the analysis question or requested report subject.
 11. Select the output route using [Output](#output); an explicitly requested audit/review report must also pass its report criteria, while ordinary analysis remains the default.
-12. **Apply shared writing guidance to authored prose.** In a direct workflow, before drafting substantive prose in either output route—including compatible prose in an explicitly requested audit/review report—load `markdown-writing-guide` with the skill tool and read `markdown-writing-guide -> reference/writing-quality.md`. Apply it only to prose being authored or substantively revised, and only where compatible. In canonical packet execution, read and apply it only when the guide is declared in the packet and already loaded; never self-load an undeclared skill. Preserve ordinary analysis's six-section order, the explicit report-routing rule, evidence distinctions, and report criteria.
+12. **Apply shared writing guidance to authored prose.**
+    - **Direct workflow:** Before drafting substantive prose in either output route—including compatible prose in an explicitly requested audit/review report—load `markdown-writing-guide` with the skill tool and read `markdown-writing-guide -> reference/writing-quality.md`.
+    - **Canonical packet execution:** Read and apply the guide only when the packet declares it and it is already loaded; never self-load an undeclared skill.
+    Apply the guidance only to prose being authored or substantively revised, and only where compatible. Preserve ordinary analysis's six-section order, the explicit report-routing rule, evidence distinctions, and report criteria.
 13. Write to the selected route using its specified content requirements.
 14. Return the created file's relative path.
 

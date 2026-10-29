@@ -6,15 +6,15 @@
 
 ## Purpose
 
-This workflow records a decision from a defined source set.
-The proposal workspace preserves the source documents, decision rationale, requirements, open engineering decisions, and implementation details.
+Use this workflow to record a decision from an explicit set of source documents.
+The proposal workspace contains copies of those documents and records the decision rationale, requirements, open engineering decisions, and implementation details.
 
 ## Sequence
 
-1. Existing source documents establish the decision context.
-2. The source set forms the basis for a proposal workspace.
-3. The proposal workspace records the requested decision and its evidence.
-4. The planning lifecycle ends unless executable planning is required later.
+1. Use existing source documents to establish the decision context.
+2. Build a proposal workspace from that source set.
+3. Record the requested decision and supporting evidence in the workspace.
+4. End the planning lifecycle here unless executable planning is required later.
 
 ## Artifacts
 

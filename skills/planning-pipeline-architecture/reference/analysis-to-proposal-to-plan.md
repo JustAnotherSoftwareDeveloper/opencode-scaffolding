@@ -7,7 +7,7 @@
 ## Purpose
 
 This workflow preserves the distinction between understanding a problem, deciding on a response, and planning approved work.
-Each stage adds a distinct artifact without replacing the artifact of the prior stage.
+Each stage adds its own artifact without replacing any earlier stage's artifact.
 
 ## Sequence
 
@@ -24,10 +24,10 @@ Each stage adds a distinct artifact without replacing the artifact of the prior 
    produces an independent, read-only report under the repository-root `.audit/`,
    recording either a pass or findings.
 8. For findings, `plan-writer` makes a bounded correction to `tasks.json` and
-   `tasks.md` in the same existing plan workspace, limited by the finding IDs and
-   impact while preserving proposal and source context. The revised plan requires a
-   mandatory read-only re-audit by `plan-audit`, with its new report under
-   repository-root `.audit/`. See the
+   `tasks.md` in the same existing plan workspace. The correction is limited by the
+   finding IDs and impact while preserving proposal and source context. The revised
+   plan requires a mandatory read-only re-audit by `plan-audit`, with its new report
+   under repository-root `.audit/`. See the
    [proposal-derived audit lifecycle](./proposal-derived-audit-lifecycle.md) for the
    full state transitions.
 

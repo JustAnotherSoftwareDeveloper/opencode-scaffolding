@@ -2,7 +2,7 @@
 
 ## File-Based Tests with `isolated_filesystem()`
 
-CliRunner's `isolated_filesystem()` creates a temporary directory as the CWD, ensuring tests do not pollute the real filesystem.
+CliRunner's `isolated_filesystem()` creates a temporary directory as the current working directory, keeping relative-path file operations out of the project tree.
 
 ```python
 """CLI integration tests for count-tokens."""

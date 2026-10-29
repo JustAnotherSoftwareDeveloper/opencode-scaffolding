@@ -1,23 +1,22 @@
 # Update Workflow
 
-Use `<name>` as the workspace-path slot below. Set it to the canonical `name` of the
-skill being maintained, then replace the slot with that value when identifying the
-target workspace under `skills/`.
+In `skills/<name>/`, replace `<name>` with the canonical `name` of the skill being
+maintained.
 
-1. Determine whether the target `skills/<name>/` workspace is being created or
-   updated, then read every existing target file.
-2. Identify the minimal affected scope before editing: a single file (including
-   `SKILL.md` only), reference files only, or the full workspace. Leave non-targeted
-   files untouched and preserve user customizations in them; a full-workspace request
-   still covers only content the request addresses. Keep template-library work
-   separate. If scope is ambiguous, ask a focused question before editing.
+1. Determine whether `skills/<name>/` is new or being updated. If it already exists,
+   read every file in the workspace before editing.
+2. Identify the minimal scope before editing: one file (including only `SKILL.md`),
+   reference files only, or the full workspace. Leave non-targeted files untouched
+   and preserve user customizations in them. A full-workspace request still covers
+   only content the request addresses. Keep template-library work separate. If scope
+   is ambiguous, ask a focused question before editing.
 3. Reconcile `SKILL.md` to the current profile contract: `name`, `description`,
    `selection`, and `class`.
-4. Ensure `selection.role`, grouped tags, and any conditions describe the owned
-   request rather than implementation history.
-5. Remove obsolete routing, registry, scoring, location, version, and
-   compatibility guidance instead of translating it into new tags.
+4. Ensure `selection.role`, grouped tags, and any conditions describe the
+   request the skill owns, not its implementation history.
+5. Remove obsolete routing, registry, scoring, location, version, and compatibility
+   guidance; do not translate it into new tags.
 6. Run the shared validators and Markdown lint on every changed Markdown file.
 
-Do not silently delete unrelated user content. Record intentional removals and
-verify unchanged files remain intact.
+Do not silently delete unrelated user content. Record intentional removals and verify
+unchanged files remain intact.

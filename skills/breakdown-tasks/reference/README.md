@@ -1,6 +1,7 @@
 # Reference Documentation Map
 
-Use this index to locate detailed guidance for the decomposition workflow.
+Use this index to find guidance for authoring, validating, and publishing
+decomposition task packets.
 
 ## Authoring
 
@@ -26,15 +27,19 @@ Use this index to locate detailed guidance for the decomposition workflow.
 
 ## Orchestration And Assignment
 
-- [Task validation](orchestration/task-validation.md) defines packet review checks.
+- [Task validation](orchestration/task-validation.md) defines structural, atomicity,
+  assignment-fit, and final acceptance checks.
 - [Skill assignment](skill-assignment.md) defines direct skill selection.
 
 ## Scripts And Maintenance
 
-- [Pipeline overview](scripts/pipeline-overview.md) summarizes the pipeline.
-- [Structure validation](scripts/validate-task-structure.md) documents validation.
+- [Pipeline overview](scripts/pipeline-overview.md) traces a request from normalization
+  through publication, structural validation, and request-aware acceptance.
+- [Structure validation](scripts/validate-task-structure.md) documents CLI modes,
+  diagnostics, exit codes, and supported auto-fixes.
 - [Error handling](scripts/error-handling-testing.md) documents failure behavior.
-- [Verification practices](maintenance/verification-best-practices.md) lists checks.
+- [Verification practices](maintenance/verification-best-practices.md) groups checks
+  by task type.
 
 ## Schemas
 

@@ -1,7 +1,8 @@
 # Selection Profile Fields
 
-Every `SKILL.md` begins with YAML frontmatter containing exactly the required fields
-`name`, `description`, `selection`, and `class`, plus only supported optional fields.
+Every `SKILL.md` starts with YAML frontmatter containing the required fields
+`name`, `description`, `selection`, and `class`. At the top level, include no other
+fields except supported optional fields.
 
 ```yaml
 ---
@@ -51,9 +52,12 @@ arrays.
 
 ## Optional Fields
 
-Use `version`, `license`, `compatibility`, `metadata`, and `permission` only when the
-profile needs them. Preserve authored list order. `supports` contains canonical skill
-names, excludes the current skill, and must resolve during full inventory validation.
+Within `selection`, `aliases`, `use_when`, `not_for`, and `supports` are optional.
+`supports` contains canonical skill names, excludes the current skill, and must resolve
+during full inventory validation.
+
+At the top level, use `version`, `license`, `compatibility`, `metadata`, and
+`permission` only when the profile needs them. Preserve authored list order.
 
 Each string is trimmed and single-line. Arrays contain 1–32 unique items; ordinary
 text is at most 128 characters, descriptions 1024, and other optional text 256.

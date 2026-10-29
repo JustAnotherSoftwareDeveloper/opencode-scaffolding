@@ -1,27 +1,27 @@
 # Packet Drafting And Traceability Checklist
 
-Use this checklist after the decomposition method produces final task results and
-before skill assignment. The task schema controls packet structure; the loaded
-`task-contract` documentation defines field meaning.
+Use this checklist after decomposition produces the final task results and before
+skill assignment. The task schema defines packet structure; the loaded
+`task-contract` documentation defines shared task semantics.
 
 ## Per-Task Checklist
 
-- Give the task a stable `taskId` and state one result in `purpose` and
-   `expectedOutput`.
-- Put the task-specific request facts, constraints, exclusions, and required prior
-   decisions in `context`.
-- List source files and predecessor file handoffs in `filesToRead`; list only the
-   task's write boundary in `filesToWrite`.
-- Write concrete execution instructions that produce the one immediate result. Put
-   independently executable checks in a dependent verification task.
-- Record observable completion in `verificationCoverage` and align it with the
-   purpose and expected output.
-- For each dependency, identify the predecessor, supplied result, consumer use,
-   and readiness condition. A dependency does not repair a compound task.
-- Use `couplingRationale` only when one result and one verification boundary require
-   multiple inseparable changes.
-- Keep the boundary unchanged during skill assignment. A skill must fit the task;
-   the task must not expand to fit a skill.
+- Give the task a stable `taskId`; state the same single result in `purpose` and
+  `expectedOutput`.
+- In `context`, include task-specific request facts, constraints, exclusions, and
+  required prior decisions.
+- In `filesToRead`, list source files and predecessor handoffs; in `filesToWrite`,
+  list only the task's write boundary.
+- Write concrete execution instructions for producing the one immediate result. Put
+  independently executable checks in a dependent verification task.
+- Record observable completion in `verificationCoverage`; align it with `purpose`
+  and `expectedOutput`.
+- For each dependency, identify the predecessor, supplied result, consumer use, and
+  readiness condition. A dependency does not make a compound task atomic.
+- Use `couplingRationale` only when multiple changes share one result and one
+  verification boundary, and separating them would cause concrete harm.
+- Keep the task boundary unchanged during skill assignment. Choose a skill to fit the
+  task; do not expand the task to fit the skill.
 
 ## Final Check
 

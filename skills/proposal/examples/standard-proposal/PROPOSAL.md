@@ -24,15 +24,17 @@ source-documents:
 
 ## Recommendation
 
-`lint-md` will accept either a Markdown file or a proposal workspace directory. File
-input keeps the existing generic rules and exit codes; directory input validates the
-workspace's `PROPOSAL.md`, source manifest, and relative links.
+`lint-md` will accept a Markdown file or a proposal workspace directory. File input
+keeps the existing generic rules and exit codes. Directory input validates
+`PROPOSAL.md`, checks its `source-documents` manifest against the copied sources, and
+verifies relative links.
 
 ## Technical Rationale
 
-The current file-only interface cannot verify relationships among frontmatter, copied
-sources, and in-document source links. Dispatching by target type adds workspace checks
-without changing the generic-file compatibility contract.
+The file-only interface checks one document's syntax but cannot verify that the
+`source-documents` manifest matches the copied sources or that relative links resolve
+within the workspace. Dispatching by target type adds those workspace checks without
+changing the generic-file compatibility contract.
 
 The implementation must preserve diagnostic ordering and exit code `1` for validation
 violations. Parse or filesystem failures must become stable diagnostics rather than
@@ -52,15 +54,16 @@ uncaught exceptions.
 
 - **Differentiator:** No CLI dispatch change.
 - **Consequence:** Source-manifest and workspace-link defects remain undetectable.
-- **Disposition:** Rejected because one-document integrity spans more than one file.
+- **Disposition:** Rejected because copied-source identity and relative links require
+  workspace context.
 
 ### Add File-or-Directory Dispatch
 
 - **Differentiator:** The target type selects a bounded validation profile.
 - **Consequence:** The CLI and library gain directory handling while file behavior stays
   compatible.
-- **Disposition:** Selected because it validates the new workspace contract without a
-  second command.
+- **Disposition:** Selected because it validates the new workspace contract through the
+  existing command.
 
 ## Implementation Details
 
@@ -75,8 +78,8 @@ uncaught exceptions.
 
 ### `scripts/node/src/lib/lint-md/proposal.ts` — Validate Workspace Identity
 
-- **Change:** Parse frontmatter, headings, copied sources, and relative links from
-  `PROPOSAL.md`.
+- **Change:** Parse `PROPOSAL.md` frontmatter and headings; validate its copied sources
+  and relative links against the workspace.
 - **Invariant:** Validation never writes proposal content.
 - **Compatibility and migration:** New workspaces use one document; historical
   workspaces remain unchanged and outside authoring validation.
@@ -97,7 +100,7 @@ uncaught exceptions.
 - Existing generic-file library and CLI tests pass unchanged.
 - A valid one-document workspace exits successfully.
 - Missing sources, malformed frontmatter, and broken relative links report stable rule
-  IDs and exit with the validation-failure code.
+  IDs and exit with code `1`.
 - Directory validation performs no writes and does not alter historical workspaces.
 
 ## Sources

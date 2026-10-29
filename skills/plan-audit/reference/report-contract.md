@@ -22,8 +22,8 @@ The report is one UTF-8 Markdown file with these semantic sections, in order:
    correction owner `plan-writer`, and the fresh-audit condition.
 
 Every diagnostic includes its stable ID, status, criterion, location, observed and
-expected evidence, impact, and confidence. Diagnostic statuses may be `WARNING`,
-`NOT OBSERVABLE`, or `BLOCKED` in addition to the four check dispositions.
+expected evidence, impact, and confidence. Its status may be a check disposition
+(`PASS`, `CONDITIONAL PASS`, `FAIL`, or `BLOCKED`), `WARNING`, or `NOT OBSERVABLE`.
 
 `PASS` means that all applicable evidence ran without a warning or violation. A
 `CONDITIONAL PASS` has only a non-blocking warning or optional non-observable

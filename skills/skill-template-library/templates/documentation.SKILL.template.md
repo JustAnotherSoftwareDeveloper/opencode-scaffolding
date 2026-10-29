@@ -93,9 +93,7 @@ The bulleted list provides the mapping of files to their purpose.
 - `<<path/to/file-3>>` — <<purpose of file 3>>
 - `<<path/to/file-4>>` — <<purpose of file 4>>
 
-Choose the relevant files based on what you need to learn or reference.
-Read only those files.
-Do not read every file — read as needed.
+Choose and read only the listed files relevant to what you need to learn or reference.
 
 ## Contents
 

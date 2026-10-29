@@ -34,11 +34,8 @@ Only catch exceptions to produce a clean error message before re-raising as `Sys
 
 ## Error Message Formatting
 
-Error messages follow a consistent pattern: `Error: <human-readable description>`.
-Write to stderr via `click.echo(..., err=True)`.
-Start with `"Error: "` prefix (capital E, colon, space).
-Include the specific cause when available (file name, invalid value).
-Do not include Python tracebacks in user-facing output.
+Write each error to stderr with `click.echo(..., err=True)` using the pattern `Error: <human-readable description>`.
+Include the specific cause when available (such as a file name or invalid value), and omit Python tracebacks from user-facing output.
 
 ## Complete Real-World Example: `count-tokens`
 

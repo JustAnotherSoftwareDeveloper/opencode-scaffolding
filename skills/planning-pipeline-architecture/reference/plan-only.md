@@ -14,11 +14,11 @@ workspace preserves the sources and contains task JSON with rendered task Markdo
 - Existing source documents establish the planning context.
 - `plan-writer` owns the direct plan workspace and its source-preserving task
   artifacts.
-- Publication of the direct plan-only artifact does not imply `Audit pending` or a
-  proposal-derived re-audit obligation.
-- An explicit audit request is the only additional condition that introduces an
-  audit handoff; the applicable audit baseline and capability requirements remain
-  separate from this direct path.
+- Publishing a direct plan-only artifact does not, on its own, enter the
+  `Audit pending` state or create a proposal-derived re-audit obligation.
+- An explicit audit request is the only additional condition that adds an audit
+  handoff; applicable audit baseline and capability requirements remain separate
+  from this direct path.
 
 ## Artifacts
 

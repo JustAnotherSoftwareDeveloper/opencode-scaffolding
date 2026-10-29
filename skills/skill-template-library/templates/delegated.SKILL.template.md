@@ -69,11 +69,11 @@ Each header defines a specific dimension of the task:
 1. Parse the eight-section input contract and sentinel values from the delegation packet.
 2. Load declared skills, read required inputs, and perform bounded work. Loading a skill is context acquisition, not completion.
    If the work includes a deterministic subtask:
-a. Prepare input for the script (file path, CLI arguments, or stdin).
-    b. Load `skill-architect` for path resolution rules to resolve `<scripts-python-dir>` or `<scripts-node-dir>`.
-       - **Python script:** `uv run --project <scripts-python-dir> <entry-point> <args>`
-       - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
-    c. Capture and validate stdout output.
+   a. Prepare input for the script (file path, CLI arguments, or stdin).
+   b. Load `skill-architect` for path resolution rules to resolve `<scripts-python-dir>` or `<scripts-node-dir>`.
+      - **Python script:** `uv run --project <scripts-python-dir> <entry-point> <args>`
+      - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
+   c. Capture and validate stdout output.
    d. On non-zero exit, return `BLOCKED` envelope status with the script failure and unblock condition.
 3. Produce the payload per Output Contract below.
 4. Self-validate using the packet's `## VERIFICATION` instructions and the template's `## Verification` section.

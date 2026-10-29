@@ -12,7 +12,11 @@ The observed EXA calls succeeded in one session. This supports the described int
 
 ## Bounded Fallback
 
-Use the observed fallback only if `functions.websearch` is exposed in the current invocation. Its verified input is one required `query` string. Call it once for an observable EXA search or page-fetch failure, zero search results, or a specific unmet mandatory capability. Also, after inspecting EXA sources, make at most one targeted fallback attempt for each task-critical claim that still lacks task-suitable support. A task-critical claim is necessary to answer the question or materially relevant to the stated use. Record the claim and the task-specific reason the inspected EXA evidence is insufficient. Fewer-than-requested EXA results or a missing date alone do not trigger fallback.
+Use the observed fallback only if `functions.websearch` is exposed in the current invocation. Its verified input is one required `query` string.
+
+Call it once for an observable EXA search or page-fetch failure, zero search results, or a specific unmet mandatory capability. After inspecting EXA sources, make at most one targeted fallback attempt for each task-critical claim that still lacks task-suitable support. A task-critical claim is necessary to answer the question or materially relevant to the stated use.
+
+Record the claim and the task-specific reason the inspected EXA evidence is insufficient. Fewer-than-requested EXA results or a missing date alone do not trigger fallback.
 
 The observed fallback returned rendered listings with titles, URLs, publication/author labels, and highlights, but no provider identity, route binding, request ID, timestamp, or verified structured result schema. The actual provider is unknown. Do not call it Google, Exa, or another named provider; do not infer freshness, coverage, quotas, privacy, retention, or retry behavior. If `functions.websearch` is absent, report the fallback as unavailable rather than inventing a substitute interface.
 

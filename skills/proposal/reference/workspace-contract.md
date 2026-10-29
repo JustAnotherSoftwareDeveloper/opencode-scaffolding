@@ -1,8 +1,8 @@
 # Proposal workspace contract
 
-This forward-only contract governs newly authored or deliberately revised proposal
-workspaces. Historical `.proposals/` workspaces remain immutable evidence and are not
-accepted as new output shapes.
+This forward-only contract governs new or deliberately revised proposal workspaces.
+Treat historical `.proposals/` workspaces as immutable evidence, not as valid output
+shapes for new work.
 
 ## Workspace Shape
 
@@ -18,8 +18,9 @@ only when it contains supplied files. New workspaces must not contain numbered d
 files, separate implementation or source indexes, unindexed companion documents, or
 active legacy aliases.
 
-The workspace name uses a 13-digit epoch-millisecond prefix and lowercase kebab-case
-slug. Creation must not replace an existing workspace.
+The workspace name starts with a 13-digit epoch-millisecond prefix, followed by a
+hyphen and a lowercase kebab-case slug. Creation must not replace an existing
+workspace.
 
 ## Source Path and File Safety
 

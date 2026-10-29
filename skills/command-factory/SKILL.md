@@ -26,7 +26,7 @@ Create or update one bounded OpenCode command file under `commands/`.
 ## Procedure
 
 1. Identify the target path as `commands/<name>.md`. Confirm the path is under `commands/` and does not overlap an existing file unless the operation is an update.
-2. Read every existing command file with a related workflow or overlapping skill reference for discovery bounded to `commands/`. Inventory any shared loading, argument, or constraint conventions.
+2. For discovery bounded to `commands/`, read every existing command file with a related workflow or an overlapping skill reference. Inventory any shared loading, argument, or constraint conventions.
 3. In direct use, before drafting command prose, load `markdown-writing-guide` through the
    skill tool, then read `markdown-writing-guide -> reference/writing-quality.md`. For a
    canonical packet, read and use the guide only if declared and successfully loaded under

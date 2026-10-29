@@ -27,10 +27,10 @@ approval.
 
 The copied-snapshot exception additionally requires an explicit unavailable or
 unreadable reason, `originIdentity`, `captureTime`, and a manifest covering every
-snapshot file. It must pass the same PROPOSAL.md section, frontmatter, and
-source-documents index checks. When both baselines are supplied, the authoritative
-tree remains the comparison baseline and any difference is a proposal-compliance
-source-drift finding.
+snapshot file. The copied snapshot must pass the same PROPOSAL.md section,
+frontmatter, and source-documents index checks. When both baselines are supplied,
+the authoritative tree remains the comparison baseline; any difference between the
+authoritative tree and copied snapshot is a proposal-compliance source-drift finding.
 
 ## Boundary
 

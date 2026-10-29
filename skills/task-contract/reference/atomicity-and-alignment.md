@@ -6,8 +6,8 @@ split it. A false split is preferable to hidden compound work.
 
 ## Split Rule
 
-A valid decomposition derives every required intermediate and final result from the
-requested outcome. Any proposed result that still contains separate discovery,
+Every required intermediate and final result in a valid decomposition must trace back
+to the requested outcome. Any proposed result that still contains separate discovery,
 research, analysis, decisions, authoring, changes, verification, or deliverables is
 not atomic. Split it again.
 

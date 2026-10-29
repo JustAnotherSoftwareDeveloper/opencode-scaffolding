@@ -22,8 +22,7 @@ Downstream operation-class skills (skill-script-bash-writer, skill-script-bash-t
 
 ## Reference Files
 
-Read the documentation files listed below as needed for your current task.
-The bulleted list provides the mapping of files to their purpose.
+The list below maps each reference file to its purpose; read only those relevant to your task.
 
 - **`reference/set-flags.md`** — Mandatory `set -euo pipefail` with caveats for each flag and library file rules.
 - **`reference/quoting-conventions.md`** — Google Shell Style Guide quoting rules: variable quoting, command substitution quoting, array usage, and `$()` over backticks.
@@ -33,10 +32,6 @@ The bulleted list provides the mapping of files to their purpose.
 - **`reference/exit-codes.md`** — Standard exit code convention: 0 success, 1 runtime error, 2 usage error, 3 environment error.
 - **`reference/json-output-conventions.md`** — stdout JSON contract and stderr diagnostic message conventions.
 - **`reference/cross-platform.md`** — Bash 3.2+ target, GNU/BSD command differences, and portable path resolution using `${BASH_SOURCE[0]}`.
-
-Choose the relevant files based on what you need to reference.
-Read only those files.
-Do not read every file — read as needed.
 
 ## Contents
 

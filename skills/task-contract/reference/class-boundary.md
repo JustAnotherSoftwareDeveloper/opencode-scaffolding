@@ -14,9 +14,8 @@ verification.
 
 ## Non-Transitive Loading
 
-Loading this documentation does not automatically read every referenced file.
-
-Further reference is explicit rather than a recursive or transitive authority chain.
+Loading this reference does not automatically read its referenced files or create a
+transitive authority chain; read each file explicitly.
 
 This store cannot add imperative steps, authorize another skill, transfer ownership
 of effects, or count as completion evidence for a consuming workflow.

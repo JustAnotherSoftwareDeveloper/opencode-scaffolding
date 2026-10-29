@@ -11,7 +11,7 @@
 ### Test Structure
 
 - **describe blocks** — Group by module, feature, or scenario.
-- **test / it names** — Verb phrase describing the expected behavior: `'exits with clean code on valid input'`, `'processes an empty file'`.
+- **test / it names** — Use a verb phrase that states the expected behavior, for example: `'exits with clean code on valid input'` or `'processes an empty file'`.
 - **No `.skip` or `.todo`** in generated test files — every test runs.
 
 ## bun:test Globals
@@ -58,8 +58,7 @@ import {
 
 ## CLI Integration Tests with Bun.spawnSync
 
-`Bun.spawnSync` is the recommended synchronous API for testing CLI scripts.
-It returns a `SyncSubprocess` object.
+`Bun.spawnSync` is the recommended synchronous API for CLI integration tests; it returns a `SyncSubprocess` object.
 
 ```typescript
 import { describe, expect, test } from 'bun:test'
@@ -90,7 +89,7 @@ describe('CLI integration', () => {
 
 ## Fixture Setup Pattern (mkdtempSync / rmSync)
 
-Use `mkdtempSync` + `beforeAll` for temporary directory creation and `rmSync` + `afterAll` for cleanup.
+Create a temporary directory with `mkdtempSync` in `beforeAll`, then remove it with `rmSync` in `afterAll`.
 
 ```typescript
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'

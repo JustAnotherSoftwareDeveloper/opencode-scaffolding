@@ -14,6 +14,8 @@ contract details.
 
 - [`skill-authoring-guide`][authoring] —
   authoring rules and selection-profile guidance.
+- [`markdown-writing-guide`][markdown-writing] — guidance for authoring and
+  revising Markdown prose.
 - [`skill-bash-conventions`][bash-conventions] — shared Bash conventions.
 - [`linux-cli-conventions`][linux-cli] — passive reference for shell, utility, and Linux OS semantics.
 - [`customize-opencode`][packet-engine] — reference for OpenCode worker-packet
@@ -24,14 +26,19 @@ contract details.
   TypeScript conventions.
 - [`skill-template-library`][templates] — canonical profiles, templates, schemas,
   and snippets.
+- [`task-contract`][task-contract] — shared semantics for atomic tasks and
+  traceable results.
 
 ## Operations
 
 - [`breakdown-tasks`][decomposition] — decompose requests into bounded task
   packets.
 - [`display-tasks`][display] — render canonical task summaries.
+- [`generic-executor`][generic-execution] — execute bounded work when no
+  specialized operation owns it.
 - [`generic-research`][research] — answer bounded questions requiring
   external evidence discovery.
+- [`plan-audit`][plan-audit] — audit an immutable proposal-derived plan.
 - [`plan-writer`][plan-writing] — create executable plan workspaces.
 - [`proposal`][proposals] — create evidence-based decision proposals.
 
@@ -43,9 +50,13 @@ contract details.
 - [`task-executor`][inline-execution] — execute one canonical task packet
   inline.
 
-## Factory and Script Workers
+## Workspace and Script Workers
 
+- [`agent-factory`][agent-factory] / [`command-factory`][command-factory] —
+  create or update agent and command contracts.
 - [`skill-factory`][skill-factory] — create or update skill workspaces.
+- [`skill-reviewer`][skill-reviewer] — assess existing skill workspaces for
+  conformance.
 - [`skill-script-bash-writer`][bash-writer] /
   [`skill-script-bash-test-writer`][bash-tests] — Bash scripts and tests.
 - [`skill-script-node-writer`][node-writer] /
@@ -57,22 +68,29 @@ contract details.
 
 [planning-architecture]: ./planning-pipeline-architecture/SKILL.md
 [architect]: ./skill-architect/SKILL.md
+[agent-factory]: ./agent-factory/SKILL.md
 [authoring]: ./skill-authoring-guide/SKILL.md
 [bash-conventions]: ./skill-bash-conventions/SKILL.md
+[command-factory]: ./command-factory/SKILL.md
 [linux-cli]: ./linux-cli-conventions/SKILL.md
+[markdown-writing]: ./markdown-writing-guide/SKILL.md
 [maintenance]: ./skill-maintenance-reference/SKILL.md
 [node-conventions]: ./skill-node-script-conventions/SKILL.md
 [templates]: ./skill-template-library/SKILL.md
+[task-contract]: ./task-contract/SKILL.md
 [decomposition]: ./breakdown-tasks/SKILL.md
 [packet-engine]: ./customize-opencode/SKILL.md
 [display]: ./display-tasks/SKILL.md
+[generic-execution]: ./generic-executor/SKILL.md
 [research]: ./generic-research/SKILL.md
+[plan-audit]: ./plan-audit/SKILL.md
 [plan-writing]: ./plan-writer/SKILL.md
 [proposals]: ./proposal/SKILL.md
 [questions]: ./ask-question/SKILL.md
 [analysis]: ./generic-analysis/SKILL.md
 [inline-execution]: ./task-executor/SKILL.md
 [skill-factory]: ./skill-factory/SKILL.md
+[skill-reviewer]: ./skill-reviewer/SKILL.md
 [bash-writer]: ./skill-script-bash-writer/SKILL.md
 [bash-tests]: ./skill-script-bash-test-writer/SKILL.md
 [node-writer]: ./skill-script-node-writer/SKILL.md

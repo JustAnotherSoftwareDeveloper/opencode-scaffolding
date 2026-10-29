@@ -1,15 +1,15 @@
 # Set Flags
 
-Every executable bash script must begin with:
+Every executable Bash script must begin with this shebang and flag declaration:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 ```
 
-- **`-e`** (errexit) — Exit on command failure.
-  Conditionals with `if cmd; then ... fi` are safe because the exit code is checked explicitly.
-  Use `|| true` or explicit `&&` chaining to suppress failures in non-conditionals.
+- **`-e`** (errexit) — Exit when a command fails, subject to Bash's `errexit` exceptions.
+  Commands tested by `if cmd; then ... fi` are safe because the condition checks the command's exit status.
+  For intentionally ignored failures outside conditionals, use `|| true` or place the command before `&&` in an explicit chain. A failing final command in the chain is not suppressed.
 - **`-u`** (nounset) — Error on undefined variable.
   Use default parameter expansion (`${var:-default}`) for all optional variables.
 - **`-o pipefail`** — Pipeline fails if any stage fails.

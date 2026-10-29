@@ -1,5 +1,6 @@
 # Command File Requirements
 
-Keep writes bounded to one `commands/<name>.md` file.
-Require supported frontmatter, explicit workflow and constraints, resolvable skill
-and agent references, and passing Markdown lint.
+Limit writes to one `commands/<name>.md` file.
+Consider the file complete only when its front matter is supported, its workflow and
+constraints are explicit, all referenced skills and agents resolve, and Markdown lint
+passes.

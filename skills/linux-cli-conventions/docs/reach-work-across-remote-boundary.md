@@ -4,14 +4,14 @@ Use this page when the requested job crosses an explicit remote-host, network-na
 
 ## Distinguish A Route View From A Socket View
 
-The iproute2 `ip(8)` interface covers objects such as addresses, links, and routes; `ss(8)` reports socket statistics. Its no-option view omits listeners and shows open non-listening sockets with established connections. These static patterns ask different questions:
+The iproute2 `ip(8)` interface covers objects such as addresses, links, and routes; `ss(8)` reports socket statistics. With no options, `ss` omits listeners and shows open non-listening sockets with established connections. These static patterns ask different questions:
 
 ```text
 ip route show
 ss -ltn
 ```
 
-The first requests route information; the second selects listening TCP sockets. A route view does not prove reachability, and a listener does not prove remote access. The inspected man7-rendered iproute2 manuals did not expose an exact release. See [`ip(8)`](https://man7.org/linux/man-pages/man8/ip.8.html) and [`ss(8)`](https://man7.org/linux/man-pages/man8/ss.8.html).
+The first requests route information; the second selects listening TCP sockets. A route view does not prove reachability, and a listener does not prove remote access. The inspected man7 renderings of the iproute2 manuals did not identify an exact release. See [`ip(8)`](https://man7.org/linux/man-pages/man8/ip.8.html) and [`ss(8)`](https://man7.org/linux/man-pages/man8/ss.8.html).
 
 Linux network namespaces isolate network resources, so identical syntax can refer to different process-scoped views. Some `ip` object commands change configuration, and `ss --kill` closes sockets; neither utility is inherently read-only. See Linux [`netlink(7)`](https://man7.org/linux/man-pages/man7/netlink.7.html) and [`network_namespaces(7)`](https://man7.org/linux/man-pages/man7/network_namespaces.7.html). For other process and mount context, see [Prepare the environment a job needs](prepare-environment-for-a-job.md#read-system-process-and-resource-views).
 
@@ -26,7 +26,7 @@ ssh host.example uname -s
 ssh -N -L 127.0.0.1:8443:service.example:443 gateway.example
 ```
 
-The first names a remote command; the second requests local port forwarding without a remote command. Configuration and server policy affect whether either request succeeds. The OpenBSD manual does not identify a Linux host's installed build, target authorization, or forwarding setup.
+The first requests that SSH run `uname -s` on the remote host; the second requests local port forwarding without a remote command. Configuration and server policy affect whether either request succeeds. The OpenBSD manual does not identify a Linux host's installed build, target authorization, or forwarding setup.
 
 ## Package Files For A Remote Job
 

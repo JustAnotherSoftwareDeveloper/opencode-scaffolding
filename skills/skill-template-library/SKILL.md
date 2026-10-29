@@ -18,13 +18,11 @@ class: documentation
 
 # skill-template-library — Documentation Store
 
-This skill is a passive data store for skill-template, schema-index, and snippet-index shared reference content.
-It does not auto-read any files when loaded.
+This skill provides passive, shared skill-authoring references, including templates, schemas, and snippets. Loading it does not read any files automatically.
 
 ## Documentation Files
 
-Read the documentation files listed below as needed for your current task.
-The bulleted list provides the mapping of files to their purpose.
+Read only the files relevant to your task; each entry describes its purpose.
 
 - `reference/selection-profile.md` — Field-by-field profile contract and class-role rules.
 - `templates/common-workflow.md` — Reference-only workflow documentation template.
@@ -36,11 +34,7 @@ The bulleted list provides the mapping of files to their purpose.
 - `schemas/index.md` — Index of the shared metadata shape and class contracts.
 - `snippets/index.md` — Index of reusable profile and workflow snippets.
 
-Choose the relevant files based on what you need to learn or reference.
-Read only those files.
-Do not read every file — read as needed.
-
 ## Docs
 
-See the [Documentation Files](#documentation-files) listing above for template descriptions.
+See the [Documentation Files](#documentation-files) above for file descriptions.
 See `schemas/index.md` for schema patterns and `snippets/index.md` for code snippets.

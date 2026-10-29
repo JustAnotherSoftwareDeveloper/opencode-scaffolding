@@ -2,7 +2,7 @@
 
 Follow conventions in `skill-bash-conventions` (set-flags, quoting-conventions, shellcheck-rules, error-handling, function-naming, cross-platform) for set flags, quoting, shellcheck directives, error handling, function naming, and portability.
 
-Use `<script-name>` for the supplied kebab-case script name and `<project-root>` for the root of the current project. Replace both slots with their concrete values wherever they appear in these path examples.
+Use `<script-name>` for the supplied kebab-case script name and `<project-root>` for the current project's root. Replace each placeholder with its concrete value in the path examples below.
 
 ## Directory Layout
 
@@ -19,7 +19,7 @@ scripts/shell/
 │   ├── utils.sh          # Shared helpers
 │   ├── <script-name>/
 │   │   └── core.sh       # Per-script library functions
-│   └── shared/           # Sharable across all scripts
+│   └── shared/           # Shared across all scripts
 │       ├── common.sh     # die(), err(), info(), require(), SCRIPT_DIR pattern
 │       └── io.sh         # read_json(), write_json(), filter_json()
 ├── tests/                # bats-core test files (mirrors src/ layout)
@@ -31,7 +31,7 @@ scripts/shell/
 
 ## Resolution Order
 
-Following the three-tier resolution pattern established in the platform layout context:
+The platform layout context records this three-tier order for resolving the shell scripts root:
 
 1. `$OPENCODE_SCRIPTS_SHELL` — Environment variable override (optional, highest priority)
 2. `<project-root>/.opencode/scripts/shell` — Project-local root

@@ -25,8 +25,9 @@ Return `BLOCKED:` for incomplete, blocked, or malformed worker results.
 
 ## Input
 
-Accept the effective request context as plaintext — not necessarily the latest user message.
-When the user references prior work ("execute it", "use that info"), the caller must resolve what that prior work entails before invoking this skill.
+Accept the effective request context as plaintext — not necessarily the latest user
+message. When the user references prior work ("execute it", "use that info"), the
+caller must resolve what that prior work entails before invoking this skill.
 Preserve the resolved context verbatim in the decomposition packet.
 
 ### Plaintext Packet Format Sent To Worker
@@ -88,14 +89,16 @@ Return `BLOCKED:` for every non-complete or invalid result.
    that it loads transitively.
    Use the packet template above.
    Insert the full input verbatim into `## DETAILS`.
-   Set `## FILES TO READ` to `None` unless the effective request identifies required source-document paths.
-    Keep `## FILES TO WRITE` as the literal bounded pattern `.tasks/<epoch-milliseconds>-<packet-slug>.json`.
-    Generate the epoch value from the current Unix epoch time in milliseconds when
-    constructing the packet. Supply the concrete value in `## EXECUTION INSTRUCTIONS`
-    and require the decomposition author to substitute it for `<epoch-milliseconds>`
-    in the concrete published and returned path. Do not resolve `<packet-slug>` in
-    the bounded pattern; the decomposition author selects it and preserves it
-    unchanged in the canonical root.
+   Set `## FILES TO READ` to `None` unless the effective request identifies
+   required source-document paths.
+   Set `## FILES TO WRITE` to the literal bounded pattern
+   `.tasks/<epoch-milliseconds>-<packet-slug>.json`.
+   Generate the epoch value from the current Unix epoch time in milliseconds when
+   constructing the packet. Supply the concrete value in `## EXECUTION INSTRUCTIONS`
+   and require the decomposition author to substitute it for `<epoch-milliseconds>`
+   in the concrete published and returned path. Do not resolve `<packet-slug>` in
+   the bounded pattern; the decomposition author selects it and preserves it
+   unchanged in the canonical root.
    Keep `## SKILLS` hardcoded to `breakdown-tasks`.
 4. **Validate the packet.**
    Confirm all 8 standard packet sections are present.
@@ -123,7 +126,7 @@ Return `BLOCKED:` for every non-complete or invalid result.
 8. **Extract and validate the payload.**
    Read all content after the `## Deliverable` heading.
    Strip leading and trailing whitespace.
-    Return the payload unchanged when it is a relative `.tasks/` JSON path.
+   Return the payload unchanged when it is a relative `.tasks/` JSON path.
    Return `BLOCKED: decomposition deliverable must be a timestamped relative .tasks path.` for every other payload.
 
 Execute this as a single-pass process.

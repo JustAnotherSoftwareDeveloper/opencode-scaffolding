@@ -17,9 +17,11 @@ Every proposal contains these H2 sections exactly once and in this order:
 7. **Verification Criteria** — tests and observations demonstrating completion.
 8. **Sources** — copied-source identity and bounded external bibliography.
 
-Use Title Case for generated proposal headings other than these eight fixed core H2
-labels. Preserve the core labels' exact wording, capitalization, and order, and preserve
-the seven table-of-contents entries exactly as shown in the skeleton.
+Use Title Case for generated proposal headings other than the eight fixed core H2
+labels. Keep those labels in the listed order and with their exact wording and
+capitalization. Preserve the seven core-section entries exactly as shown in the
+skeleton's table of contents. When a permitted domain-specific H2 is included, add its
+entry to the table of contents.
 
 A domain-specific H2 may appear between `Questions` and `Options Considered` when it
 adds substantial decision-relevant design detail. Every H2 appears in the table of

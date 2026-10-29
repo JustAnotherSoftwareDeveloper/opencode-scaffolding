@@ -57,9 +57,9 @@ contract.
   request, record, and final task set.
 - A record is treated as closed while inventory coverage, a boundary decision, or
   a warning disposition is missing, ambiguous, contradictory, or unresolved.
-- For every applicable packet, reject optional adoption, backwards compatibility,
-  migration, legacy, transition, prior-format, absent-record acceptance, and alternate
-  paths.
+- Reject an applicable packet if it allows optional adoption, backward compatibility,
+  migration, legacy or transition support, prior-format behavior, acceptance without a
+  record, or alternate paths.
 
 Use [Atomicity Examples](atomicity-examples.md) for short contrasts and
 [Worked Decomposition Examples](decomposition-examples.md) for complete records,

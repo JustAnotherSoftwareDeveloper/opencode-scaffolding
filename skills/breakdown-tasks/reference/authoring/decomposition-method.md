@@ -1,9 +1,9 @@
 # Decomposition Method
 
-Use this method after request normalization and before skill assignment. Turn one
-requested outcome into the smallest useful results, then connect those results so
-workers can complete the whole request. Deliberately over-split rather than risk
-a compound assignment.
+Use this method after request normalization and before skill assignment. Break the
+requested outcome into the smallest useful results, then connect them so workers can
+complete the whole request. Deliberately over-split rather than risk a compound
+assignment.
 
 The loaded `task-contract` documentation skill owns task identity, atomicity,
 dependencies, coupling, traceability, and verification meaning. This method applies
@@ -19,20 +19,19 @@ that contract.
    a usable breakdown.
 
 2. **Create the request-result inventory.** For every applicable packet, retain
-   a boundary-review record alongside the draft and canonical packet. Its request-result
-   inventory lists every discovery, evidence collection,
-   question, analysis, finding, decision, recommendation, authored artifact, change,
-   verification, review, and report needed for the outcome. Treat each action verb
-   and each distinct object as a candidate. Work backward from the requested outcome:
-   ask what must already be known, decided, or available before each candidate can
-   be produced. Include intermediate results even when the user requested only one
-   final deliverable.
+   a boundary-review record alongside the draft and canonical packet. The record's
+   request-result inventory lists every discovery, evidence collection, question,
+   analysis, finding, decision, recommendation, authored artifact, change,
+   verification, review, and report needed for the outcome. Treat each action verb and
+   each distinct object as a candidate. Work backward from the requested outcome: ask
+   what must already be known, decided, or available before each candidate can be
+   produced. Include intermediate results even when the user requested only one final
+   deliverable.
 
 3. **Make and record the fixed-predecessor split decision.** Begin with one task
-   per candidate. For every proposed task, hold predecessor outputs fixed and
-   available,
-   map the task to one immediate result, and record whether the candidate is `split`
-   or `accepted-indivisible`. Then ask:
+   per candidate. For each proposed task, assume predecessor outputs are fixed and
+   available, map the task to one immediate result, and record whether to `split` it or
+   accept it as `accepted-indivisible`. Then ask:
 
    - Does it still contain another substantial question, decision, change, or
      deliverable?
@@ -40,7 +39,6 @@ that contract.
      retried, completed, or verified without redoing the rest?
    - Does investigation establish a finding that changes later scope, design,
      interfaces, or acceptance criteria?
-
    - Does it cross from discovery to analysis, analysis to decision, decision to
      authoring, authoring to implementation, or implementation to verification?
    - Could another worker consume or check an intermediate result, even as a short
@@ -75,8 +73,8 @@ that contract.
    - every uncertain boundary was split; and
    - independently executable verification has its own task.
 
-    Record a closed disposition for every warning: `split`,
-    `accepted-indivisible`, or `not-applicable`. Rework failed, missing, ambiguous,
+   Record a closed disposition for every warning: `split`,
+   `accepted-indivisible`, or `not-applicable`. Rework failed, missing, ambiguous,
    contradictory, or unresolved boundaries and repeat the review. Proceed to
    skill assignment only after this request-aware review accepts the complete
    record. A skill cannot create, preserve, or cure a boundary.
@@ -87,10 +85,10 @@ that contract.
    it for display or dispatch only if inventory coverage, one-immediate-result mapping,
    fixed-predecessor decisions, warning dispositions, dependency handoffs, and any
    indivisibility rationale are all closed and still match the final set. Structural
-    validity is diagnostic evidence only and never proves atomicity. Return any failed
-    review to splitting or a concrete indivisibility rationale. For every applicable
-    packet, reject optional adoption, backwards compatibility, migration, legacy,
-    transition, prior-format, absent-record acceptance, and alternate paths.
+   validity is diagnostic evidence only and never proves atomicity. Return any failed
+   review to splitting or a concrete indivisibility rationale. For every applicable
+   packet, reject optional adoption, backwards compatibility, migration, legacy,
+   transition, prior-format, absent-record acceptance, and alternate paths.
 
 ## Stopping Rule
 

@@ -1,13 +1,14 @@
 # Atomicity Examples
 
-Use these contrasts with the **Atomicity and alignment** reference from the
-loaded `task-contract` documentation skill.
-For every applicable packet, record the request-result inventory, the
-fixed-predecessor decision for each candidate, and closed dispositions for review
-warnings before skills are assigned. After candidate publication, the delegator
-must compare that record and final task set with the original request before accepting
-the
-packet for display or dispatch. Structural validity never supplies this acceptance.
+Use these contrasts alongside **Atomicity and alignment** in the loaded
+`task-contract` documentation skill.
+
+Before assigning skills, the boundary-review record for each applicable packet must
+capture the request-result inventory, the fixed-predecessor split decision for every
+candidate, and a closed disposition for every review warning. After publishing
+candidates, the delegator must compare that closed record and the final task set with
+the original request before accepting the packet for display or dispatch. Structural
+validity never supplies this acceptance.
 
 ## Split
 

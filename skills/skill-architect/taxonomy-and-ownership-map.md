@@ -19,7 +19,7 @@ migration, or authorize a procedure, tool, write, delegation, or completion resu
 
 The authoritative source for this concern is the approved local architecture represented
 by [class taxonomy](class-taxonomy.md), [class boundary rules](class-boundary-rules.md),
-and the indexed six-concern scope. Supporting material is descriptive context only.
+and the [six-concern scope index](SKILL.md). Supporting material is descriptive context only.
 
 ## Scope
 
@@ -37,9 +37,9 @@ has one owner; stale proposed inventory names are not approved substitutes.
 
 ## Evidence Status
 
-Approved target architecture, with repository-observed class facts recorded in the
-architecture decision. Ownership-ledger completion and subsequent migration evidence
-remain implementation gates.
+The target architecture is approved, and the architecture decision records
+repository-observed class facts. Ownership-ledger completion and subsequent migration
+evidence remain implementation gates.
 
 ## Shared Passive-Contract Verification
 

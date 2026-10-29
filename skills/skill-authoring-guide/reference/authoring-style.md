@@ -1,7 +1,7 @@
 # Selection Profile Style
 
 Use imperative, active prose and exact field names. Keep one decision per sentence.
-Use one term per concept. Omit filler and tutorial preambles.
+Use one term consistently for each concept. Omit filler and tutorial preambles.
 Use one H1 per file, Title Case headings, ordered lists for procedures, and bullets for
 rules. Use fenced YAML for metadata examples. Keep examples short and contrastive.
 
@@ -14,8 +14,8 @@ Choose prose structure by meaning:
 - Use definition lists for term-and-definition material.
 - Use subsection headings for concerns that need separate review.
 
-Do not use Markdown tables in filled content. Do not create an accuracy or comparison
-exception; use the semantic forms above instead.
+Do not use Markdown tables in filled content. Do not make table exceptions for accuracy
+or comparison; use the semantic forms above instead.
 
 `TABLE-001` has one exception, approved by the user, because `display-tasks` requires
 both a concrete format example and a single-table renderer output. It applies only while

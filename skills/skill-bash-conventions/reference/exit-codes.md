@@ -1,6 +1,8 @@
 # Exit Codes
 
-Use standard exit codes matching Python and Node conventions:
+Use these standard exit codes in Bash scripts to match Python and Node
+conventions. The corresponding named constants are defined in
+[Error Handling](error-handling.md):
 
 - **0** — Success.
   Use when: Normal completion.

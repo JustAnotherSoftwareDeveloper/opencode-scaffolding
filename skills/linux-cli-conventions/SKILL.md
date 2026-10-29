@@ -31,7 +31,13 @@ Use this passive reference when shell, utility, or Linux OS semantics materially
 - **[Prepare the environment a job needs](docs/prepare-environment-for-a-job.md)** — “Check whether a dependency is installed or only available,” “understand the service and access context before a run,” or “work out whether a space report describes a directory, filesystem, or mount.” Covers prerequisite-state and system-view distinctions, not installation, repair, or cleanup procedures.
 - **[Reach or work across a remote boundary](docs/reach-work-across-remote-boundary.md)** — “Run a read-only query remotely,” “forward a local connection,” “interpret route and socket reports for a failed connection,” or “bundle files for delivery to a remote host.” Covers network views and SSH scope, with archive semantics linked as supporting context for packaging; it does not provide file-transfer or end-to-end connection workflows.
 
-Route by the requested result, not by a command name: filtering systemd journal records belongs under **Extract**; using journal evidence to investigate a failed job or unit start belongs under **Run and debug**, even if the unit's process never launched. **Prepare** is supporting context for unit-file, enablement, and runtime-state distinctions, and owns prerequisite-readiness checks rather than failure investigation. An explicit remote host or service boundary belongs under **Reach remotely**, including file delivery; **Extract** supplies supporting archive semantics, not transfer instructions. Follow links for support without changing the primary route. The references distinguish unit state and journal filtering but do not interpret a failed unit's cause or provide file-transfer procedures.
+Route by the requested result, not by a command name:
+
+- Filtering systemd journal records belongs under **Extract**; using journal evidence to investigate a failed job or unit start belongs under **Run and debug**, even if the unit's process never launched.
+- **Prepare** is supporting context for unit-file, enablement, and runtime-state distinctions. It owns prerequisite-readiness checks, not failure investigation.
+- An explicit remote host or service boundary belongs under **Reach remotely**, including file delivery. **Extract** supplies supporting archive semantics, not transfer instructions.
+
+Follow links for support without changing the primary route. The references distinguish unit state and journal filtering but do not interpret a failed unit's cause or provide file-transfer procedures.
 
 A familiar command name does not identify its shell, implementation, version, data source, or scope; the references qualify those boundaries where they affect interpretation. Manuals describe documented behavior, not installed tools or live host state.
 

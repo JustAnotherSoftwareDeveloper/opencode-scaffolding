@@ -50,12 +50,12 @@ Concrete description of what this skill produces and in what format.
 ## Execution Plan
 
 1. <<Step 1>> — see [Input](#input).
-2. If the step involves deterministic data processing, delegate to a script:
-    Load `skill-architect` for path resolution rules per the global/project-local resolution order.
-    - **Command slots:** Resolve `<scripts-python-dir>` and `<scripts-node-dir>` using the `skill-architect` path-resolution rules above; take `<entry-point>` from the selected script's concrete entry point and `<args>` from its declared CLI inputs. Substitute these single-angle slots with their concrete values when instantiating the skill. `[args]` remains optional-argument notation.
+2. When a step involves deterministic data processing, delegate that processing to a script:
+   Load `skill-architect` to resolve script paths using the global/project-local resolution order.
+   - **Command slots:** Resolve `<scripts-python-dir>` and `<scripts-node-dir>` using the `skill-architect` path-resolution rules above. Take `<entry-point>` from the selected script's concrete entry point and `<args>` from its declared CLI inputs. Substitute these single-angle slots with their concrete values when instantiating the skill. `[args]` remains optional-argument notation.
    - **Python script:** `uv run --project <scripts-python-dir> <entry-point> <args>`
    - **Node script:** `bun run --cwd <scripts-node-dir> <entry-point> [args]`
-   Incorporate script output into the reasoning context.
+   Incorporate the script's output into the reasoning context.
 3. <<Step 2>> — see [Output Format](#output-format).
 4. <<Step 3>> — produce output per [Output](#output).
 

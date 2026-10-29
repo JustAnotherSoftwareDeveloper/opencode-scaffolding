@@ -1,19 +1,20 @@
 # Skill Factory Create And Update Workflow
 
-Use this workflow for the current direct-selection profile only. Template-library
-content is maintained separately and is not part of this operation.
+Use this workflow only for the current direct-selection profile. Maintain
+template-library content separately; it is outside this operation.
 
 ## Create
 
-1. Identify the skill name, owned request, class, inputs, outputs, and nearest
+1. Identify the skill's name, owned request, class, inputs, outputs, and nearest
    neighboring skills.
 2. Write frontmatter with exactly the required profile fields: `name`,
    `description`, `selection`, and `class`.
 3. Set `selection.role` to `owner`, `support`, or `reference`, then add only the
    grouped tags that change a selection decision.
 4. Add `selection.aliases`, `use_when`, `not_for`, and `supports` only when they
-   improve direct selection: aliases are recognition-only alternate wording for the
-   same owned request, conditions are request-facing, and `supports` is directional.
+   improve direct selection. Use aliases only as recognition-only alternate wording
+   for the same owned request; make `use_when` and `not_for` request-facing; keep
+   `supports` directional.
 5. Write the body for the selected class. Keep implementation instructions in the
    body, not in profile tags.
 6. Validate the completed file with the shared validator and Markdown checks.

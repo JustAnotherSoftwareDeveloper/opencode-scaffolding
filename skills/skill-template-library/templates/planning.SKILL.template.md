@@ -40,13 +40,16 @@ Planning skills must not produce side effects, modify files, invoke tools, or de
 
 ## Common Workflows
 
-For each common planning workflow in this domain, create a workflow file using the common-workflow template, then list it below using the format: name - optional skill - description:
+Create a workflow file from the common-workflow template for each common planning
+workflow in this domain. Then list each below using this format: name - optional skill -
+description:
+
+When the workflow involves deterministic processing, note the Python script that handles it:
+`scripts/python/<entry-point>`.
 
 - `<<workflow-name>>` - `<<optional skill>>` - `<<quick description>>`
 - `<<workflow-name>>` - `<<optional skill>>` - `<<quick description>>`
 - `<<workflow-name>>` - `<<optional skill>>` - `<<quick description>>`
-  When the workflow involves deterministic processing, note the Python script that handles it:
-  `scripts/python/<entry-point>`.
 
 ## Related Skills
 

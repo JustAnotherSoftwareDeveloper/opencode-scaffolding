@@ -122,8 +122,8 @@ A created or updated pytest suite under `scripts/python/tests/`, limited to file
 required by the requested test result. Typical affected files include:
 
 Replace `<script_name>` in these illustrative filenames with the selected script name
-from **Script identity** before creating or reporting a test file. Keep `_cli` for the
-CLI test filename.
+from **Script identity** before creating or reporting a test file. The listed paths are
+relative to `scripts/python/`. Keep `_cli` for the CLI test filename.
 
 - `tests/test_<script_name>.py`
 - `tests/test_<script_name>_cli.py`

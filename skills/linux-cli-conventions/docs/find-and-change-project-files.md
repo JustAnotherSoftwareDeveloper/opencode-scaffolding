@@ -1,12 +1,12 @@
 # Find And Change Project Files
 
-Use this page when the job is to locate project paths, collect files, or reason about what a common file operation does to names. The references describe utility behavior; they do not provide an editor, version-control, or configuration-format workflow.
+Use this page to find project paths, collect files, or understand how common file operations affect names and directory entries. It explains utility behavior, not workflows for editing files, using version control, or interpreting configuration formats.
 
 ## Find The Relevant Path
 
 POSIX `ls` normally omits names beginning with `.`. GNU Coreutils 9.12 varies listing presentation by terminal and locale, so a human-oriented listing is not a stable inventory format. See [POSIX `ls`](https://pubs.opengroup.org/onlinepubs/9799919799.2024edition/utilities/ls.html) and [GNU `ls`](https://www.gnu.org/software/coreutils/manual/html_node/ls-invocation.html).
 
-The inspected GNU `find(1)` manual says its default `-P` does not follow symbolic links; `-L` follows them. Newlines are valid in pathnames, so newline-delimited text can merge or split names. GNU `find -print0` paired with GNU `xargs -0` preserves argument boundaries; it does not make traversal a snapshot or eliminate races with a changing tree. The rendered manuals do not identify exact releases. See GNU [`find(1)`](https://man7.org/linux/man-pages/man1/find.1.html) and [`xargs(1)`](https://man7.org/linux/man-pages/man1/xargs.1.html).
+The inspected GNU `find(1)` manual says its default `-P` does not follow symbolic links; `-L` follows them. Newlines are valid in pathnames, so newline-delimited text can merge or split names. GNU `find -print0` paired with GNU `xargs -0` preserves argument boundaries. It does not make traversal a snapshot or eliminate races with a changing tree. The rendered manuals do not identify exact releases. See GNU [`find(1)`](https://man7.org/linux/man-pages/man1/find.1.html) and [`xargs(1)`](https://man7.org/linux/man-pages/man1/xargs.1.html).
 
 Static GNU pattern (not a live-host procedure):
 

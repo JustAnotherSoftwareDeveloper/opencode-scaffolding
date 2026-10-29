@@ -9,10 +9,10 @@
 
 ## Construct Scenarios
 
-- Build a limited set of plausible, internally consistent future conditions.
+- Build a small set of plausible, internally consistent future scenarios.
 - Vary critical uncertainties rather than creating minor variations of one forecast.
 - Describe the assumptions, triggers, opportunities, and risks for each scenario.
-- Avoid assigning certainty to a single scenario.
+- Do not treat any single scenario as certain.
 
 ## Test Responses
 

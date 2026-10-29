@@ -22,10 +22,10 @@ class: documentation
 
 # Shared Task Semantics
 
-This skill is a passive data store for shared task identity, atomicity, alignment,
-dependency, coupling, traceability, and authoring metadata semantics.
+Use this skill as a passive reference for shared semantics about task identity,
+atomicity, alignment, dependencies, coupling, traceability, and authoring metadata.
 
-It does not auto-read any files when loaded.
+Loading the skill does not automatically read any files.
 
 It does not own decomposition, plan creation, packet execution, structural schema
 validation, skill selection, assignment, delegation, writes, or completion evidence.

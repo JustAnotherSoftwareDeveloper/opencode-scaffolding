@@ -35,6 +35,5 @@ here does not by itself establish validator support.
 
 Class behavior and role invariants are documented in
 `../reference/selection-profile.md` and `skills/skill-architect/class-taxonomy.md`.
-Per-skill output schemas remain owned by the skill that produces that artifact;
-this directory indexes metadata profiles rather than copying those schemas.
-each skill's contract.
+Per-skill output schemas remain part of the producing skill's contract; this
+directory indexes metadata profiles rather than copying those schemas.

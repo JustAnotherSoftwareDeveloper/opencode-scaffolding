@@ -2,10 +2,10 @@
 
 ## Define The Change
 
-- Describe the proposed change, purpose, scope, and implementation boundary.
+- Describe the proposed change, including its purpose, scope, and implementation boundary.
 - Identify affected components, interfaces, stakeholders, and workflows.
-- Establish the baseline behavior before evaluating effects.
-- Separate intended outcomes from unverified expectations.
+- Establish the baseline behavior before assessing effects.
+- Separate intended outcomes from expectations that have not been verified.
 
 ## Trace Effects
 
@@ -17,6 +17,6 @@
 ## Determine Actions
 
 - Rank impacts by magnitude, likelihood, timing, and reversibility.
-- Define mitigations, validation steps, and monitoring signals for material impacts.
-- Identify affected owners who require consultation, approval, or notification.
-- State the net expected impact and conditions that require reassessment.
+- For material impacts, define mitigations, validation steps, and monitoring signals.
+- Identify which affected owners need consultation, approval, or notification.
+- State the net expected impact and what conditions require reassessment.

@@ -1,14 +1,14 @@
 # Skill Class Taxonomy
 
-Every `SKILL.md` has a `class` field in its frontmatter.
-Exactly five classes are valid.
-No other classes are valid.
+Every `SKILL.md` frontmatter must include a `class` field with one of five valid values:
+`operation`, `delegated`, `inline`, `planning`, or `documentation`. No other classes are
+valid.
 If uncertain, lean toward `operation`.
-If the skill is a passive data store consumed by other skills, choose `documentation`.
+Choose `documentation` for a passive data store consumed by other skills.
 
 ## Operation
 
-**Template**: `./templates/operation.SKILL.template.md`
+**Template**: `skill-template-library` — canonical operation-class entry-point template
 
 Broad/default class for single bounded procedures that are independent, self-validating, and do not sub-delegate.
 A Normalize Input step absorbs free-form input, structured packets, files, or tool outputs into one internal input, avoiding separate modes for different invocation shapes.
@@ -28,7 +28,7 @@ For CLI tools, shell scripting, and Makefile orchestration, scripts may be writt
 
 ## Delegated
 
-**Template**: `./templates/delegated.SKILL.template.md`
+**Template**: `skill-template-library` — canonical delegated-class entry-point template
 
 Receives delegation packets and performs bounded subtasks within a pipeline or orchestration.
 Includes final workers and workflow stages (including decomposers) invoked by a delegator.
@@ -39,7 +39,7 @@ Includes final workers and workflow stages (including decomposers) invoked by a 
 
 ## Inline
 
-**Template**: `./templates/inline.SKILL.template.md`
+**Template**: `skill-template-library` — canonical inline-class entry-point template
 
 Single-pass reasoning-heavy skill executed directly by the main agent.
 Optional direct tool calls.
@@ -52,7 +52,7 @@ No worker or sub-skill orchestration as its own workflow.
 
 ## Planning
 
-**Template**: `./templates/planning.SKILL.template.md`
+**Template**: `skill-template-library` — canonical planning-class entry-point template
 
 Reference sources loaded during planning or architecting activities (formal plan creation, informal discussion, design review, onboarding, code review).
 Documents structural knowledge about the codebase.
@@ -64,7 +64,7 @@ Documents structural knowledge about the codebase.
 
 ## Documentation
 
-**Template**: `./templates/documentation.SKILL.template.md`
+**Template**: `skill-template-library` — canonical documentation-class entry-point template
 
 Passive data store for domain-shared reference content (docs, schemas, templates).
 Consumed by other skills via relative-path references.

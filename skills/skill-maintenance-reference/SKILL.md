@@ -24,17 +24,13 @@ contract. It does not auto-read files when loaded.
 
 ## Documentation Files
 
-Read the documentation files listed below as needed for your current task.
-The bulleted list provides the mapping of files to their purpose.
+Read only the files relevant to your task. Use the descriptions below to choose which
+references to consult.
 
 - [Update workflow](reference/update-workflow.md) — Defines current-scope update workflow and content integrity rules.
 - [Migration guide](reference/migration-guide.md) — Defines outright migration to the current profile.
 - [Validation checklist](reference/validation-checklist.md) — Lists shared-contract validation checks.
 - [Gotchas](reference/gotchas.md) — Catalogues current profile maintenance pitfalls.
-
-Choose the relevant files based on what you need to learn or reference.
-Read only those files.
-Do not read every file — read as needed.
 
 ## Docs
 

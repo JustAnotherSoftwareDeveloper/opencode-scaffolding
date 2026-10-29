@@ -4,7 +4,7 @@
 
 - Identify the artifact type, version, provenance, and intended purpose.
 - Inspect structure, metadata, dependencies, and relevant surrounding context.
-- Extract observable statements, behavior, values, and inconsistencies.
+- Record observable statements, behavior, and values; flag inconsistencies for evaluation.
 - Preserve exact locations for material findings.
 
 ## Evaluate Findings

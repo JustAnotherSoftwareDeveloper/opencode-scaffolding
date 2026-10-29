@@ -1,7 +1,6 @@
 # Path Layout
 
-Generated Node scripts live under `scripts/node/` within either the global or project-local root.
-Both roots follow the same directory layout; the difference is their filesystem location and resolution priority.
+Both global and project-local roots use the same `scripts/node/` layout; they differ only in filesystem location and resolution priority.
 
 > **Platform selection guidance** — See `skill-architect` (class-decision-flow) for the formal decision framework on choosing Node vs Python.
 > **Resolution order** — See `skill-architect` (platform-layout-context) for script-root resolution precedence (env var → project-local → global).

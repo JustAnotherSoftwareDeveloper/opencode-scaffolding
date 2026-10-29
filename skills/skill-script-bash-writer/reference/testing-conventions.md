@@ -1,10 +1,10 @@
 # Testing Conventions
 
-Follow conventions in `skill-bash-conventions` (exit-codes, json-output-conventions) for exit code usage and JSON output format expectations in test assertions.
+When asserting exit status or JSON output, follow the shared rules in `skill-bash-conventions` (`reference/exit-codes.md` and `reference/json-output-conventions.md`).
 
 ## bats-core Setup
 
-Tests live under `scripts/shell/tests/` with a `.bats` extension. Each source script in `src/` has a corresponding test file.
+Place each `.bats` test in `scripts/shell/tests/`; provide a corresponding test file for each source script in `src/`.
 
 **Basic test structure:**
 
@@ -39,7 +39,7 @@ teardown() {
 
 ## Assertion Libraries
 
-Use the standard bats-core assertion ecosystem, installed system-wide via package manager:
+Install the standard bats-core assertion libraries system-wide, using the package-manager or npm package name shown for your environment:
 
 - **`bats-support`** — Helper utilities for other assertion libs. Install: `bats-support` (apt/brew) or `@bats-core/support` (npm).
 - **`bats-assert`** — Provides `assert_success`, `assert_failure`, `assert_output`, `assert_line`, and `refute_output`. Install: `bats-assert` (apt/brew) or `@bats-core/assert` (npm).
@@ -85,7 +85,7 @@ teardown() {
 
 ## Fixture Management
 
-Fixtures live under `scripts/shell/fixtures/<script-name>/`. Use `BATS_TEST_DIRNAME` for relative paths:
+Store fixtures in `scripts/shell/fixtures/<script-name>/` and resolve them from the test file’s directory with `BATS_TEST_DIRNAME`:
 
 ```bash
 @test 'process_json: handles valid input' {
@@ -95,7 +95,7 @@ Fixtures live under `scripts/shell/fixtures/<script-name>/`. Use `BATS_TEST_DIRN
 }
 ```
 
-Use temp directories (`mktemp -d`) for writable test fixtures. The `teardown()` function should clean up all temp directories.
+Use `mktemp -d` for writable test fixtures. The `teardown()` function should clean up all temporary directories.
 
 ## Test Coverage Expectations
 
@@ -111,7 +111,7 @@ Each test file should cover:
 
 ## Local Validation Workflow
 
-Run `make -C scripts/shell check` before committing. This executes:
+Before committing, run `make -C scripts/shell check`. It runs:
 
 1. `make deps-check` — Verify shellcheck, shfmt, and bats are installed.
 2. `make lint` — Run shellcheck on all shell files.

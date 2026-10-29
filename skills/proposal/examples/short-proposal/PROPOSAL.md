@@ -30,10 +30,9 @@ table-of-contents entries remain unchanged; only authored non-core headings chan
 
 ## Technical Rationale
 
-Title Case distinguishes authored non-core headings while preserving the format's fixed
-core labels, technical terminology, identifiers, and Markdown hierarchy. The linked
-policy source specifies this boundary, and the existing core H2 and table-of-contents
-text remain exact.
+The linked policy assigns Title Case to authored non-core headings while preserving the
+exact core H2 labels and table-of-contents text, technical terminology, identifiers, and
+Markdown hierarchy.
 
 Assumption: Reviewers recognize the unchanged Markdown heading levels without title
 capitalization.
@@ -62,9 +61,9 @@ capitalization.
 
 ## Implementation Details
 
-### Proposal Template — Render Title Case Headings
+### Proposal Template — Render Non-Core Headings in Title Case
 
-- **Change:** Use Title Case for generated non-core headings, including optional or
+- **Change:** Render generated non-core headings in Title Case, including optional or
   domain-specific H2s and H3s.
 - **Invariant:** The exact core H2 labels and table-of-contents text, Markdown heading
   levels, and section order remain unchanged.

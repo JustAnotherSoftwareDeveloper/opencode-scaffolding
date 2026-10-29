@@ -6,8 +6,8 @@ This index maps the passive references for the shared task contract.
 
 - [Ownership ledger](ownership-ledger.md) — records the boundary between shared
   semantics, workflow procedures, and structural interfaces.
-- [Task identity](task-identity.md)
-  — describes stable identity and the semantic roles of task fields.
+- [Task identity](task-identity.md) — describes stable identity and the semantic
+  roles of task fields.
 - [Atomicity and alignment](atomicity-and-alignment.md) — describes independent
   concerns, one result, and verification alignment.
 - [Dependencies and coupling](dependencies-and-coupling.md) — describes ordered

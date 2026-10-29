@@ -21,8 +21,8 @@ A finding does not authorize a repair, and an audit pass does not authorize appr
 
 - **Proposal recorded** — `proposal` owns the decision record, supporting evidence,
   source labels, and authoritative proposal baseline. The proposal workspace and
-  its canonical decision sections are the artifact. A stable baseline does not
-  authorize planning.
+  its canonical decision sections together form the artifact. A stable
+  baseline does not authorize planning.
 - **Proposal authorization confirmed** — the decision authority owns the transition
   to planning. It requires either a recorded accepted lifecycle state or
   `decision-ready` plus explicit planning authorization from the recorded

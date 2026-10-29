@@ -1,6 +1,6 @@
 # Reference Files
 
-Index of reference files for `skill-script-python-writer`.
+Use these references when creating or editing a Python script with `skill-script-python-writer`.
 
 - [CLI conventions](./cli-conventions.md) — Click argument vs option conventions, JSON stdout default, exit code meanings, error message formatting, and the complete `count-tokens` example.
 - [Python style guide](./python-style-guide.md) — Ruff lint rules, pyright type-check settings, import ordering, naming conventions, type annotation style, and coverage exemptions.

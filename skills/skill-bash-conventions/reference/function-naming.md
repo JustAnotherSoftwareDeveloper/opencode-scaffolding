@@ -1,6 +1,6 @@
 # Function Naming
 
-Follow these naming conventions:
+Use these conventions to name Bash functions and constants:
 
 - **Script-level functions** — Lowercase snake_case.
   Example: `parse_args()`, `validate_input()`.

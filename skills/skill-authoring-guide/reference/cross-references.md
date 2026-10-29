@@ -14,9 +14,9 @@ Use concrete names and paths, not unresolved placeholders. Examples:
 - `customize-opencode -> #core-contract`
 
 The first example selects a document owned by the named documentation skill. The
-second selects a section in an owned document. The third selects a section of the
-content returned by the skill tool; it does not instruct filesystem inspection of
-`SKILL.md`.
+second selects a section in a document owned by the named skill. The third selects
+a section of the content returned by the skill tool; it does not instruct filesystem
+inspection of `SKILL.md`.
 
 ## Resolution
 

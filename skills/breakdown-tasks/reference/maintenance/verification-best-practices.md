@@ -6,34 +6,34 @@ Verification checks by task type.
 
 - File exists at the expected path.
 - File is non-empty.
-- File syntax is valid (parseable by the relevant parser).
-- File follows project conventions (naming, directory structure).
+- The relevant parser accepts the file.
+- Naming and directory structure follow project conventions.
 
 ## File Modification Tasks
 
-- All expected changes are present (diff inspection).
-- No unintended changes to other parts of the file.
+- Diff inspection confirms all expected changes are present.
+- Diff inspection finds no unintended changes elsewhere in the file.
 - File still parses without errors.
-- Existing exports, interfaces, or public API surface remain intact (if preserving backward compatibility).
+- When backward compatibility is required, existing exports, interfaces, and public API surface remain intact.
 
 ## Refactoring Tasks
 
 - Existing tests still pass.
 - Public API or interface contracts are unchanged.
 - No dead code or orphaned imports remain.
-- Linter passes with zero new warnings.
-- Build or type-check passes.
+- Linter reports no new warnings.
+- Build or type-check succeeds.
 
 ## Testing Tasks
 
 - All new tests pass.
 - Code coverage meets the project threshold (if applicable).
-- No flaky test introductions (tests are deterministic, no shared mutable state).
+- No flaky tests are introduced (tests are deterministic and use no shared mutable state).
 - Tests verify the intended behavior, not implementation details.
 
 ## Configuration Tasks
 
-- Configuration file is valid YAML, JSON, TOML, or whatever format is expected.
+- Configuration file is valid YAML, JSON, TOML, or the expected format.
 - Configuration references existing resources, paths, and identifiers.
 - Syntax check passes (e.g., `python -c "import yaml; yaml.safe_load(open(...))"`).
 - If the configuration activates a feature, that feature's tests pass.

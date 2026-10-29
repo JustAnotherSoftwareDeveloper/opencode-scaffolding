@@ -4,7 +4,9 @@ The `lint` target runs shellcheck on all `.sh` files.
 Adopt these rule policies:
 
 - **SC2155** (declare and local mask return values) — Policy: Error.
-  Declare separately from assignment to prevent masking local exit codes.
+  Declare variables separately from assignments. When an assignment uses command
+  substitution, this prevents `local` or `declare` from masking the command's return
+  status.
 - **SC2086** (double quote to prevent globbing) — Policy: Error.
   Enforce quoting for all variable expansions.
 - **SC2206** (quote to prevent word splitting) — Policy: Error.

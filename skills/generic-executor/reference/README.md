@@ -8,9 +8,10 @@ lifecycle, artifact contract, orchestration flow, destructive authority, or othe
 special execution semantics. Otherwise use `generic-executor`, optionally alongside
 materially relevant documentation skills.
 
-A missing specialized match is normal and should not block. Collection failure, an
-absent or stale collector record, class/path mismatch, failed required skill load, or
-malformed task contract remains a hard failure and must not be hidden by fallback.
+Finding no specialized operation that owns the task is normal and should not
+block. Collection failure, an absent or stale collector record, class/path mismatch,
+failed required skill load, or malformed task contract remains a hard failure and
+must not be hidden by fallback.
 
 Generic execution may cover source code, tests, scripts, configuration,
 documentation, fixtures, analysis, and other bounded repository work. Follow the

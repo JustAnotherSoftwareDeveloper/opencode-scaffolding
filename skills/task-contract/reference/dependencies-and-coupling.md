@@ -1,6 +1,7 @@
 # Dependencies And Coupling
 
-Dependencies and coupling answer different questions about a task boundary.
+Dependencies express order or artifact availability. Coupling determines whether
+multiple apparent results can be separated into distinct tasks.
 
 ## Dependency Semantics
 

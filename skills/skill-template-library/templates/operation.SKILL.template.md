@@ -81,8 +81,8 @@ skill.
 
 ## Normalize Input
 
-Map invocation context to one internal input object.
-Define required fields, defaults, and `BLOCKED: <reason>` conditions for missing required input.
+Normalize invocation context into one internal input object. Specify its required
+fields and defaults, and define which cases of missing required input return `BLOCKED: <reason>`.
 
 ## Procedure
 

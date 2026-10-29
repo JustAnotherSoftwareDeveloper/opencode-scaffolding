@@ -68,9 +68,7 @@ Do not catch `process.exit` — it is a legitimate termination path.
 
 ## Error Message Formatting
 
-Error messages follow a consistent pattern: `Error: <human-readable description>`.
-Write to stderr via `process.stderr.write()`.
-Start with `"Error: "` prefix (capital E, colon, space).
+Format each error as `Error: <human-readable description>` (capital E, colon, space) and write it to stderr with `process.stderr.write()`.
 Include the specific cause when available (file name, invalid value).
 Do not include TypeScript stack traces in user-facing output.
 

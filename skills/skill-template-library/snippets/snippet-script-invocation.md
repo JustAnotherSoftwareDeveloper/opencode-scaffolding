@@ -6,7 +6,7 @@ Choose a script runtime based on objective criteria. Scripts are appropriate whe
 
 ### Python (Default)
 
-Use Python when the work:
+Python is the default when one or more of these criteria apply:
 
 1. Is **deterministic** — produces identical output for identical input.
    - Example: parsing YAML, validating JSON schema, computing diffs.

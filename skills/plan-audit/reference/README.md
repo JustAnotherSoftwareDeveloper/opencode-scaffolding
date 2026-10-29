@@ -8,5 +8,5 @@
 - [Requirements traceability](requirements-traceability.md) maps each input,
   boundary, check, threshold, and non-goal to the selected proposal evidence.
 
-The entry point owns the operation. These references do not add authority, repair
-behavior, delegation, or implicit skill loading.
+The [plan-audit skill](../SKILL.md) owns the operation. These references do not add
+authority, repair behavior, delegation, or implicit skill loading.

@@ -2,7 +2,7 @@
 
 ## Define The Model
 
-- State the conclusion, forecast, or decision metric under examination.
+- State the conclusion, forecast, or decision metric to test.
 - Identify input variables, assumptions, and fixed constraints.
 - Establish baseline values and the source for each material input.
 - Isolate variables that materially influence the output.

@@ -16,8 +16,8 @@ evidence that the format improves reader comprehension.
   security, performance, reliability, migration, rollback, and failure-mode depth.
 
 Each workspace contains one authored `PROPOSAL.md` plus only the copied source files
-declared in its frontmatter. The examples retain `Assumption:`, `Evidence Gap:`, and
-`Open Question:` as stable labels under `Questions`.
+declared in that document's frontmatter. The examples retain `Assumption:`,
+`Evidence Gap:`, and `Open Question:` as stable labels under `Questions`.
 
 ## Supporting Examples
 

@@ -1,22 +1,23 @@
 # Cross-Platform Patterns
 
-Target **bash 3.2+** for macOS system bash compatibility.
-Avoid features not available in bash 3.2:
+## Bash version compatibility
+
+For compatibility with macOS's system Bash, target Bash 3.2 or later. Avoid features unavailable in Bash 3.2:
 
 - `**` globstar
 - `declare -A` associative arrays
 - `[[ -v var]]` variable existence check
 - `$EPOCHSECONDS`
 
-Scripts that require bash 4+ features must declare `# Requires: bash >= 4.0` and fall back gracefully.
+Scripts that require Bash 4+ features must declare `# Requires: bash >= 4.0` and fall back gracefully.
 
-**GNU/BSD command differences:**
+## GNU/BSD command differences
 
 - **`sed -i`** — Use `sed -i.bak 's/foo/bar/' file` for a portable two-step that works on both GNU and BSD.
   Remove the `.bak` backup afterward.
-- **`date`** — Detect via `date --version 2>/dev/null || true` and branch.
-  GNU: `date -d 'yesterday'` for relative dates.
-  BSD: `date -v-1d` for relative arithmetic.
+- **`date`** — Detect via `date --version 2>/dev/null || true`, then branch:
+  - GNU: `date -d 'yesterday'` for relative dates.
+  - BSD: `date -v-1d` for relative arithmetic.
 - **`find -exec`** — Use `-exec ... +` (POSIX, works on both).
   For null-delimited output, use `find ... -exec cmd {} +` directly instead of `-print0 | xargs`.
 - **`stat`** — Detect and branch.
@@ -26,10 +27,9 @@ Scripts that require bash 4+ features must declare `# Requires: bash >= 4.0` and
 - **`readlink -f`** — Linux-only.
   Use the portable `${BASH_SOURCE[0]}`-based pattern instead.
 
-**Path resolution:**
+## Path resolution
 
-Use `${BASH_SOURCE[0]}` for script-relative paths.
-Avoid `readlink -f` (Linux-only).
+For script-relative paths, use `${BASH_SOURCE[0]}`. Avoid `readlink -f` (Linux-only).
 
 Portable pattern:
 

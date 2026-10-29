@@ -61,6 +61,9 @@ scripts/python/
     test_<feature_or_domain>.py
 ```
 
+Here, `test_<feature_or_domain>.py` covers the feature/domain package; tests for shared
+modules use the `test_shared_*.py` naming convention above.
+
 CLI adapters and feature packages may import internal library modules using
 package-qualified paths. For example:
 

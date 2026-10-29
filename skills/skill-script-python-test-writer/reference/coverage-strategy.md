@@ -2,10 +2,10 @@
 
 ## Measurement Policy
 
-Measure line coverage with `pytest-cov`. Require exactly 100% line coverage for the
-complete unit-test classification. Do not set a numeric branch-coverage threshold or
-describe line coverage as proof that every branch, path, input, or assertion is correct.
-Exercise relevant branch outcomes when needed to execute in-scope lines.
+Measure line coverage with `pytest-cov`. Require exactly 100% line coverage across the
+complete set of tests classified as `unit`. Do not set a numeric branch-coverage
+threshold or describe line coverage as proof that every branch, path, input, or assertion
+is correct. Exercise relevant branch outcomes when needed to execute in-scope lines.
 
 ## Fixed Production-Source Denominator
 
@@ -50,9 +50,10 @@ roots, or a mixed-suite configuration that can satisfy the unit result. Run from
 Python project context with the effective configuration explicitly selected.
 
 If the first complete unit run is below 100%, add targeted tests for supported,
-in-scope behavior and rerun the complete unit selection. Retry once. If the second run
-still fails, report `PARTIAL` with failing tests, measured coverage when available, and
-remaining gaps. Never lower the target or claim success from a partial selection.
+in-scope behavior and rerun the complete unit selection. This second run is the only
+retry. If the second run still fails, report `PARTIAL` with failing tests, measured coverage
+when available, and remaining gaps. Never lower the target or claim success from a
+partial selection.
 
 ## Separate Full-Suite Result
 

@@ -72,14 +72,15 @@ help check from `scripts/shell/`.
       check `[[ "$stderr" == *'Error:'* ]]`.
     - **Argument validation tests** — Test each option (`-h`, `-o`, `-v`) and
       the required positional argument.
-      Use `run bash src/<script-name>.sh ...args` for CLI invocation tests.
       Create writable test fixtures with `mktemp -d` inside `setup()`.
       Reference those fixtures through the `TEST_TEMP` variable.
       Use `BATS_TEST_DIRNAME` for fixture-relative paths to
       `../fixtures/<script-name>/`.
-      Use the Bats `run` helper for all CLI invocations. Capture exit codes via
-      `$status`, stdout via `$output`, and stderr via `$stderr` when using
-      `--separate-stderr` (Bats 1.10+).
+      Invoke every CLI case with the Bats `run` helper: use
+      `run bash src/<script-name>.sh ...args` for standard cases and
+      `run --separate-stderr bash src/<script-name>.sh ...args` when a test
+      needs separate stderr (Bats 1.10+). Capture exit codes via `$status`,
+      stdout via `$output`, and separated stderr via `$stderr`.
       For file-based scripts, isolate external commands with executable mocks
       in a temporary directory prepended to `PATH`.
 
@@ -87,10 +88,9 @@ help check from `scripts/shell/`.
    `scripts/shell/Makefile`:
    Skip the `run-<script-name>` target and help text; skill-script-bash-writer
    step 4 already registers them.
-   Add a `.PHONY` target `test-<script-name>` that runs
-   `"$(BATS)" tests/<script-name>.bats`.
+   Define `test-<script-name>` to run `"$(BATS)" tests/<script-name>.bats`
+   and list it in `.PHONY` if it is not already present.
    Add help text line for `test-<script-name>` to the `help` target.
-   Add `test-<script-name>` to the `.PHONY` list if it is not already present.
    Place the target after `deps-check` and before `clean`, alphabetically by
    script name.
 

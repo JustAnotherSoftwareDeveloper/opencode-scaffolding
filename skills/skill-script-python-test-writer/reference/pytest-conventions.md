@@ -248,5 +248,5 @@ The test writer reads generated source files to determine module structure and a
 Each test is independent and shares no state with other tests.
 Use `isolated_filesystem()` or `tmp_path` for file-based tests.
 Use fixtures for reusable setup rather than module-level variables.
-Coverage classification is per test, not per file; any test module can contain both
-classes only when each collected test resolves to exactly one class.
+Classification applies per test, not per file. A test module may contain both unit and
+integration tests only if each collected test resolves to exactly one classification.

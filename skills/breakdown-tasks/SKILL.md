@@ -18,13 +18,13 @@ class: delegated
 
 <!-- markdownlint-disable MD007 MD013 -->
 
-Normalize a request, apply the operation-owned decomposition method, collect skills,
-select inline, publish, and hand the published packet to downstream dispatch.
+Normalize a request, apply the operation-owned decomposition method, collect and
+select skills inline, publish the packet, and hand it to downstream dispatch.
 
 ## Input Contract
 
 Read and normalize `PURPOSE` and `DETAILS`, preserving the request's explicit scope,
-constraints, files, and expected outcome. Block when either is absent.
+constraints, files, and expected outcome. Block if either field is absent.
 
 ## Execution
 
@@ -98,12 +98,12 @@ constraints, files, and expected outcome. Block when either is absent.
     `task-contract -> reference/atomicity-and-alignment.md`,
     `task-contract -> reference/dependencies-and-coupling.md`, and
     `task-contract -> reference/traceability-and-metadata.md`.
-    Hold predecessor outputs fixed when testing whether dependent results
-   can be accepted or retried separately. Treat lifecycle stages as separate tasks by
-   default. Known-file reading may support one task, but source discovery, findings,
-   decisions, changes, and independently executable checks are separate results. Do
-   not use a final deliverable, shared file, workflow, sequence, or available skill to
-   merge them.
+    Hold predecessor outputs fixed when testing whether dependent results can be
+    accepted or retried separately. Treat lifecycle stages as separate tasks by
+    default. Reading a known file may support one task, but source discovery, findings,
+    decisions, changes, and independently executable checks are separate results. Do
+    not use a final deliverable, shared file, workflow, sequence, or available skill to
+    merge them.
 
    Draft tasks without `skills`. Give each task a unique `taskId` and populate
    `verificationCoverage`, `dependencies`, `antiPatternSignals`, and
@@ -127,16 +127,16 @@ constraints, files, and expected outcome. Block when either is absent.
    draft and the distinct operation and documentation results to the LLM. For
    each task, select exactly one `class: operation` execution owner without
    changing the accepted boundary. When one specialized operation clearly owns a
-   distinct lifecycle, artifact contract, orchestration flow, destructive
-   authority, or other special execution semantics, select that operation. When
-   no specialized operation semantically fits, select the exact
-    collector-winning `generic-executor` operation as the execution owner; absence
-    of a specialized semantic match is not a blocker. Add zero to two materially
-    relevant `class: documentation` skills when useful. Zero is valid when none
-    adds distinct material value. Documentation is passive and cannot replace or
-    compete with the operation owner. Store the result in the existing flat
-    `skills` array: one operation owner followed by zero to two documentation
-    skills. Exclude passive `task-contract` from executable `skills`.
+    distinct lifecycle, artifact contract, orchestration flow, destructive
+    authority, or other special execution semantics, select that operation. When
+    no specialized operation semantically fits, select the exact
+    collector-winning `generic-executor` operation as the execution owner; a lack
+    of a specialized match is not a blocker. Add zero to two materially relevant
+    `class: documentation` skills when useful. Zero is valid when none adds distinct
+    material value. Documentation is passive and cannot replace or compete with the
+    operation owner. Store the result in the existing flat `skills` array: one
+    operation owner followed by zero to two documentation skills. Exclude passive
+    `task-contract` from executable `skills`.
 
    When a task requires substantive prose authoring or revision in a Markdown
    deliverable or structured task fields, include the exact collector-winning
@@ -170,8 +170,8 @@ constraints, files, and expected outcome. Block when either is absent.
     changing boundaries or metadata. Require the author to select one packet slug.
     Run `mktemp "${TMPDIR:-/tmp}/opencode-breakdown.XXXXXX.json"`, capture the
     returned unique path as `DRAFT_PATH`, and write the schema-valid canonical packet
-    root there. Block if the command fails. Preserve the packet slug unchanged. The
-    canonical root fields and slug constraints are owned by
+    root to that path. Block if the command fails. Preserve the packet slug unchanged.
+    The canonical root fields and slug constraints are owned by
     [the task-packet schema](schema/task-packet.schema.json), not this workflow.
 
 10. **Publish the candidate packet.** Run:
@@ -188,10 +188,10 @@ constraints, files, and expected outcome. Block when either is absent.
    draft on success or failure. Block on non-zero exit. This publication does not
    accept the packet for display or dispatch.
 
-11. **Validate structure and close final request-aware acceptance.** Run structural validation in a loop
-   until valid. Treat repairable structural diagnostics as warnings before hard
-   failure. Revalidate task coverage, boundaries, dependencies, and skills after any
-   split:
+11. **Validate structure and close final request-aware acceptance.** Run structural
+    validation in a loop until valid. Treat repairable structural diagnostics as
+    warnings before hard failure. Revalidate task coverage, boundaries, dependencies,
+    and skills after any split:
 
    ```bash
    schema=~/.config/opencode/skills/breakdown-tasks/schema

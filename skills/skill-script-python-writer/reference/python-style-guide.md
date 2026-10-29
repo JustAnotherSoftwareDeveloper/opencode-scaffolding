@@ -8,7 +8,7 @@ These policies are configured in `ruff.toml` and `pyrightconfig.json` at
 
 ## Approved Ruff Profile
 
-The project retains Ruff, the `py312` target, and these existing lint categories:
+Ruff is configured to target Python 3.12 (`py312`) and select these lint categories:
 
 - **E** (pycodestyle errors): Syntax errors, indentation, line breaks.
 - **F** (pyflakes): Unused imports, undefined names, duplicate arguments.

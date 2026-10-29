@@ -2,7 +2,7 @@
 
 - Read `~/.config/opencode/output-contract-template.md` as the sole worker-envelope
   grammar. Fixtures illustrate outcomes but never override that contract.
-- Treat `SKILL.md` as the authoritative packet construction and worker result handling contract.
+- Treat the [task-delegation skill contract](../SKILL.md) as authoritative for packet construction and worker-result handling.
 - Use [complete-no-files.txt](./fixtures/complete-no-files.txt) for complete analysis-only result validation.
 - Use [complete-file-change.txt](./fixtures/complete-file-change.txt) for file reconciliation validation.
 - Use [partial.txt](./fixtures/partial.txt) for partial result validation.

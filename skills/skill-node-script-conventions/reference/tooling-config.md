@@ -1,15 +1,15 @@
 # Tooling Configuration
 
-Every `scripts/node/` root must contain a `package.json`, `biome.json`, and `tsconfig.json`.
-Create or update these files alongside each new script.
+At every `scripts/node/` root, keep a `package.json`, `biome.json`, and `tsconfig.json`.
+Create or update these root-level files when adding a script.
 
 > **Resolution order** — See `skill-architect` (platform-layout-context) for script-root resolution precedence (env var → project-local → global).
 > **Path layout** — See `path-layout.md` for directory structure and import conventions.
 
 ## Configure `biome.json`
 
-Biome enforces code formatting and lint rules.
-Create or update `biome.json` at the `scripts/node/` root.
+Use Biome to enforce formatting and lint rules.
+Store its configuration in `biome.json` at the `scripts/node/` root.
 
 ```json
 {

@@ -21,6 +21,7 @@ source-documents:
   - [Security Boundary](#security-boundary)
   - [Performance and Capacity](#performance-and-capacity)
   - [Migration and Rollback](#migration-and-rollback)
+  - [Failure Modes](#failure-modes)
 - [Options Considered](#options-considered)
 - [Implementation Details](#implementation-details)
 - [Verification Criteria](#verification-criteria)
@@ -91,7 +92,9 @@ outstanding tokens; operators must observe that consequence explicitly.
 
 - **Differentiator:** One key signs while two public keys verify temporarily.
 - **Consequence:** Rotation tolerates propagation delay at the cost of bounded overlap.
-- **Disposition:** Selected because controls limit exposure and preserve availability.
+- **Disposition:** Selected because bounded overlap preserves verification during
+  asynchronous propagation, while the key-set limit and emergency revocation constrain
+  exposure.
 
 ### Serve Every Historical Public Key
 

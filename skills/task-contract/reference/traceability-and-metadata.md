@@ -5,22 +5,22 @@ that justifies it.
 
 ## Source Traceability
 
-Source-derived requirements remain represented in `context` and point to the relevant
-source paths in `filesToRead`.
+Keep source-derived requirements in `context`, and list the relevant source paths in
+`filesToRead`.
 
-The read set includes a predecessor artifact when a dependency supplies material
+Include a predecessor artifact in `filesToRead` when a dependency makes it a material
 input to the task.
 
-Source traceability identifies evidence; it does not turn every source concern into
-one task.
+Source references identify evidence; they do not by themselves make every concern in
+a source part of the same task.
 
 ## Proposal Traceability
 
 Proposal-derived scope, constraints, decisions, and verification criteria remain
 recognizable in task context.
 
-Proposal section references and supporting source paths preserve the route from
-the task result back to the decision record.
+Keep proposal section references and supporting source paths so readers can trace the
+task result back to the decision record.
 
 An implementation detail or verification criterion does not become a generic workflow
 stage merely because it appears in a proposal.
@@ -51,10 +51,9 @@ of the purpose, result, verification, dependencies, and coupling evidence togeth
 
 ## Result Traceability
 
-Every smaller result maps to one task, a predecessor handoff, or an explicit
-exclusion. Every task maps back to the requested outcome or a necessary intermediate
-result. This exposes missing work, duplicate work, and compound tasks before
-assignment.
+Map each smaller result to one task, a predecessor handoff, or an explicit exclusion.
+Map each task back to the requested outcome or a necessary intermediate result. These
+links expose missing work, duplicate work, and compound tasks before assignment.
 
 For retained coupling, traceability identifies the one shared result, one
 verification boundary, and separation risk. Dependencies, shared files, skills,

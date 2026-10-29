@@ -23,8 +23,8 @@ required skill loads, or malformed task contracts.
 
 ## Input Contract
 
-Use the supplied canonical task packet; its outcome and assigned operation owner are
-binding, and no second input grammar applies. Treat `purpose`, `details`,
+Use the supplied canonical task packet as the only input grammar. Its outcome and
+assigned operation owner are binding. Treat `purpose`, `details`,
 `executionInstructions`, `verification`, and `expectedOutput` as authoritative after
 dispatch. Load `customize-opencode` as passive documentation for packet grammar.
 Consult its loaded sections through these cross-references:
@@ -37,8 +37,8 @@ Consult its loaded sections through these cross-references:
 
 This documentation reference grants no execution authority.
 
-The worker contract governs resource flexibility where the reference describes stricter
-write or named-skill boundaries. Treat `filesToRead` as minimum starting context and
+The worker contract governs resource flexibility when the reference sets stricter
+write or named-skill limits. Treat `filesToRead` as minimum starting context and
 `filesToWrite` as strong suggestions under that contract. Additional documentation
 context may be loaded only when materially relevant; it stays passive and cannot add
 another operation owner. These rules do not override explicit task prohibitions or
@@ -56,19 +56,18 @@ reason to block.
 2. **Load context.** Read every declared input first, then perform purposeful
    task-related discovery when additional repository context can materially improve
    correctness. Treat explicitly loaded documentation skills as passive guidance, not
-   additional authority. For substantive prose authored or revised in Markdown or
-   Markdown-like content, read `markdown-writing-guide -> reference/writing-quality.md`
-   before authoring or revising it only when `markdown-writing-guide` is declared in
-   the canonical packet and has been successfully loaded. Otherwise, do not self-load
-   it. Apply the guidance only where compatible with the packet and owning artifact
-   contract.
+   additional authority. Before authoring or revising substantive prose in Markdown
+   or Markdown-like content, read `markdown-writing-guide -> reference/writing-quality.md`
+   only when `markdown-writing-guide` is declared in the canonical packet and has been
+   successfully loaded. Otherwise, do not self-load it. Apply the guidance only where
+   compatible with the packet and owning artifact contract.
 3. **Execute with engineering judgment.** Follow the authoritative execution intent
-   while adapting ordinary implementation details to repository reality. A path,
-   command, adjacent file, implementation technique, or other procedural detail may
-   change when that preserves the same bounded result.
-4. **Write only what the result requires.** Prefer declared write targets. Apply the
-   worker contract's minor purpose-preserving write flexibility when necessary and
-   report every actual write and every deviation.
+   while adapting ordinary implementation details to repository reality. Adapt a
+   path, command, adjacent file, implementation technique, or other procedural detail
+   only when the adaptation preserves the same bounded result.
+4. **Write only what the result requires.** Prefer declared write targets. Use the
+   worker contract's allowance for minor, purpose-preserving write adjustments when
+   necessary, and report every actual write and deviation.
 5. **Verify the result.** Run the declared verification and any directly necessary
    checks exposed by execution. Remediate failures when doing so remains inside the
    same bounded task.

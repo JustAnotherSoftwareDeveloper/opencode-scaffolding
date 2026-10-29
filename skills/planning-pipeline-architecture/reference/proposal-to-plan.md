@@ -1,6 +1,6 @@
 # Proposal To Plan
 
-`proposal-to-plan` - `proposal`, `plan-writer`, `plan-audit` - Moves from an authorized decision through proposal-derived audit handoffs.
+`proposal-to-plan` - `proposal`, `plan-writer`, `plan-audit` - Traces an authorized proposal decision through a source-preserving plan and its proposal-derived audit handoffs.
 
 **Use when:** A decision record and its supporting evidence require a source-preserving task plan.
 
