@@ -1,0 +1,65 @@
+# Source-Style Guide Compatibility Hub
+
+This page keeps the former `reference/python-source-style-guide.md` route working for
+existing readers. It is a hub, not a second copy of the detailed guide. Choose a topic
+from the [index](README.md) for examples, edge cases, and source-level recommendations.
+
+## Scope And Shared Decision Context
+
+This reference owns general Python source conventions: names, imports, source
+formatting, expressions, function and class form, comments, docstrings, and annotation
+idioms. It does not decide a project's public API, runtime support, directory tree,
+formatter/checker configuration, security or logging policy, concurrency model, package
+distribution, or code-change procedure.
+
+Read each statement according to its kind. Python documentation describes syntax and
+runtime behavior for a named version; PEP 8 and PEP 257 publish conventions within their
+stated scopes; Google and NumPy examples describe their own house or ecosystem choices;
+topic pages label this guide's proposed defaults; project contracts and approved local
+policy control their own decisions. PEP 8 explicitly scopes itself to the standard
+library, gives project-specific guidance precedence in conflicts, and says not to break
+backwards compatibility merely to satisfy the PEP ([PEP 8: Introduction and consistency](https://peps.python.org/pep-0008/#introduction)).
+
+For an established project, preserve its documented conventions and compatibility
+promises first, then follow applicable approved local policy. Consider a proposed
+default only for a new or unconfigured project when the task permits a choice. A source
+format preference does not authorize a public rename, mass reformat, syntax upgrade, or
+policy migration.
+
+The fixed evidence dossier checked the versioned Python 3.15.2 documentation and named
+PEP feature versions. The Google guide and numpydoc `stable` pages are mutable and showed
+no revision/release identifier in the inspected renderings; the inspected NumPy pages
+identified the v2.5 Manual. Those are evidence scopes, not target-project versions. The
+sources establish documented behavior and publisher recommendations, not convention
+prevalence, comparative maintainability outcomes, approved policy, or a universal best
+style. Each topical page links its primary sources and keeps version-sensitive claims
+next to the relevant example. Claim IDs in the topics map to
+`.research/20261107-012245-ee8e70-python-source-style-guide-evidence/claims.md`; the
+primary source links remain at the point of use.
+
+## Choose A Topic
+
+- [Names and imports](names-and-imports.md) — naming roles, public/internal signals,
+  import grouping, aliases, wildcard trade-offs, and module-level dunder ordering.
+- [Readable layout and control flow](readable-layout-and-control-flow.md) — formatting,
+  line wrapping, expression readability, and behavior-preserving rewrites.
+- [Functions, classes, and state](functions-classes-and-state.md) — cohesive callable
+  boundaries, decomposition, mutable defaults, instance/class state, and modules.
+- [Comments and docstrings](comments-and-docstrings.md) — explanatory comments,
+  docstring meaning, Google/NumPy format choices, and runtime-visible docstrings.
+- [Annotations and typing idioms](annotations-and-typing-idioms.md) — type intent,
+  supported syntax, checker/runtime distinctions, and annotation introspection.
+
+The former duplicated “greenfield defaults at a glance” recap is intentionally omitted;
+each page states its useful default beside the example and trade-off it informs.
+
+## Neighboring Ownership
+
+When a source-style question depends on a broader project contract, explicitly load only
+the needed module. `python-project-reference -> reference/source-and-api.md` owns public
+API promises and failure semantics; `python-project-reference -> reference/project-context-and-layout.md`
+owns project kind, runtime support, and file placement; and
+`python-project-reference -> reference/static-quality.md` owns formatter, linter, and
+type-checker configuration and result interpretation. Those references supply context,
+not a transitive load or permission to act. The operation that requested work retains
+its workflow and evidence responsibilities.
