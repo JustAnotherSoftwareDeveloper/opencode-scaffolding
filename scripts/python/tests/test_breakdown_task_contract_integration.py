@@ -61,11 +61,15 @@ def test_task_contract_is_collector_winning_passive_context_before_drafting():
 
     collection = text.index("Collect documentation skills")
     load = text.index(
-        "Load the shared task contract before authoring boundaries"
+        "Load shared task and writing references before authoring"
     )
     draft = text.index("Draft tasks without `skills`")
     assert collection < load < draft
-    assert "documentation result" in text[load:draft].lower()
+    load_section = text[load:draft].lower()
+    assert "documentation result" in load_section
+    assert "exact collector winner named `task-contract`" in load_section
+    assert "class `documentation`" in load_section
+    assert "load it before drafting boundaries" in load_section
     assert "exact collector winner" in text
     assert "passive, non-transitive" in text
     assert "adds no authority" in text
@@ -174,7 +178,9 @@ def test_passive_documentation_is_not_an_executable_assignment() -> None:
     assert "class: documentation" in contract
     assert "non-transitive" in contract
     assert "does not own decomposition" in contract
-    assert "does not auto-read" in contract
+    assert "loading the skill does not automatically read any files" in (
+        contract.lower()
+    )
 
 
 def test_decomposition_method_splits_then_connects_results() -> None:

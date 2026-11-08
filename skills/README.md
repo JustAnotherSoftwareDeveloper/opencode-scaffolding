@@ -9,6 +9,7 @@ contract details.
 - [`planning-pipeline-architecture`][planning-architecture] —
   lifecycle and handoff planning.
 - [`skill-architect`][architect] — skill class boundaries and platform layout.
+- [`python-domain-planning`][python-planning] — Python change ownership and combined workflows.
 
 ## Documentation References
 
@@ -28,6 +29,8 @@ contract details.
   and snippets.
 - [`task-contract`][task-contract] — shared semantics for atomic tasks and
   traceable results.
+- [`python-project-reference`][python-project-context] — Python project constraints and technical guidance.
+- [`python-source-style-guide`][python-style] — source conventions and worked examples.
 
 ## Operations
 
@@ -41,6 +44,11 @@ contract details.
 - [`plan-audit`][plan-audit] — audit an immutable proposal-derived plan.
 - [`plan-writer`][plan-writing] — create executable plan workspaces.
 - [`proposal`][proposals] — create evidence-based decision proposals.
+- [`python-project-writer`][python-production] — production behavior and directly coupled regression tests.
+- [`python-project-test-writer`][python-project-tests] — standalone test-only changes.
+- [`python-quality-workflow`][python-quality] — quality configuration and scoped diagnostics without remediation.
+- [`python-project-dependencies`][python-dependencies] — dependency decisions, declarations, locks, and environments.
+- [`python-package-distribution`][python-distribution] — distribution metadata, builds, and install checks.
 
 ## Analysis and Inline Work
 
@@ -99,3 +107,11 @@ contract details.
 [python-tests]: ./skill-script-python-test-writer/SKILL.md
 [delegation]: ./task-delegation/SKILL.md
 [dispatch]: ./dispatch-decompose/SKILL.md
+[python-planning]: ./python-domain-planning/SKILL.md
+[python-project-context]: ./python-project-reference/SKILL.md
+[python-style]: ./python-source-style-guide/SKILL.md
+[python-production]: ./python-project-writer/SKILL.md
+[python-project-tests]: ./python-project-test-writer/SKILL.md
+[python-quality]: ./python-quality-workflow/SKILL.md
+[python-dependencies]: ./python-project-dependencies/SKILL.md
+[python-distribution]: ./python-package-distribution/SKILL.md

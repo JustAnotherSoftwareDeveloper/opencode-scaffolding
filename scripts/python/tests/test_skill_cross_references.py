@@ -85,30 +85,101 @@ def test_planning_and_documentation_require_actual_skill_tool_loads(
 ) -> None:
     """Verify planning workflows load selected skills through the skill tool."""
     text = (SKILLS / workflow / "SKILL.md").read_text(encoding="utf-8")
-    planning_start = text.split("**Select and load planning skills.**", 1)[1]
-    planning_sections = re.split(
-        r"\*\*Collect operation skills(?: once per request)?\.\*\*",
-        planning_start,
-        maxsplit=1,
-    )
-    assert len(planning_sections) == 2
-    planning = planning_sections[0]
-    planning = " ".join(planning.split())
-    assert "skill tool" in planning
-    assert "load failure" in planning
-    assert "substitute for loading" in planning
+    _assert_planning_load_obligations(text)
 
-    assert text.index("**Collect documentation skills") < text.index(
-        "**Load the shared task contract before authoring"
+
+@pytest.mark.parametrize("workflow", ("plan-writer", "breakdown-tasks"))
+@pytest.mark.parametrize("obligation", ("load", "failure"))
+def test_planning_load_policy_rejects_missing_load_or_failure_block(
+    workflow: str, obligation: str
+) -> None:
+    """Guard the policy assertions against losing either key obligation."""
+    text = (SKILLS / workflow / "SKILL.md").read_text(encoding="utf-8")
+    if obligation == "load":
+        text = re.sub(
+            r"(?i)load each selection\s+with the skill tool", "", text
+        )
+        text = re.sub(r"(?i)load each with the skill tool", "", text)
+    else:
+        text = re.sub(
+            r"(?i)block on an absent name, stale path, or load failure",
+            "",
+            text,
+        )
+        text = re.sub(
+            r"(?i)block on an absent name, stale path, class mismatch, "
+            r"or load failure",
+            "",
+            text,
+        )
+
+    with pytest.raises(AssertionError):
+        _assert_planning_load_obligations(text)
+
+
+def _assert_planning_load_obligations(text: str) -> None:
+    """Check current workflow semantics without pinning incidental wording."""
+    headings = re.findall(r"(?m)^\s*\d+\. \*\*([^*]+)\*\*", text)
+    assert any(
+        "Select and load planning skills" in heading for heading in headings
+    )
+    planning_match = re.search(
+        r"(?ms)^\s*\d+\. \*\*Select and load planning skills\.?\*\*\.?(.*?)"
+        r"(?=^\s*\d+\. \*\*Collect operation skills)",
+        text,
+    )
+    assert planning_match, (
+        "planning selection must precede operation collection"
+    )
+    planning = " ".join(planning_match.group(1).split()).lower()
+    assert "skill tool" in planning and re.search(r"\bload\b", planning)
+    assert re.search(r"\bblock\b", planning)
+    assert "load failure" in planning or (
+        "failed required skill load" in planning
+    )
+    assert re.search(
+        r"reading .*skILL\.md.*(not|does not).*load", planning, re.I
     )
 
-    verification = " ".join(
-        text.split("**Verify selected contracts.**", 1)[1].split()
+    docs_collection = re.search(
+        r"(?mi)^\s*\d+\. \*\*Collect documentation skills[^\n]*", text
     )
-    assert "Load each selected documentation skill" in verification
-    assert "skill tool before relying on its guidance" in verification
-    assert "reading its `SKILL.md` is not a load" in verification
-    assert "Do not load planning skills" not in text
+    shared_load = re.search(
+        r"(?mi)^\s*\d+\. \*\*Load shared (?:documentation|task and writing)"
+        r"[^\n]*",
+        text,
+    )
+    assert docs_collection and shared_load
+    assert docs_collection.start() < shared_load.start()
+    shared_section = text[shared_load.start() :]
+    shared_section = (
+        shared_section.split("\n\n", 1)[0]
+        + " "
+        + " ".join(shared_section.split()[0:120])
+    )
+    assert "task-contract" in shared_section
+    assert "skill tool" in shared_section
+    assert re.search(r"\bload\b", shared_section, re.I)
+    assert re.search(r"(?i)block on .*load failure", shared_section)
+    assert re.search(r"(?i)non-transitive", shared_section)
+    assert "markdown-writing-guide" in shared_section
+    assert "skill tool" in shared_section
+    assert "reference/writing-quality.md" in shared_section
+
+    verification_match = re.search(
+        r"(?ms)^\s*\d+\. \*\*Verify selected contracts\.?\*\*\.?"
+        r"(.*?)(?=^\s*\d+\. )",
+        text,
+    )
+    assert verification_match
+    verification = " ".join(verification_match.group(1).split()).lower()
+    assert "documentation skill" in verification
+    assert "skill tool" in verification
+    assert "reading" in verification and "skill.md" in verification
+    assert "not a load" in verification or (
+        "does not substitute for loading" in verification
+    )
+    assert "non-transitive" in text.lower()
 
 
 def test_cross_reference_policy_is_indexed_and_loads_before_resolution() -> (

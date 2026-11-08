@@ -22,7 +22,7 @@ def load_invoice(invoice_id: str) -> Invoice:
 
 `load_invoice` identifies an action and `invoice_id` gives more context than `id`.
 These spellings are conventions, not syntax requirements. PEP 8 gives role-based
-recommendations for its stated scope ([PEP 8: Naming Conventions](https://peps.python.org/pep-0008/#naming-conventions); dossier C01).
+recommendations for its stated scope ([PEP 8: Naming Conventions](https://peps.python.org/pep-0008/#naming-conventions)).
 
 ```python
 T = 5.0
@@ -60,7 +60,7 @@ Python accepts valid non-ASCII identifiers and normalizes identifier text using 
 an ASCII preference is therefore a coordination choice, not a parser rule. PEP 8's
 ASCII policy is scoped to the standard library. Preserve an established domain or
 language choice rather than treating ASCII as a security or universal style mandate
-([Python 3.15.2 lexical analysis](https://docs.python.org/3.15/reference/lexical_analysis.html#identifiers); [PEP 3131](https://peps.python.org/pep-3131/); dossier C01).
+([Python 3.15.2 lexical analysis](https://docs.python.org/3.15/reference/lexical_analysis.html#identifiers); [PEP 3131](https://peps.python.org/pep-3131/)).
 
 ## Group Imports So Their Origins Are Visible
 
@@ -70,7 +70,7 @@ recommends absolute imports but permits explicit relative imports when they make
 complex package layout clearer. For a new or unconfigured module, this guide proposes
 explicit imports and readable absolute paths as a starting point; Google's stricter
 no-relative-import choice is a Google house rule, not a universal Python requirement
-([PEP 8: Imports](https://peps.python.org/pep-0008/#imports); [Google Python Style Guide: Packages](https://google.github.io/styleguide/pyguide.html#s2.3-packages); dossier C02).
+([PEP 8: Imports](https://peps.python.org/pep-0008/#imports); [Google Python Style Guide: Packages](https://google.github.io/styleguide/pyguide.html#s2.3-packages)).
 
 ```python
 import json
@@ -87,8 +87,32 @@ Keep imports explicit when doing so makes dependencies and names easier to locat
 `et`. Importing a module can make ownership visible at the call site, while selecting
 names can keep a simple call concise. Prefer the spelling that fits the package and
 existing local practice; the evidence does not establish a universal module-versus-name
-rule. NumPy contributor guidance uses `import numpy as np`, but its own documentation
-examples have a narrower exception ([NumPy contributor guide](https://numpy.org/doc/stable/dev/index.html); dossier C02).
+rule. For example, compare a module-qualified call with an imported name:
+
+```python
+from acme.billing import store
+
+invoice = store.load_invoice(invoice_id)
+```
+
+```python
+from acme.billing.store import load_invoice
+
+invoice = load_invoice(invoice_id)
+```
+
+The first keeps the owner visible at each call; the second removes a repeated qualifier
+when the imported name already explains its role. Google's module/package-import rule
+also has typing-related exemptions, so do not read it as banning every direct import
+of a type ([Google Python Style Guide: Imports](https://google.github.io/styleguide/pyguide.html#s2.2-imports);
+[Imports For Typing](https://google.github.io/styleguide/pyguide.html#s3.19.12-imports-for-typing)).
+
+NumPy contributor code uses `import numpy as np`, while NumPy documentation examples
+need not repeat that import at the start. An example written for that prepared
+documentation context is not necessarily a self-contained script. Include required
+imports when presenting a standalone example; do not generalize the documentation
+exception to application modules ([NumPy contributor guide](https://numpy.org/doc/stable/dev/index.html);
+[NumPy documentation guide](https://numpy.org/doc/stable/dev/howto-docs.html)).
 
 Avoid wildcard imports and compressed mixed forms in ordinary modules:
 
@@ -129,7 +153,7 @@ PEP 8 has a separate ordering rule for module-level dunder names such as `__all_
 imports, except `from __future__` imports. The language requires future imports before
 other code apart from the module docstring. Then place ordinary imports in their
 groups; ordinary module initialization follows them
-([PEP 8: Module Level Dunder Names](https://peps.python.org/pep-0008/#module-level-dunder-names); [Python compound statements](https://docs.python.org/3.15/reference/compound_stmts.html); dossier C02, checked against the actual PEP 8 passage on 2026-11-07).
+([PEP 8: Module Level Dunder Names](https://peps.python.org/pep-0008/#module-level-dunder-names); [Python compound statements](https://docs.python.org/3.15/reference/compound_stmts.html); the PEP 8 ordering passage was checked on 2026-11-07).
 
 ```python
 """Billing models exposed by this package."""
@@ -167,7 +191,7 @@ dunders precede ordinary imports. Keep project-specific metadata conventions int
 PEP 8 is the primary convention source and explicitly scopes itself to the standard
 library. The direct Python 3.15.2 lexical reference supports identifier mechanics, not
 the ASCII preference. The Google and NumPy sources describe publisher-specific choices;
-their inspected live pages are not universal policy. The fixed dossier was retrieved on
-2026-11-07 and identifies these distinctions in C01-C02 and source register S01, S03,
-S14-S16. Check the target project's conventions and support context before applying a
-new spelling or import form.
+their live pages were inspected on 2026-11-07, with NumPy identifying the v2.5 Manual
+and Google exposing no numbered revision. These are documentation snapshots, not
+universal policy. Check the target project's conventions and support context before
+applying a new spelling or import form.

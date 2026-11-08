@@ -64,15 +64,27 @@ def _assert_three_stage_workflow(workflow: str) -> None:
     )
 
     task_contract_load = re.search(
-        r"load the shared task contract before authoring", execution_lowered
+        r"task-contract.{0,300}load.{0,160}before drafting "
+        r"(?:task )?boundaries",
+        execution_compact,
+    )
+    authoring = re.search(
+        r"\b(?:author|draft) tasks\b|\bbefore initial task authoring\b",
+        execution_compact,
     )
     assignment = re.search(
         r"\bassign skills(?: only)? after boundary acceptance\b",
         execution_lowered,
     )
     assert task_contract_load is not None
+    assert authoring is not None
     assert assignment is not None
-    assert calls[-1][1] < task_contract_load.start() < assignment.start()
+    assert (
+        calls[-1][1]
+        < task_contract_load.start()
+        < authoring.start()
+        < assignment.start()
+    )
 
 
 def _assert_affirmative_documentation_policy(text: str) -> None:

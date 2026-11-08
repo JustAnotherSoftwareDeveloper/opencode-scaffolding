@@ -55,17 +55,19 @@ def _assert_three_stage_collection_contract(workflow: str) -> None:
     for stage in ("planning", "operation", "documentation"):
         assert f"collect {stage} skills once per request" in execution_lowered
 
-    task_contract_load = re.search(
-        r"\*\*Load the shared task contract before authoring\.", execution
+    shared_documentation_load = re.search(
+        r"\*\*Load shared documentation before authoring\.", execution
     )
     author_tasks = re.search(r"\*\*Author tasks\.", execution)
     assignment = re.search(
         r"\*\*Assign skills after boundary acceptance\.", execution
     )
-    assert task_contract_load is not None
+    assert shared_documentation_load is not None
     assert author_tasks is not None
     assert assignment is not None
-    assert calls[-1][1] < task_contract_load.start() < author_tasks.start()
+    assert (
+        calls[-1][1] < shared_documentation_load.start() < author_tasks.start()
+    )
     assert author_tasks.start() < assignment.start()
 
     assert (
@@ -92,7 +94,9 @@ def _assert_three_stage_collection_contract(workflow: str) -> None:
     assert "listed materials" in execution_lowered
     assert "zero documentation assignments is valid" in execution_lowered
     assert "assign no more than two" in execution_lowered
-    assert "this is not a blanket ban on `task-contract`" in execution_lowered
+    assert "do not assign pre-authoring documentation loads automatically" in (
+        execution_lowered
+    )
     assert "do not recollect for each task" in execution_lowered
     workflow_lowered = " ".join(workflow.lower().split())
     assert "without per-task recollection or task-semantic filtering" in (
@@ -110,6 +114,7 @@ def test_workspace_move_preserves_the_complete_relative_reference_subtree() -> (
         "reference/scripts.md",
         "reference/task-authoring.md",
         "reference/workspace-contract.md",
+        "reference/writing-integration.md",
     }
     actual = {
         path.relative_to(TARGET).as_posix()
@@ -167,10 +172,10 @@ def test_frontmatter_and_shared_contract_are_cut_over_before_authoring() -> (
     assert "same-workspace correction" in frontmatter
     assert "name: plan\n" not in frontmatter
     assert "# Plan Writer" in workflow
-    assert "Load the shared task contract before authoring" in workflow
-    assert workflow.index(
-        "Load the shared task contract before authoring"
-    ) < workflow.index("**Author tasks.**")
+    assert "Load shared documentation before authoring" in workflow
+    assert workflow.index("Load shared documentation before authoring") < (
+        workflow.index("**Author tasks.**")
+    )
     assert "passive, documentation-only, and non-transitive" in workflow
     assert "already-loaded `task-contract` documentation skill" in workflow
     assert "../task-contract/reference/README.md" not in workflow
@@ -197,7 +202,7 @@ def test_plan_writer_collection_and_assignment_contract() -> None:
         "distinct "
         "operation and documentation results" in normalized_authoring
     )
-    assert "the passive `task-contract` record is context only" in (
+    assert "the passive `task-contract` record provides context only" in (
         normalized_authoring
     )
 
@@ -233,7 +238,7 @@ def test_bounded_correction_stays_in_place_and_requires_fresh_reaudit() -> None:
 
     assert (
         "Require the existing plan-directory path, exact audit report (or a "
-        "finding extract retaining its run identity and complete input "
+        "finding extract that retains its run identity and complete input "
         "manifest), finding IDs, and proposal baseline."
     ) in correction
     assert (
@@ -242,21 +247,21 @@ def test_bounded_correction_stays_in_place_and_requires_fresh_reaudit() -> None:
         "SHA-256"
     ) in correction
     assert "block missing, ambiguous, or mismatched identity" in correction
-    assert "Correct only the reported, plan-writer-owned findings" in correction
-    assert "preserving unrelated task content and packet identity" in correction
+    assert "Correct only reported findings owned by plan-writer" in correction
+    assert "preserve unrelated task content and packet identity" in correction
     assert (
-        "The only writable files are that `tasks.json` and its `tasks.md`; "
-        "never modify copied sources or the proposal baseline"
+        "The only writable files are that `tasks.json` and its `tasks.md`. "
+        "Never modify copied sources or the proposal baseline; block findings "
+        "that require those edits."
     ) in correction
     assert (
-        "Validate the revised `tasks.json` with step 14's state-file command "
-        "but omit `--auto-fix`"
+        "Validate the revised `tasks.json` with the state-file command from "
+        "step 14, omitting `--auto-fix`"
     ) in correction
     assert (
-        "inspect each diff and fix only finding-authorized violations, "
-        "including `skills` entries only when that finding authorizes them"
-        in correction
-    )
+        "Inspect each diff and fix only finding-authorized violations. Change "
+        "`skills` entries only when the finding authorizes those changes"
+    ) in correction
     assert (
         "Do not create `draft.json`, invoke `init-task-packet`, or create, "
         "rename, or replace a plan workspace."
@@ -385,8 +390,7 @@ def test_active_callers_lifecycle_mappings_and_fixtures_use_new_identity() -> (
     assert "the existing plan workspace" in plan_command
     assert (
         "After each correction, perform a mandatory fresh read-only "
-        "`plan-audit`"
-        in plan_command
+        "`plan-audit`" in plan_command
     )
 
     automation_command = _text("commands/leeroy-jenkins.md")
@@ -403,8 +407,7 @@ def test_active_callers_lifecycle_mappings_and_fixtures_use_new_identity() -> (
     )
     assert (
         "After each correction, perform a mandatory fresh read-only "
-        "`plan-audit`"
-        in automation_command
+        "`plan-audit`" in automation_command
     )
     planner = " ".join(_text("agents/planner.md").split())
     assert (

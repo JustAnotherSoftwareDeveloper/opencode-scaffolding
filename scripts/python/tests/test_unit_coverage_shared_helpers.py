@@ -35,7 +35,7 @@ def test_package_path_setup_inserts_once_and_returns_resolved_source(
 def test_shared_schema_import_branches_and_fallback_validation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Exercise type-checking imports and the optional jsonschema fallback."""
+    """Exercise imports and fail-closed validation without jsonschema."""
     with monkeypatch.context() as patch:
         patch.setattr(typing, "TYPE_CHECKING", True)
         importlib.reload(shared_schema)
@@ -59,15 +59,17 @@ def test_shared_schema_import_branches_and_fallback_validation(
         patch.setattr(builtins, "__import__", without_jsonschema)
         fallback = importlib.reload(shared_schema)
         assert fallback._HAS_JSONSCHEMA is False
-        assert fallback.validate_json_schema("wrong", {}) == [
-            "Instance must be a dict"
-        ]
+        unavailable_error = (
+            "jsonschema is unavailable; full JSON Schema validation "
+            "cannot be performed"
+        )
+        assert fallback.validate_json_schema("wrong", {}) == [unavailable_error]
         assert fallback.validate_json_schema(
             {"name": "present"}, {"required": "not-an-array"}
-        ) == []
+        ) == [unavailable_error]
         assert fallback.validate_json_schema(
             {"name": "present"}, {"required": ["name", "version"]}
-        ) == ["version"]
+        ) == [unavailable_error]
 
     importlib.reload(shared_schema)
     assert shared_schema._HAS_JSONSCHEMA is True

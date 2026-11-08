@@ -28,12 +28,30 @@ DEFAULT_DESCRIPTION_PREFIX = "Use when"
 PASSIVE_VOICE_PATTERNS = re.compile(
     r"\b(is|are|was|were|be|been|being)\s+\w+ed\b"
     r"|\bshould\b"
-    r"|\bmay\b"
-    r"|\bcould\b"
-    r"|\bmight\b"
+    r"|\b(?:you|we)\s+(?:may|could|might)\b"
     r"|\b(must\s+be\s+\w+ed)\b"
     r"|\b(is\s+used)\b"
     r"|\b(will\s+be)\b",
+    re.IGNORECASE,
+)
+
+# Conditional clauses qualify a directive rather than replacing its main clause.
+# Non-finite passive complements ("to be reviewed") likewise do not make the
+# finite clause passive. Neither rule exempts a finite passive main clause.
+CONDITIONAL_CLAUSE_PATTERN = re.compile(
+    r"\b(?:when|if|unless|where)\b.*$", re.IGNORECASE
+)
+CONDITIONAL_START_PATTERN = re.compile(
+    r"^\s*(?:when|if|unless|where)\b", re.IGNORECASE
+)
+CONDITIONAL_END_PATTERN = re.compile(
+    r"\b(?:when|if|unless|where)\s*$", re.IGNORECASE
+)
+NONFINITE_PASSIVE_PATTERN = re.compile(r"\bto\s+be\s+\w+ed\b", re.IGNORECASE)
+# A demonstrative copula plus a participial noun phrase commonly states a fact
+# ("These are proposed alternatives"), rather than assigning an action.
+DESCRIPTIVE_COPULA_PATTERN = re.compile(
+    r"\b(?:this|these|that|those)\s+(?:is|are|was|were)\s+\w+ed\s+(?=\w+)",
     re.IGNORECASE,
 )
 

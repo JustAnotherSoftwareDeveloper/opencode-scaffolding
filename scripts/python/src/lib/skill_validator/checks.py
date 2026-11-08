@@ -10,7 +10,12 @@ from lib.collect_skills.parser import SKILL_NAME_RE
 from lib.skill_metadata import SkillMetadataError, normalize_skill_metadata
 
 from .helpers import (
+    CONDITIONAL_CLAUSE_PATTERN,
+    CONDITIONAL_END_PATTERN,
+    CONDITIONAL_START_PATTERN,
     DEFAULT_DESCRIPTION_PREFIX,
+    DESCRIPTIVE_COPULA_PATTERN,
+    NONFINITE_PASSIVE_PATTERN,
     PASSIVE_VOICE_PATTERNS,
     PLACEHOLDER_PATTERN,
     PLANNING_DESCRIPTION_PREFIX,
@@ -249,6 +254,17 @@ def check_no_declarative_voice(skill_dir: Path) -> CheckResult:
     if not md_files:
         return CheckResult("no-declarative-voice", False, "No .md files found")
 
+    skill_text = _read_skill_md(skill_dir)
+    metadata = _parse_frontmatter(skill_text) if skill_text else None
+    # Documentation-class skills are passive data stores and, by contract, have
+    # no execution steps whose voice this procedural check can assess.
+    if metadata and metadata.get("class") == "documentation":
+        return CheckResult(
+            "no-declarative-voice",
+            True,
+            "No procedural prose to check in documentation-class skill",
+        )
+
     for md_file in md_files:
         # Skip schemas/, templates/, and reference/ per style guide exceptions
         # Reference facts have an explicit declarative-voice exception.
@@ -258,7 +274,13 @@ def check_no_declarative_voice(skill_dir: Path) -> CheckResult:
             continue
 
         text = md_file.read_text(encoding="utf-8")
+        # Selection metadata describes fit and is not procedural prose.
+        if md_file.name == "SKILL.md":
+            frontmatter = re.match(r"^---\s*\n.*?\n---\s*\n", text, re.DOTALL)
+            if frontmatter:
+                text = text[frontmatter.end() :]
         lines = text.split("\n")
+        conditional_continuation = False
         for i, line in enumerate(lines, 1):
             stripped = line.strip()
             # Skip headings, empty, code fences, list markers, frontmatter
@@ -270,7 +292,49 @@ def check_no_declarative_voice(skill_dir: Path) -> CheckResult:
                 continue
 
             # Check for passive voice or hedging in procedural prose lines.
-            if PASSIVE_VOICE_PATTERNS.search(stripped):
+            prose = stripped
+            if conditional_continuation:
+                comma = prose.find(",")
+                if comma >= 0:
+                    prose = prose[comma + 1 :]
+                    conditional_continuation = False
+                elif re.search(r"[.!?]\s*$", prose):
+                    prose = ""
+                    conditional_continuation = False
+                else:
+                    prose = ""
+                    continue
+            elif CONDITIONAL_START_PATTERN.search(prose):
+                comma = prose.find(",")
+                if comma >= 0:
+                    prose = prose[comma + 1 :]
+                elif re.search(r"[.!?]\s*$", prose):
+                    prose = ""
+                else:
+                    conditional_continuation = True
+                    prose = ""
+            elif CONDITIONAL_END_PATTERN.search(prose):
+                conditional_continuation = True
+                prose = ""
+            else:
+                conditional_clause = CONDITIONAL_CLAUSE_PATTERN.search(prose)
+                if conditional_clause:
+                    prose = prose[: conditional_clause.start()]
+                    conditional_continuation = not bool(
+                        re.search(r"[.!?:]\s*$", stripped)
+                    )
+            if prose and not conditional_continuation:
+                following_condition = CONDITIONAL_CLAUSE_PATTERN.search(prose)
+                if following_condition:
+                    condition_start = following_condition.start()
+                    condition_text = prose[condition_start:]
+                    prose = prose[:condition_start]
+                    conditional_continuation = not bool(
+                        re.search(r"[.!?:]\s*$", condition_text)
+                    )
+            prose = NONFINITE_PASSIVE_PATTERN.sub("", prose)
+            prose = DESCRIPTIVE_COPULA_PATTERN.sub("", prose)
+            if PASSIVE_VOICE_PATTERNS.search(prose):
                 violations.append(f"{md_file.name}:{i}: '{stripped[:80]}'")
 
     if violations:

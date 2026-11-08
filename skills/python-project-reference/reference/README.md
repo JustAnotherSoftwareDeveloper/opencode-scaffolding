@@ -13,6 +13,11 @@ canonical home rather than copying its technical guidance.
 - [Logging and observability](logging-and-observability.md) — Why is one event emitted twice, or why did a custom field disappear?
 - [Async and concurrency](async-and-concurrency.md) — Was a coroutine scheduled, is a queue saturated, or did cancellation stop the underlying work?
 
+## Starting Choices And Adoption
+
+- [Project baseline and incremental adoption](project-baseline-and-adoption.md) —
+  optional starting choices, preservation-first adoption, and unresolved local policy.
+
 ## Cross-Skill Boundary
 
 General source conventions belong to the separate `python-source-style-guide`. When

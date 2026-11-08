@@ -8,10 +8,9 @@ PEP 8 recommends four spaces, 79 code columns and 72 comment/docstring columns, 
 allowing a team-agreed code width up to 99. Google chooses 80 columns with exceptions.
 Those are publisher choices, not parser limits or measured optima. For new or
 unconfigured code, this guide proposes four spaces, a 79-column code target, and a
-72-column comment/docstring target as starting values. PEP 8 permits teams to choose a
-code width up to 99, and Google uses 80 with exceptions; retain the project's formatter
+72-column comment/docstring target as starting values. Retain the project's formatter
 choice in existing code
-([PEP 8: Code Layout](https://peps.python.org/pep-0008/#code-lay-out); [Google Python Style Guide: Line Length](https://google.github.io/styleguide/pyguide.html#s3.2-line-length); dossier C03).
+([PEP 8: Code Layout](https://peps.python.org/pep-0008/#code-lay-out); [Google Python Style Guide: Line Length](https://google.github.io/styleguide/pyguide.html#s3.2-line-length)).
 
 Use spaces rather than tabs for new indentation. PEP 8 permits tabs to match a file that
 already uses them; inconsistent tab/space indentation can fail when Python cannot
@@ -24,7 +23,7 @@ PEP 8 makes no universal choice between single and double quotes for ordinary st
 This guide proposes double quotes for new, unconfigured code; use single quotes when
 they avoid escapes or when the project already uses them. Triple-double quotes are the
 published docstring convention. The parser treats ordinary single- and double-quoted
-strings equivalently ([PEP 8: String Quotes](https://peps.python.org/pep-0008/#string-quotes); dossier C03).
+strings equivalently ([PEP 8: String Quotes](https://peps.python.org/pep-0008/#string-quotes)).
 
 Use parentheses, brackets, and braces for implicit continuation where practical. It
 keeps a call's structure visible without a backslash:
@@ -48,6 +47,11 @@ Prefer one statement per line in new code. Same-line compound statements and
 semicolon-separated statements are legal in Python, but PEP 8 discourages them because
 the visual structure can obscure sequencing and branches. A formatter may enforce a
 subset, but its configuration is not defined here (`python-project-reference -> reference/static-quality.md`).
+Python's [lexical rules](https://docs.python.org/3.15/reference/lexical_analysis.html),
+[simple statements](https://docs.python.org/3.15/reference/simple_stmts.html), and
+[compound statements](https://docs.python.org/3.15/reference/compound_stmts.html)
+explain why implicit continuation and same-line statements parse; they do not recommend
+one presentation for every reader.
 
 ## Expand Dense Code Without Changing Its Branches
 
@@ -85,7 +89,7 @@ behavior.
 Python truth testing can distinguish neither `None` from an empty string nor an empty
 container from another false value. `or` returns one of its operands, not a normalized
 `bool`; use it only when every false-valued case should take the fallback
-([Python 3.15.2 truth-value testing](https://docs.python.org/3.15/library/stdtypes.html#truth-value-testing); [Boolean operations](https://docs.python.org/3.15/library/stdtypes.html#boolean-operations-and-or-not); dossier C04).
+([Python 3.15.2 truth-value testing](https://docs.python.org/3.15/library/stdtypes.html#truth-value-testing); [Boolean operations](https://docs.python.org/3.15/library/stdtypes.html#boolean-operations-and-or-not)).
 
 ```python
 def display_label(record: Record) -> str:
@@ -106,10 +110,26 @@ The `or` form is correct if empty strings and all other false values also mean â
 State that domain rule rather than inferring it from brevity. PEP 8 recommends
 `is None` for the singleton test ([PEP 8: Programming Recommendations](https://peps.python.org/pep-0008/#programming-recommendations)).
 
+`and` and `or` also short-circuit: the second expression runs only when needed, and
+the result can retain the operand's type rather than becoming `bool`:
+
+```python
+label = cached_label or load_label()
+can_send = invoice is not None and invoice.is_ready
+```
+
+`load_label()` is skipped for a true-valued cached label, but runs for an empty string.
+The second expression does not access `is_ready` when `invoice` is `None`. Expanding
+either expression must preserve those evaluation conditions. When the domain question
+is specifically numeric zero, `remaining == 0` can communicate it more precisely than
+`not remaining`; use truthiness when all relevant false-valued cases mean the same thing.
+
 Truth testing is not guaranteed to work for every object. Google's guide calls out
 NumPy arrays, whose implicit truth test can raise when the array has more than one
 element. That is a useful NumPy-specific warning, not a rule that every custom object
-or sequence behaves alike ([Google Python Style Guide: True/False Evaluations](https://google.github.io/styleguide/pyguide.html#s2.14-truefalse-evaluations); dossier C04).
+or sequence behaves alike ([Google Python Style Guide: True/False Evaluations](https://google.github.io/styleguide/pyguide.html#s2.14-truefalse-evaluations)).
+Custom objects can define `__bool__()` or, if absent, `__len__()`; inspect that contract
+before replacing an identity or explicit comparison with an implicit truth test.
 
 ## Name An Intermediate When It Carries Meaning
 
@@ -158,7 +178,7 @@ limit.
 
 PEP 8 and the Python 3.15.2 lexical, compound-statement, and built-in type references
 support the distinction between valid syntax and conventions. Google supplies an
-80-column house choice and a NumPy truth-testing caveat. The fixed dossier was retrieved
-on 2026-11-07; see C03-C04 and source register S01, S03-S06, and S14. These sources do
-not establish an optimal width or prove that expanded syntax always preserves behavior;
-check the actual expression and target project's formatter.
+80-column house choice and a NumPy truth-testing caveat. The sources were inspected
+on 2026-11-07; Google's live guide exposed no numbered revision. They do not establish
+an optimal width or prove that expanded syntax always preserves behavior; check the
+actual expression and target project's formatter.

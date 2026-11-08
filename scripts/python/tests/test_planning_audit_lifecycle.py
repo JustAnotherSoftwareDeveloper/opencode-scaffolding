@@ -160,8 +160,7 @@ def test_correction_is_bounded_in_the_same_workspace_before_reaudit() -> None:
     )
     assert (
         "`plan-writer` owns the revised snapshot in that same existing"
-        " plan workspace"
-        in collapsed
+        " plan workspace" in collapsed
     )
     assert (
         "The revised snapshot transitions to **Mandatory re-audit** rather than"
@@ -205,10 +204,10 @@ def test_direct_plan_only_keeps_publication_without_an_automatic_audit() -> (
 ):
     """Verify plan-only publication does not trigger an automatic audit."""
     text = _text("skills/planning-pipeline-architecture/reference/plan-only.md")
-    lowered = text.lower()
+    lowered = " ".join(text.lower().split())
     assert "plan-writer" in text
-    assert "publication" in lowered
-    assert "does not imply `audit pending`" in lowered
+    assert "publishing a direct plan-only artifact" in lowered
+    assert "does not, on its own, enter the `audit pending` state" in lowered
     assert "explicit audit request" in lowered
     assert "mandatory" not in lowered
 

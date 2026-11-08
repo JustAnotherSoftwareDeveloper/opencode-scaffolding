@@ -368,6 +368,33 @@ def test_skill_validator_checks_and_cli(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
+def test_validator_voice_check_preserves_documentation_class_facts(
+    tmp_path: Path,
+) -> None:
+    """Accept descriptive taxonomy in a passive documentation skill."""
+    skill = write_skill(
+        tmp_path,
+        "project-reference",
+        **{
+            "class": "documentation",
+            "description": "Use when project context is needed",
+            "selection": {
+                "role": "reference",
+                "tags": {"actions": ["explain"]},
+            },
+        },
+    )
+    skill.write_text(
+        skill.read_text(encoding="utf-8")
+        + "\nThis reference is passive. The measurements are grouped by date.\n"
+        + "Examples are explanatory; no target system has been inspected "
+        "or executed here.\n",
+        encoding="utf-8",
+    )
+    assert check_no_declarative_voice(skill.parent).passed
+
+
+@pytest.mark.unit
 def test_reference_readme_is_required_only_for_local_reference_files(
     tmp_path: Path,
 ) -> None:

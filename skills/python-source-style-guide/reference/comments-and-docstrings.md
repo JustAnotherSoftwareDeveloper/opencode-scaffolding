@@ -22,14 +22,14 @@ count += 1
 
 An outdated or contradictory comment is worse than no comment because it can lead a
 reader to trust a false explanation. PEP 8 makes accuracy a direct recommendation
-([PEP 8: Comments](https://peps.python.org/pep-0008/#comments); dossier C07).
+([PEP 8: Comments](https://peps.python.org/pep-0008/#comments)).
 
 ## Write Docstrings For Caller-Relevant Behavior
 
 PEP 257 defines an ordinary docstring as the first string-literal statement in a module,
 function, class, or method. That string becomes the object's `__doc__`. PEP 257
 recommends a concise summary and, when useful, a blank line followed by detail; it does
-not prescribe a markup system ([PEP 257: What Is A Docstring?](https://peps.python.org/pep-0257/#what-is-a-docstring); [Multi-line Docstrings](https://peps.python.org/pep-0257/#multi-line-docstrings); dossier C07).
+not prescribe a markup system ([PEP 257: What Is A Docstring?](https://peps.python.org/pep-0257/#what-is-a-docstring); [Multi-line Docstrings](https://peps.python.org/pep-0257/#multi-line-docstrings)).
 
 A useful docstring says what callers need beyond what the signature already expresses:
 
@@ -77,7 +77,7 @@ not a PEP requirement. NumPy's contributor and API-documentation workflow recomm
 numpydoc with Sphinx and uses section headings such as `Parameters`, `Returns`,
 `Raises`, and `Examples`. PEP 257 deliberately leaves markup open, so retain the
 established format rather than converting a project just to match either example
-([Google Python Style Guide: Comments And Docstrings](https://google.github.io/styleguide/pyguide.html#s3.8-comments-and-docstrings); [NumPy documentation guide](https://numpy.org/doc/stable/dev/howto-docs.html); [numpydoc style guide](https://numpydoc.readthedocs.io/en/stable/format.html); dossier C07).
+([Google Python Style Guide: Comments And Docstrings](https://google.github.io/styleguide/pyguide.html#s3.8-comments-and-docstrings); [NumPy documentation guide](https://numpy.org/doc/stable/dev/howto-docs.html); [numpydoc style guide](https://numpydoc.readthedocs.io/en/stable/format.html)).
 
 The same hypothetical contract can be presented in a NumPy-style form:
 
@@ -109,7 +109,14 @@ generation, and project convention. In a NumPy/Sphinx ecosystem, numpydoc sectio
 be the most useful fit; elsewhere, a different established format can be better. The
 NumPy `mean` reference illustrates parameter constraints, return details, notes, and
 examples, but one reference page does not prove that every project needs that level of
-detail ([NumPy `mean` reference](https://numpy.org/doc/stable/reference/generated/numpy.mean.html); dossier C07).
+detail ([NumPy `mean` reference](https://numpy.org/doc/stable/reference/generated/numpy.mean.html)).
+
+Use that reference's content choices as prompts rather than copying its headings: does
+an input have shape or value constraints, does the return vary with an option, or does
+precision need explanation? Put behavior needed to call the function in parameter and
+return descriptions; reserve longer reasoning for notes, and show an example when it
+clarifies a non-obvious choice. numpydoc explicitly prioritizes human readability over
+tooling convenience. More sections are not better when they only repeat the signature.
 
 ## Know What Is And Is Not Available At Runtime
 
@@ -128,7 +135,24 @@ class Invoice:
 
 `Invoice.__doc__` is the class docstring. Do not assume the second string becomes
 `Invoice.total.__doc__`; rely on it as documentation only when the project's chosen
-tooling recognizes attribute docstrings ([PEP 257: Specification](https://peps.python.org/pep-0257/#specification); dossier C07).
+tooling recognizes attribute docstrings ([PEP 257: Specification](https://peps.python.org/pep-0257/#specification)).
+
+An additional string immediately after the ordinary docstring is also distinct from
+runtime-visible documentation:
+
+```python
+def invoice_total():
+    """Return the net invoice total."""
+    """Extra explanation for tools that extract additional docstrings."""
+    return 0
+```
+
+`invoice_total.__doc__` contains only `Return the net invoice total.` The second
+literal does not extend it automatically. Keep caller-essential information inside
+the first docstring unless the documentation toolchain deliberately supports another
+form. Similarly, placing a string after executable statements does not make it the
+function's ordinary docstring. Use one multi-line first docstring when both the summary
+and detail need to be visible together.
 
 For a class, explain what the abstraction represents and any important usage or
 lifecycle constraint. For a module, explain its non-obvious purpose or supported entry
@@ -150,6 +174,6 @@ reader cannot infer safely from the names and signatures.
 PEP 257 supports docstring meaning, summary/detail structure, and the runtime distinction
 for additional strings. Google and NumPy/numpydoc document their own formats; the
 inspected NumPy sources identify the v2.5 Manual, while the numpydoc `stable` page did
-not surface a numbered release. The fixed dossier was retrieved on 2026-11-07; see C07
-and source register S02, S14, and S16-S18. These sources do not mandate a markup format
-for an unrelated project or prove that one format improves outcomes universally.
+not surface a numbered release. Sources were inspected on 2026-11-07; Google and
+numpydoc are mutable live pages. They do not mandate a markup format for an unrelated
+project or prove that one format improves outcomes universally.

@@ -8,7 +8,7 @@ behavior, represents a value or concept, or gives instances a useful lifecycle. 
 function or module-level function when object state and abstraction add no clarity.
 There is no source-supported universal function-size, argument-count, or rule requiring
 one class per file. Choose boundaries by cohesion, call-site clarity, lifecycle, and the
-project's interface rather than an arbitrary threshold ([PEP 8: Naming and class guidance](https://peps.python.org/pep-0008/#naming-conventions); dossier C05-C06).
+project's interface rather than an arbitrary threshold ([PEP 8: Naming and class guidance](https://peps.python.org/pep-0008/#naming-conventions)).
 
 Use keyword arguments when names make similar values clearer; positional arguments
 remain suitable for short, conventional calls. A helper earns its place when its name,
@@ -25,6 +25,30 @@ def normalize_email(value: str) -> str:
 
 The input, transformation, and invalid case are visible. This normalization is only an
 example; email identity rules belong to the application's contract.
+
+## Make Parameter Roles Easy To Recognize
+
+Use `self` for an instance method's first parameter and `cls` for a class method's
+first parameter. These are PEP 8 conventions, not reserved words. Their consistent use
+lets a reader distinguish instance state from construction through the class:
+
+```python
+class Amount:
+    def __init__(self, cents: int = 0) -> None:
+        self.cents = cents
+
+    @classmethod
+    def from_cents(cls, cents: int) -> "Amount":
+        return cls(cents=cents)
+```
+
+Keep parameter/default spacing consistent: `def scale(value, factor=1):` has no
+spaces around an unannotated default's `=`, while `factor: int = 1` uses spaces around
+`=` with an annotation. A keyword call remains `scale(value, factor=2)`. These forms
+help readers separate parameter names, type intent, and defaults; they do not authorize
+changing an existing callable's signature
+([PEP 8: Function And Method Arguments](https://peps.python.org/pep-0008/#function-and-method-arguments);
+[Other Recommendations](https://peps.python.org/pep-0008/#other-recommendations)).
 
 ## Decompose Without Moving The Contract
 
@@ -82,7 +106,7 @@ Keep it only if the public/private split or adapter has a real purpose.
 
 Python evaluates a parameter's default expression once when the `def` statement runs,
 not once per call. A mutable default therefore persists between calls that omit the
-argument ([Python 3.15.2 function definitions](https://docs.python.org/3.15/reference/compound_stmts.html); [Google Python Style Guide: Default Argument Values](https://google.github.io/styleguide/pyguide.html#s2.12-default-argument-values); dossier C05).
+argument ([Python 3.15.2 function definitions](https://docs.python.org/3.15/reference/compound_stmts.html); [Google Python Style Guide: Default Argument Values](https://google.github.io/styleguide/pyguide.html#s2.12-default-argument-values)).
 
 ```python
 def append_event(event, events=[]):
@@ -143,7 +167,7 @@ class RequestCounter:
 Use class attributes for genuinely class-wide data such as immutable constants, or for
 mutable shared registries only when shared behavior is deliberate. If a value should
 belong to one object, initialize it in `__init__`; a class and instance attribute are
-not interchangeable spellings for that state ([Python 3.15.2 class definitions](https://docs.python.org/3.15/reference/compound_stmts.html); dossier C06).
+not interchangeable spellings for that state ([Python 3.15.2 class definitions](https://docs.python.org/3.15/reference/compound_stmts.html)).
 
 ## Keep Objects When State And Behavior Belong Together
 
@@ -171,7 +195,7 @@ Each instance can advance independently. The `collections.abc` generic form requ
 Python 3.9 or newer, and `float | None` requires Python 3.10 or newer; therefore this
 combined example needs Python 3.10+. The example says nothing about safe retry policy,
 delay bounds, or whether a real operation can be replayed
-([PEP 585](https://peps.python.org/pep-0585/); [PEP 604](https://peps.python.org/pep-0604/); dossier C05-C06).
+([PEP 585](https://peps.python.org/pep-0585/); [PEP 604](https://peps.python.org/pep-0604/)).
 
 By contrast, a class that only namespaces one unrelated function may add indirection:
 
@@ -187,7 +211,7 @@ purpose, a module-level function is simpler. A utility-class pattern may still b
 established project convention; do not rewrite a public object model just to apply this
 proposal. Google explicitly allows related classes and top-level functions to share a
 module; that is an exemplar, not a universal repository layout rule
-([Google Python Style Guide: Packages](https://google.github.io/styleguide/pyguide.html#s2.3-packages); dossier C06).
+([Google Python Style Guide: Packages](https://google.github.io/styleguide/pyguide.html#s2.3-packages)).
 
 ## Existing-Project Safeguards And Boundaries
 
@@ -207,7 +231,7 @@ module; that is an exemplar, not a universal repository layout rule
 
 The Python 3.15.2 language reference supports default-expression evaluation and
 class/instance attribute semantics. PEP 8 supports naming and visibility conventions;
-Google's function-length and module-sharing guidance is its house style. The fixed
-dossier, retrieved on 2026-11-07, maps these subjects in C05-C06 and source register
-S01, S05, and S14. The evidence supplies behavior and examples, not an ideal function
-size, universally useful class boundary, or comparative maintainability result.
+Google's function-length and module-sharing guidance is its house style. Sources were
+inspected on 2026-11-07; the live Google guide exposed no numbered revision. The
+evidence supplies behavior and examples, not an ideal function size, universally useful
+class boundary, or comparative maintainability result.

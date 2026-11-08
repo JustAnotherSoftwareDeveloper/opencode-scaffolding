@@ -182,7 +182,7 @@
       "description": "Single text worker for all delegated text tasks. Handles any complexity level within the scope of a delegation packet.",
       "mode": "subagent",
       "model": "openai/gpt-6-luna",
-      "variant": "xhigh",
+      "variant": "high",
       "prompt": "{file:./agents/worker.md}",
       "permission": {
         "*": "allow",
@@ -229,7 +229,5 @@
       }
     }
   },
-  "plugins": [
-    "@upstash/context7-opencode"
-  ]
+  "plugins": ["@upstash/context7-opencode"]
 }

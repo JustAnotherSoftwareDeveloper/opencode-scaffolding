@@ -13,12 +13,12 @@ framework may also inspect annotations at runtime. Keep three questions distinct
 
 The Python `typing` documentation states that the runtime does not enforce annotations.
 The Typing specification defines type-checker semantics; it does not constrain every
-annotation expression the parser accepts ([Python 3.15.2 typing documentation](https://docs.python.org/3.15/library/typing.html); [Typing specification: Annotations](https://typing.python.org/en/latest/spec/annotations.html); dossier C08).
+annotation expression the parser accepts ([Python 3.15.2 typing documentation](https://docs.python.org/3.15/library/typing.html); [Typing specification: Annotations](https://typing.python.org/en/latest/spec/annotations.html)).
 
-For a new project that has selected Pyright, this guide proposes annotating public
-functions and newly authored nontrivial internal functions for consistency. That is a
-contextual style choice, not a universal coverage rule. Do not backfill an established
-project solely to satisfy it. Checker selection/configuration belongs to
+For new or unconfigured code, this guide proposes annotating public functions and
+nontrivial internal functions where types clarify their inputs and results. That is a
+contextual source-style choice, not a checker selection or universal coverage rule.
+Do not backfill an established project solely to satisfy it. Checker configuration belongs to
 `python-project-reference -> reference/static-quality.md`; advertised typed API promises
 belong to `python-project-reference -> reference/source-and-api.md`.
 
@@ -48,7 +48,7 @@ def first_label(labels: Sequence[str]) -> str | None:
 This combined syntax requires Python 3.10 or newer: `collections.abc` generics are
 available from Python 3.9, while `X | Y` union syntax is available from Python 3.10.
 Use older compatible spellings if the project's declared support range requires them
-([PEP 585](https://peps.python.org/pep-0585/); [PEP 604](https://peps.python.org/pep-0604/); dossier C08).
+([PEP 585](https://peps.python.org/pep-0585/); [PEP 604](https://peps.python.org/pep-0604/)).
 
 Use `object` when a function truly accepts any Python value but the caller should still
 be required to narrow the type before using type-specific operations. Reserve `Any`
@@ -71,7 +71,7 @@ def cross_dynamic_boundary(value: Any) -> Any:
 The `object` example must narrow before string operations; `Any` permits operations
 without that checking and can hide mistakes. An annotation still does not validate the
 runtime input. Typing best practices are explicitly evolving and contextual, not a
-mandatory project standard ([Typing Best Practices: `Any` And `object`](https://typing.python.org/en/latest/reference/best_practices.html#any-and-object); dossier C08).
+mandatory project standard ([Typing Best Practices: `Any` And `object`](https://typing.python.org/en/latest/reference/best_practices.html#any-and-object)).
 
 Use a `Protocol` when a named structural capability is useful to callers, not merely
 to avoid naming a concrete type:
@@ -91,7 +91,7 @@ def label_for(value: HasLabel) -> str:
 `typing.Protocol` was added to the standard library in Python 3.8. The example is
 useful when unrelated objects satisfy the same small capability; it adds needless
 indirection if one concrete class is the stable contract
-([Python 3.15.2 `typing.Protocol`](https://docs.python.org/3.15/library/typing.html#typing.Protocol); dossier C08).
+([Python 3.15.2 `typing.Protocol`](https://docs.python.org/3.15/library/typing.html#typing.Protocol)).
 
 ## Treat Alias Syntax As A Versioned Choice
 
@@ -103,13 +103,12 @@ This assignment binds a runtime name to `str`; it does not make an `InvoiceId` v
 nominally distinct from a string. The `type InvoiceId = str` statement was added in
 Python 3.12. A `NewType` or a dedicated class may express a stronger distinction, but
 that is a type/API design decision rather than formatting. Do not use newer syntax
-outside the declared support range ([Python 3.15.2 type aliases](https://docs.python.org/3.15/library/typing.html#type-aliases); dossier C08).
+outside the declared support range ([Python 3.15.2 type aliases](https://docs.python.org/3.15/library/typing.html#type-aliases)).
 
-Annotating `__init__` with `-> None` is a reasonable consistency choice for this guide.
-The Typing specification says its return ought to be `None`, while the library-author
-type-completeness guidance does not treat omission as blocking its completeness
-definition. Keep the choice aligned with the project/checker rather than turning either
-source into a universal quality gate (dossier C08).
+Annotating `__init__` with `-> None` makes its return intent explicit and follows the
+Typing specification's guidance for methods. Whether every initializer must spell it
+out is the project's annotation convention, not a universal quality gate
+([Typing specification: Annotations](https://typing.python.org/en/latest/spec/annotations.html)).
 
 ## Understand Future Imports And Runtime Evaluation
 
@@ -120,7 +119,7 @@ expressions were ordinarily evaluated when the function or class definition ran.
 versions covered by the inspected documentation. Beginning with Python 3.14, the
 default model is deferred evaluation; the future import continues to select stringized
 behavior in the inspected Python 3.14/3.15 documentation. These are distinct runtime
-models, not alternative spellings for runtime validation ([Python 3.14 release notes](https://docs.python.org/3.15/whatsnew/3.14.html); [Typing specification: `__future__` annotations](https://typing.python.org/en/latest/spec/annotations.html); dossier C08, sources S08 and S11).
+models, not alternative spellings for runtime validation ([Python 3.14 release notes](https://docs.python.org/3.15/whatsnew/3.14.html); [Typing specification: `__future__` annotations](https://typing.python.org/en/latest/spec/annotations.html)).
 
 For example, this forward reference can be written directly with the future import on
 versions where that import is part of the module contract:
@@ -142,10 +141,37 @@ decorators, serializers, and introspection code can depend on whether annotation
 values, strings, or deferred expressions. Test such consumers on the supported
 interpreters before changing that behavior.
 
+The timing difference is observable with a deliberately effectful annotation:
+
+```python
+events = []
+
+
+def label_type():
+    events.append("annotation evaluated")
+    return str
+
+
+def read_label(label: label_type()) -> str:
+    return label
+```
+
+Without the future import, Python before 3.14 calls `label_type()` while defining
+`read_label`; under the 3.14+ default, that call is deferred until evaluation is needed,
+such as reading `read_label.__annotations__`. With the future import, annotations are
+stored as strings instead; resolving those strings can still execute the call. This
+example demonstrates runtime timing, not recommended static type-hint syntax: the
+language accepting an expression does not make it a valid type expression. Prefer
+ordinary type names in annotations, and do not rely on annotation side effects for
+program initialization.
+
 Python 3.14 introduced `annotationlib` for annotation introspection. Its current
 documentation warns that most introspection functionality can execute arbitrary code;
 do not treat annotation inspection as harmless parsing of untrusted data
-([Python 3.15.2 `annotationlib`](https://docs.python.org/3.15/library/annotationlib.html); dossier C08, sources S10-S11).
+([Python 3.15.2 `annotationlib`](https://docs.python.org/3.15/library/annotationlib.html)).
+Requesting string or forward-reference output is not a general sandbox: these formats
+do not guarantee that annotation inspection executes no code. Use introspection only
+with the same trust assumptions as the code that supplies the annotations.
 
 ## Brownfield Safeguards And Boundaries
 
@@ -164,8 +190,9 @@ do not treat annotation inspection as harmless parsing of untrusted data
 
 The versioned Python 3.15.2 docs and named PEP feature versions support the syntax and
 runtime distinctions described here. Typing project's `/latest/` specification and
-best-practices pages are mutable and did not surface a numbered release in the fixed
-dossier; the dossier was retrieved on 2026-11-07. See C08 and source register S07-S13.
+best-practices pages are mutable and did not surface a numbered release when inspected
+on 2026-11-07. PEPs 585/604 identify historical feature-introduction boundaries; use
+current Python documentation for present semantics.
 These sources do not choose a project's minimum Python version, checker, annotation
 coverage, or public typed-interface promise. Verify those against the target project
 before applying a version-sensitive example.

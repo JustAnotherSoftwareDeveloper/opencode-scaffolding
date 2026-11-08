@@ -235,6 +235,103 @@ def test_voice_and_placeholder_checks_honor_prose_and_skip_rules(
     assert not checks.check_no_placeholders(no_markdown).passed
 
 
+@pytest.mark.parametrize(
+    "prose",
+    [
+        "Preserve defaults only when a choice is permitted.",
+        "When choice is permitted, preserve defaults. "
+        "These are proposed choices, not universal findings.",
+        "The frontend may produce multiple artifacts.",
+        "The option could be unavailable on some platforms.",
+        "Prefer non-writing checks unless writes are authorized.",
+        "If the needed tool is unavailable and installation is unauthorized, "
+        "stop and report it.",
+        "The exact output is to be requested and separately authorized.",
+        "Preserve the selected defaults\nwhen choice is permitted.",
+        "If a user choice\nis permitted, preserve the selected theme.",
+    ],
+)
+def test_voice_check_accepts_meaningful_qualifications_and_facts(
+    tmp_path: Path, prose: str
+) -> None:
+    """Do not mistake qualifications or possibility for procedure."""
+    skill = _write_skill(tmp_path, body=f"## Docs\n{prose}\n")
+    assert checks.check_no_declarative_voice(skill.parent).passed
+
+
+def test_voice_check_still_rejects_procedural_passive_and_hedged_prose(
+    tmp_path: Path,
+) -> None:
+    """Retain detection for passive procedural claims and hedged directives."""
+    skill = _write_skill(
+        tmp_path,
+        body="## Procedure\nThe result is recorded after validation.\n",
+    )
+    assert not checks.check_no_declarative_voice(skill.parent).passed
+
+    skill.write_text(
+        skill.read_text(encoding="utf-8").replace(
+            "You may want to inspect the result after validation.",
+            "You should inspect the result after validation.",
+        ),
+        encoding="utf-8",
+    )
+    assert not checks.check_no_declarative_voice(skill.parent).passed
+
+    skill.write_text(
+        skill.read_text(encoding="utf-8").replace(
+            "The result is recorded after validation.",
+            "You may want to inspect the result after validation.",
+        ),
+        encoding="utf-8",
+    )
+    assert not checks.check_no_declarative_voice(skill.parent).passed
+
+
+@pytest.mark.parametrize(
+    "prose",
+    [
+        "The command is executed.",
+        "The input is inspected.",
+        "The request is authorized.",
+        "The result is requested.",
+        "The proposal is proposed.",
+        "The command is executed when choice is permitted.",
+    ],
+)
+def test_voice_check_does_not_globally_exempt_participle_vocabulary(
+    tmp_path: Path, prose: str
+) -> None:
+    """Reject procedural passives despite valid uses of the same verbs."""
+    skill = _write_skill(
+        tmp_path,
+        body=(
+            "## Procedure\nBefore proceeding, verify the prerequisite. "
+            f"{prose}\n"
+        ),
+    )
+    assert not checks.check_no_declarative_voice(skill.parent).passed
+
+
+def test_voice_check_handles_wrapped_conditional_qualifiers(
+    tmp_path: Path,
+) -> None:
+    """Exercise wrapped, leading, trailing, and continued condition clauses."""
+    skill = _write_skill(
+        tmp_path,
+        body=(
+            "## Procedure\n"
+            "If choice\nis permitted, preserve defaults.\n"
+            "If the condition\nis satisfied.\n"
+            "Unless\nthe policy\napplies, preserve the current setting.\n"
+            "Preserve the setting unless\nthe owner authorizes a change.\n"
+            "When the source is available, preserve the configuration "
+            "when selection is permitted.\n"
+        ),
+    )
+    assert checks.check_no_declarative_voice(skill.parent).passed
+
+
 def test_registry_omits_physical_line_rule_and_keeps_other_checks(
     tmp_path: Path,
 ) -> None:

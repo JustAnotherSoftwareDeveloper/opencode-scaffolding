@@ -2,17 +2,19 @@
 
 This reference summarizes the structure in
 [`task-packet.schema.json`](../../schema/task-packet.schema.json). The schema is
-authoritative for types, requiredness, and constraints. The loaded `task-contract`
-documentation skill is authoritative for task identity, atomicity, result and
-verification alignment, dependency and coupling meaning, traceability, and
-authoring metadata. These notes cover structure, not those shared semantics.
+authoritative for types, requiredness, and constraints. Load the `task-contract`
+documentation skill through the skill tool before relying on its shared semantics;
+then read the relevant references explicitly. That skill is authoritative for task
+identity, atomicity, result and verification alignment, dependency and coupling
+meaning, traceability, and authoring metadata. These notes cover structure, not those
+shared semantics.
 
 ## Boundary Guidance
 
-Use `task-contract`'s shared semantics when reviewing task boundaries; see
-[Atomicity and alignment](../../../task-contract/reference/atomicity-and-alignment.md),
-[Dependencies and coupling](../../../task-contract/reference/dependencies-and-coupling.md),
-and [Traceability and metadata](../../../task-contract/reference/traceability-and-metadata.md).
+Use `task-contract`'s shared semantics when reviewing task boundaries; read
+`task-contract -> reference/atomicity-and-alignment.md`,
+`task-contract -> reference/dependencies-and-coupling.md`, and
+`task-contract -> reference/traceability-and-metadata.md` after loading the skill.
 The fields below describe the JSON interface only.
 
 ## Root-Level Fields

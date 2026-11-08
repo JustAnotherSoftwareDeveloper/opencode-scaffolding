@@ -45,6 +45,7 @@ cross-domain routes.
 - [Secure configuration and data handling](reference/secure-configuration-and-data-handling.md) — required settings and secret output boundaries.
 - [Logging and observability](reference/logging-and-observability.md) — duplicate records, field serialization, and context.
 - [Async and concurrency](reference/async-and-concurrency.md) — unscheduled coroutines, saturation, task failure, and cancellation limits.
+- [Baseline and adoption](reference/project-baseline-and-adoption.md) — proposed starting choices and incremental improvement without forced migrations.
 
 ## Ownership Boundary
 
@@ -54,3 +55,7 @@ General naming, imports, docstring form, and annotation style belong to the sepa
 owns project API promises and tooling context, not general source style. The nine
 domains remain distinct; reliability is folded into Source and API, while security,
 logging/observability, and async/concurrency retain separate modules.
+
+## Docs
+
+Use the [reference index](reference/README.md) for domain questions and supporting context.

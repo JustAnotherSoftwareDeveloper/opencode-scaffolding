@@ -16,7 +16,7 @@ Keep three support facts separate:
 
 `requires-python` is not evidence that every declared Python and platform combination
 was tested. Python-version metadata also does not describe an operating system, Python
-implementation, runtime image, or system-library promise. (Dossier C02; see the [PyPA
+implementation, runtime image, or system-library promise. (See the [PyPA
 `pyproject.toml` specification](https://packaging.python.org/en/latest/specifications/pyproject-toml/).)
 
 ## Choose A Layout For Its Import Boundary
@@ -27,7 +27,7 @@ package path. PyPA documents the trade-off: source code is not importable merely
 because the checkout is the current directory, so the developer must install the
 package (often editably). That can expose missing installation/package configuration
 that a checkout import hides. It adds an installation step; it does not prove a
-universal maintainability advantage. (C01, C32; [PyPA layout discussion](https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/).)
+universal maintainability advantage. ([PyPA layout discussion](https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/).)
 
 ```text
 pyproject.toml
@@ -50,8 +50,44 @@ python -c 'import acme_metrics; print(acme_metrics.__file__)'
 ```
 
 The observable value is the imported module's path. Compare it in the checkout and in
-the consumer-like environment; no path is asserted here because none was run. (C32;
+the consumer-like environment; no path is asserted here because none was run. (
 [Python 3.15.2 path initialization](https://docs.python.org/3.15/library/sys_path_init.html).)
+
+## Match Test Placement To Pytest Import Mode
+
+Pytest supports tests outside application code (for example, `tests/`) and tests inside
+the package tree; its discovery defaults find `test_*.py` and `*_test.py`, but discovery
+does not determine which copy of the application was imported. With the historical
+`prepend` import mode, pytest adds directories to `sys.path`; same-named test modules
+in separate non-package directories can collide, and checkout imports can mask the
+installed package. `src/` plus external tests is one way to expose that boundary. For a
+new pytest project, pytest recommends `importlib` mode: it imports test modules without
+changing `sys.path`, avoiding that path mutation/name collision mechanism, though test
+modules cannot import one another as ordinary modules unless the project sets up an
+explicit mechanism. This is pytest guidance, not a mandatory test taxonomy; check the
+configured mode and actual command before diagnosing import behavior.
+([pytest good integration practices](https://docs.pytest.org/en/stable/explanation/goodpractices.html#choosing-an-import-mode), [test layout](https://docs.pytest.org/en/stable/explanation/goodpractices.html#choosing-a-test-layout).)
+
+Test placement is also a packaging decision. External tests commonly remain outside
+the installed package, while package-local tests may ship unless the backend excludes
+them. A test import that succeeds because the repository root or test directory is on
+`sys.path` does not establish a consumer import. For an installable library, combine
+the chosen pytest mode with an installed-package check; for a repository-run
+application, preserve a deliberate existing import model rather than changing layout
+to satisfy a generic template.
+
+## Distinguish Regular And Namespace Packages
+
+A regular package conventionally has `__init__.py`; Python executes that initializer
+when importing the package. A namespace package can omit `__init__.py` and may combine
+portions from multiple locations, which supports separately distributed components
+sharing a package namespace but makes discovery/import resolution and ownership less
+obvious. PyPA's packaging tutorial presents namespace packages as an advanced option,
+not a default for an ordinary single-distribution library. Do not remove or add
+`__init__.py` casually: changing package form can affect resource lookup, backend
+discovery, import behavior, and whether multiple distributions contribute to the same
+namespace. Confirm the intended multi-distribution boundary and backend semantics
+before choosing it. ([PyPA packaging tutorial — package files and namespace packages](https://packaging.python.org/en/latest/tutorials/packaging-projects/#creating-the-package-files).)
 
 A small application deliberately launched from its repository may keep a flat layout
 if its existing import and deployment model is intentional. A service's modules should
@@ -72,7 +108,7 @@ approved policy calls for a bounded change. A move to `src/`, package rename, na
 conversion, or directory-layer split can change imports and consumers. Make those
 effects visible before proposing a migration. The evidence supports import/layout
 trade-offs, not a universal application tree or a target project's tested support
-matrix. (C01-C02, C32.)
+matrix.
 
 ## Related Domains
 

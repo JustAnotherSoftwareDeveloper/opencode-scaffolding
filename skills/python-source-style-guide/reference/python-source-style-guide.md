@@ -26,16 +26,19 @@ default only for a new or unconfigured project when the task permits a choice. A
 format preference does not authorize a public rename, mass reformat, syntax upgrade, or
 policy migration.
 
-The fixed evidence dossier checked the versioned Python 3.15.2 documentation and named
-PEP feature versions. The Google guide and numpydoc `stable` pages are mutable and showed
-no revision/release identifier in the inspected renderings; the inspected NumPy pages
-identified the v2.5 Manual. Those are evidence scopes, not target-project versions. The
-sources establish documented behavior and publisher recommendations, not convention
-prevalence, comparative maintainability outcomes, approved policy, or a universal best
-style. Each topical page links its primary sources and keeps version-sensitive claims
-next to the relevant example. Claim IDs in the topics map to
-`.research/20261107-012245-ee8e70-python-source-style-guide-evidence/claims.md`; the
-primary source links remain at the point of use.
+Use the primary links beside each topic's examples to answer the relevant question:
+Python's language/library references explain execution, PEP 8/257 explain conventions,
+and Google or NumPy show concrete house-style alternatives. For version-sensitive
+syntax or annotation evaluation, check the project's supported interpreters before
+adopting an example; a style recommendation cannot make newer syntax compatible.
+
+The source reads recorded on 2026-11-07 rendered Python 3.15.2 and NumPy v2.5. Those
+versions describe the inspected documentation, not a target project's environment.
+Google, Typing `/latest/`, and numpydoc `stable` pages are mutable and exposed no
+numbered revision. Use PEPs 585/604 for feature introduction dates and current Python
+documentation for semantics. None of these guides establishes one universally best
+style or measured maintainability benefit; choose among conventions using the code's
+meaning, reader needs, and existing project practice.
 
 ## Choose A Topic
 
@@ -49,9 +52,6 @@ primary source links remain at the point of use.
   docstring meaning, Google/NumPy format choices, and runtime-visible docstrings.
 - [Annotations and typing idioms](annotations-and-typing-idioms.md) — type intent,
   supported syntax, checker/runtime distinctions, and annotation introspection.
-
-The former duplicated “greenfield defaults at a glance” recap is intentionally omitted;
-each page states its useful default beside the example and trade-off it informs.
 
 ## Neighboring Ownership
 
