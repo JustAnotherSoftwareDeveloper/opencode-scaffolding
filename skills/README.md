@@ -10,6 +10,7 @@ contract details.
   lifecycle and handoff planning.
 - [`skill-architect`][architect] — skill class boundaries and platform layout.
 - [`python-domain-planning`][python-planning] — Python change ownership and combined workflows.
+- [`node-domain-planning`][node-planning] — Node.js and Bun project structure and outcome boundaries.
 
 ## Documentation References
 
@@ -31,6 +32,8 @@ contract details.
   traceable results.
 - [`python-project-reference`][python-project-context] — Python project constraints and technical guidance.
 - [`python-source-style-guide`][python-style] — source conventions and worked examples.
+- [`node-project-reference`][node-project-context] — passive shared project mechanics reference for TypeScript questions in Node.js and Bun projects.
+- [`node-source-style-guide`][node-source-style] — passive TypeScript source-style reference for Node.js and Bun projects.
 
 ## Operations
 
@@ -49,6 +52,11 @@ contract details.
 - [`python-quality-workflow`][python-quality] — quality configuration and scoped diagnostics without remediation.
 - [`python-project-dependencies`][python-dependencies] — dependency decisions, declarations, locks, and environments.
 - [`python-package-distribution`][python-distribution] — distribution metadata, builds, and install checks.
+- [`node-project-writer`][node-production] — Node.js and Bun production behavior changes.
+- [`node-project-test-writer`][node-project-tests] — standalone test-only changes.
+- [`node-project-dependencies`][node-dependencies] — dependency decisions and project environment changes.
+- [`node-quality-workflow`][node-quality] — standalone quality configuration and diagnostics.
+- [`node-package-distribution`][node-distribution] — package artifacts and consumer validation.
 
 ## Analysis and Inline Work
 
@@ -115,3 +123,11 @@ contract details.
 [python-quality]: ./python-quality-workflow/SKILL.md
 [python-dependencies]: ./python-project-dependencies/SKILL.md
 [python-distribution]: ./python-package-distribution/SKILL.md
+[node-planning]: ./node-domain-planning/SKILL.md
+[node-project-context]: ./node-project-reference/SKILL.md
+[node-source-style]: ./node-source-style-guide/SKILL.md
+[node-production]: ./node-project-writer/SKILL.md
+[node-project-tests]: ./node-project-test-writer/SKILL.md
+[node-dependencies]: ./node-project-dependencies/SKILL.md
+[node-quality]: ./node-quality-workflow/SKILL.md
+[node-distribution]: ./node-package-distribution/SKILL.md

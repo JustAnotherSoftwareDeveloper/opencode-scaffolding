@@ -1,7 +1,7 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [],
-  "model": "claude-agent/sonnet",
+  "model": "openai/gpt-6.1-sol",
   "default_agent": "delegator",
   "provider": {
     "ollama": {
@@ -87,59 +87,10 @@
     }
   },
   "agent": {
-    "executor": {
-      "description": "Reads task JSON from .plans/ or .tasks/, displays the task summary, and delegates tasks to workers in order.",
-      "mode": "primary",
-      "prompt": "{file:./agents/executor.md}",
-      "permission": {
-        "*": "deny",
-        "read": {
-          "*": "deny",
-          "output-contract-template.md": "allow",
-          "*/output-contract-template.md": "allow",
-          "skills/breakdown-tasks/schema/task-packet.schema.json": "allow",
-          ".plans/*/tasks.json": "allow",
-          ".tasks/*.json": "allow",
-          "*/.plans/*/tasks.json": "allow",
-          "*/.tasks/*.json": "allow"
-        },
-        "bash": {
-          "*": "deny",
-          "uv run --project scripts/python get-task .plans/*/tasks.json --id *": "allow",
-          "uv run --project scripts/python get-task .plans/*/tasks.json --index *": "allow",
-          "uv run --project scripts/python get-task .tasks/*.json --id *": "allow",
-          "uv run --project scripts/python get-task .tasks/*.json --index *": "allow",
-          "uv run --project scripts/python validate-task-structure .plans/*/tasks.json --schema skills/breakdown-tasks/schema/task-packet.schema.json": "allow",
-          "uv run --project scripts/python validate-task-structure .tasks/*.json --schema skills/breakdown-tasks/schema/task-packet.schema.json": "allow"
-        },
-        "external_directory": {
-          "*": "deny",
-          "~/.config/opencode/output-contract-template.md": "allow"
-        },
-        "task": {
-          "*": "deny",
-          "worker": "allow"
-        },
-        "skill": {
-          "*": "deny",
-          "display-tasks": "allow",
-          "task-delegation": "allow"
-        }
-      }
-    },
-    "executor-simple": {
-      "description": "Reads task JSON from .plans/ or .tasks/, displays the task summary, and executes tasks inline in order.",
-      "mode": "primary",
-      "prompt": "{file:./agents/executor-simple.md}",
-      "permission": {
-        "*": "allow",
-        "task": "deny",
-        "question": "deny"
-      }
-    },
     "delegator": {
       "description": "Dispatches decomposition to breakdown-tasks, supervises execution with read-only repository context, and delegates each task to workers in serial.",
       "mode": "primary",
+      "variant": "high",
       "prompt": "{file:./agents/delegator.md}",
       "permission": {
         "*": "deny",
@@ -181,8 +132,7 @@
     "worker": {
       "description": "Single text worker for all delegated text tasks. Handles any complexity level within the scope of a delegation packet.",
       "mode": "subagent",
-      "model": "claude-agent/haiku",
-      "variant": "high",
+      "model": "openrouter/deepseek/deepseek-v4.1-flash-1017",
       "prompt": "{file:./agents/worker.md}",
       "permission": {
         "*": "allow",
